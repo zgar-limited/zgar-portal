@@ -15,7 +15,7 @@ export default function Nav() {
   return (
     <>
       <li className="menu-item">
-        <a href="#" className="item-link">
+        <a href="/" className="item-link">
           HOME
           <i className="icon icon-caret-down" />
         </a>
@@ -61,7 +61,7 @@ export default function Nav() {
       </li>
       <li className="menu-item">
         <a href="#" className="item-link">
-          SHOP
+          PRODUCTS
           <i className="icon icon-caret-down" />
         </a>
         <div className="sub-menu mega-menu">
@@ -114,94 +114,19 @@ export default function Nav() {
       </li>
       <li className="menu-item">
         <a href="#" className="item-link">
-          PRODUCT
+          ABOUT
           <i className="icon icon-caret-down" />
         </a>
-        <div className="sub-menu mega-menu">
-          <div className="container">
-            <div className="row">
-              {productMenuColumns.map((col, i) => (
-                <div className="col-2" key={i}>
-                  <div className="mega-menu-item">
-                    <h4 className="menu-heading">{col.heading}</h4>
-                    <ul className="sub-menu_list">
-                      {col.items.map((item, j) => (
-                        <li key={j}>
-                          <Link href={item.href} className="sub-menu_link">
-                            {item.label}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              ))}
-
-              {/* Recent Products Column */}
-              <div className="col-4">
-                <div className="mega-menu-item mn-none">
-                  <h4 className="menu-heading">Recent Products</h4>
-                  <ul className="list-ver">
-                    {recentProducts.map((prd, idx) => (
-                      <React.Fragment key={idx}>
-                        <li className="prd-recent hover-img">
-                          <Link
-                            href={`/product-detail/${prd.id}`}
-                            className="image img-style"
-                          >
-                            <Image
-                              src={prd.imgSrc}
-                              alt="Image"
-                              width={244}
-                              height={244}
-                              className="lazyload"
-                            />
-                          </Link>
-                          <div className="content">
-                            <span className="badge-tag">{prd.tag}</span>
-                            <Link
-                              href={`/product-detail/${prd.id}`}
-                              className="name-prd h6 fw-medium link"
-                            >
-                              {prd.title}
-                            </Link>
-                            <span className="price-wrap h6 fw-semibold text-black">
-                              ${prd.price.toFixed(2)}
-                            </span>
-                          </div>
-                        </li>
-                        {idx < recentProducts.length - 1 && (
-                          <li className="br-line" />
-                        )}
-                      </React.Fragment>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </li>
       <li className="menu-item position-relative">
         <a href="#" className="item-link">
-          PAGE
-          <i className="icon icon-caret-down" />
+          PARTNERS
+          {/* <i className="icon icon-caret-down" /> */}
         </a>
-        <div className="sub-menu">
-          <ul className="sub-menu_list">
-            {infoPages.map((page, index) => (
-              <li key={index}>
-                <Link href={page.href} className="sub-menu_link">
-                  {page.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
       </li>
       <li className="menu-item position-relative">
         <a href="#" className="item-link">
-          BLOG
+          CARE
           <i className="icon icon-caret-down" />
         </a>
         <div className="sub-menu">
@@ -215,6 +140,16 @@ export default function Nav() {
             ))}
           </ul>
         </div>
+      </li>
+      <li className="menu-item">
+        <a href="#" className="item-link">
+          AUTHENTICATION
+        </a>
+      </li>
+      <li className="menu-item">
+        <a href="#" className="item-link">
+          CLUB
+        </a>
       </li>
     </>
   );

@@ -21,11 +21,11 @@ export default function Home() {
       <Header1 containerFull />
       <Hero />
       <Collections />
-      <Products1 />
-      <Products2 />
-      <Testimonials />
+      {/* <Products1 /> */}
+      {/* <Products2 /> */}
+      {/* <Testimonials /> */}
       <Blogs />
-      <InstagramPosts />
+      {/* <InstagramPosts /> */}
       <Footer1 />
     </>
   );
