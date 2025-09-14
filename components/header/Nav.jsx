@@ -17,9 +17,9 @@ export default function Nav() {
       <li className="menu-item">
         <a href="/" className="item-link">
           HOME
-          <i className="icon icon-caret-down" />
+          {/* <i className="icon icon-caret-down" /> */}
         </a>
-        <div className="sub-menu mega-menu mega-home">
+        {/* <div className="sub-menu mega-menu mega-home">
           <div className="container">
             <div className="row-demo">
               {demoItems.slice(0, 12).map((item, index) => (
@@ -57,7 +57,7 @@ export default function Nav() {
               </a>
             </div>
           </div>
-        </div>
+        </div> */}
       </li>
       <li className="menu-item">
         <a href="#" className="item-link">

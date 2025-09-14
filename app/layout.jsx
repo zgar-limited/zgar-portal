@@ -1,6 +1,7 @@
 import "../public/scss/main.scss";
 import "photoswipe/dist/photoswipe.css";
 import "rc-slider/assets/index.css";
+import "../public/css/tailwind.css";
 import CartModal from "@/components/modals/CartModal";
 import CompareColorModal from "@/components/modals/CompareColorModal";
 import CompareModal from "@/components/modals/CompareModal";
@@ -53,7 +54,8 @@ export default function RootLayout({ children }) {
             <ShareModal />
             <ShipAndDaliveryModal />
             <SizeGuideModal />
-            <ToolbarModal /> <NewsLetterModal />
+            <ToolbarModal />
+            <NewsLetterModal />
           </Context>
           <GlobalEffectsProvider />
           <ScrollTop />

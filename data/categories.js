@@ -319,30 +319,40 @@ export const foodCategories = [
 export const categories4 = [
   {
     id: 49,
-    imgSrc: "/images/category/cate-41.jpg",
-    name: "Sandals",
+    imgSrc: "/images/slot/imgi_13_26_672b1afb-7a7d-4699-8fdc-2c92b56c1ed8_900x.webp",
+    name: "Product A",
     count: 24,
   },
   {
     id: 50,
-    imgSrc: "/images/category/cate-42.jpg",
+    imgSrc: "/images/slot/imgi_25_22_b96729a0-ee7a-43c9-a9f3-6979d3ee6e8e_900x.webp",
     name: "Accessories",
     count: 30,
   },
   {
     id: 51,
-    imgSrc: "/images/category/cate-43.jpg",
+    imgSrc: "/images/slot/imgi_16_27_1dd29078-b2d2-41f8-9cc2-2d95b59bffd7_540x.webp",
     name: "Strides",
     count: 18,
   },
-  { id: 52, imgSrc: "/images/category/cate-44.jpg", name: "Vault", count: 47 },
+  {
+    id: 52,
+    imgSrc: "/images/slot/imgi_14_10_86aca2e5-854f-4458-a273-d617b4e28d62_540x.webp",
+    name: "Vault",
+    count: 47
+  },
   {
     id: 53,
-    imgSrc: "/images/category/cate-45.jpg",
+    imgSrc: "/images/slot/imgi_31_25_9de987be-a4a4-420c-953a-3c3bfde95b90_900x.webp",
     name: "Slippers",
     count: 90,
   },
-  { id: 54, imgSrc: "/images/category/cate-46.jpg", name: "Glide", count: 86 },
+  {
+    id: 54,
+    imgSrc: "/images/slot/imgi_87_18_009b5953-a4b5-43af-a053-0a89bccbcad1_360x.webp",
+    name: "Glide",
+    count: 86
+  },
 ];
 
 export const categories5 = [

@@ -1,10 +1,15 @@
 export const galleryImages = [
-  "/images/gallery/gallery-1.jpg",
-  "/images/gallery/gallery-2.jpg",
-  "/images/gallery/gallery-3.jpg",
-  "/images/gallery/gallery-4.jpg",
-  "/images/gallery/gallery-5.jpg",
-  "/images/gallery/gallery-6.jpg",
+  "/images/slot/social/1.webp",
+  "/images/slot/social/2.webp",
+  "/images/slot/social/3.webp",
+  "/images/slot/social/4.webp",
+  "/images/slot/social/5.webp",
+  "/images/slot/social/6.webp",
+  "/images/slot/social/7.webp",
+  "/images/slot/social/8.webp",
+  "/images/slot/social/9.webp",
+  "/images/slot/social/10.webp",
+
 ];
 
 export const galleryImagesStyle2 = [
