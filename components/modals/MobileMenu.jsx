@@ -29,35 +29,48 @@ export default function MobileMenu() {
           <ul className="nav-ul-mb" id="wrapper-menu-navigation">
             <li className="nav-mb-item">
               <a
-                href="#dropdown-menu-0"
+                href="/"
                 className="mb-menu-link collapsed"
-                data-bs-toggle="collapse"
-                aria-expanded="false"
-                aria-controls="dropdown-menu-0"
+                // data-bs-toggle="collapse"
+                // aria-expanded="false"
+                // aria-controls="dropdown-menu-0"
               >
                 <span>HOME</span>
+              </a>
+            </li>
+            <li className="nav-mb-item">
+              <a
+                href="/shop"
+                className="mb-menu-link collapsed"
+                // data-bs-toggle="collapse"
+                // aria-expanded="false"
+                // aria-controls="dropdown-menu-0"
+              >
+                <span>PRODUCTS</span>
+              </a>
+            </li>
+            <li className="nav-mb-item">
+              <a
+                href="/verify-guide"
+                className="mb-menu-link collapsed"
+                // data-bs-toggle="collapse"
+                // aria-expanded="false"
+                // aria-controls="dropdown-menu-0"
+              >
+                <span>AUTHENTICATION</span>
               </a>
             </li>
           </ul>
         </div>
 
-        {/* <div className="group-btn">
-          <Link href={`/wishlist`} className="tf-btn type-small style-2">
-            Wishlist
-            <i className="icon icon-heart" />
+        <div className="group-btn">
+          <Link href={`/shop`} className="tf-btn type-small style-2">
+            PRODUCTS
+            {/* <i className="icon icon-heart" /> */}
           </Link>
-          <div data-bs-dismiss="offcanvas">
-            <a
-              href="#search"
-              data-bs-toggle="modal"
-              className="tf-btn type-small style-2"
-            >
-              Search
-              <i className="icon icon-magnifying-glass" />
-            </a>
-          </div>
-        </div> */}
-        {/* <div className="flow-us-wrap">
+        </div>
+
+        <div className="flow-us-wrap">
           <h5 className="title">Follow us on</h5>
           <ul className="tf-social-icon">
             <li>
@@ -101,7 +114,7 @@ export default function MobileMenu() {
               </a>
             </li>
           </ul>
-        </div> */}
+        </div>
       </div>
       <div className="canvas-footer">
         {/* <div className="tf-currencies">

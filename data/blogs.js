@@ -1,39 +1,39 @@
 export const blogItems = [
   {
     id: 1,
-    imgSrc: "/images/blog/blog-1.jpg",
+    imgSrc: "/images/blog/blog_1.webp",
     date: "March 2, 2025",
-    title: "Bring Confidence With Simple T-shirt Style",
+    title: "ZGAR BLOG TITLE 4",
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit in malesuada magna faucibus. Pellentesque eget finibus nunc.",
+      "ZGAR DECS.",
     wowDelay: "0s",
   },
   {
     id: 2,
-    imgSrc: "/images/blog/blog-2.jpg",
+    imgSrc: "/images/blog/blog_2.webp",
     date: "March 2, 2025",
-    title: "Experience the 90s style of mixing and matching",
+    title: "ZGAR BLOG TITLE 4",
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit in malesuada magna faucibus. Pellentesque eget finibus nunc.",
-    wowDelay: "0.1s",
+      "ZGAR DECS.",
+    wowDelay: "0s",
   },
   {
     id: 3,
-    imgSrc: "/images/blog/blog-3.jpg",
+    imgSrc: "/images/blog/blog_3.webp",
     date: "March 2, 2025",
-    title: "April 4th the biggest sale of the year",
+    title: "ZGAR BLOG TITLE 4",
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit in malesuada magna faucibus. Pellentesque eget finibus nunc.",
-    wowDelay: "0.2s",
+      "ZGAR DECS.",
+    wowDelay: "0s",
   },
   {
     id: 4,
-    imgSrc: "/images/blog/blog-4.jpg",
+    imgSrc: "/images/blog/blog_4.webp",
     date: "March 2, 2025",
-    title: "Top 5 simple accessories you need in your wardrobe",
+    title: "ZGAR BLOG TITLE 4",
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit in malesuada magna faucibus. Pellentesque eget finibus nunc.",
-    wowDelay: "0.3s",
+      "ZGAR DECS.",
+    wowDelay: "0s",
   },
 ];
 
