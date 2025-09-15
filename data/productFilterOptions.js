@@ -1,11 +1,9 @@
 export const categories = [
-  { name: "Bags", count: 112, active: false },
-  { name: "Booking", count: 32, active: false },
-  { name: "Clothing", count: 42, active: false },
-  { name: "Women", count: 65, active: true },
-  { name: "Men", count: 13, active: false },
-  { name: "Shoes", count: 52, active: false },
-  { name: "Uncategorized", count: 14, active: false },
+  { name: "Filter A", count: 112, active: false },
+  { name: "Filter B", count: 32, active: false },
+  { name: "Filter C", count: 42, active: false },
+  { name: "Filter D", count: 65, active: true },
+
 ];
 
 export const sizes = ["XS", "S", "M", "L", "XL", "2XL", "3XL"];

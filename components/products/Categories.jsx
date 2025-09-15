@@ -8,7 +8,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 
 export default function Categories() {
   return (
-    <div className="flat-spacing pb-0">
+    <div className="pb-0 flat-spacing">
       <div className="container">
         <Swiper
           dir="ltr"
@@ -24,7 +24,7 @@ export default function Categories() {
               spaceBetween: 24,
             },
             1200: {
-              slidesPerView: 5,
+              slidesPerView: 4,
               spaceBetween: 40,
             },
           }}

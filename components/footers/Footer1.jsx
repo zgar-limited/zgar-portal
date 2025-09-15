@@ -251,7 +251,7 @@ export default function Footer1({
           </div>
         </div>
       </div>
-      <div className="footer-bottom">
+      {/* <div className="footer-bottom">
         <div className="container">
           <div className="inner-bottom">
             <ul className="list-hor">
@@ -310,7 +310,7 @@ export default function Footer1({
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
     </footer>
   );
 }

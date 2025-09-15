@@ -33,41 +33,7 @@ export default function NewsLetterModal() {
       setModalShown(true);
     }
   }, [pathname]);
-  const [success, setSuccess] = useState(true);
-  const [showMessage, setShowMessage] = useState(false);
-  const handleShowMessage = () => {
-    setShowMessage(true);
-    setTimeout(() => {
-      setShowMessage(false);
-    }, 2000);
-  };
-  const sendEmail = async (e) => {
-    e.preventDefault(); // Prevent default form submission behavior
-    const email = e.target.email.value;
 
-    try {
-      const response = await axios.post(
-        "https://express-brevomail.vercel.app/api/contacts",
-        {
-          email,
-        }
-      );
-
-      if ([200, 201].includes(response.status)) {
-        e.target.reset(); // Reset the form
-        setSuccess(true); // Set success state
-        handleShowMessage();
-      } else {
-        setSuccess(false); // Handle unexpected responses
-        handleShowMessage();
-      }
-    } catch (error) {
-      console.error("Error:", error.response?.data || "An error occurred");
-      setSuccess(false); // Set error state
-      handleShowMessage();
-      e.target.reset(); // Reset the form
-    }
-  };
   return (
     <div
       ref={modalElement}
@@ -91,87 +57,28 @@ export default function NewsLetterModal() {
             </span>
           </div>
           <div className="modal-body">
-            <p className="h6 sub-title">Subscribe to our newletter!</p>
+            <p className="h6 sub-title">Zgar Tips!</p>
             <h3 className="fw-normal title">
-              Receive 20% off your next order, along with exclusive offers and
-              more!
+              This website contains adult material and is only suitable for
+              those 21 years or older. Click Enter only if you are at least 21
+              years of age.
             </h3>
-
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                sendEmail(e);
-              }}
-              className="form-newletter"
-            >
-              <fieldset className="mb-12">
-                <input
-                  className="style-stroke"
-                  type="text"
-                  placeholder="Enter your email"
-                  required
-                  name="email"
-                />
-              </fieldset>
-              <button type="submit" className="tf-btn w-100 animate-btn">
-                Subscribe
+            <div className="d-flex justify-content-center gap-2">
+              <button
+                type="button"
+                className="btn btn-light "
+                data-bs-dismiss="modal"
+              >
+                Exit
               </button>
-            </form>
-            <div
-              className={`tfSubscribeMsg text-center  footer-sub-element ${
-                showMessage ? "active" : ""
-              }`}
-            >
-              {success ? (
-                <p style={{ color: "rgb(52, 168, 83)" }}>
-                  You have successfully subscribed.
-                </p>
-              ) : (
-                <p style={{ color: "red" }}>Something went wrong</p>
-              )}
+              <button
+                type="button"
+                className="btn btn-dark "
+                data-bs-dismiss="modal"
+              >
+                I'm over 21
+              </button>
             </div>
-            <ul className="tf-social-icon justify-content-center w-100">
-              <li>
-                <a
-                  href="https://www.facebook.com/"
-                  target="_blank"
-                  className="social-facebook"
-                >
-                  <span className="icon">
-                    <i className="icon-fb" />
-                  </span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://www.instagram.com/"
-                  target="_blank"
-                  className="social-instagram"
-                >
-                  <span className="icon">
-                    <i className="icon-instagram-logo" />
-                  </span>
-                </a>
-              </li>
-              <li>
-                <a href="https://x.com/" target="_blank" className="social-x">
-                  <span className="icon">
-                    <i className="icon-x" />
-                  </span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://www.tiktok.com/"
-                  target="_blank"
-                  className="social-tiktok"
-                >
-                  <span className="icon">
-                    <i className="icon-tiktok" />
-                  </span>
-                </a>
-              </li>
-            </ul>
           </div>
         </div>
       </div>

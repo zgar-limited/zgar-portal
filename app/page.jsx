@@ -2,13 +2,18 @@ import Footer1 from "@/components/footers/Footer1";
 import Header1 from "@/components/header/Header1";
 import Topbar1 from "@/components/header/Topbar1";
 import Blogs from "@/components/homes/home-1/Blogs";
-import Collections from "@/components/homes/home-1/Collections";
+
 import Hero from "@/components/homes/home-1/Hero";
 import InstagramPosts from "@/components/homes/home-1/InstagramPosts";
-import Products1 from "@/components/homes/home-1/Products1";
-import Products2 from "@/components/homes/home-1/Products2";
 import Testimonials from "@/components/homes/home-1/Testimonials";
 
+import Categories from "@/components/homes/home-sneaker/Categories";
+
+import Products1 from "@/components/homes/home-sneaker/Products1";
+import Products2 from "@/components/homes/home-sneaker/Products2";
+import HomeProductPreview from "@/widgets/HomeProductPreview";
+import HomeSocialPost from "@/widgets/HomeSocialPost";
+import HomeProductVerify from "@/widgets/HomeProductVerify"
 export const metadata = {
   title:
     "Home Fashion 01 || Ochaka - Multipurpose eCommerce React Nextjs Template",
@@ -20,12 +25,17 @@ export default function Home() {
       <Topbar1 containerFull containerFullClass="container-full" />
       <Header1 containerFull />
       <Hero />
-      <Collections />
+      <Categories />
+
+      <HomeProductPreview />
+      {/* <Collections /> */}
       {/* <Products1 /> */}
       {/* <Products2 /> */}
       {/* <Testimonials /> */}
       <Blogs />
       {/* <InstagramPosts /> */}
+      <HomeSocialPost />
+      <HomeProductVerify/>
       <Footer1 />
     </>
   );
