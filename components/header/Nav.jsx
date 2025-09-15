@@ -113,19 +113,19 @@ export default function Nav() {
         </div> */}
       </li>
       <li className="menu-item">
-        <a href="#" className="item-link">
+        <a href="/about" className="item-link">
           ABOUT
           {/* <i className="icon icon-caret-down" /> */}
         </a>
       </li>
       <li className="menu-item position-relative">
-        <a href="#" className="item-link">
+        <a href="/partner" className="item-link">
           PARTNERS
           {/* <i className="icon icon-caret-down" /> */}
         </a>
       </li>
       <li className="menu-item position-relative">
-        <a href="#" className="item-link">
+        <a href="/care" className="item-link">
           CARE
           {/* <i className="icon icon-caret-down" /> */}
         </a>
@@ -147,7 +147,7 @@ export default function Nav() {
         </a>
       </li>
       <li className="menu-item">
-        <a href="#" className="item-link">
+        <a href="/club" className="item-link">
           CLUB
         </a>
       </li>

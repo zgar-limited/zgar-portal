@@ -2,11 +2,12 @@
 import React from "react";
 import scope from "./index.module.scss";
 import Image from "next/image";
+import Link from "next/link";
 
 const index = () => {
   return (
     <div
-      className={`${scope.background} d-flex flex-column align-items-center pb-[70px]`}
+      className={`${scope.background} d-flex flex-column align-items-center pb-[70px] mt-[50px]`}
     >
       <div className="mt-[88px]  h1  title font-bold text-[#000]">
         SCAN TO VERIFY
@@ -16,7 +17,9 @@ const index = () => {
         phone on the product <span className="font-bold ">packaging</span> to
         enter <span className="font-bold ">Two-Step Product Verification</span>
       </div>
-      <h5 className="mt-[38px] h4 underline cursor-pointer">{`View Guide>>`}</h5>
+      <Link href="/verify-guide">
+        <h5 className="mt-[38px] h4 underline cursor-pointer">{`View Guide>>`}</h5>
+      </Link>
       <Image
         className="mt-[56px]"
         width={1200}
