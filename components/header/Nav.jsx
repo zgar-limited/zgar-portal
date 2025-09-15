@@ -60,11 +60,11 @@ export default function Nav() {
         </div> */}
       </li>
       <li className="menu-item">
-        <a href="#" className="item-link">
+        <a href="/shop" className="item-link">
           PRODUCTS
-          <i className="icon icon-caret-down" />
+          {/* <i className="icon icon-caret-down" /> */}
         </a>
-        <div className="sub-menu mega-menu">
+        {/* <div className="sub-menu mega-menu">
           <div className="container">
             <div className="row">
               {shopPages.map((col, index) => (
@@ -110,12 +110,12 @@ export default function Nav() {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
       </li>
       <li className="menu-item">
         <a href="#" className="item-link">
           ABOUT
-          <i className="icon icon-caret-down" />
+          {/* <i className="icon icon-caret-down" /> */}
         </a>
       </li>
       <li className="menu-item position-relative">
@@ -127,9 +127,9 @@ export default function Nav() {
       <li className="menu-item position-relative">
         <a href="#" className="item-link">
           CARE
-          <i className="icon icon-caret-down" />
+          {/* <i className="icon icon-caret-down" /> */}
         </a>
-        <div className="sub-menu">
+        {/* <div className="sub-menu">
           <ul className="sub-menu_list">
             {blogMenuItems.map((item, index) => (
               <li key={index}>
@@ -139,10 +139,10 @@ export default function Nav() {
               </li>
             ))}
           </ul>
-        </div>
+        </div> */}
       </li>
       <li className="menu-item">
-        <a href="#" className="item-link">
+        <a href="/verify-guide" className="item-link">
           AUTHENTICATION
         </a>
       </li>

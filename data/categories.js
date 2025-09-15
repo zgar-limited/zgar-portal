@@ -590,28 +590,24 @@ export const categories10 = [
 
 export const categories11 = [
   {
-    imgSrc: "/images/category/cate-shop-1.jpg",
-    alt: "Women",
-    label: "Women",
+    imgSrc: "https://nova-vapure.myshopify.com/cdn/shop/files/img-4-4.jpg?v=1754384560&width=1080",
+    alt: "CLOSE-SYSTEM",
+    label: "CLOSE-SYSTEM",
   },
   {
-    imgSrc: "/images/category/cate-shop-2.jpg",
-    alt: "Men",
-    label: "Men",
+    imgSrc: "https://nova-vapure.myshopify.com/cdn/shop/files/img-4-3.jpg?v=1754384560&width=1080",
+    alt: "OPEN-SYSTEM",
+    label: "OPEN-SYSTEM",
   },
   {
-    imgSrc: "/images/category/cate-shop-3.jpg",
-    alt: "Accessories",
-    label: "Accessories",
+    imgSrc: "https://nova-vapure.myshopify.com/cdn/shop/files/img-4-1.jpg?v=1754384560&width=1080",
+    alt: "DISPOSABLE",
+    label: "DISPOSABLE",
   },
   {
-    imgSrc: "/images/category/cate-shop-4.jpg",
-    alt: "Dress",
-    label: "Dress",
+    imgSrc: "https://nova-vapure.myshopify.com/cdn/shop/files/img-4-2.jpg?v=1754384560&width=1080",
+    alt: "Z-LIQ",
+    label: "Z-LIQ",
   },
-  {
-    imgSrc: "/images/category/cate-shop-5.jpg",
-    alt: "Bras",
-    label: "Bras",
-  },
+
 ];

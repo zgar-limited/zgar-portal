@@ -1,7 +1,8 @@
 import "../public/scss/main.scss";
 import "photoswipe/dist/photoswipe.css";
 import "rc-slider/assets/index.css";
-import "../public/css/tailwind.css";
+import "../public/css/tailwind.css"
+
 import CartModal from "@/components/modals/CartModal";
 import CompareColorModal from "@/components/modals/CompareColorModal";
 import CompareModal from "@/components/modals/CompareModal";
@@ -43,19 +44,19 @@ export default function RootLayout({ children }) {
         <main id="wrapper">
           <Context>
             {children}
-            <CartModal />
-            <CompareColorModal />
-            <CompareModal />
+            {/* <CartModal /> */}
+            {/* <CompareColorModal /> */}
+            {/* <CompareModal /> */}
             <DemoModal />
             <MobileMenu />
-            <QuestionModal />
-            <QuickViewModal />
-            <SearchModal />
-            <ShareModal />
-            <ShipAndDaliveryModal />
-            <SizeGuideModal />
-            <ToolbarModal />
-            <NewsLetterModal />
+            {/* <QuestionModal /> */}
+            {/* <QuickViewModal /> */}
+            {/* <SearchModal /> */}
+            {/* <ShareModal /> */}
+            {/* <ShipAndDaliveryModal /> */}
+            {/* <SizeGuideModal /> */}
+            {/* <ToolbarModal /> */}
+            {/* <NewsLetterModal /> */}
           </Context>
           <GlobalEffectsProvider />
           <ScrollTop />

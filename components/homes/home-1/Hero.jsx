@@ -45,12 +45,12 @@ export default function Hero() {
                       className="title_sld text-display fade-item fade-item-1"
                       dangerouslySetInnerHTML={{ __html: item.title }}
                     />
-                    <p className="sub-text_sld h5 text-black fade-item fade-item-2">
+                    <p className="text-black sub-text_sld h5 fade-item fade-item-2">
                       {item.description}
                     </p>
                     <div className="fade-item fade-item-3">
                       <Link
-                        href={`/shop-default-list`}
+                        href={`/shop`}
                         className="tf-btn animate-btn fw-semibold"
                       >
                         Shop now

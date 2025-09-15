@@ -146,7 +146,7 @@ export default function FilterSidebar({ state, dispatch }) {
                     onChange={(value) => setPrice(dispatch, value)}
                   />
                 </div>
-                <div className="box-value-price mb-3 pb-2">
+                <div className="pb-2 mb-3 box-value-price">
                   <span className="h6 text-main">Price:</span>
                   <div className="price-box">
                     <div className="price-val">${state.price[0]}</div>
@@ -159,7 +159,7 @@ export default function FilterSidebar({ state, dispatch }) {
           </div>
         </div>
         {/* Brand Filter - Optional checkbox list */}
-        <div className="widget-facet">
+        {/* <div className="widget-facet">
           <div
             className="facet-title"
             data-bs-target={`#brand-${collapseId}`}
@@ -190,10 +190,10 @@ export default function FilterSidebar({ state, dispatch }) {
               ))}
             </ul>
           </div>
-        </div>
+        </div> */}
 
         {/* Size Filter */}
-        <div className="widget-facet">
+        {/* <div className="widget-facet">
           <div
             className="facet-title"
             data-bs-target={`#size-${collapseId}`}
@@ -206,7 +206,7 @@ export default function FilterSidebar({ state, dispatch }) {
             <span className="icon icon-caret-down fs-20" />
           </div>
           <div id={`size-${collapseId}`} className="collapse show">
-            <div className="collapse-body filter-size-box flat-check-list d-flex flex-wrap gap-2">
+            <div className="flex-wrap gap-2 collapse-body filter-size-box flat-check-list d-flex">
               {[...sizes, "Over size"].map((size, i) => (
                 <div
                   key={i}
@@ -220,10 +220,10 @@ export default function FilterSidebar({ state, dispatch }) {
               ))}
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Color Filter */}
-        <div className="widget-facet">
+        {/* <div className="widget-facet">
           <div
             className="facet-title"
             data-bs-target={`#color-${collapseId}`}
@@ -236,7 +236,7 @@ export default function FilterSidebar({ state, dispatch }) {
             <span className="icon icon-caret-down fs-20" />
           </div>
           <div id={`color-${collapseId}`} className="collapse show">
-            <div className="collapse-body filter-color-box flat-check-list d-flex flex-wrap gap-2">
+            <div className="flex-wrap gap-2 collapse-body filter-color-box flat-check-list d-flex">
               {colors.map((color, i) => (
                 <div
                   key={i}
@@ -251,10 +251,10 @@ export default function FilterSidebar({ state, dispatch }) {
               ))}
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Promo Banner */}
-        <div className="sb-banner hover-img">
+        {/* <div className="sb-banner hover-img">
           <a href="/blog-detail" className="image img-style d-inline-flex">
             <Image
               src="/images/blog/side-banner.jpg"
@@ -278,7 +278,7 @@ export default function FilterSidebar({ state, dispatch }) {
               Shop now <i className="icon icon-arrow-right" />
             </a>
           </div>
-        </div>
+        </div> */}
       </div>
 
       <div className="canvas-bottom d-xl-none">
