@@ -19,11 +19,15 @@ export const metadata = {
     "Home Fashion 01 || Ochaka - Multipurpose eCommerce React Nextjs Template",
   description: "Ochaka - Multipurpose eCommerce React Nextjs Template",
 };
-export default function Home() {
+export default async function Home() {
+
+  // const res = await fetch("https://wp.cloudrainext.cn:10081/wp-json/wp/v2/media")
+  // console.log("🚀 ~ Home ~ res:", res)
+  
   return (
     <>
-      <Topbar1 containerFull containerFullClass="container-full" />
-      <Header1 containerFull />
+      {/* <Topbar1 containerFull containerFullClass="container-full" /> */}
+      {/* <Header1 containerFull /> */}
       <Hero />
       <Categories />
 
