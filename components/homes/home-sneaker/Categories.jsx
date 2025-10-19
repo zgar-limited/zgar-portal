@@ -11,7 +11,7 @@ export default function Categories() {
     <section className="flat-spacing">
       <div className="container">
         <div className="sect-title text-center wow fadeInUp">
-          <h1 className="s-title mb-8">Product Category</h1>
+          <h1 className="s-title mb-8">Special Product</h1>
           <p className="s-subtitle h6">
             Up to 50% off Lorem ipsum dolor sit amet, consectetur adipiscing
             elit
@@ -49,7 +49,7 @@ export default function Categories() {
               >
                 <div className="collection_image img-style">
                   <Image
-                    className="lazyload"
+                    className="lazyload "
                     src={item.imgSrc}
                     alt=""
                     width={400}

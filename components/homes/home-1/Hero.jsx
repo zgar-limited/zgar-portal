@@ -7,7 +7,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, EffectFade, Navigation, Pagination } from "swiper/modules";
 export default function Hero() {
   return (
-    <div className="tf-slideshow type-abs tf-btn-swiper-main hover-sw-nav">
+    <div className="tf-slideshow type-abs tf-btn-swiper-main hover-sw-nav w-[90%]">
       <Swiper
         dir="ltr"
         className="swiper tf-swiper sw-slide-show slider_effect_fade"
@@ -45,12 +45,12 @@ export default function Hero() {
                       className="title_sld text-display fade-item fade-item-1"
                       dangerouslySetInnerHTML={{ __html: item.title }}
                     />
-                    <p className="sub-text_sld h5 text-black fade-item fade-item-2">
+                    <p className="text-black sub-text_sld h5 fade-item fade-item-2">
                       {item.description}
                     </p>
                     <div className="fade-item fade-item-3">
                       <Link
-                        href={`/shop-default-list`}
+                        href={`/shop`}
                         className="tf-btn animate-btn fw-semibold"
                       >
                         Shop now

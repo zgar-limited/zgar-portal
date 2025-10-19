@@ -1,32 +1,55 @@
 import Footer1 from "@/components/footers/Footer1";
-import Header1 from "@/components/header/Header1";
-import Topbar1 from "@/components/header/Topbar1";
 import Blogs from "@/components/homes/home-1/Blogs";
-import Collections from "@/components/homes/home-1/Collections";
-import Hero from "@/components/homes/home-1/Hero";
-import InstagramPosts from "@/components/homes/home-1/InstagramPosts";
-import Products1 from "@/components/homes/home-1/Products1";
-import Products2 from "@/components/homes/home-1/Products2";
-import Testimonials from "@/components/homes/home-1/Testimonials";
 
+import Categories from "@/components/homes/home-sneaker/Categories";
+
+import HomeProductPreview from "@/widgets/HomeProductPreview";
+import HomeSocialPost from "@/widgets/HomeSocialPost";
+import HomeProductVerify from "@/widgets/HomeProductVerify";
+import HomeHeader from "@/widgets/HomeHeader";
+import HomeBgColor from "@/widgets/HomeBgColor";
+import HomeBanner from "@/widgets/HomeBanner";
+import HomeTips from "@/widgets/HomeTips";
+import FlowingMenu from "@/components/banner/menu/flowing-menu/FlowingMenu";
+import HomeSpecialProducts from "@/widgets/HomeSpecialProducts";
+import Header1 from "@/components/header/Header1"
 export const metadata = {
   title:
     "Home Fashion 01 || Ochaka - Multipurpose eCommerce React Nextjs Template",
   description: "Ochaka - Multipurpose eCommerce React Nextjs Template",
 };
-export default function Home() {
+export default async function Home() {
+  // const res = await fetch(
+  //   "https://wp.cloudrainext.cn:10081/wp-json/wp/v2/posts",
+  //   { cache: "no-store" }
+  // ).then(res => res.json());
+  // console.log("🚀 ~ Home ~ res:", res)
+  
+
+  // console.log("WP_ORIGIN",process.env.WP_ORIGIN)
+  
   return (
-    <>
-      <Topbar1 containerFull containerFullClass="container-full" />
-      <Header1 containerFull />
-      <Hero />
-      <Collections />
+    <div className="bg-[#f2f2f2]">
+      {/* <HomeBgColor /> */}
+      {/* <HomeTips /> */}
+      <div className="primary-bg-img">
+        {/* <Header1/> */}
+        <HomeHeader />
+        <HomeBanner />
+      </div>
+
+      <HomeSpecialProducts />
+
+      <HomeProductPreview />
+
       {/* <Products1 /> */}
       {/* <Products2 /> */}
       {/* <Testimonials /> */}
       <Blogs />
       {/* <InstagramPosts /> */}
+      <HomeSocialPost />
+      <HomeProductVerify />
       <Footer1 />
-    </>
+    </div>
   );
 }

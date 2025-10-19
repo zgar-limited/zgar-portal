@@ -125,3 +125,14 @@
   margin-top: auto;
   margin-bottom: auto;
 }
+
+.primary-bg-img {
+  background-image: url("/images/bg/bg_primary.webp");
+  background-position: bottom left;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+.second-bg-img {
+  background-image: url("/images/bg/bg_second.webp");
+  background-size: cover;
+}
