@@ -43,16 +43,16 @@
 pipeline {
     agent any
     stages {
-        stage('git pull') {
-            steps {
-                git branch: 'main', credentialsId: '219b2b05-a39e-49d3-a4b7-5c0fbdcafa05', url: 'git@github.com:zgar-limited/zgar-portal.git'
-            }
-        }
+        // stage('git pull') {
+        //     steps {
+        //         git branch: 'main', credentialsId: '219b2b05-a39e-49d3-a4b7-5c0fbdcafa05', url: 'git@github.com:zgar-limited/zgar-portal.git'
+        //     }
+        // }
         stage('build docker image') {
             agent {
                 dockerfile {
                     filename 'Dockerfile'
-                    dir 'build'
+                    // dir 'build'
                     // label 'my-defined-label'
                     additionalBuildArgs  '--build-arg version=1.0.0'
                     // args '-v /tmp:/tmp'
