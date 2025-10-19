@@ -1,20 +1,34 @@
 export const sliderItems = [
   {
     id: 1,
-    imgSrc: "/images/slider/slider-1.jpg",
+    imgSrc: "/images/slider/zgar/1.jpg",
     title: "Fall Winter <br class='d-sm-none' /> Collection",
     description: "Vivamus lacinia odio vitae vestibulum vestibulum",
   },
   {
     id: 2,
-    imgSrc: "/images/slider/slider-2.jpg",
+    imgSrc: "/images/slider/zgar/2.jpg",
     title: "Spring Summer <br class='d-sm-none' /> Collection",
     description:
       "Discover the elegance of renewal with soft tones and flowing textures.",
   },
   {
     id: 3,
-    imgSrc: "/images/slider/slider-3.jpg",
+    imgSrc: "/images/slider/zgar/3.jpg",
+    title: "Urban Edge <br class='d-sm-none' /> Series",
+    description:
+      "Bold cuts and minimalist design for the modern city lifestyle.",
+  },
+  {
+    id: 4,
+    imgSrc: "/images/slider/zgar/4.jpg",
+    title: "Urban Edge <br class='d-sm-none' /> Series",
+    description:
+      "Bold cuts and minimalist design for the modern city lifestyle.",
+  },
+  {
+    id: 5,
+    imgSrc: "/images/slider/zgar/5.jpg",
     title: "Urban Edge <br class='d-sm-none' /> Series",
     description:
       "Bold cuts and minimalist design for the modern city lifestyle.",
@@ -298,7 +312,7 @@ export const sliderData = [
 export const sliderItems5 = [
   {
     id: 31,
-    imgSrc: "/images/slider/slider-38.jpg",
+    imgSrc: "/images/slider/zgar/1.jpg",
     alt: "Slider",
     width: 1938,
     height: 881,
@@ -308,7 +322,7 @@ export const sliderItems5 = [
   },
   {
     id: 32,
-    imgSrc: "/images/slider/slider-37.jpg",
+    imgSrc: "/images/slider/zgar/2.jpg",
     alt: "Slider",
     width: 1938,
     height: 881,
@@ -318,7 +332,7 @@ export const sliderItems5 = [
   },
   {
     id: 33,
-    imgSrc: "/images/slider/slider-39.jpg",
+    imgSrc: "/images/slider/zgar/3.jpg",
     alt: "Slider",
     width: 1938,
     height: 881,

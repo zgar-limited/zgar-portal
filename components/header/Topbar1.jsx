@@ -21,11 +21,11 @@ export default function Topbar1({
                   light ? "" : "text-white"
                 } fw-normal text-line-clamp-1`}
               >
-                Up to 50% off Lorem ipsum dolor sit amet, consectetur adipiscing
-                elit
+                This is news news news news news news: up to 50% off Zgar
+                Products!
               </h6>
               <div className="group-btn">
-                <Link
+                {/* <Link
                   href={`/shop-default`}
                   className={`tf-btn-line  letter-space-0  ${
                     light ? "" : "style-white"
@@ -40,7 +40,7 @@ export default function Topbar1({
                   }`}
                 >
                   Women
-                </Link>
+                </Link> */}
               </div>
             </div>
           </div>
@@ -48,36 +48,6 @@ export default function Topbar1({
             <ul
               className={`topbar-right ${light ? "" : "topbar-option-list"} `}
             >
-              <li className="h6">
-                <Link
-                  href={`/faq`}
-                  className={` ${light ? "" : "text-white"} link`}
-                >
-                  Help &amp; FAQs
-                </Link>
-              </li>
-              <li className={`br-line  ${light ? "type-vertical" : ""}`} />
-              <li className="h6">
-                <Link
-                  href={`/faq`}
-                  className={` ${light ? "" : "text-white"} link`}
-                >
-                  Factory
-                </Link>
-              </li>
-              <li
-                className={`br-line d-none d-xl-inline-flex  ${
-                  light ? "type-vertical" : ""
-                }`}
-              />
-              <li className="tf-currencies d-none d-xl-block">
-                <CurrencySelect textBlack={light} />
-              </li>
-              <li
-                className={`br-line d-none d-xl-inline-flex  ${
-                  light ? "type-vertical" : ""
-                }`}
-              />
               <li className="tf-languages d-none d-xl-block">
                 <LanguageSelect textBlack={light} />
               </li>

@@ -52,7 +52,7 @@ export default function Header1({
             <Link href={`/`} className="logo-site">
               <Image
                 alt="Logo"
-                src="/images/logo/logo.svg"
+                src="/images/logo/logo-zgar.png"
                 width={133}
                 height={53}
               />
@@ -72,7 +72,7 @@ export default function Header1({
                   <i className="icon icon-user" />
                 </Link>
               </li>
-              <li className="d-none d-md-flex">
+              {/* <li className="d-none d-md-flex">
                 <a
                   className="nav-icon-item link"
                   href="#search"
@@ -80,13 +80,13 @@ export default function Header1({
                 >
                   <i className="icon icon-magnifying-glass" />
                 </a>
-              </li>
-              <li className="d-none d-sm-flex">
+              </li> */}
+              {/* <li className="d-none d-sm-flex">
                 <Link className="nav-icon-item link" href={`/wishlist`}>
                   <i className="icon icon-heart" />
                 </Link>
-              </li>
-              <li
+              </li> */}
+              {/* <li
                 className="shop-cart"
                 data-bs-toggle="offcanvas"
                 data-bs-target="#shoppingCart"
@@ -101,7 +101,7 @@ export default function Header1({
                 <span className="count">
                   <CartLength />
                 </span>
-              </li>
+              </li> */}
             </ul>
           </div>
         </div>
