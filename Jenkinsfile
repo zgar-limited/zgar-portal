@@ -11,31 +11,44 @@
 //     }
 // }
 
+// pipeline {
+//     agent {
+//         dockerfile {
+//             filename 'Dockerfile'
+//             dir 'build'
+//             label 'my-defined-label'
+//             additionalBuildArgs  "--build-arg version=1.0.0"
+//             // args '-v /tmp:/tmp'
+//         }
+//     }
+
+//     stages {
+//         stage('Build') {
+//             steps {
+//                 echo 'Building..'
+//             }
+//         }
+//         stage('Test') {
+//             steps {
+//                 echo 'Testing..'
+//             }
+//         }
+//         stage('Deploy') {
+//             steps {
+//                 echo 'Deploying....'
+//             }
+//         }
+//     }
+// }
+
 pipeline {
     agent {
-        dockerfile {
-            filename 'Dockerfile'
-            dir 'build'
-            label 'my-defined-label'
-            additionalBuildArgs  "--build-arg version=1.0.0"
-            // args '-v /tmp:/tmp'
-        }
+        docker { image 'node:7-alpine' }
     }
-
     stages {
-        stage('Build') {
-            steps {
-                echo 'Building..'
-            }
-        }
         stage('Test') {
             steps {
-                echo 'Testing..'
-            }
-        }
-        stage('Deploy') {
-            steps {
-                echo 'Deploying....'
+                sh 'node --version'
             }
         }
     }
