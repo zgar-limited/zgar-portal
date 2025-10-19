@@ -41,7 +41,7 @@
 // }
 
 pipeline {
-    // agent none
+    agent any
     stages {
         stage('git pull') {
             steps {
