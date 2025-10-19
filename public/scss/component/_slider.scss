@@ -559,6 +559,9 @@
 
 .tf-slideshow {
   .slider-wrap {
+    @include res(xxxl,min) {
+      height: 650px;
+    }
     @include res(xxl) {
       height: 650px;
     }

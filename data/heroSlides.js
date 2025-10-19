@@ -312,7 +312,7 @@ export const sliderData = [
 export const sliderItems5 = [
   {
     id: 31,
-    imgSrc: "/images/slider/slider-38.jpg",
+    imgSrc: "/images/slider/zgar/1.jpg",
     alt: "Slider",
     width: 1938,
     height: 881,
@@ -322,7 +322,7 @@ export const sliderItems5 = [
   },
   {
     id: 32,
-    imgSrc: "/images/slider/slider-37.jpg",
+    imgSrc: "/images/slider/zgar/2.jpg",
     alt: "Slider",
     width: 1938,
     height: 881,
@@ -332,7 +332,7 @@ export const sliderItems5 = [
   },
   {
     id: 33,
-    imgSrc: "/images/slider/slider-39.jpg",
+    imgSrc: "/images/slider/zgar/3.jpg",
     alt: "Slider",
     width: 1938,
     height: 881,

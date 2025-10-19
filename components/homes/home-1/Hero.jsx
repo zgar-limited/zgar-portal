@@ -7,7 +7,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, EffectFade, Navigation, Pagination } from "swiper/modules";
 export default function Hero() {
   return (
-    <div className="tf-slideshow type-abs tf-btn-swiper-main hover-sw-nav">
+    <div className="tf-slideshow type-abs tf-btn-swiper-main hover-sw-nav w-[90%]">
       <Swiper
         dir="ltr"
         className="swiper tf-swiper sw-slide-show slider_effect_fade"
