@@ -4,8 +4,8 @@ node {
     }
     stage('build') {
         docker.withServer('tcp://47.79.240.235:2375') {
-            def customImage = docker.build("zgar-portal-prod:${env.BUILD_TAG}")
-            cleanWs()
+            // def customImage = docker.build("zgar-portal-prod:${env.BUILD_TAG}")
+            // cleanWs()
             
         }
     }
