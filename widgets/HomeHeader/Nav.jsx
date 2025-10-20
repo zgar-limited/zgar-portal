@@ -113,7 +113,7 @@ export default function Nav() {
         </div> */}
       </li>
       <li className="menu-item">
-        <a href="/about" className="item-link">
+        <a href="/about-us" className="item-link">
           ABOUT
           {/* <i className="icon icon-caret-down" /> */}
         </a>

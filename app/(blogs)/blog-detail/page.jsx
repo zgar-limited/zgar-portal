@@ -1,9 +1,8 @@
 import BlogDetails from "@/components/blogs/BlogDetails";
 import BlogDetailsBreadcumb from "@/components/blogs/BlogDetailsBreadcumb";
 import RelatedBlogs from "@/components/blogs/RelatedBlogs";
-import Footer1 from "@/components/footers/Footer1";
-import Header1 from "@/components/header/Header1";
-import Topbar1 from "@/components/header/Topbar1";
+import HomeFooter from "@/widgets/HomeFooter";
+import HomeHeader from "@/widgets/HomeHeader";
 import React from "react";
 export const metadata = {
   title:
@@ -14,12 +13,11 @@ export const metadata = {
 export default function page() {
   return (
     <>
-      <Topbar1 />
-      <Header1 />
+      <HomeHeader />
       <BlogDetailsBreadcumb />
       <BlogDetails />
       <RelatedBlogs />
-      <Footer1 />
+      <HomeFooter />
     </>
   );
 }

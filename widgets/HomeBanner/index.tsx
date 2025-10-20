@@ -15,7 +15,7 @@ export default function Hero() {
 
 
   return (
-    <div className="w-full sm:mt-[0px] ">
+    <div className="w-full " >
       <Swiper
         // dir="ltr"
         className="w-full slider_effect_fade"

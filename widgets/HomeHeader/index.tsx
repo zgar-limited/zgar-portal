@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import Nav from "./Nav";
+import LanguageSelect from "@/components/common/LanguageSelect";
 // import CartLength from "./CartLength";
 
 export default function Header1({
@@ -33,12 +34,12 @@ export default function Header1({
   }, [lastScrollY]);
   return (
     <header
-      className={`${parentClass} ${
-        lastScrollY > 200 && isScrollingUp ? "header-sticky" : ""
-      } ${lastScrollY > 100 ? "will-sticky" : ""}`}
+    
+      className={`${parentClass} ${lastScrollY > 200 && isScrollingUp ? "header-sticky" : ""
+        } ${lastScrollY > 100 ? "will-sticky" : ""}`}
     >
       <div className={containerFull ? "container-full" : "container"}>
-        <div className="row align-items-center">
+        <div className="row align-items-center ">
           <div className="col-md-4 col-3 d-xl-none">
             <a
               href="#mobileMenu"
@@ -67,6 +68,7 @@ export default function Header1({
           </div>
           <div className="col-xl-3 col-md-4 col-3">
             <ul className="nav-icon-list">
+
               <li className="d-none d-lg-flex">
                 <Link className="nav-icon-item link" href={`/login`}>
                   <i className="icon icon-user" />
@@ -83,9 +85,10 @@ export default function Header1({
               </li> */}
               {/* <li className="d-none d-sm-flex">
                 <Link className="nav-icon-item link" href={`/wishlist`}>
-                  <i className="icon icon-heart" />
+                  <i className="icon icon-translate" />
                 </Link>
               </li> */}
+              <LanguageSelect />
               {/* <li
                 className="shop-cart"
                 data-bs-toggle="offcanvas"
