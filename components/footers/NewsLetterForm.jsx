@@ -72,7 +72,7 @@ export default function NewsLetterForm({ isBgDark = false }) {
           <i className="icon icon-arrow-right" />
         </button>
       </div>
-      <div className="checkbox-wrap">
+      {/* <div className="checkbox-wrap">
         <input
           id="remember"
           type="checkbox"
@@ -102,7 +102,7 @@ export default function NewsLetterForm({ isBgDark = false }) {
           </Link>
           .
         </label>
-      </div>
+      </div> */}
       <div id="subscribe-msg">
         <div
           className={`tfSubscribeMsg  footer-sub-element ${

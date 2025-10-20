@@ -9,6 +9,8 @@ import Products1 from "@/components/products/Products1";
 import React from "react";
 import Image from "next/image";
 import ShopBanner from "@/widgets/ShopBanner";
+import HomeHeader from "@/widgets/HomeHeader";
+import HomeFooter from "@/widgets/HomeFooter";
 
 export const metadata = {
   title: "Shop || Ochaka - Multipurpose eCommerce React Nextjs Template",
@@ -17,13 +19,14 @@ export const metadata = {
 export default function page() {
   return (
     <>
-      <Topbar1 />
-      <Header1 parentClass="tf-header header-fix" />
+      {/* <Topbar1 /> */}
+      {/* <Header1 parentClass="tf-header header-fix" /> */}
+      <HomeHeader />
       <ShopBanner />
       <Categories />
       <Products1 />
       <Features parentClass="flat-spacing" />
-      <Footer1 />
+      <HomeFooter />
     </>
   );
 }

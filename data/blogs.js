@@ -35,6 +35,15 @@ export const blogItems = [
       "ZGAR DECS.",
     wowDelay: "0s",
   },
+  {
+    id: 5,
+    imgSrc: "/images/blog/blog_4.webp",
+    date: "March 2, 2025",
+    title: "ZGAR BLOG TITLE 4",
+    description:
+      "ZGAR DECS.",
+    wowDelay: "0s",
+  },
 ];
 
 export const blogItems2 = [
@@ -422,6 +431,24 @@ export const fashionBlogPosts = [
     wowDelay: "0.2s",
     date: "March 2, 2025",
     title: "April 4th the biggest sale of the year",
+    description:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit in malesuada magna faucibus. Pellentesque eget finibus nunc.",
+  },
+  {
+    id: 43,
+    imgSrc: "/images/blog/blog-32.jpg",
+    wowDelay: "0.3s",
+    date: "March 2, 2025",
+    title: "Top 5 simple accessories you need in your wardrobe",
+    description:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit in malesuada magna faucibus. Pellentesque eget finibus nunc.",
+  },
+  {
+    id: 43,
+    imgSrc: "/images/blog/blog-32.jpg",
+    wowDelay: "0.3s",
+    date: "March 2, 2025",
+    title: "Top 5 simple accessories you need in your wardrobe",
     description:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit in malesuada magna faucibus. Pellentesque eget finibus nunc.",
   },

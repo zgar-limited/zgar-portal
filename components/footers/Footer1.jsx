@@ -52,7 +52,7 @@ export default function Footer1({
       ) : (
         ""
       )}
-      <div className="footer-body">
+      <div className="footer-body bg-[#fff]">
         <div className="container">
           <div className="row">
             <div className="col-xl-3 col-sm-6 mb_30 mb-xl-0">
@@ -273,7 +273,7 @@ export default function Footer1({
                 </Link>
               </li>
             </ul>
-            <div className="list-hor flex-wrap">
+            <div className="flex-wrap list-hor">
               <span className="h6">Payment:</span>
 
               <ul className={`payment-method-list`}>

@@ -5,10 +5,10 @@ import React from "react";
 export default function PageTitle() {
   return (
     <section className="page-title-image">
-      <div className="page_image overflow-hidden">
+      <div className="overflow-hidden page_image">
         <Image
           className="lazyload ani-zoom"
-          src="/images/section/about-us.jpg"
+          src="/images/about-us/banner.webp"
           alt="Banner"
           width={2880}
           height={1350}
@@ -17,16 +17,16 @@ export default function PageTitle() {
       <div className="page_content">
         <div className="container">
           <div className="content">
-            <h1 className="heading fw-bold">
-              WE PRIORITIZE SUSTAINABLE &amp;{" "}
+            <h1 className="text-white heading ">
+              {/* WE PRIORITIZE SUSTAINABLE &amp;{" "}
               <br className="d-none d-sm-block" />
               ENVIRONMENTALLY FRIENDLY <br className="d-none d-sm-block" />
-              DEVELOPMENT
+              DEVELOPMENT */}
             </h1>
-            <Link href={`/shop-default`} className="tf-btn animate-btn">
+            {/* <Link href={`/shop-default`} className="tf-btn animate-btn">
               Our shop
               <i className="icon icon-caret-right" />
-            </Link>
+            </Link> */}
           </div>
         </div>
       </div>

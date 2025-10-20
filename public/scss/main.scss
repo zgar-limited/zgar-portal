@@ -126,11 +126,12 @@
   margin-bottom: auto;
 }
 
-.primary-bg-img {
-  background-image: url("/images/bg/bg_primary.webp");
-  background-position: bottom left;
-  background-repeat: no-repeat;
-  background-size: cover;
+
+.primary-gradient-bg {
+  background: linear-gradient(315deg, #c6ffdd, #fbd786, #c6ffdd);
+}
+.second-gradient-bg {
+  // background: linear-gradient(315deg, #e2e2e2, #c9d6ff);
 }
 .second-bg-img {
   background-image: url("/images/bg/bg_second.webp");

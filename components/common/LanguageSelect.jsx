@@ -2,12 +2,12 @@
 
 import React, { useState } from "react";
 
-const languages = ["English", "العربية", "简体中文", "اردو"];
+const languages = ["English", "繁體中文"];
 
 export default function LanguageSelect({
   placement = "bottom-start",
   textBlack = false,
-  textColor = "color-white",
+  textColor = "var(--black)",
 }) {
   const [selectedLanguage, setSelectedLanguage] = useState(languages[0]);
 

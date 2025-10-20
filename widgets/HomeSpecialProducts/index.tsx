@@ -9,8 +9,8 @@ import { Pagination } from "swiper/modules";
 export default function HomeSpecialProducts() {
   return (
     <section
-      
-      className="primary-bg-img "
+
+      className="pt-24 pb-24 "
     >
       <div className="container">
         <div className="text-center sect-title wow fadeInUp">

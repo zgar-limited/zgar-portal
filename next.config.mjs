@@ -9,7 +9,7 @@ const nextConfig = {
   output: "standalone",
   env:{
     
-  }
+  },
 };
 
 export default nextConfig;

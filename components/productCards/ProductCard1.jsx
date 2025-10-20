@@ -115,21 +115,21 @@ export default function ProductCard1({ product, style = 1 }) {
               <CartButton tooltipDirection={tooltipDir} product={product} />
             </li>
           )}
-          {style === 5 && <li className="br-line type-vertical h-24" />}
+          {style === 5 && <li className="h-24 br-line type-vertical" />}
 
           {showWishlist && (
             <li className="wishlist">
               <WishlistButton tooltipDirection={tooltipDir} product={product} />
             </li>
           )}
-          {style === 5 && <li className="br-line type-vertical h-24" />}
+          {style === 5 && <li className="h-24 br-line type-vertical" />}
 
           {showCompare && (
             <li className="compare">
               <CompareButton tooltipDirection={tooltipDir} product={product} />
             </li>
           )}
-          {style === 5 && <li className="br-line type-vertical h-24" />}
+          {style === 5 && <li className="h-24 br-line type-vertical" />}
 
           {showQuickView && (
             <li>

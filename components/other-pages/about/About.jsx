@@ -37,14 +37,15 @@ export default function About() {
                   </span>
                   <div className="text-rotate">
                     <div className="circle">
-                      <TextCircle />
+                      <TextCircle  text="innovative & high-quality & "/>
                     </div>
                   </div>
                 </div>
               </div>
               <div className="box-intro">
                 <h4 className="slogan fw-normal">
-                  FIRST STORE IN A RURAL AREA OF DENMARK
+                  Zgar® is a multinational e-cigarette brand known for its innovative & high-quality vaping products.
+
                 </h4>
                 <p className="intro-text">
                   Morbi finibus erat ullamcorper malesuada placerat. Integer

@@ -7,7 +7,8 @@ import Hero from "@/components/other-pages/about/Hero";
 import PageTitle from "@/components/other-pages/about/PageTitle";
 import ShopGram from "@/components/other-pages/about/ShopGram";
 import Testimonials from "@/components/other-pages/about/Testimonials";
-import React from "react";
+import HomeHeader from "@/widgets/HomeHeader"
+import HomeFooter from "@/widgets/HomeFooter"
 
 export const metadata = {
   title: "About || Ochaka - Multipurpose eCommerce React Nextjs Template",
@@ -16,15 +17,15 @@ export const metadata = {
 export default function page() {
   return (
     <>
-      <Topbar1 />
-      <Header1 parentClass="tf-header header-fix header-abs-1" />
+
+      <HomeHeader/>
       <PageTitle />
       <Hero />
       <About />
       <BrandStory />
-      <Testimonials />
-      <ShopGram />
-      <Footer1 />
+      {/* <Testimonials /> */}
+      {/* <ShopGram /> */}
+      <HomeFooter />
     </>
   );
 }

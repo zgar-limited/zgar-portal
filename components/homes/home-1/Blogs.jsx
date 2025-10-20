@@ -8,9 +8,9 @@ import { Pagination } from "swiper/modules";
 
 export default function Blogs() {
   return (
-    <div className="flat-spacing">
+    <div className="bg-[#f2f2f2] flat-spacing">
       <div className="container">
-        <div className="h1 sect-title text-black fw-medium text-center wow fadeInUp">
+        <div className="text-center text-black h1 sect-title fw-medium wow fadeInUp">
           Read Our Blog
         </div>
         <Swiper

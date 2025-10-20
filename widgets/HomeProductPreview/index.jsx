@@ -17,11 +17,13 @@ export default function Products1() {
     [activeTab]
   );
   return (
-    <section className="flat-spacing flat-animate-tab">
+    <section
+      className="flat-spacing flat-animate-tab second-gradient-bg"
+    >
       <div className="container">
         <div className="sect-title wow fadeInUp">
           <h1 className="mb-24 text-center title">Trending Product</h1>
-          <ul className="tab-product_list" role="tablist">
+          {/* <ul className="tab-product_list" role="tablist">
             {tabItems.map((tab) => (
               <li key={tab} className="nav-tab-item">
                 <button
@@ -34,7 +36,7 @@ export default function Products1() {
                 </button>
               </li>
             ))}
-          </ul>
+          </ul> */}
         </div>
         <div className="tab-content">
           <div className="tab-pane active show" id="new-arr" role="tabpanel">
@@ -64,7 +66,7 @@ export default function Products1() {
             >
               {filteredProducts.map((product, i) => (
                 <SwiperSlide key={i}>
-                  <ProductCard1 product={product} />
+                  <ProductCard1 product={product}  />
                 </SwiperSlide>
               ))}
 

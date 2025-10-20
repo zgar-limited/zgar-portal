@@ -8,7 +8,7 @@ import { Pagination } from "swiper/modules";
 
 export default function InstagramPosts() {
   return (
-    <section className="pt-0 flat-spacing pb-xl-0">
+    <section className="pt-24 flat-spacing pb-xl-0">
       <div className="container">
         <div className="text-center sect-title wow fadeInUp">
           <div className="mb-16 h1 title">Follow Us On Media</div>
