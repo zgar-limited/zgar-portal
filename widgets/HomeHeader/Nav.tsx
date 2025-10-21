@@ -146,11 +146,15 @@ export default function Nav() {
           AUTHENTICATION
         </a>
       </li>
-      <li className="menu-item">
-        <a href="/club" className="item-link">
-          CLUB
-        </a>
+
+      <li>
+        <div className="animated-border-box radius-style-2">
+          <Link className="tp-btn-gradient sm p-relative" href="/register">
+            CLUB
+          </Link>
+        </div>
       </li>
+
     </>
   );
 }

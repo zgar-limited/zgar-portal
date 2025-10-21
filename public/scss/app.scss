@@ -35,6 +35,8 @@
 /*--------- Abstracts variable ---------- */
 @use "./abstracts/index"as abstract;
 
+@use "./utils/index"as utils;
+
 /*---------- Reset css styles ----------- */
 @use "reset";
 

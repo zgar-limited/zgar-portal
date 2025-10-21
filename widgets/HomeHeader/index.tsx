@@ -34,7 +34,7 @@ export default function HomeHeader({
   }, [lastScrollY]);
   return (
     <header
-    
+
       className={`${parentClass} ${lastScrollY > 200 && isScrollingUp ? "header-sticky" : ""
         } ${lastScrollY > 100 ? "will-sticky" : ""}`}
     >
@@ -106,9 +106,11 @@ export default function HomeHeader({
                 </span>
               </li> */}
             </ul>
+
           </div>
         </div>
       </div>
+
     </header>
   );
 }
