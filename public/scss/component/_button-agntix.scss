@@ -891,14 +891,15 @@
 		align-items: center;
 		overflow: hidden;
 		font-weight: 600;
-		font-size: 17px;
+		font-size: 0.8125rem;
 		line-height: 1;
 		z-index: 1;
 		margin: 1px;
 		transition: .4s;
 		border-radius: 14px;
-		padding: 22px 30px;
-		padding-top: 25px;
+		// padding: 22px 30px;
+        padding: 10px 16px;
+		// padding-top: 25px;
 		display: inline-block;
 		letter-spacing: -0.01em;
 		color: var(--tp-common-white);
@@ -906,9 +907,9 @@
         background: linear-gradient(315deg,rgba(69, 212, 251, 1) 0%, rgba(157, 251, 211, 1) 74%);
 
 		@media #{$md,$xs}{
-			font-size: 16px;
-			padding: 15px 25px;
-			padding-top: 18px;
+			// font-size: 16px;
+			// padding: 12px 16px;
+			// padding-top: 18px;
 		}
 		&:hover{
 			color: var(--tp-common-white);
@@ -924,8 +925,8 @@
 			}
 		}
 		&.sm{
-			padding-top: 0;
-			padding: 13px 24px;
+			// padding-top: 0;
+			// padding: 12px 16px;
 			position: relative;
 		}
 	}

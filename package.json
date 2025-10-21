@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@gsap/react": "^2.1.2",
     "axios": "^1.11.0",
     "bootstrap": "^5.3.7",
     "drift-zoom": "^1.5.1",

@@ -10,6 +10,7 @@ import HomeFooter from "@/widgets/HomeFooter";
 import HomeFaq from "@/widgets/HomeFaq";
 
 import ParallaxSlider from "@/components/parallax-slider/ParallaxSlider";
+import HomeProductCate from "@/widgets/HomeProductCate";
 export const metadata = {
   title:
     "Zgar",
@@ -34,7 +35,8 @@ export default async function Home() {
       <ParallaxSlider />
       {/* <HomeBanner /> */}
       {/* <HomeSpecialProducts  /> */}
-      <Categories />
+      {/* <Categories /> */}
+      <HomeProductCate />
 
       <HomeProductPreview />
       <HomeProductVerify />
