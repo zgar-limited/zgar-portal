@@ -22,8 +22,8 @@ import ScrollTop from "@/components/common/ScrollTop";
 import GlobalEffectsProvider from "@/components/common/FlobalEffectProvider";
 import NewsLetterModal from "@/components/modals/NewsLetterModal";
 export const metadata = {
-  title: "Home || Ochaka - Multipurpose eCommerce React Nextjs Template",
-  description: "Ochaka - Multipurpose eCommerce React Nextjs Template",
+  title: "Zgar Vape Website",
+  description: "Zgar - Home",
 };
 export default function RootLayout({ children }) {
   return (

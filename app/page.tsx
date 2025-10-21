@@ -1,4 +1,3 @@
-import Footer from "@/components/footers/Footer6";
 import Blogs from "@/components/homes/home-accessories/Blogs";
 
 import Categories from "@/components/homes/home-watch/Categories";
@@ -7,19 +6,14 @@ import HomeProductPreview from "@/widgets/HomeProductPreview";
 import HomeSocialPost from "@/widgets/HomeSocialPost";
 import HomeProductVerify from "@/widgets/HomeProductVerify";
 import HomeHeader from "@/widgets/HomeHeader";
-import HomeBgColor from "@/widgets/HomeBgColor";
-import HomeBanner from "@/widgets/HomeBanner";
-import HomeTips from "@/widgets/HomeTips";
-import FlowingMenu from "@/components/banner/menu/flowing-menu/FlowingMenu";
-import HomeSpecialProducts from "@/widgets/HomeSpecialProducts";
-import Header1 from "@/components/header/Header1";
 import HomeFooter from "@/widgets/HomeFooter";
-import Faqs from "@/components/other-pages/Faqs";
 import HomeFaq from "@/widgets/HomeFaq";
+
+import ParallaxSlider from "@/components/parallax-slider/ParallaxSlider";
 export const metadata = {
   title:
-    "Home Fashion 01 || Ochaka - Multipurpose eCommerce React Nextjs Template",
-  description: "Ochaka - Multipurpose eCommerce React Nextjs Template",
+    "Zgar",
+  description: "Zgar - Home",
 };
 export default async function Home() {
   // const res = await fetch(
@@ -34,17 +28,18 @@ export default async function Home() {
     <div>
       {/* <HomeBgColor /> */}
       {/* <HomeTips /> */}
-      <div className="primary-gradient-bg">
-        {/* <Header1/> */}
-        <HomeHeader />
-        <HomeBanner />
-        {/* <HomeSpecialProducts  /> */}
-        <Categories />
-      </div>
+
+      {/* <Header1/> */}
+      <HomeHeader />
+      <ParallaxSlider />
+      {/* <HomeBanner /> */}
+      {/* <HomeSpecialProducts  /> */}
+      <Categories />
+
       <HomeProductPreview />
       <HomeProductVerify />
       <HomeFaq />
-      
+
       <Blogs />
       <HomeSocialPost />
 

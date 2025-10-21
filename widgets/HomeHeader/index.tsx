@@ -6,8 +6,8 @@ import Nav from "./Nav";
 import LanguageSelect from "@/components/common/LanguageSelect";
 // import CartLength from "./CartLength";
 
-export default function Header1({
-  containerFull = false,
+export default function HomeHeader({
+  containerFull = true,
   parentClass = "tf-header header-fix header-abs-1",
 }) {
   const [isScrollingUp, setIsScrollingUp] = useState(false);
@@ -38,7 +38,7 @@ export default function Header1({
       className={`${parentClass} ${lastScrollY > 200 && isScrollingUp ? "header-sticky" : ""
         } ${lastScrollY > 100 ? "will-sticky" : ""}`}
     >
-      <div className={containerFull ? "container-full" : "container"}>
+      <div className="px-[6%]">
         <div className="row align-items-center ">
           <div className="col-md-4 col-3 d-xl-none">
             <a
