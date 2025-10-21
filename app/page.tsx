@@ -11,9 +11,9 @@ import HomeFaq from "@/widgets/HomeFaq";
 
 import ParallaxSlider from "@/components/parallax-slider/ParallaxSlider";
 import HomeProductCate from "@/widgets/HomeProductCate";
+import HomeTips from "@/widgets/HomeTips";
 export const metadata = {
-  title:
-    "Zgar",
+  title: "Zgar",
   description: "Zgar - Home",
 };
 export default async function Home() {
@@ -28,7 +28,7 @@ export default async function Home() {
   return (
     <div>
       {/* <HomeBgColor /> */}
-      {/* <HomeTips /> */}
+      <HomeTips />
 
       {/* <Header1/> */}
       <HomeHeader />
