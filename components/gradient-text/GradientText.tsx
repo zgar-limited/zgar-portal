@@ -12,7 +12,7 @@ export default function GradientText({
   children,
   className = '',
   colors = ['#ffaa40', '#9c40ff', '#ffaa40'],
-  animationSpeed = 8,
+  animationSpeed = 1,
   showBorder = false
 }: GradientTextProps) {
   const gradientStyle = {
