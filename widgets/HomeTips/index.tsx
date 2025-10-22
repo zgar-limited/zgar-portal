@@ -7,10 +7,10 @@ const HomeTips = (props: Props) => {
   return (
     <section
       style={{
-        background: "linear-gradient(315deg,#45d4fb, #9dfbd3, #45d4fb, #9dfbd3 )",
+        // background: "linear-gradient(315deg,#45d4fb, #9dfbd3, #45d4fb, #9dfbd3 )",
       }}
 
-      className=" w-full  text-[#fff]  p-2 flex items-center"
+      className=" w-full  text-[#fff]  p-2 flex items-center bg-black"
     >
       <ScrollVelocity
         className=" me-[80px]"

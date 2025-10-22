@@ -2,7 +2,7 @@ import Blogs from "@/components/homes/home-accessories/Blogs";
 
 import Categories from "@/components/homes/home-watch/Categories";
 
-import HomeProductPreview from "@/widgets/HomeProductPreview";
+import HomeHotSellingProduct from "@/widgets/HomeHotSellingProduct";
 import HomeSocialPost from "@/widgets/HomeSocialPost";
 import HomeProductVerify from "@/widgets/HomeProductVerify";
 import HomeHeader from "@/widgets/HomeHeader";
@@ -33,12 +33,8 @@ export default async function Home() {
       {/* <Header1/> */}
       <HomeHeader />
       <ParallaxSlider />
-      {/* <HomeBanner /> */}
-      {/* <HomeSpecialProducts  /> */}
-      {/* <Categories /> */}
       <HomeProductCate />
-
-      <HomeProductPreview />
+      <HomeHotSellingProduct />
       <HomeProductVerify />
       <HomeFaq />
 

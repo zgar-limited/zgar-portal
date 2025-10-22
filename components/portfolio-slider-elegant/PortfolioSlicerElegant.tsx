@@ -16,12 +16,12 @@ const PortfolioSlicerElegant = () => {
   // Enable smooth scroll animations
   // useScrollSmooth();
 
-  useGSAP(() => {
-    const timer = setTimeout(() => {
-      fadeAnimation();
-    }, 100);
-    return () => clearTimeout(timer);
-  });
+  // useGSAP(() => {
+  //   const timer = setTimeout(() => {
+  //     fadeAnimation();
+  //   }, 100);
+  //   return () => clearTimeout(timer);
+  // });
 
   return (
     <>
@@ -33,7 +33,7 @@ const PortfolioSlicerElegant = () => {
         <div id="smooth-content">
           {/* Main Content Sections */}
           <main>
-            <div className="container tp-slider-elegant-area">
+            <div className=" tp-slider-elegant-area">
               <div className="tp-slider-elegant-wrapper">
                 <div className="tp-slider-elegant-inner-wrap">
                   {[
