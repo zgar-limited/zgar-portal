@@ -10,7 +10,7 @@ const HomeTips = (props: Props) => {
         // background: "linear-gradient(315deg,#45d4fb, #9dfbd3, #45d4fb, #9dfbd3 )",
       }}
 
-      className=" w-full  text-[#fff]  p-2 flex items-center bg-black"
+      className=" w-full  text-[#fff]  p-2 flex items-center bg-black overflow-hidden"
     >
       <ScrollVelocity
         className=" me-[80px]"

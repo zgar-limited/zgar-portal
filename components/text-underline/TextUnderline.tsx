@@ -23,8 +23,8 @@ const TextUnderline = (props: { width?: number }) => {
             y2="31.8404"
             gradientUnits="userSpaceOnUse"
           >
-            <stop offset="1" stop-color="#45d4fb"></stop>
-            <stop offset="1" stop-color="#9dfbd3"></stop>
+            <stop offset="1" stopColor="#45d4fb"></stop>
+            <stop offset="1" stopColor="#9dfbd3"></stop>
           </linearGradient>
         </defs>
       </svg>

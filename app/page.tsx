@@ -12,6 +12,8 @@ import HomeFaq from "@/widgets/HomeFaq";
 import ParallaxSlider from "@/components/parallax-slider/ParallaxSlider";
 import HomeProductCate from "@/widgets/HomeProductCate";
 import HomeTips from "@/widgets/HomeTips";
+import HomeVideo from "@/widgets/HomeVideo/HomeVideo";
+import HomeSubscription from "@/widgets/HomeSubscription/HomeSubscription";
 export const metadata = {
   title: "Zgar",
   description: "Zgar - Home",
@@ -26,20 +28,19 @@ export default async function Home() {
   // console.log("WP_ORIGIN",process.env.WP_ORIGIN)
 
   return (
-    <div>
-      {/* <HomeBgColor /> */}
+    <div className="overflow-hidden">
       <HomeTips />
-
-      {/* <Header1/> */}
       <HomeHeader />
       <ParallaxSlider />
       <HomeProductCate />
       <HomeHotSellingProduct />
       <HomeProductVerify />
-      <HomeFaq />
+      <HomeVideo />
+      <HomeSubscription />
+      {/* <HomeFaq /> */}
 
-      <Blogs />
-      <HomeSocialPost />
+      {/* <Blogs /> */}
+      {/* <HomeSocialPost /> */}
 
       <HomeFooter />
     </div>

@@ -93,7 +93,8 @@ video {
   font-style: inherit;
   font-weight: inherit;
 }
-
+img,
+video,
 article,
 aside,
 details,
@@ -1690,5 +1691,12 @@ a {
   * {
     animation: none !important;
     transition: none !important;
+  }
+}
+
+input,
+textarea {
+  &:focus {
+    outline: none;
   }
 }

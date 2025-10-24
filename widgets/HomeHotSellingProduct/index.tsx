@@ -9,6 +9,7 @@ import { useGSAP } from "@gsap/react";
 import React, { useMemo, useState } from "react";
 import { Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
+import ProductGrid from "./ProductGrid";
 const tabItems = ["new arrivals", "best seller", "on sale"];
 
 export default function Products1() {
@@ -22,17 +23,19 @@ export default function Products1() {
   );
 
   return (
-    <section className="text-center bg-black mt-[100px] flat-spacing rounded-[30px]">
-      <a className="text-white h1 mb-[80px]">
+    <section className="text-center  mt-[100px] flat-spacing rounded-[30px]">
+      <a className="text-black h1 mb-[80px]">
         <span>🔥🔥🔥🔥</span>
         <TrueFocus
           pauseBetweenAnimations={0.5}
           sentence="Hot-selling Products"
         ></TrueFocus>
       </a>
-      <div className=" container-full h-[900px] ">
+      <ProductGrid/>
+      {/* <div className=" container-full h-[900px] ">
         <DomeGallery />
-      </div>
+      </div> */}
+      
     </section>
   );
 }
