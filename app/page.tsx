@@ -14,6 +14,7 @@ import HomeProductCate from "@/widgets/HomeProductCate";
 import HomeTips from "@/widgets/HomeTips";
 import HomeVideo from "@/widgets/HomeVideo/HomeVideo";
 import HomeSubscription from "@/widgets/HomeSubscription/HomeSubscription";
+import HomeAboutUs from "@/widgets/HomeAboutUs";
 export const metadata = {
   title: "Zgar",
   description: "Zgar - Home",
@@ -36,6 +37,7 @@ export default async function Home() {
       <HomeHotSellingProduct />
       <HomeProductVerify />
       <HomeVideo />
+      <HomeAboutUs />
       <HomeSubscription />
       {/* <HomeFaq /> */}
 
