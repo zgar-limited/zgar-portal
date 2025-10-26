@@ -38,11 +38,12 @@ export default async function Home() {
       <HomeProductVerify />
       <HomeVideo />
       <HomeAboutUs />
-      <HomeSubscription />
-      {/* <HomeFaq /> */}
+      
+
 
       {/* <Blogs /> */}
-      {/* <HomeSocialPost /> */}
+      <HomeSocialPost />
+      <HomeSubscription />
 
       <HomeFooter />
     </div>

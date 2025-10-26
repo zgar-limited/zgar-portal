@@ -9,7 +9,7 @@ const HomeProductCate = (props: Props) => {
   return (
     <section className="container-full">
       <GradientText
-        className="relative flat-spacing"
+        className="relative my-32"
         animationSpeed={6}
         showBorder={false}
         colors={["#45d4fb", "#9dfbd3", "#45d4fb", "#9dfbd3", "#45d4fb"]}

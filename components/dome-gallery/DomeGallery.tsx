@@ -103,7 +103,7 @@ const DEFAULTS = {
   maxVerticalRotationDeg: 5,
   dragSensitivity: 20,
   enlargeTransitionMs: 300,
-  segments: 35
+  segments: 15
 };
 
 const clamp = (v: number, min: number, max: number) => Math.min(Math.max(v, min), max);

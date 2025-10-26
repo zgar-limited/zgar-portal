@@ -13,6 +13,7 @@ import TextPressure from "@/components/text-pressure/TextPressure";
 const HomeVideo = () => {
   return (
     <div className=" it-project-area">
+      <h1 className="my-32 font-semibold text-center">🎬 Featured Videos</h1>
       <div className="text-center it-project-slider-wrap">
         <Swiper className="it-project-active " {...project_swiper_params}>
           {[
@@ -96,7 +97,7 @@ const HomeVideo = () => {
             </SwiperSlide>
           ))}
         </Swiper>
-        <div className="it-project-arrow mt-[50px]">
+        <div className="mt-16 it-project-arrow">
           <button className="it-project-prev">
             <span>
               <LeftArrowIcon
@@ -120,7 +121,7 @@ const HomeVideo = () => {
             </span>
           </button>
         </div>
-        <div className="it-project-dots"></div>
+        <div className=" it-project-dots"></div>
       </div>
     </div>
   );

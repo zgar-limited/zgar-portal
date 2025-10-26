@@ -1,0 +1,34 @@
+@use '../../public/scss/utils' as *;
+
+
+.dgm-about{
+    &-thumb{
+        &-1{
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            box-shadow: 0 20px 30px 0 rgba(20, 20, 20, 0.12);
+            @media #{$xs}{
+                position: static;
+                margin-top: 30px;
+                width: 100%;
+            }
+        }
+        &-wrap{
+            margin-left: 80px;
+            padding-bottom: 90px;
+            @media #{$lg}{
+                margin-left: 0;
+            }
+            @media #{$md}{
+                margin-left: 0;
+                margin-bottom: 50px;
+            }
+            @media #{$xs}{
+                margin-left: 0;
+                padding-bottom: 40px;
+            }
+        }
+    }
+    
+}

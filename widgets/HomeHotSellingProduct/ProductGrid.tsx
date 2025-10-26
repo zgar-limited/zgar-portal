@@ -1,6 +1,13 @@
-
 // 'use client';
 import { useHoverEffect } from "@/hooks/useHoverEffect";
+import {
+  ArrowFour,
+  ArrowThree,
+  ArrowTwenty,
+  ArrowTwentyFour,
+  ArrowTwentyThree,
+  ArrowTwentyTwo,
+} from "@/svg/ArrowIcons";
 // import { ArrowTwentyFour } from '@/svg/ArrowIcons';
 import Image from "next/image";
 import Link from "next/link";
@@ -34,12 +41,12 @@ const PortfolioMasonryGrid = () => {
       image: "/images/slider/zgar/4.jpg",
       title: "Ella Whitmore",
       categories: ["Website", "Services"],
-      colClass: "col-lg-12",
+      colClass: "col-lg-12 mt-8",
       link: "/portfolio-details-gallery-light",
     },
   ].map((item) => (
     <div key={item.id} className={item.colClass}>
-      <div className="tp-portfolio-masonry-grid-item mb-70">
+      <div className="tp-portfolio-masonry-grid-item ">
         <div
           ref={addToRefs}
           className="tp-portfolio-masonry-grid-thumb tp--hover-item"
@@ -81,31 +88,8 @@ const PortfolioMasonryGrid = () => {
     </div>
   ));
   return (
-    <div className="tp-portfolio-masonry-grid-ptb pt-55 pb-140">
-      <div className="container container-1830">
-        <div className="row">
-          <div className="col-lg-12">
-            <div className="pb-40 tp-portfolio-masonry-grid-heading">
-              <span>Featured Project:</span>
-            </div>
-          </div>
-          {/* Rendered Items  */}
-          {RenderedItems}
-        </div>
-        <div className="row justify-content-center">
-          <div className="col-md-8">
-            <div className="tp-portfolio-masonry-grid-bottom">
-              <Link className="tp-btn-animation" href="#">
-                {Array.from({ length: 5 }).map((_, index) => (
-                  <span key={index}>
-                    {/* Load more Projects <ArrowTwentyFour /> */}
-                  </span>
-                ))}
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="container-full ">
+      <div className="row">{RenderedItems}</div>
     </div>
   );
 };

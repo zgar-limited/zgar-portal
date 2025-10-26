@@ -9,7 +9,7 @@ type Props = {};
 
 const HomeSubscription = (props: Props) => {
   return (
-    <div className="container-full bg-[black]  mt-32 flat-spacing relative ">
+    <div className=" bg-[black]  flat-spacing relative px-[24px] ">
       {/* <Image
         className="    absolute -top-[100px] w-[375px] h-auto z-10"
         src={"/images/newsletter/pendant.png"}
@@ -18,14 +18,20 @@ const HomeSubscription = (props: Props) => {
         alt="zgar-newsletter"
       /> */}
       <div className="flex flex-wrap gap-y-8 items-center mx-auto text-center max-w-[1920px]">
-        <GradientText
+        {/* <GradientText
           //   className="w-full"
           animationSpeed={6}
           showBorder={false}
           colors={["#45d4fb", "#9dfbd3", "#45d4fb", "#9dfbd3", "#45d4fb"]}
-        >
-          <span className="h1">Receive Zgar production newsletter</span>
-        </GradientText>
+        > */}
+        <p className="text-white">
+          <p className="h1">SUBSCRIBE</p>
+          <p className="h6">
+            Get the latest product launches, promotions, and giveaway delivered
+            straight to your inbox for free!
+          </p>
+        </p>
+        {/* </GradientText> */}
         <div className="flex-1">
           <div className="relative flex items-center max-w-2xl mx-auto">
             <span className="absolute inline-block ml-4 leading-1 ">
@@ -34,7 +40,7 @@ const HomeSubscription = (props: Props) => {
             <input
               className="self-stretch block bg-white border-none  rounded-l-[100px] ps-[44px] pe-[24px] text-[16px] leading-1 flex-1"
               type="email"
-              placeholder="Please input your Email"
+              placeholder="Email Address"
             />
             <SubmitButton text="Subscription" />
           </div>

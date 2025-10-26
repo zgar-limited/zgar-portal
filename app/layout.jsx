@@ -21,7 +21,7 @@ export default function RootLayout({ children }) {
         
       </head>
       <body>
-        <main id="wrapper">
+        <main id="wrapper" >
           <Context>
             {children}
             {/* <CartModal /> */}
