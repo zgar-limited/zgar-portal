@@ -1,7 +1,8 @@
 "use client";
 
+import { GetInventoryListRes } from "@/types/inventory-list";
 import { medusaSDK } from "@/utils/medusa";
-import { useQuery } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { CSSProperties, useState, Fragment } from "react";
 
@@ -99,12 +100,36 @@ const ProductsSelectModal = (props: Props) => {
   const productsRes = useQuery({
     queryKey: ["productsRes"],
     queryFn: async () => {
-      const productsRes = await medusaSDK.store.product.list({ limit: 99, });
+      const productsRes = await medusaSDK.store.product.list({
+        limit: 99,
+        fields: "*external_id",
+      });
       return productsRes;
-    },    
+    },
   });
-  
-  
+  const allInventoryRes = useQueries({
+    queries:
+      productsRes?.data?.products?.length > 0
+        ? productsRes.data.products.map((product) => {
+            return {
+              queryKey: ["inventoryRes", product.id],
+              queryFn: async () => {
+                const inventoryListRes = (await medusaSDK.client.fetch(
+                  "/jdc-erp/inventory",
+                  {
+                    method: "get",
+                    query: {
+                      filter_material_category: product.external_id,
+                    },
+                  }
+                )) as GetInventoryListRes;
+                return inventoryListRes;
+              },
+            };
+          })
+        : [],
+  });
+
 
   const toggleProduct = (productId: string) => {
     setExpandedProductIds((prev) =>
@@ -148,7 +173,7 @@ const ProductsSelectModal = (props: Props) => {
               </tr>
             </thead>
             <tbody>
-              {productsRes.data?.products?.map((product) => {
+              {productsRes.data?.products?.map((product, productIndex) => {
                 const isExpanded = expandedProductIds.includes(product.id);
                 return (
                   <Fragment key={product.id}>
@@ -170,15 +195,15 @@ const ProductsSelectModal = (props: Props) => {
                       <td className="fw-bold">{product.title}</td>
                       <td>{product.thumbnail}</td>
                       <td>
-                        {/* <span
+                        <span
                           className={`badge ${
-                            product.status === "Active"
+                            allInventoryRes[productIndex]?.isLoading
                               ? "bg-success"
                               : "bg-secondary"
                           }`}
                         >
-                          {product.status}
-                        </span> */}
+                          {allInventoryRes[productIndex].status}
+                        </span>
                       </td>
                       <td className="text-end">
                         <button
@@ -202,10 +227,10 @@ const ProductsSelectModal = (props: Props) => {
                             <table className="table mb-0 bg-white table-sm table-bordered">
                               <thead>
                                 <tr>
-                                  <th>Name</th>
-                                  <th>Attributes</th>
-                                  <th>Price</th>
-                                  <th>Stock</th>
+                                  <th>名称</th>
+                                  <th>Feature</th>
+                                  <th>价格</th>
+                                  <th>库存</th>
                                   <th className="text-end">Select SKU</th>
                                 </tr>
                               </thead>
@@ -213,9 +238,22 @@ const ProductsSelectModal = (props: Props) => {
                                 {product.variants?.map((sku) => (
                                   <tr key={sku.id}>
                                     <td>{sku.title}</td>
-                                    <td>{sku.options.map(option => option.value).join(",")}</td>
+                                    <td>
+                                      {sku.options
+                                        .map((option) => option.value)
+                                        .join(",")}
+                                    </td>
                                     <td>$0</td>
-                                    <td>0</td>
+                                    <td>
+                                      {
+                                        allInventoryRes[
+                                          productIndex
+                                        ].data.rows.find(
+                                          (row) =>
+                                            row.material_number === sku.sku
+                                        )?.valid_qty
+                                      }
+                                    </td>
                                     <td className="text-end">
                                       <input
                                         type="checkbox"
