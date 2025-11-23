@@ -85,6 +85,16 @@ export default function Context({ children }) {
       return [...prev, item];
     });
   };
+  const addEmptyProductToCart = (id, qty = 1) => {
+    setCartProducts((prev) => {
+      const exists = prev.some((p) => p.id === id);
+      if (exists) return prev;
+      const product = allProducts.find((p) => p.id == id);
+      if (!product) return prev;
+      const item = { ...product, quantity: qty };
+      return [...prev, item];
+    });
+  };
   const removeProductFromCart = (id) => {
     setCartProducts((prev) => prev.filter((p) => p.id !== id));
   };

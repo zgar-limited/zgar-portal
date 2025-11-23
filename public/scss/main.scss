@@ -3,10 +3,13 @@
 
 // CSS
 @import "../css/bootstrap-select.min.css";
-@import "../css/bootstrap.min.css";
+// @import "../css/bootstrap.min.css";
 @import "../css/swiper-bundle.min.css";
 @import "../css/animate.css";
-@import 'react-photo-view/dist/react-photo-view.css';
+@import "react-photo-view/dist/react-photo-view.css";
+
+@include meta.load-css("bootstrap/scss/bootstrap");
+
 @include meta.load-css("app.scss");
 .infiniteSlider {
   display: flex;
@@ -126,7 +129,6 @@
   margin-top: auto;
   margin-bottom: auto;
 }
-
 
 .primary-gradient-bg {
   background: linear-gradient(315deg, #c6ffdd, #fbd786, #c6ffdd);

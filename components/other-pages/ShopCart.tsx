@@ -8,10 +8,15 @@ import QuantitySelect from "../common/QuantitySelect";
 import { ChevronDown, PackagePlus, ShoppingCart, X } from "lucide-react";
 
 import ProductsSelectModal from "../modals/ProductsSelectModal";
+import { useQuery } from "@tanstack/react-query";
+import { medusaSDK } from "@/utils/medusa";
 
 export default function ShopCart() {
   const { cartProducts, totalPrice, removeProductFromCart, updateQuantity } =
     useContextElement();
+
+  
+
   return (
     <div className="flat-spacing each-list-prd">
       <div className="container">
