@@ -8,6 +8,7 @@ import "../public/css/harmonyos_sans_tc.css"
 // import DemoModal from "@/components/modals/DemoModal";
 import MobileMenu from "@/components/modals/MobileMenu";
 import Context from "@/context/Context";
+import ProductsSelectModal from "@/components/modals/ProductsSelectModal";
 // import ScrollTop from "@/components/common/ScrollTop";
 // import GlobalEffectsProvider from "@/components/common/FlobalEffectProvider";
 export const metadata = {
@@ -37,6 +38,7 @@ export default function RootLayout({ children }) {
             {/* <SizeGuideModal /> */}
             {/* <ToolbarModal /> */}
             {/* <NewsLetterModal /> */}
+            <ProductsSelectModal />
           </Context>
           {/* <GlobalEffectsProvider /> */}
           {/* <ScrollTop /> */}

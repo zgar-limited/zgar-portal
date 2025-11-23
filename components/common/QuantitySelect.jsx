@@ -1,4 +1,5 @@
 "use client";
+import { Minus, Plus } from "lucide-react";
 import React from "react";
 
 const QuantitySelect = ({
@@ -28,11 +29,11 @@ const QuantitySelect = ({
   return (
     <div className={`wg-quantity ${styleClass}`}>
       <button className="btn-quantity btn-decrease" onClick={handleDecrease}>
-        <i className="icon icon-minus" />
+        <Minus></Minus>
       </button>
       <input
         className="quantity-product"
-        type="number"
+        // type="number"
         name="number"
         value={quantity}
         onChange={handleChange}
@@ -43,7 +44,8 @@ const QuantitySelect = ({
         role="button"
         tabIndex={0}
       >
-        <i className="icon icon-plus" />
+        <Plus />
+        {/* <i className="icon icon-plus" /> */}
       </button>
     </div>
   );

@@ -16,6 +16,8 @@
     "drift-zoom": "^1.5.1",
     "gsap": "^3.13.0",
     "hover-effect": "^1.2.1",
+    "lucide": "^0.554.0",
+    "lucide-react": "^0.554.0",
     "motion": "^12.23.22",
     "next": "16.0.0",
     "ogl": "^1.0.11",
