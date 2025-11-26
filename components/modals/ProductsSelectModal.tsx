@@ -130,7 +130,6 @@ const ProductsSelectModal = (props: Props) => {
         : [],
   });
 
-
   const toggleProduct = (productId: string) => {
     setExpandedProductIds((prev) =>
       prev.includes(productId)
@@ -164,12 +163,14 @@ const ProductsSelectModal = (props: Props) => {
             <thead className="table-light">
               <tr>
                 <th scope="col" style={{ width: "50px" }}></th>
-                <th scope="col">Product Name</th>
-                <th scope="col">Category</th>
-                <th scope="col">Status</th>
-                <th scope="col" className="text-end">
-                  Action
+                <th scope="col" colSpan={4}>
+                  Product Name
                 </th>
+                {/* <th scope="col">Category</th> */}
+                {/* <th scope="col">Status</th> */}
+                {/* <th scope="col" className="text-end">
+                  Action
+                </th> */}
               </tr>
             </thead>
             <tbody>
@@ -193,8 +194,8 @@ const ProductsSelectModal = (props: Props) => {
                         <span style={{ fontWeight: 'bold' }}>{isExpanded ? '-' : '+'}</span> */}
                       </td>
                       <td className="fw-bold">{product.title}</td>
-                      <td>{product.thumbnail}</td>
-                      <td>
+                      {/* <td>{product.thumbnail}</td> */}
+                      {/* <td>
                         <span
                           className={`badge ${
                             allInventoryRes[productIndex]?.isLoading
@@ -204,8 +205,8 @@ const ProductsSelectModal = (props: Props) => {
                         >
                           {allInventoryRes[productIndex].status}
                         </span>
-                      </td>
-                      <td className="text-end">
+                      </td> */}
+                      {/* <td className="text-end">
                         <button
                           className="btn btn-sm btn-outline-primary"
                           onClick={(e) => {
@@ -215,7 +216,7 @@ const ProductsSelectModal = (props: Props) => {
                         >
                           Select
                         </button>
-                      </td>
+                      </td> */}
                     </tr>
 
                     {/* Nested SKU Table Row */}
@@ -223,20 +224,21 @@ const ProductsSelectModal = (props: Props) => {
                       <tr>
                         <td colSpan={5} className="p-0 bg-light">
                           <div className="p-3">
-                            <h6 className="mb-2 text-muted">SKU Details:</h6>
-                            <table className="table mb-0 bg-white table-sm table-bordered">
+                            <h6 className="mb-2 text-muted">选项:</h6>
+                            <table className="table mb-0 bg-white table-sm table-bordered table-striped">
                               <thead>
                                 <tr>
-                                  <th>名称</th>
-                                  <th>Feature</th>
-                                  <th>价格</th>
-                                  <th>库存</th>
-                                  <th className="text-end">Select SKU</th>
+                                  <th className="text-center">名称</th>
+                                  <th className="text-center">Feature</th>
+                                  <th className="text-center">价格</th>
+                                  <th className="text-center">库存</th>
+                                  <th className="text-center">单位</th>
+                                  <th className="text-center">选购数量</th>
                                 </tr>
                               </thead>
                               <tbody>
                                 {product.variants?.map((sku) => (
-                                  <tr key={sku.id}>
+                                  <tr className="text-center" key={sku.id}>
                                     <td>{sku.title}</td>
                                     <td>
                                       {sku.options
@@ -254,11 +256,13 @@ const ProductsSelectModal = (props: Props) => {
                                         )?.valid_qty
                                       }
                                     </td>
-                                    <td className="text-end">
+                                    <td className="text-center">pcs</td>
+                                    <td className="text-center">
                                       <input
-                                        type="checkbox"
-                                        className="form-check-input"
+                                        type="number"
+                                        // className="form-input"
                                         id={`sku-${sku.id}`}
+                                        placeholder="最少50pcs"
                                       />
                                     </td>
                                   </tr>
