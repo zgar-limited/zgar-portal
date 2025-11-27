@@ -348,6 +348,7 @@
   &.type-languages {
     > .dropdown-menu {
       width: 110px !important;
+      min-width: auto !important;
     }
   }
 

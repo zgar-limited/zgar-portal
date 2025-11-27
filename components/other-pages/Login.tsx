@@ -3,6 +3,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import CountryCodeSelect from "../common/CountryCodeSelect";
+import { medusaSDK } from "@/utils/medusa";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Login() {
   const [isLogin, setIsLogin] = useState(true);
@@ -10,10 +12,44 @@ export default function Login() {
   const [showPass2, setShowPass2] = useState(false);
   const [countryCode, setCountryCode] = useState("+86");
   const router = useRouter();
+  const { login, register } = useAuth();
 
-  const handleSubmit = (e) => {
+  // Form States
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async (e) => {
     e.preventDefault();
-    router.push("/account-page");
+    setLoading(true);
+    const result = await login(email, password);
+    setLoading(false);
+    if (result.success) {
+      router.push("/");
+    } else {
+      alert(result.error);
+    }
+  };
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    if (password !== confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+    setLoading(true);
+    const fullPhone = `${countryCode}${phoneNumber}`;
+    const result = await register(email, password, firstName, lastName, fullPhone);
+    setLoading(false);
+    if (result.success) {
+      router.push("/");
+    } else {
+      alert(result.error);
+    }
   };
 
   return (
@@ -82,7 +118,7 @@ export default function Login() {
           <div className="form-content">
             {isLogin ? (
               // Login Form
-              <form className="form-login" onSubmit={handleSubmit}>
+              <form className="form-login" onSubmit={handleLogin}>
                 <div className="list-ver" style={{ gap: "20px" }}>
                   <fieldset>
                     <input
@@ -90,6 +126,8 @@ export default function Login() {
                       placeholder="Enter your email address *"
                       required
                       style={{ borderRadius: "8px", padding: "15px" }}
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                     />
                   </fieldset>
                   <fieldset className="password-wrapper">
@@ -99,6 +137,8 @@ export default function Login() {
                       placeholder="Password *"
                       required
                       style={{ borderRadius: "8px", padding: "15px" }}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                     />
                     <span
                       onClick={() => setShowPass1((pre) => !pre)}
@@ -132,20 +172,45 @@ export default function Login() {
                   type="submit"
                   className="tf-btn animate-btn w-100"
                   style={{ marginTop: "24px", borderRadius: "8px" }}
+                  disabled={loading}
                 >
-                  Login
+                  {loading ? "Loading..." : "Login"}
                 </button>
               </form>
             ) : (
               // Register Form
-              <form className="form-register" onSubmit={handleSubmit}>
+              <form className="form-register" onSubmit={handleRegister}>
                 <div className="list-ver" style={{ gap: "20px" }}>
+                  <div style={{ display: "flex", gap: "20px" }}>
+                    <fieldset style={{ flex: 1 }}>
+                      <input
+                        type="text"
+                        placeholder="First Name *"
+                        required
+                        style={{ borderRadius: "8px", padding: "15px" }}
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                      />
+                    </fieldset>
+                    <fieldset style={{ flex: 1 }}>
+                      <input
+                        type="text"
+                        placeholder="Last Name *"
+                        required
+                        style={{ borderRadius: "8px", padding: "15px" }}
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                      />
+                    </fieldset>
+                  </div>
                   <fieldset>
                     <input
                       type="email"
                       placeholder="Enter your email address *"
                       required
                       style={{ borderRadius: "8px", padding: "15px" }}
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                     />
                   </fieldset>
                   
@@ -158,6 +223,8 @@ export default function Login() {
                         placeholder="Phone number *"
                         required
                         style={{ borderRadius: "8px", padding: "15px" }}
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value)}
                       />
                     </fieldset>
                   </div>
@@ -169,6 +236,8 @@ export default function Login() {
                       placeholder="Password *"
                       required
                       style={{ borderRadius: "8px", padding: "15px" }}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                     />
                     <span
                       onClick={() => setShowPass1((pre) => !pre)}
@@ -185,6 +254,8 @@ export default function Login() {
                       placeholder="Confirm Password *"
                       required
                       style={{ borderRadius: "8px", padding: "15px" }}
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
                     />
                     <span
                       onClick={() => setShowPass2((pre) => !pre)}
@@ -196,7 +267,7 @@ export default function Login() {
                   </fieldset>
                 </div>
 
-                <div className="check-bottom" style={{ marginTop: "20px" }}>
+                {/* <div className="check-bottom" style={{ marginTop: "20px" }}>
                   <div className="checkbox-wrap">
                     <input
                       id="terms"
@@ -208,15 +279,16 @@ export default function Login() {
                       I agree to the <a href="#" className="link">Terms of User</a>
                     </label>
                   </div>
-                </div>
+                </div> */}
 
                 <button
                   id="btnRegister"
                   type="submit"
                   className="tf-btn animate-btn w-100"
                   style={{ marginTop: "24px", borderRadius: "8px" }}
+                  disabled={loading}
                 >
-                  Register
+                  {loading ? "Loading..." : "Register"}
                 </button>
               </form>
             )}

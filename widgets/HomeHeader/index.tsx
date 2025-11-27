@@ -4,12 +4,15 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import Nav from "./Nav";
 import LanguageSelect from "@/components/common/LanguageSelect";
+import { User } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 // import CartLength from "./CartLength";
 
 export default function HomeHeader({
   containerFull = true,
   parentClass = "tf-header header-fix header-abs-1",
 }) {
+  const { customer } = useAuth();
   const [isScrollingUp, setIsScrollingUp] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -70,8 +73,11 @@ export default function HomeHeader({
             <ul className="nav-icon-list">
 
               <li className="d-none d-lg-flex">
-                <Link className="nav-icon-item link" href={`/login`}>
-                  <i className="icon icon-user" />
+                <Link
+                  className="nav-icon-item link"
+                  href={customer ? "/account-page" : "/login"}
+                >
+                  <User />
                 </Link>
               </li>
               {/* <li className="d-none d-md-flex">
