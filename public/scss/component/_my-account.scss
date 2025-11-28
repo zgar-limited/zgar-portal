@@ -1,0 +1,14 @@
+.account-box-shadow {
+    box-shadow: 0px 0px 25px 0px rgba(0, 0, 0, 0.1) !important;
+    transition: all 0.3s ease;
+    
+    &:hover {
+        box-shadow: 0px 5px 30px 0px rgba(0, 0, 0, 0.15) !important;
+        transform: translateY(-2px);
+    }
+}
+
+.swiper-shadow-fix {
+    padding: 30px !important;
+    margin: -30px !important;
+}

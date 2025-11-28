@@ -56,7 +56,7 @@ export default function Login() {
     <section className="flat-spacing">
       <div className="container">
         <div
-          className="login-register-wrapper"
+          className="login-register-wrapper account-box-shadow"
           style={{
             maxWidth: "500px",
             margin: "0 auto",
@@ -64,7 +64,6 @@ export default function Login() {
             padding: "40px",
             backgroundColor: "#fff",
             borderRadius: "12px",
-            boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
           }}
         >
           {/* Tab Header */}

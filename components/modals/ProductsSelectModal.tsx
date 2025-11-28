@@ -129,6 +129,29 @@ const ProductsSelectModal = (props: Props) => {
           })
         : [],
   });
+  const allProductSkuDetails = useQueries({
+    queries:
+      productsRes?.data?.products?.length > 0
+        ? productsRes.data.products.map((product) => {
+            return {
+              queryKey: ["skuDetail", product.id],
+              queryFn: async () => {
+                const skuDetailList = (await medusaSDK.client.fetch(
+                  "/jdc-erp/sku-detail/batch",
+                  {
+                    method: "post",
+                    body: {
+                      variant_ids: product.variants?.map((v) => v.id) || [],
+                    },
+                  }
+                )) as any;
+                return skuDetailList;
+              },
+              enabled: expandedProductIds.includes(product.id),
+            };
+          })
+        : [],
+  });
 
   const toggleProduct = (productId: string) => {
     setExpandedProductIds((prev) =>
@@ -247,14 +270,15 @@ const ProductsSelectModal = (props: Props) => {
                                     </td>
                                     <td>$0</td>
                                     <td>
-                                      {
-                                        allInventoryRes[
+                                      {/* {
+                                        allInventoryRes?.[
                                           productIndex
-                                        ].data.rows.find(
+                                        ]?.data?.rows.find(
                                           (row) =>
                                             row.material_number === sku.sku
                                         )?.valid_qty
-                                      }
+                                      } */}
+                                      0
                                     </td>
                                     <td className="text-center">pcs</td>
                                     <td className="text-center">

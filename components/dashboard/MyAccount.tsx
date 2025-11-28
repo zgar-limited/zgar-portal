@@ -2,18 +2,15 @@
 import Link from "next/link";
 import Image from "next/image";
 import React from "react";
+import { Pagination } from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Pencil } from "lucide-react";
 import Sidebar from "./Sidebar";
 import { orders } from "@/data/products";
+import { useAuth } from "@/context/AuthContext";
 
 export default function MyAccount() {
-  // Mock data for the new sections
-  const userInfo = {
-    name: "Themesflat",
-    email: "support@ochaka.com",
-    level: "Gold Member",
-    avatar: "/images/avatar/avatar-4.jpg",
-    joinDate: "2023-01-15",
-  };
+  const { customer } = useAuth();
 
   const wallet = {
     balance: 1250.0,
@@ -85,36 +82,44 @@ export default function MyAccount() {
           </div>
           <div className="col-xl-9">
             <div className="my-account-content">
-              {/* 1. User Info Section */}
-              <div className="mb_40">
-                <h4 className="mb_20">User Info</h4>
-                <div className="gap-4 p-4 bg-white border rounded-3 d-flex flex-column flex-md-row align-items-center">
-                  <div className="text-center flex-grow-1 text-md-start">
-                    <h5 className="mb-1">{userInfo.name}</h5>
-                    <p className="mb-2 text-muted">{userInfo.email}</p>
-                    <div className="gap-3 d-flex justify-content-center justify-content-md-start">
-                      <span className="px-3 py-2 badge bg-primary-subtle text-primary rounded-pill">
-                        {userInfo.level}
-                      </span>
-                      <span className="text-muted align-self-center text-small">
-                        Member since {userInfo.joinDate}
-                      </span>
+              {/* 1. User Info & Wallet Section */}
+              <div className="mb-5">
+                <div className="row g-4">
+                  {/* User Info */}
+                  <div className="col-md-4">
+                    <div className="p-4 bg-white border-0 account-box-shadow rounded-4 h-100 d-flex flex-column position-relative">
+                      <button
+                        className="top-0 gap-1 p-0 m-3 position-absolute end-0 btn btn-link text-muted text-decoration-none d-flex align-items-center"
+                        style={{ fontSize: "0.875rem" }}
+                      >
+                        <Pencil size={14} />
+                        <span>Edit</span>
+                      </button>
+                      <div className="flex-grow-1">
+                        <h5 className="mb-1">
+                          {customer?.first_name} {customer?.last_name}
+                        </h5>
+                        <p className="mb-2 text-muted text-small">
+                          {customer?.email}
+                        </p>
+                        <div className="gap-2 mb-3 d-flex align-items-center">
+                          <span className="badge bg-primary-subtle text-primary rounded-pill">
+                            Member
+                          </span>
+                        </div>
+                        <p className="mb-0 text-muted text-small">
+                          Member since{" "}
+                          {customer?.created_at
+                            ? new Date(customer.created_at).toLocaleDateString()
+                            : ""}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                  <div className="gap-2 d-flex">
-                    <button className="tf-btn btn-outline-dark btn-sm radius-3">
-                      Edit Profile
-                    </button>
-                  </div>
-                </div>
-              </div>
 
-              {/* 2. Wallet Section */}
-              <div className="mb_40">
-                <h4 className="mb_20">My Wallet</h4>
-                <div className="row g-3">
+                  {/* Balance */}
                   <div className="col-md-4">
-                    <div className="p-4 text-center bg-white border rounded-3 h-100 text-md-start">
+                    <div className="p-4 bg-white border-0 account-box-shadow rounded-4 h-100 d-flex flex-column">
                       <div className="mb-2 text-muted text-small text-uppercase fw-bold">
                         Balance
                       </div>
@@ -122,16 +127,20 @@ export default function MyAccount() {
                         {wallet.currency}
                         {wallet.balance.toFixed(2)}
                       </h3>
-                      <Link
-                        href="/account-wallet"
-                        className="mt-2 text-decoration-underline text-small d-inline-block"
-                      >
-                        View History
-                      </Link>
+                      <div className="pt-3 mt-auto">
+                        <Link
+                          href="/account-wallet"
+                          className="text-decoration-underline text-small fw-semibold"
+                        >
+                          View History
+                        </Link>
+                      </div>
                     </div>
                   </div>
+
+                  {/* Points */}
                   <div className="col-md-4">
-                    <div className="p-4 text-center bg-white border rounded-3 h-100 text-md-start">
+                    <div className="p-4 bg-white border-0 account-box-shadow rounded-4 h-100 d-flex flex-column">
                       <div className="mb-2 text-muted text-small text-uppercase fw-bold">
                         Points
                       </div>
@@ -141,32 +150,32 @@ export default function MyAccount() {
                       </div>
                     </div>
                   </div>
-                  <div className="col-md-4">
-                    <div className="p-4 text-center bg-white border rounded-3 h-100 text-md-start">
-                      <div className="mb-2 text-muted text-small text-uppercase fw-bold">
-                        Coupons
-                      </div>
-                      <h3 className="mb-0 text-success">{wallet.coupons}</h3>
-                      <div className="mt-2 text-small text-muted">
-                        Active coupons
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
 
               {/* 3. Redemption Center */}
-              <div className="mb_40">
-                <div className="d-flex justify-content-between align-items-center mb_20">
+              <div className="mb-5">
+                <div className="mb-4 d-flex justify-content-between align-items-center">
                   <h4 className="mb-0">Redemption Center</h4>
                   <Link href="/rewards" className="tf-btn-link">
                     View All <i className="icon-arrow-right" />
                   </Link>
                 </div>
-                <div className="row row-cols-2 row-cols-md-4 g-3">
+                <Swiper
+                  dir="ltr"
+                  className="swiper tf-swiper swiper-shadow-fix"
+                  spaceBetween={16}
+                  breakpoints={{
+                    0: { slidesPerView: 2, spaceBetween: 16 },
+                    768: { slidesPerView: 3, spaceBetween: 24 },
+                    1200: { slidesPerView: 4, spaceBetween: 24 },
+                  }}
+                  modules={[Pagination]}
+                  pagination={{ clickable: true, el: ".spd-redemption" }}
+                >
                   {redemptionItems.map((item) => (
-                    <div key={item.id} className="col">
-                      <div className="overflow-hidden border card h-100 rounded-3">
+                    <SwiperSlide key={item.id}>
+                      <div className="overflow-hidden border-0 account-box-shadow card h-100 rounded-4">
                         <div className="position-relative aspect-ratio-1x1">
                           <Image
                             src={item.image}
@@ -183,25 +192,26 @@ export default function MyAccount() {
                             <span className="text-warning fw-bold text-small">
                               {item.cost} Pts
                             </span>
-                            <button className="h-auto px-2 py-1 tf-btn btn-sm btn-fill radius-3 fs-12">
+                            <button className="h-auto px-3 py-1 tf-btn btn-sm btn-fill rounded-pill fs-12 hover-effect">
                               Redeem
                             </button>
                           </div>
                         </div>
                       </div>
-                    </div>
+                    </SwiperSlide>
                   ))}
-                </div>
+                  <div className="mt-4 sw-dot-default tf-sw-pagination spd-redemption" />
+                </Swiper>
               </div>
 
               {/* 4. Task Center */}
-              <div className="mb_40">
-                <h4 className="mb_20">Task Center</h4>
-                <div className="overflow-hidden bg-white border rounded-3">
+              <div className="mb-5">
+                <h4 className="mb-4">Task Center</h4>
+                <div className="overflow-hidden bg-white border-0 account-box-shadow rounded-4">
                   {tasks.map((task, index) => (
                     <div
                       key={task.id}
-                      className={`p-3 d-flex flex-column flex-md-row align-items-center gap-3 ${
+                      className={`p-4 d-flex flex-column flex-md-row align-items-center gap-4 ${
                         index !== tasks.length - 1 ? "border-bottom" : ""
                       }`}
                     >
@@ -232,13 +242,13 @@ export default function MyAccount() {
                       <div>
                         {task.status === "Completed" ? (
                           <button
-                            className="tf-btn btn-outline-success btn-sm radius-3"
+                            className="tf-btn type-very-small btn-outline-success rounded-pill"
                             disabled
                           >
                             Completed
                           </button>
                         ) : (
-                          <button className="tf-btn btn-fill btn-sm radius-3">
+                          <button className="tf-btn type-very-small btn-fill rounded-pill hover-effect">
                             Go to Task
                           </button>
                         )}
@@ -249,23 +259,23 @@ export default function MyAccount() {
               </div>
 
               {/* 5. Orders Table */}
-              <div>
-                <h4 className="mb_20">Recent Orders</h4>
-                <div className="overflow-auto">
-                  <table className="table-my_order order_recent w-100">
-                    <thead>
-                      <tr className="bg-light">
-                        <th className="p-3">Order ID</th>
-                        <th className="p-3">Product Details</th>
-                        <th className="p-3">Total</th>
-                        <th className="p-3">Status</th>
-                        <th className="p-3">Actions</th>
+              <div className="mb-5">
+                <h4 className="mb-4">Recent Orders</h4>
+                <div className="p-3 bg-white account-box-shadow table-responsive rounded-4">
+                  <table className="table mb-0 align-middle table-hover w-100">
+                    <thead className="bg-light">
+                      <tr>
+                        <th className="p-3 border-bottom-0 text-muted text-small text-uppercase">Order ID</th>
+                        <th className="p-3 border-bottom-0 text-muted text-small text-uppercase">Product Details</th>
+                        <th className="p-3 border-bottom-0 text-muted text-small text-uppercase">Total</th>
+                        <th className="p-3 border-bottom-0 text-muted text-small text-uppercase">Status</th>
+                        <th className="p-3 border-bottom-0 text-muted text-small text-uppercase">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {orders.map((order, index) => (
-                        <tr key={index} className="border-bottom">
-                          <td className="p-3 align-middle">
+                        <tr key={index} className="border-bottom-0">
+                          <td className="p-3">
                             <span className="fw-bold text-dark">
                               {order.code}
                             </span>
@@ -273,11 +283,11 @@ export default function MyAccount() {
                               Oct 24, 2023
                             </div>
                           </td>
-                          <td className="p-3 align-middle">
+                          <td className="p-3">
                             <div className="gap-3 d-flex align-items-center">
                               <div
                                 className="flex-shrink-0 border rounded position-relative"
-                                style={{ width: "60px", height: "60px" }}
+                                style={{ width: "50px", height: "50px" }}
                               >
                                 <Image
                                   src={order.imgSrc}
@@ -289,7 +299,7 @@ export default function MyAccount() {
                               <div>
                                 <h6
                                   className="mb-1 text-truncate"
-                                  style={{ maxWidth: "200px" }}
+                                  style={{ maxWidth: "180px" }}
                                 >
                                   <Link
                                     href={`/product-detail/${order.id}`}
@@ -299,20 +309,19 @@ export default function MyAccount() {
                                   </Link>
                                 </h6>
                                 <div className="text-small text-muted">
-                                  SKU: {order.id}00{index} <br />
                                   Size: {order.size} | Qty: 1
                                 </div>
                               </div>
                             </div>
                           </td>
-                          <td className="p-3 align-middle">
+                          <td className="p-3">
                             <span className="fw-bold">
                               ${order.price.toFixed(2)}
                             </span>
                           </td>
-                          <td className="p-3 align-middle">
+                          <td className="p-3">
                             <span
-                              className={`badge rounded-pill px-3 py-2 ${
+                              className={`badge  px-3 py-2 ${
                                 order.status === "Completed"
                                   ? "bg-success-subtle text-success"
                                   : order.status === "Pending"
@@ -325,16 +334,16 @@ export default function MyAccount() {
                               {order.status}
                             </span>
                           </td>
-                          <td className="p-3 align-middle">
+                          <td className="p-3">
                             <div className="gap-2 d-flex">
                               <Link
                                 href={`/account-orders/${order.id}`}
-                                className="px-3 tf-btn btn-outline-dark btn-sm radius-3"
+                                className=" tf-btn btn-outline-dark type-very-small rounded-pill hover-effect"
                               >
                                 View
                               </Link>
                               {order.status === "Completed" && (
-                                <button className="px-3 tf-btn btn-fill btn-sm radius-3">
+                                <button className=" tf-btn btn-fill type-very-small rounded-pill hover-effect">
                                   Reorder
                                 </button>
                               )}
