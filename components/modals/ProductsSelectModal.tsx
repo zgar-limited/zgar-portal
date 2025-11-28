@@ -1,204 +1,125 @@
 "use client";
 
-import { GetInventoryListRes } from "@/types/inventory-list";
-import { medusaSDK } from "@/utils/medusa";
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useShopContext } from "@/context/ShopContext";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { CSSProperties, useState, Fragment } from "react";
+import { Fragment, useState, useEffect } from "react";
+import { Offcanvas, Table, Button } from "react-bootstrap";
+import { useContextElement } from "@/context/Context";
 
-type SKU = {
-  id: number;
-  skuCode: string;
-  price: number;
-  stock: number;
-  attributes: string;
+type Props = {
+  show: boolean;
+  onHide: () => void;
 };
 
-type Product = {
-  id: number;
-  title: string;
-  category: string;
-  status: string;
-  skus: SKU[];
-};
+const ProductsSelectModal = ({ show, onHide }: Props) => {
+  const {
+    products,
+    expandedProductIds,
+    toggleProduct,
+    inventory,
+  } = useShopContext();
 
-// Mock Data
-const mockProducts: Product[] = [
-  {
-    id: 1,
-    title: "T-Shirt Basic",
-    category: "Clothing",
-    status: "Active",
-    skus: [
-      {
-        id: 101,
-        skuCode: "TS-W-S",
-        price: 19.99,
-        stock: 100,
-        attributes: "White, S",
-      },
-      {
-        id: 102,
-        skuCode: "TS-W-M",
-        price: 19.99,
-        stock: 80,
-        attributes: "White, M",
-      },
-      {
-        id: 103,
-        skuCode: "TS-B-S",
-        price: 19.99,
-        stock: 50,
-        attributes: "Black, S",
-      },
-    ],
-  },
-  {
-    id: 2,
-    title: "Running Shoes",
-    category: "Footwear",
-    status: "Active",
-    skus: [
-      {
-        id: 201,
-        skuCode: "RS-42",
-        price: 89.99,
-        stock: 20,
-        attributes: "Size 42",
-      },
-      {
-        id: 202,
-        skuCode: "RS-43",
-        price: 89.99,
-        stock: 15,
-        attributes: "Size 43",
-      },
-    ],
-  },
-  {
-    id: 3,
-    title: "Summer Hat",
-    category: "Accessories",
-    status: "Out of Stock",
-    skus: [
-      {
-        id: 301,
-        skuCode: "SH-01",
-        price: 15.0,
-        stock: 0,
-        attributes: "One Size",
-      },
-    ],
-  },
-];
+  const { addProductToCart, cartProducts } = useContextElement();
+  const [selectedSkus, setSelectedSkus] = useState<string[]>([]);
 
-type Props = {};
-
-const ProductsSelectModal = (props: Props) => {
-  const [expandedProductIds, setExpandedProductIds] = useState<string[]>([]);
-
-  const productsRes = useQuery({
-    queryKey: ["productsRes"],
-    queryFn: async () => {
-      const productsRes = await medusaSDK.store.product.list({
-        limit: 99,
-        fields: "*external_id",
+  // Sync local state with cart when modal opens
+  useEffect(() => {
+    if (show) {
+      const initialSelected: string[] = [];
+      cartProducts.forEach((item: any) => {
+        initialSelected.push(item.id);
       });
-      return productsRes;
-    },
-  });
-  const allInventoryRes = useQueries({
-    queries:
-      productsRes?.data?.products?.length > 0
-        ? productsRes.data.products.map((product) => {
-            return {
-              queryKey: ["inventoryRes", product.id],
-              queryFn: async () => {
-                const inventoryListRes = (await medusaSDK.client.fetch(
-                  "/jdc-erp/inventory",
-                  {
-                    method: "get",
-                    query: {
-                      filter_material_category: product.external_id,
-                    },
-                  }
-                )) as GetInventoryListRes;
-                return inventoryListRes;
-              },
-            };
-          })
-        : [],
-  });
-  const allProductSkuDetails = useQueries({
-    queries:
-      productsRes?.data?.products?.length > 0
-        ? productsRes.data.products.map((product) => {
-            return {
-              queryKey: ["skuDetail", product.id],
-              queryFn: async () => {
-                const skuDetailList = (await medusaSDK.client.fetch(
-                  "/jdc-erp/sku-detail/batch",
-                  {
-                    method: "post",
-                    body: {
-                      variant_ids: product.variants?.map((v) => v.id) || [],
-                    },
-                  }
-                )) as any;
-                return skuDetailList;
-              },
-              enabled: expandedProductIds.includes(product.id),
-            };
-          })
-        : [],
-  });
+      setSelectedSkus(initialSelected);
+    }
+  }, [show, cartProducts]);
 
-  const toggleProduct = (productId: string) => {
-    setExpandedProductIds((prev) =>
-      prev.includes(productId)
-        ? prev.filter((id) => id !== productId)
-        : [...prev, productId]
+  const toggleSkuSelection = (skuId: string) => {
+    setSelectedSkus(prev =>
+      prev.includes(skuId) ? prev.filter(id => id !== skuId) : [...prev, skuId]
     );
   };
 
-  return (
-    <div
-      className="h-full offcanvas offcanvas-bottom"
-      id="productsSelectModel"
-      style={
-        {
-          "--bs-offcanvas-height": "90vh",
-        } as CSSProperties
+  const toggleProductSelection = (product: any) => {
+    const allSkuIds = product.variants?.map((v: any) => v.id) || [];
+    const allSelected = allSkuIds.every((id: string) => selectedSkus.includes(id));
+
+    if (allSelected) {
+      // Deselect all
+      setSelectedSkus(prev => prev.filter(id => !allSkuIds.includes(id)));
+    } else {
+      // Select all
+      setSelectedSkus(prev => {
+        const newSelected = [...prev];
+        allSkuIds.forEach((id: string) => {
+          if (!newSelected.includes(id)) newSelected.push(id);
+        });
+        return newSelected;
+      });
+    }
+  };
+
+  const handleSubmit = () => {
+    // Process selected SKUs
+    selectedSkus.forEach(skuId => {
+      // Find product and sku details
+      let foundProduct: any = null;
+      let foundSku: any = null;
+
+      for (const product of products || []) {
+        const sku = product.variants?.find((v: any) => v.id === skuId);
+        if (sku) {
+          foundProduct = product;
+          foundSku = sku;
+          break;
+        }
       }
-    >
-      <div className="offcanvas-header">
-        <h2 className="offcanvas-title">Select Products</h2>
-        <button
-          type="button"
-          className="btn-close"
-          data-bs-dismiss="offcanvas"
-          aria-label="Close"
-        ></button>
-      </div>
-      <div className="offcanvas-body">
-        <div className="table-responsive">
-          <table className="table align-middle table-hover">
-            <thead className="table-light">
+
+      if (foundProduct && foundSku) {
+        // Check if item is already in cart to preserve quantity, otherwise default to 50
+        const existingItem = cartProducts.find((p: any) => p.id === skuId);
+        const quantity = existingItem ? existingItem.quantity : 50;
+
+        addProductToCart({
+          id: foundSku.id,
+          title: foundProduct.title,
+          price: 0,
+          quantity: quantity,
+          sku: foundSku.sku,
+          variantTitle: foundSku.title,
+          options: foundSku.options,
+          image: foundProduct.thumbnail,
+        });
+      }
+    });
+    onHide();
+  };
+
+  return (
+    <Offcanvas show={show} onHide={onHide} placement="bottom" style={{ height: '90vh' }}>
+      <Offcanvas.Header closeButton>
+        <Offcanvas.Title>Select Products</Offcanvas.Title>
+      </Offcanvas.Header>
+      <Offcanvas.Body className="d-flex flex-column">
+        <div className="table-responsive flex-grow-1">
+          <Table hover className="align-middle">
+            <thead className="table-light sticky-top" style={{ zIndex: 10 }}>
               <tr>
                 <th scope="col" style={{ width: "50px" }}></th>
-                <th scope="col" colSpan={4}>
+                <th scope="col" style={{ width: "40px" }}>
+                  {/* Header Checkbox could go here if we wanted select all products */}
+                </th>
+                <th scope="col" colSpan={3}>
                   Product Name
                 </th>
-                {/* <th scope="col">Category</th> */}
-                {/* <th scope="col">Status</th> */}
-                {/* <th scope="col" className="text-end">
-                  Action
-                </th> */}
               </tr>
             </thead>
             <tbody>
-              {productsRes.data?.products?.map((product, productIndex) => {
+              {products?.map((product) => {
                 const isExpanded = expandedProductIds.includes(product.id);
+                const allSkuIds = product.variants?.map((v: any) => v.id) || [];
+                const isAllSelected = allSkuIds.length > 0 && allSkuIds.every((id: string) => selectedSkus.includes(id));
+                const isIndeterminate = allSkuIds.some((id: string) => selectedSkus.includes(id)) && !isAllSelected;
+
                 return (
                   <Fragment key={product.id}>
                     {/* Main Product Row */}
@@ -213,33 +134,19 @@ const ProductsSelectModal = (props: Props) => {
                         ) : (
                           <ChevronDown size={16} />
                         )}
-                        {/* <i className={`icon ${isExpanded ? 'icon-minus' : 'icon-plus'}`}></i>
-                        <span style={{ fontWeight: 'bold' }}>{isExpanded ? '-' : '+'}</span> */}
+                      </td>
+                      <td className="text-center" onClick={(e) => e.stopPropagation()}>
+                        <input
+                          type="checkbox"
+                          className="form-check-input"
+                          checked={isAllSelected}
+                          ref={input => {
+                            if (input) input.indeterminate = isIndeterminate;
+                          }}
+                          onChange={() => toggleProductSelection(product)}
+                        />
                       </td>
                       <td className="fw-bold">{product.title}</td>
-                      {/* <td>{product.thumbnail}</td> */}
-                      {/* <td>
-                        <span
-                          className={`badge ${
-                            allInventoryRes[productIndex]?.isLoading
-                              ? "bg-success"
-                              : "bg-secondary"
-                          }`}
-                        >
-                          {allInventoryRes[productIndex].status}
-                        </span>
-                      </td> */}
-                      {/* <td className="text-end">
-                        <button
-                          className="btn btn-sm btn-outline-primary"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            // Handle selection logic here
-                          }}
-                        >
-                          Select
-                        </button>
-                      </td> */}
                     </tr>
 
                     {/* Nested SKU Table Row */}
@@ -248,51 +155,55 @@ const ProductsSelectModal = (props: Props) => {
                         <td colSpan={5} className="p-0 bg-light">
                           <div className="p-3">
                             <h6 className="mb-2 text-muted">选项:</h6>
-                            <table className="table mb-0 bg-white table-sm table-bordered table-striped">
-                              <thead>
-                                <tr>
-                                  <th className="text-center">名称</th>
-                                  <th className="text-center">Feature</th>
-                                  <th className="text-center">价格</th>
-                                  <th className="text-center">库存</th>
-                                  <th className="text-center">单位</th>
-                                  <th className="text-center">选购数量</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {product.variants?.map((sku) => (
-                                  <tr className="text-center" key={sku.id}>
-                                    <td>{sku.title}</td>
-                                    <td>
-                                      {sku.options
-                                        .map((option) => option.value)
-                                        .join(",")}
-                                    </td>
-                                    <td>$0</td>
-                                    <td>
-                                      {/* {
-                                        allInventoryRes?.[
-                                          productIndex
-                                        ]?.data?.rows.find(
-                                          (row) =>
-                                            row.material_number === sku.sku
-                                        )?.valid_qty
-                                      } */}
-                                      0
-                                    </td>
-                                    <td className="text-center">pcs</td>
-                                    <td className="text-center">
-                                      <input
-                                        type="number"
-                                        // className="form-input"
-                                        id={`sku-${sku.id}`}
-                                        placeholder="最少50pcs"
-                                      />
-                                    </td>
+                            <div className="table-responsive">
+                              <Table bordered striped size="sm" className="mb-0 bg-white" style={{ minWidth: '600px' }}>
+                                <thead>
+                                  <tr>
+                                    <th className="text-center bg-white position-sticky start-0" style={{ left: 0, zIndex: 5, width: '40px' }}>
+                                      选择
+                                    </th>
+                                    <th className="text-center bg-white position-sticky" style={{ left: '40px', zIndex: 5 }}>名称</th>
+                                    <th className="text-center">Feature</th>
+                                    <th className="text-center">价格</th>
+                                    <th className="text-center">库存</th>
+                                    <th className="text-center">单位</th>
                                   </tr>
-                                ))}
-                              </tbody>
-                            </table>
+                                </thead>
+                                <tbody>
+                                  {product.variants?.map((sku: any) => {
+                                    const isSelected = selectedSkus.includes(sku.id);
+                                    
+                                    return (
+                                    <tr className="text-center" key={sku.id}>
+                                      <td className="bg-white position-sticky start-0" style={{ left: 0, zIndex: 5 }}>
+                                        <input
+                                          type="checkbox"
+                                          className="form-check-input"
+                                          checked={isSelected}
+                                          onChange={() => toggleSkuSelection(sku.id)}
+                                        />
+                                      </td>
+                                      <td className="bg-white position-sticky" style={{ left: '40px', zIndex: 5 }}>{sku.title}</td>
+                                      <td>
+                                        {sku.options
+                                          .map((option: any) => option.value)
+                                          .join(",")}
+                                      </td>
+                                      <td>$0</td>
+                                      <td>
+                                        {
+                                          inventory[product.id]?.rows.find(
+                                            (row: any) =>
+                                              row.material_number === sku.sku
+                                          )?.valid_qty || 0
+                                        }
+                                      </td>
+                                      <td className="text-center">pcs</td>
+                                    </tr>
+                                  )})}
+                                </tbody>
+                              </Table>
+                            </div>
                           </div>
                         </td>
                       </tr>
@@ -301,10 +212,14 @@ const ProductsSelectModal = (props: Props) => {
                 );
               })}
             </tbody>
-          </table>
+          </Table>
         </div>
-      </div>
-    </div>
+        <div className="gap-2 pt-3 mt-3 d-flex justify-content-end border-top">
+            <Button variant="outline-secondary" onClick={onHide} className="rounded-0">Cancel</Button>
+            <Button variant="dark" onClick={handleSubmit} className="rounded-0">Confirm Selection</Button>
+        </div>
+      </Offcanvas.Body>
+    </Offcanvas>
   );
 };
 

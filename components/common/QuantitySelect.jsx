@@ -1,29 +1,62 @@
 "use client";
 import { Minus, Plus } from "lucide-react";
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 const QuantitySelect = ({
   quantity = 1,
-  setQuantity = () => {},
+  setQuantity = (val) => {},
   styleClass = "",
+  step = 1,
 }) => {
+  const [inputValue, setInputValue] = useState(quantity);
+
+  useEffect(() => {
+    setInputValue(quantity);
+  }, [quantity]);
+
   const handleDecrease = () => {
     if (setQuantity) {
-      setQuantity(quantity > 1 ? quantity - 1 : quantity);
+      setQuantity(quantity > step ? quantity - step : quantity);
     }
   };
 
   const handleIncrease = () => {
     if (setQuantity) {
-      setQuantity(quantity + 1);
+      setQuantity(quantity + step);
     }
   };
 
   const handleChange = (e) => {
-    const value = parseInt(e.target.value, 10);
-    if (!isNaN(value) && value > 0 && setQuantity) {
-      setQuantity(value);
+    const value = e.target.value;
+    setInputValue(value);
+  };
+
+  const handleBlur = (e) => {
+    let value = parseInt(e.target.value, 10);
+    
+    if (isNaN(value) || value <= 0) {
+      // Reset to current valid quantity if input is invalid
+      setInputValue(quantity);
+      return;
     }
+
+    if (step > 1) {
+      const remainder = value % step;
+      if (remainder !== 0) {
+        if (remainder < step / 2) {
+          value = value - remainder;
+        } else {
+          value = value + (step - remainder);
+        }
+      }
+    }
+    
+    // Ensure minimum value is at least step (or 1 if step is not set/invalid)
+    const minVal = step > 0 ? step : 1;
+    if (value < minVal) value = minVal;
+
+    setQuantity(value);
+    setInputValue(value);
   };
 
   return (
@@ -35,8 +68,9 @@ const QuantitySelect = ({
         className="quantity-product"
         // type="number"
         name="number"
-        value={quantity}
+        value={inputValue}
         onChange={handleChange}
+        onBlur={handleBlur}
       />
       <button
         className="btn-quantity btn-increase"

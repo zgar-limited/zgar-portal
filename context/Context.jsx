@@ -75,14 +75,44 @@ export default function Context({ children }) {
     return cartProducts.some((product) => product.id === id);
   };
 
-  const addProductToCart = (id, qty = 1) => {
+  const addProductToCart = (productOrId, qty = 1) => {
     setCartProducts((prev) => {
-      const exists = prev.some((p) => p.id === id);
-      if (exists) return prev;
-      const product = allProducts.find((p) => p.id == id);
+      let id;
+      let product;
+
+      if (typeof productOrId === 'object') {
+        id = productOrId.id;
+        product = productOrId;
+      } else {
+        id = productOrId;
+        product = allProducts.find((p) => p.id == id);
+      }
+
       if (!product) return prev;
-      const item = { ...product, quantity: qty };
-      return [...prev, item];
+
+      const existingProductIndex = prev.findIndex((p) => p.id === id);
+      
+      if (existingProductIndex > -1) {
+        // Update existing product quantity
+        const newCart = [...prev];
+        // If passed an object with quantity, use that, otherwise add qty
+        const newQty = typeof productOrId === 'object' && productOrId.quantity
+          ? productOrId.quantity
+          : newCart[existingProductIndex].quantity + qty;
+          
+        newCart[existingProductIndex] = {
+          ...newCart[existingProductIndex],
+          quantity: newQty
+        };
+        return newCart;
+      } else {
+        // Add new product
+        const item = {
+          ...product,
+          quantity: typeof productOrId === 'object' && productOrId.quantity ? productOrId.quantity : qty
+        };
+        return [...prev, item];
+      }
     });
   };
   const addEmptyProductToCart = (id, qty = 1) => {
