@@ -1,9 +1,17 @@
 "use client";
 
 import { medusaSDK } from "@/utils/medusa";
-import { useQueries, useQuery } from "@tanstack/react-query";
-import React, { createContext, useContext, useMemo, useState } from "react";
+import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import React, {
+  createContext,
+  useContext,
+  useMemo,
+  useState,
+  useEffect,
+} from "react";
 import { GetInventoryListRes } from "@/types/inventory-list";
+import { StoreAddCartLineItem } from "@medusajs/types";
+import { allProducts } from "@/data/products";
 
 type ShopContextType = {
   products: any[];
@@ -12,6 +20,13 @@ type ShopContextType = {
   skuDetails: Record<string, any>;
   expandedProductIds: string[];
   toggleProduct: (id: string) => void;
+  cart: any;
+  cartLoading: boolean;
+  addToCart: (cardLineItem: StoreAddCartLineItem) => Promise<void>;
+  removeFromCart: (lineId: string) => Promise<void>;
+  updateCartItem: (lineId: string, quantity: number) => Promise<void>;
+  cartProducts: any[];
+  totalPrice: number;
 };
 
 const ShopContext = createContext<ShopContextType | undefined>(undefined);
@@ -26,13 +41,127 @@ export const useShopContext = () => {
 
 export const ShopProvider = ({ children }: { children: React.ReactNode }) => {
   const [expandedProductIds, setExpandedProductIds] = useState<string[]>([]);
+  const [cartId, setCartId] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const [totalPrice, setTotalPrice] = useState(0);
+
+  // Initialize cart ID from localStorage
+  useEffect(() => {
+    const storedCartId = localStorage.getItem("cart_id");
+    if (storedCartId) {
+      setCartId(storedCartId);
+    } else {
+      createCart();
+    }
+  }, []);
+
+  const createCart = async () => {
+    try {
+      const { cart } = await medusaSDK.store.cart.create({
+        sales_channel_id: "sc_01K9KAK0MDCMSWCXRV0WH70EQK",
+        region_id: "reg_01K9M1A9NHMN4MXBACKAS5F4V1",
+      });
+      setCartId(cart.id);
+      localStorage.setItem("cart_id", cart.id);
+      return cart;
+    } catch (error) {
+      console.error("Error creating cart:", error);
+    }
+  };
+
+  const { data: cart, isLoading: cartLoading } = useQuery({
+    queryKey: ["cart", cartId],
+    queryFn: async () => {
+      if (!cartId) return null;
+      try {
+        const { cart } = await medusaSDK.store.cart.retrieve(cartId);
+        return cart;
+      } catch (error) {
+        // If cart not found (e.g. expired), create a new one
+        console.error("Error fetching cart, creating new one:", error);
+        localStorage.removeItem("cart_id");
+        const newCart = await createCart();
+        return newCart;
+      }
+    },
+    enabled: !!cartId,
+  });
+
+  const addToCart = async (cardLineItem: StoreAddCartLineItem) => {
+    console.log('%c [ cardLineItem ]-91', 'font-size:13px; background:pink; color:#bf2c9f;', cardLineItem)
+    try {
+      let currentCartId = cartId;
+      if (!currentCartId) {
+        const newCart = await createCart();
+        if (!newCart) throw new Error("Failed to create cart");
+        currentCartId = newCart.id;
+      }
+
+      await medusaSDK.store.cart.createLineItem(currentCartId, cardLineItem);
+
+      queryClient.invalidateQueries({ queryKey: ["cart", currentCartId] });
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+    }
+  };
+
+  const removeFromCart = async (lineId: string) => {
+    if (!cartId) return;
+    try {
+      await medusaSDK.store.cart.deleteLineItem(cartId, lineId);
+      queryClient.invalidateQueries({ queryKey: ["cart", cartId] });
+    } catch (error) {
+      console.error("Error removing from cart:", error);
+    }
+  };
+
+  const updateCartItem = async (lineId: string, quantity: number) => {
+    if (!cartId) return;
+    try {
+      await medusaSDK.store.cart.updateLineItem(cartId, lineId, {
+        quantity,
+      });
+      queryClient.invalidateQueries({ queryKey: ["cart", cartId] });
+    } catch (error) {
+      console.error("Error updating cart item:", error);
+    }
+  };
+
+  // Map Medusa cart items to the format expected by the UI
+  const cartProducts = useMemo(() => {
+    if (!cart?.items) return [];
+    return cart.items.map((item: any) => ({
+      id: item.id, // Line item ID for removal/update
+      variantId: item.variant_id,
+      productId: item.product_id,
+      title: item.product_title,
+      variantTitle: item.variant_title,
+      price: item.unit_price, // Medusa prices are usually in cents, check if division is needed. Assuming unit_price is correct for now or adjust if needed.
+      quantity: item.quantity,
+      imgSrc: item.thumbnail || "https://picsum.photos/100/100", // Fallback image
+      options: item.variant?.options || [],
+      // Add other necessary fields mapped from Medusa item
+    }));
+  }, [cart]);
+
+  useEffect(() => {
+    if (cart) {
+      // Medusa cart total is usually in cents if currency is involved, but let's use the calculated total from items for now to match previous logic or use cart.total / 100
+      // Using local calculation based on mapped products to ensure consistency with UI display
+      const subtotal = cartProducts.reduce(
+        (acc, product) => acc + product.quantity * product.price,
+        0
+      );
+      setTotalPrice(subtotal);
+    }
+  }, [cartProducts, cart]);
 
   const productsRes = useQuery({
     queryKey: ["productsRes"],
     queryFn: async () => {
       const productsRes = await medusaSDK.store.product.list({
         limit: 99,
-        fields: "*external_id",
+        fields: "*external_id,*variants",
       });
       return productsRes;
     },
@@ -121,6 +250,13 @@ export const ShopProvider = ({ children }: { children: React.ReactNode }) => {
       skuDetails,
       expandedProductIds,
       toggleProduct,
+      cart,
+      cartLoading,
+      addToCart,
+      removeFromCart,
+      updateCartItem,
+      cartProducts,
+      totalPrice,
     }),
     [
       productsRes.data?.products,
@@ -128,6 +264,10 @@ export const ShopProvider = ({ children }: { children: React.ReactNode }) => {
       inventory,
       skuDetails,
       expandedProductIds,
+      cart,
+      cartLoading,
+      cartProducts,
+      totalPrice,
     ]
   );
 

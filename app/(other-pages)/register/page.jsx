@@ -1,41 +1,18 @@
-import Footer1 from "@/components/footers/Footer1";
-import Header1 from "@/components/header/Header1";
-import Topbar1 from "@/components/header/Topbar1";
+"use client";
+import React, { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
-import Register from "@/components/other-pages/Register";
-import Link from "next/link";
-import React from "react";
-export const metadata = {
-  title: "Register || Ochaka - Multipurpose eCommerce React Nextjs Template",
-  description: "Ochaka - Multipurpose eCommerce React Nextjs Template",
-};
-export default function page() {
-  return (
-    <>
-      <Topbar1 />
-      <Header1 parentClass="tf-header header-fix" />
-      <section className="s-page-title">
-        <div className="container">
-          <div className="content">
-            <h1 className="title-page">Register</h1>
-            <ul className="breadcrumbs-page">
-              <li>
-                <Link href={`/`} className="h6 link">
-                  Home
-                </Link>
-              </li>
-              <li className="d-flex">
-                <i className="icon icon-caret-right" />
-              </li>
-              <li>
-                <h6 className="current-page fw-normal">Register</h6>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </section>
-      <Register />
-      <Footer1 />
-    </>
-  );
+export default function RegisterPage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    // Redirect to login page with register tab active intent if possible,
+    // but our Login component controls the state internally.
+    // Ideally we should pass a prop to Login to set initial state,
+    // or just redirect to /login and user can switch tabs.
+    // Given the task, we merged Register into Login.
+    router.replace("/login");
+  }, [router]);
+
+  return null;
 }

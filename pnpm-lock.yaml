@@ -12,11 +12,11 @@ importers:
         specifier: ^2.1.2
         version: 2.1.2(gsap@3.13.0)(react@19.1.1)
       '@medusajs/js-sdk':
-        specifier: ^2.11.3
-        version: 2.11.3
+        specifier: ^2.11.2
+        version: 2.11.2
       '@medusajs/types':
-        specifier: ^2.11.3
-        version: 2.11.3
+        specifier: ^2.11.2
+        version: 2.11.2
       '@tanstack/react-query':
         specifier: ^5.90.10
         version: 5.90.10(react@19.1.1)
@@ -268,16 +268,16 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@medusajs/js-sdk@2.11.3':
-    resolution: {integrity: sha512-AbIwi5BhIqmD4VS+T5WhA/VvMj2W7iuHVMV7TgPU+nIyioOCiz++M1ky+YxUthgzyf0TgwGbHKRVjawB9NAO1g==}
+  '@medusajs/js-sdk@2.11.2':
+    resolution: {integrity: sha512-UqmIV7w/nYTpRfMlaaDvNv8Flej75XDEtkXKlqJR5rUnQgUpk7Kto0wIxNuhZ3eBlRojHeNQ9G4nZiiuRt+8JQ==}
     engines: {node: '>=20'}
 
-  '@medusajs/types@2.11.3':
-    resolution: {integrity: sha512-vtPvgUAyNqqSZeHeMA5KuYt0h2YIL5xtOKSc0/lwgThtZq2uM7hU85Jj8G80T/DrUvPGqYQHFqeaSzerm97F3g==}
+  '@medusajs/types@2.11.2':
+    resolution: {integrity: sha512-c9wrW8Abyia263MFvZAsZOc+ew5YoJm61QzA6BAbiicbWAg+A4NeOsLWmAwiEbP46kly/B6Fzi/AMuBLNRtK4A==}
     engines: {node: '>=20'}
     peerDependencies:
       ioredis: ^5.4.1
-      vite: ^5.4.14
+      vite: ^5 || ^6
     peerDependenciesMeta:
       ioredis:
         optional: true
@@ -1442,12 +1442,12 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@medusajs/js-sdk@2.11.3':
+  '@medusajs/js-sdk@2.11.2':
     dependencies:
       fetch-event-stream: 0.1.6
       qs: 6.14.0
 
-  '@medusajs/types@2.11.3':
+  '@medusajs/types@2.11.2':
     dependencies:
       bignumber.js: 9.3.1
 

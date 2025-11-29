@@ -8,6 +8,7 @@ import React, {
   useRef,
   useMemo,
 } from "react";
+import { useShopContext } from "./ShopContext";
 
 const dataContext = createContext(undefined);
 
@@ -20,27 +21,41 @@ export const useContextElement = () => {
 };
 
 export default function Context({ children }) {
-  const [cartProducts, setCartProducts] = useState([]);
+  const { cart, addToCart, removeFromCart, updateCartItem, cartLoading } = useShopContext();
   const [wishList, setWishList] = useState([]);
   const [compareItem, setCompareItem] = useState([]);
   const [quickViewItem, setQuickViewItem] = useState(null);
   const [quickAddItem, setQuickAddItem] = useState(null);
   const [totalPrice, setTotalPrice] = useState(0);
 
-  // Sync from localStorage
+  // Map Medusa cart items to the format expected by the UI
+  const cartProducts = useMemo(() => {
+    if (!cart?.items) return [];
+    return cart.items.map((item) => ({
+      id: item.id, // Line item ID for removal/update
+      variantId: item.variant_id,
+      productId: item.product_id,
+      title: item.product_title,
+      variantTitle: item.variant_title,
+      price: item.unit_price, // Medusa prices are usually in cents, check if division is needed. Assuming unit_price is correct for now or adjust if needed.
+      quantity: item.quantity,
+      imgSrc: item.thumbnail || "https://picsum.photos/100/100", // Fallback image
+      options: item.variant?.options || [],
+      // Add other necessary fields mapped from Medusa item
+    }));
+  }, [cart]);
+
+  // Sync from localStorage (only for wishlist and compare)
   useEffect(() => {
     try {
-      const storedCart = JSON.parse(localStorage.getItem("cartList") || "[]");
       const storedWish = JSON.parse(localStorage.getItem("wishlist") || "[]");
       const storedCompare = JSON.parse(
         localStorage.getItem("compareList") || "[]"
       );
 
-      if (Array.isArray(storedCart)) setCartProducts(storedCart);
       if (Array.isArray(storedWish)) setWishList(storedWish);
       if (Array.isArray(storedCompare)) setCompareItem(storedCompare);
     } catch {
-      setCartProducts([]);
       setWishList([]);
       setCompareItem([]);
     }
@@ -51,7 +66,6 @@ export default function Context({ children }) {
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
-      localStorage.setItem("cartList", JSON.stringify(cartProducts));
       localStorage.setItem("wishlist", JSON.stringify(wishList));
       localStorage.setItem("compareList", JSON.stringify(compareItem));
     }, 300);
@@ -61,83 +75,83 @@ export default function Context({ children }) {
         clearTimeout(debounceRef.current);
       }
     };
-  }, [cartProducts, wishList, compareItem]);
+  }, [wishList, compareItem]);
 
   useEffect(() => {
-    const subtotal = cartProducts.reduce(
-      (acc, product) => acc + product.quantity * product.price,
-      0
-    );
-    setTotalPrice(subtotal);
-  }, [cartProducts]);
+    if (cart) {
+      // Medusa cart total is usually in cents if currency is involved, but let's use the calculated total from items for now to match previous logic or use cart.total / 100
+      // Using local calculation based on mapped products to ensure consistency with UI display
+      const subtotal = cartProducts.reduce(
+        (acc, product) => acc + product.quantity * product.price,
+        0
+      );
+      setTotalPrice(subtotal);
+    }
+  }, [cartProducts, cart]);
 
   const isAddedToCartProducts = (id) => {
-    return cartProducts.some((product) => product.id === id);
+    // Check if product (variant) is in cart. 
+    // Note: The UI might be passing product ID or variant ID. 
+    // If it's product ID, we check if any item in cart has that product ID.
+    return cartProducts.some((product) => product.productId === id || product.variantId === id);
   };
 
-  const addProductToCart = (productOrId, qty = 1) => {
-    setCartProducts((prev) => {
-      let id;
-      let product;
+  const addProductToCart = async (productOrId, qty = 1) => {
+    let variantId;
+    let quantity = qty;
 
-      if (typeof productOrId === 'object') {
-        id = productOrId.id;
-        product = productOrId;
+    if (typeof productOrId === 'object') {
+      // Assuming product object has a default variant or we need to select one.
+      // For now, let's assume we pick the first variant if available, or the ID itself is the variant ID if passed explicitly.
+      // Ideally, the UI should pass a variant ID.
+      // If productOrId is a full product object from Medusa, it should have variants.
+      if (productOrId.variants && productOrId.variants.length > 0) {
+        variantId = productOrId.variants[0].id;
       } else {
-        id = productOrId;
-        product = allProducts.find((p) => p.id == id);
+        variantId = productOrId.id; // Fallback
       }
-
-      if (!product) return prev;
-
-      const existingProductIndex = prev.findIndex((p) => p.id === id);
       
-      if (existingProductIndex > -1) {
-        // Update existing product quantity
-        const newCart = [...prev];
-        // If passed an object with quantity, use that, otherwise add qty
-        const newQty = typeof productOrId === 'object' && productOrId.quantity
-          ? productOrId.quantity
-          : newCart[existingProductIndex].quantity + qty;
-          
-        newCart[existingProductIndex] = {
-          ...newCart[existingProductIndex],
-          quantity: newQty
-        };
-        return newCart;
-      } else {
-        // Add new product
-        const item = {
-          ...product,
-          quantity: typeof productOrId === 'object' && productOrId.quantity ? productOrId.quantity : qty
-        };
-        return [...prev, item];
+      if (productOrId.quantity) {
+        quantity = productOrId.quantity;
       }
-    });
-  };
-  const addEmptyProductToCart = (id, qty = 1) => {
-    setCartProducts((prev) => {
-      const exists = prev.some((p) => p.id === id);
-      if (exists) return prev;
-      const product = allProducts.find((p) => p.id == id);
-      if (!product) return prev;
-      const item = { ...product, quantity: qty };
-      return [...prev, item];
-    });
-  };
-  const removeProductFromCart = (id) => {
-    setCartProducts((prev) => prev.filter((p) => p.id !== id));
+    } else {
+      // If it's an ID, we assume it's a variant ID or we need to find the product to get the variant.
+      // Since we don't have full product list here easily without fetching, 
+      // we might need to rely on the caller passing a valid variant ID.
+      // However, existing code might be passing product ID.
+      // Let's try to find it in allProducts if possible, or assume it's a variant ID.
+      const product = allProducts.find((p) => p.id == productOrId);
+      if (product && product.variants && product.variants.length > 0) {
+         variantId = product.variants[0].id; // Default to first variant
+      } else {
+         variantId = productOrId;
+      }
+    }
+
+    if (variantId) {
+      await addToCart(variantId, quantity);
+    }
   };
 
-  const updateQuantity = (id, qty) => {
+  const addEmptyProductToCart = (id, qty = 1) => {
+     // This seems to be for adding a placeholder? 
+     // With Medusa, we probably just want to add the real product.
+     addProductToCart(id, qty);
+  };
+
+  const removeProductFromCart = async (id) => {
+    // id here corresponds to the line item ID in our mapped cartProducts
+    await removeFromCart(id);
+  };
+
+  const updateQuantity = async (id, qty) => {
     if (qty < 1) return;
-    setCartProducts((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, quantity: qty } : item))
-    );
+    // id is line item ID
+    await updateCartItem(id, qty);
   };
 
   const quantityInCart = (id) => {
-    const item = cartProducts.find((p) => p.id === id);
+    const item = cartProducts.find((p) => p.id === id || p.productId === id || p.variantId === id);
     return item ? item.quantity : 0;
   };
 
@@ -169,7 +183,7 @@ export default function Context({ children }) {
   const contextElement = useMemo(
     () => ({
       cartProducts,
-      setCartProducts,
+      setCartProducts: () => {}, // No-op, managed by Medusa
       totalPrice,
       addProductToCart,
       isAddedToCartProducts,
@@ -189,14 +203,14 @@ export default function Context({ children }) {
       updateQuantity,
       quantityInCart,
       wishList,
+      cartLoading, // Expose loading state
     }),
     [
       cartProducts,
-      setCartProducts,
       totalPrice,
-      addProductToCart,
-      isAddedToCartProducts,
-      removeProductFromCart,
+      // addProductToCart, // These are stable functions now
+      // isAddedToCartProducts,
+      // removeProductFromCart,
       removeFromWishlist,
       addToWishlist,
       isAddedtoWishlist,
@@ -209,9 +223,10 @@ export default function Context({ children }) {
       removeFromCompareItem,
       compareItem,
       setCompareItem,
-      updateQuantity,
-      quantityInCart,
+      // updateQuantity,
+      // quantityInCart,
       wishList,
+      cartLoading,
     ]
   );
 

@@ -11,23 +11,23 @@ import ProductsSelectModal from "../modals/ProductsSelectModal";
 import { useQuery } from "@tanstack/react-query";
 import { medusaSDK } from "@/utils/medusa";
 import { Container, Row, Col, Table, Card, Button, Form, Pagination, } from "react-bootstrap";
-import { ShopProvider } from "@/context/ShopContext";
+import { useShopContext } from "@/context/ShopContext";
 
 export default function ShopCart() {
   return (
-    <ShopProvider>
-      <ShopCartContent />
-    </ShopProvider>
+    <ShopCartContent />
   );
 }
 
 function ShopCartContent() {
-  const { cartProducts, totalPrice, removeProductFromCart, updateQuantity } =
-    useContextElement();
+  const { cartProducts, totalPrice, removeFromCart, updateCartItem, cartLoading } =
+    useShopContext();
 
   const [showModal, setShowModal] = useState(false);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [updatingItems, setUpdatingItems] = useState<string[]>([]);
   const itemsPerPage = 5;
 
   // Reset page when cart items change significantly (e.g. all deleted)
@@ -38,13 +38,13 @@ function ShopCartContent() {
     } else if (maxPage === 0) {
       setCurrentPage(1);
     }
-  }, [cartProducts.length, itemsPerPage]);
+    
+    // Cleanup selected items that no longer exist
+    setSelectedItems(prev => prev.filter(id => cartProducts.some(p => p.id === id)));
+  }, [cartProducts, itemsPerPage]); // cartProducts dependency covers length changes and item removal
 
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
-      // Select only visible items on current page or all items?
-      // Usually "Select All" selects all items in the cart, not just the page.
-      // Let's stick to all items for better UX.
       setSelectedItems(cartProducts.map((p) => p.id));
     } else {
       setSelectedItems([]);
@@ -59,9 +59,40 @@ function ShopCartContent() {
     }
   };
 
-  const handleBatchDelete = () => {
-    selectedItems.forEach((id) => removeProductFromCart(id));
-    setSelectedItems([]);
+  const handleBatchDelete = async () => {
+    if (selectedItems.length === 0) return;
+    
+    setIsDeleting(true);
+    try {
+      await Promise.all(selectedItems.map((id) => removeFromCart(id)));
+      setSelectedItems([]);
+    } catch (error) {
+      console.error("Error deleting items:", error);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleRemoveItem = async (id: string) => {
+    setUpdatingItems(prev => [...prev, id]);
+    try {
+      await removeFromCart(id);
+    } catch (error) {
+      console.error("Error removing item:", error);
+    } finally {
+      setUpdatingItems(prev => prev.filter(itemId => itemId !== id));
+    }
+  };
+
+  const handleUpdateQuantity = async (id: string, value: number) => {
+    setUpdatingItems(prev => [...prev, id]);
+    try {
+      await updateCartItem(id, value);
+    } catch (error) {
+      console.error("Error updating quantity:", error);
+    } finally {
+      setUpdatingItems(prev => prev.filter(itemId => itemId !== id));
+    }
   };
 
   // Pagination logic
@@ -81,7 +112,14 @@ function ShopCartContent() {
         <Row>
           <Col xxl={9} xl={8}>
             <Form onSubmit={(e) => e.preventDefault()}>
-              <div className="table-responsive">
+              <div className="table-responsive position-relative">
+                {cartLoading && (
+                  <div className="top-0 bg-white bg-opacity-75 position-absolute start-0 w-100 h-100 d-flex justify-content-center align-items-center" style={{ zIndex: 10 }}>
+                    <div className="spinner-border text-primary" role="status">
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                  </div>
+                )}
                 <Table hover  className="align-middle tf-table-page-cart">
                   <thead>
                     <tr>
@@ -100,12 +138,13 @@ function ShopCartContent() {
                   </thead>
                   <tbody>
                     {currentItems.map((product, i) => (
-                      <tr key={i} className="tf-cart_item">
+                      <tr key={i} className={`tf-cart_item ${updatingItems.includes(product.id) ? 'opacity-50' : ''}`}>
                         <td>
                           <Form.Check
                             type="checkbox"
                             checked={selectedItems.includes(product.id)}
                             onChange={() => handleSelectItem(product.id)}
+                            disabled={updatingItems.includes(product.id)}
                           />
                         </td>
                         <td>
@@ -143,7 +182,10 @@ function ShopCartContent() {
                                 </Button>
                               </h6>
                               {/* Mobile Delete Button */}
-                              <div className="d-md-none mobile-delete-btn" onClick={() => removeProductFromCart(product.id)}>
+                              <div
+                                className={`d-md-none mobile-delete-btn ${updatingItems.includes(product.id) ? 'pe-none' : 'cursor-pointer'}`}
+                                onClick={() => handleRemoveItem(product.id)}
+                              >
                                 <Trash2 size={18} />
                               </div>
                             </div>
@@ -153,13 +195,15 @@ function ShopCartContent() {
                           ${product.price.toFixed(2)}
                         </td>
                         <td className="cart_quantity">
-                          <QuantitySelect
-                            quantity={product.quantity}
-                            setQuantity={(value) =>
-                              updateQuantity(product.id, value)
-                            }
-                            step={50}
-                          />
+                          <div className={updatingItems.includes(product.id) ? "pe-none" : ""}>
+                            <QuantitySelect
+                              quantity={product.quantity}
+                              setQuantity={(value) =>
+                                handleUpdateQuantity(product.id, value)
+                              }
+                              step={50}
+                            />
+                          </div>
                         </td>
                         <td className="cart_total h6 each-subtotal-price fw-bold">
                           {(product.quantity * product.price).toFixed(2)}
@@ -215,8 +259,19 @@ function ShopCartContent() {
                   </Button>
                   
                   {selectedItems.length > 0 && (
-                    <Button variant="outline-danger" className="gap-2 d-flex align-items-center" onClick={handleBatchDelete}>
-                      <Trash2 size={18} />
+                    <Button
+                      variant="outline-danger"
+                      className="gap-2 d-flex align-items-center"
+                      onClick={handleBatchDelete}
+                      disabled={isDeleting}
+                    >
+                      {isDeleting ? (
+                        <div className="spinner-border spinner-border-sm" role="status">
+                          <span className="visually-hidden">Loading...</span>
+                        </div>
+                      ) : (
+                        <Trash2 size={18} />
+                      )}
                       <span className="mb-0 h6">Delete Selected ({selectedItems.length})</span>
                     </Button>
                   )}

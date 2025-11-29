@@ -2,12 +2,24 @@
 import Link from "next/link";
 import Image from "next/image";
 import React, { useState } from "react";
-import { useContextElement } from "@/context/Context";
+import { useShopContext } from "@/context/ShopContext";
 import { cartSimilerItems } from "@/data/products";
 
 export default function CartModal() {
-  const { cartProducts, totalPrice, removeProductFromCart } =
-    useContextElement();
+  const { cartProducts, totalPrice, removeFromCart, cartLoading } =
+    useShopContext();
+  const [removingId, setRemovingId] = useState(null);
+
+  const handleRemove = async (id) => {
+    setRemovingId(id);
+    try {
+      await removeFromCart(id);
+    } catch (error) {
+      console.error("Error removing item:", error);
+    } finally {
+      setRemovingId(null);
+    }
+  };
 
   const miniCartActions = [
     {
@@ -85,7 +97,13 @@ export default function CartModal() {
             <div className="tf-mini-cart-main">
               <div className="tf-mini-cart-sroll">
                 <div className="tf-mini-cart-items list-empty">
-                  {!cartProducts.length ? (
+                  {cartLoading ? (
+                    <div className="d-flex justify-content-center align-items-center" style={{ height: "200px" }}>
+                      <div className="spinner-border text-primary" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                      </div>
+                    </div>
+                  ) : !cartProducts.length ? (
                     <div className="box-text_empty type-shop_cart">
                       <div className="shop-empty_top">
                         <span className="icon">
@@ -154,12 +172,17 @@ export default function CartModal() {
                                   ${product.price.toFixed(2)}
                                 </span>
                               </div>
-                              <i
-                                className="icon link icon-close remove"
-                                onClick={() =>
-                                  removeProductFromCart(product.id)
-                                }
-                              />
+                              {removingId === product.id ? (
+                                <div className="spinner-border spinner-border-sm text-secondary" role="status">
+                                  <span className="visually-hidden">Loading...</span>
+                                </div>
+                              ) : (
+                                <i
+                                  className="icon link icon-close remove"
+                                  onClick={() => handleRemove(product.id)}
+                                  style={{ cursor: "pointer" }}
+                                />
+                              )}
                             </div>
                           </div>
                         </div>

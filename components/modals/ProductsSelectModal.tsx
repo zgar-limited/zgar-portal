@@ -3,8 +3,8 @@
 import { useShopContext } from "@/context/ShopContext";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { Fragment, useState, useEffect } from "react";
-import { Offcanvas, Table, Button } from "react-bootstrap";
-import { useContextElement } from "@/context/Context";
+import { Offcanvas, Table, Button, Spinner } from "react-bootstrap";
+import QuantitySelect from "@/components/common/QuantitySelect";
 
 type Props = {
   show: boolean;
@@ -17,26 +17,53 @@ const ProductsSelectModal = ({ show, onHide }: Props) => {
     expandedProductIds,
     toggleProduct,
     inventory,
+    addToCart,
+    removeFromCart,
+    updateCartItem,
+    cartProducts,
   } = useShopContext();
 
-  const { addProductToCart, cartProducts } = useContextElement();
   const [selectedSkus, setSelectedSkus] = useState<string[]>([]);
+  const [quantities, setQuantities] = useState<Record<string, number>>({});
+  const [submitting, setSubmitting] = useState(false);
 
   // Sync local state with cart when modal opens
   useEffect(() => {
     if (show) {
       const initialSelected: string[] = [];
+      const initialQuantities: Record<string, number> = {};
+
       cartProducts.forEach((item: any) => {
-        initialSelected.push(item.id);
+        // Use variantId to check selection status as item.id is line item id
+        if (item.variantId) {
+          initialSelected.push(item.variantId);
+          initialQuantities[item.variantId] = item.quantity;
+        }
       });
       setSelectedSkus(initialSelected);
+      setQuantities(initialQuantities);
     }
   }, [show, cartProducts]);
 
   const toggleSkuSelection = (skuId: string) => {
-    setSelectedSkus(prev =>
-      prev.includes(skuId) ? prev.filter(id => id !== skuId) : [...prev, skuId]
-    );
+    setSelectedSkus((prev) => {
+      const isSelected = prev.includes(skuId);
+      if (!isSelected) {
+        // When selecting, ensure there is a default quantity if none exists
+        if (!quantities[skuId]) {
+          setQuantities((q) => ({ ...q, [skuId]: 50 }));
+        }
+        return [...prev, skuId];
+      }
+      return prev.filter((id) => id !== skuId);
+    });
+  };
+
+  const updateQuantity = (skuId: string, qty: number) => {
+    setQuantities((prev) => ({ ...prev, [skuId]: qty }));
+    // If quantity is set > 0 and not selected, should we select it?
+    // Let's assume user explicitly selects via checkbox, but setting quantity is enough intent?
+    // For now, let's keep selection explicit via checkbox to avoid confusion.
   };
 
   const toggleProductSelection = (product: any) => {
@@ -58,40 +85,42 @@ const ProductsSelectModal = ({ show, onHide }: Props) => {
     }
   };
 
-  const handleSubmit = () => {
-    // Process selected SKUs
-    selectedSkus.forEach(skuId => {
-      // Find product and sku details
-      let foundProduct: any = null;
-      let foundSku: any = null;
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    try {
+      const cartMap = new Map(cartProducts.map((p: any) => [p.variantId, p]));
+      const promises: Promise<any>[] = [];
 
-      for (const product of products || []) {
-        const sku = product.variants?.find((v: any) => v.id === skuId);
-        if (sku) {
-          foundProduct = product;
-          foundSku = sku;
-          break;
+      // 1. Handle Additions and Updates
+      for (const skuId of selectedSkus) {
+        const quantity = quantities[skuId] || 50;
+        const existingItem = cartMap.get(skuId);
+
+        if (existingItem) {
+          // Update if quantity changed
+          if (existingItem.quantity !== quantity) {
+            promises.push(updateCartItem(existingItem.id, quantity));
+          }
+        } else {
+          // Add new item
+          promises.push(addToCart({ variant_id: skuId, quantity }));
         }
       }
 
-      if (foundProduct && foundSku) {
-        // Check if item is already in cart to preserve quantity, otherwise default to 50
-        const existingItem = cartProducts.find((p: any) => p.id === skuId);
-        const quantity = existingItem ? existingItem.quantity : 50;
-
-        addProductToCart({
-          id: foundSku.id,
-          title: foundProduct.title,
-          price: 0,
-          quantity: quantity,
-          sku: foundSku.sku,
-          variantTitle: foundSku.title,
-          options: foundSku.options,
-          image: foundProduct.thumbnail,
-        });
+      // 2. Handle Removals (items in cart but not in selectedSkus)
+      for (const item of cartProducts) {
+        if (item.variantId && !selectedSkus.includes(item.variantId)) {
+          promises.push(removeFromCart(item.id));
+        }
       }
-    });
-    onHide();
+
+      await Promise.all(promises);
+      onHide();
+    } catch (error) {
+      console.error("Error updating cart:", error);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -166,13 +195,15 @@ const ProductsSelectModal = ({ show, onHide }: Props) => {
                                     <th className="text-center">Feature</th>
                                     <th className="text-center">价格</th>
                                     <th className="text-center">库存</th>
+                                    <th className="text-center">Quantity</th>
                                     <th className="text-center">单位</th>
                                   </tr>
                                 </thead>
                                 <tbody>
                                   {product.variants?.map((sku: any) => {
                                     const isSelected = selectedSkus.includes(sku.id);
-                                    
+                                    const quantity = quantities[sku.id] || 50;
+
                                     return (
                                     <tr className="text-center" key={sku.id}>
                                       <td className="bg-white position-sticky start-0" style={{ left: 0, zIndex: 5 }}>
@@ -198,6 +229,13 @@ const ProductsSelectModal = ({ show, onHide }: Props) => {
                                           )?.valid_qty || 0
                                         }
                                       </td>
+                                      <td style={{ width: '150px' }}>
+                                        <QuantitySelect
+                                          quantity={quantity}
+                                          setQuantity={(val: number) => updateQuantity(sku.id, val)}
+                                          step={50}
+                                        />
+                                      </td>
                                       <td className="text-center">pcs</td>
                                     </tr>
                                   )})}
@@ -215,8 +253,13 @@ const ProductsSelectModal = ({ show, onHide }: Props) => {
           </Table>
         </div>
         <div className="gap-2 pt-3 mt-3 d-flex justify-content-end border-top">
-            <Button variant="outline-secondary" onClick={onHide} className="rounded-0">Cancel</Button>
-            <Button variant="dark" onClick={handleSubmit} className="rounded-0">Confirm Selection</Button>
+          <Button variant="outline-secondary" onClick={onHide} className="rounded-0" disabled={submitting}>
+            Cancel
+          </Button>
+          <Button variant="dark" onClick={handleSubmit} className="gap-2 rounded-0 d-flex align-items-center" disabled={submitting}>
+            {submitting && <Spinner size="sm" animation="border" />}
+            Confirm Selection
+          </Button>
         </div>
       </Offcanvas.Body>
     </Offcanvas>
