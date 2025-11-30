@@ -10,22 +10,22 @@ import React, {
   useEffect,
 } from "react";
 import { GetInventoryListRes } from "@/types/inventory-list";
-import { StoreAddCartLineItem, StoreCart, StoreCartLineItem } from "@medusajs/types";
+import { StoreAddCartLineItem, StoreCart, StoreCartLineItem, StoreProduct } from "@medusajs/types";
 import { allProducts } from "@/data/products";
 
 type ShopContextType = {
-  products: any[];
+  products: StoreProduct[];
   isLoadingProducts: boolean;
   inventory: Record<string, any>;
   skuDetails: Record<string, any>;
   expandedProductIds: string[];
   toggleProduct: (id: string) => void;
-  cart: StoreCart;
+  cart: StoreCart | undefined | null;
   cartLoading: boolean;
   addToCart: (cardLineItem: StoreAddCartLineItem) => Promise<void>;
   removeFromCart: (lineId: string) => Promise<void>;
   updateCartItem: (lineId: string, quantity: number) => Promise<void>;
-  cartProducts: StoreCartLineItem[];
+  cartProducts: any[]; // Using any for UI mapped type for now, or define a specific UI type if strictness needed
   totalPrice: number;
 };
 

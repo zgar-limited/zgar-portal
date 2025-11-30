@@ -1,31 +1,45 @@
 import Link from "next/link";
-
 import Features from "@/components/common/Features";
-import Footer1 from "@/components/footers/Footer1";
-import Header1 from "@/components/header/Header1";
-import Topbar1 from "@/components/header/Topbar1";
-import Categories from "@/components/products/Categories";
-import Products1 from "@/components/products/Products1";
-import React from "react";
-import Image from "next/image";
-import ShopBanner from "@/widgets/ShopBanner";
 import HomeHeader from "@/widgets/HomeHeader";
 import HomeFooter from "@/widgets/HomeFooter";
+import ProductGrid from "@/components/products/ProductGrid";
+import React from "react";
+import ShopBanner from "@/widgets/ShopBanner";
+import Categories from "@/components/products/Categories";
+import { medusaFetch } from "@/utils/medusa-fetch";
+import { StoreProductListResponse } from "@medusajs/types";
 
 export const metadata = {
   title: "Shop || Ochaka - Multipurpose eCommerce React Nextjs Template",
   description: "Ochaka - Multipurpose eCommerce React Nextjs Template",
 };
-export default function page() {
+
+async function getProducts() {
+  try {
+    const data = await medusaFetch<StoreProductListResponse>("/store/products", {
+      query: {
+        limit: 50,
+        fields: "*variants",
+      },
+      next: { revalidate: 60 },
+    });
+    
+    return data.products || [];
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    return [];
+  }
+}
+
+export default async function page() {
+  const products = await getProducts();
+
   return (
     <>
-      {/* <Topbar1 /> */}
-      {/* <Header1 parentClass="tf-header header-fix" /> */}
       <HomeHeader />
       <ShopBanner />
       <Categories />
-      <Products1 />
-      <Features parentClass="flat-spacing" />
+      <ProductGrid initialProducts={products} />
       <HomeFooter />
     </>
   );

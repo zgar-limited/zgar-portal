@@ -6,8 +6,9 @@ import { Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pencil } from "lucide-react";
 import Sidebar from "./Sidebar";
-import { orders } from "@/data/products";
 import { useAuth } from "@/context/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { medusaSDK } from "@/utils/medusa";
 
 export default function MyAccount() {
   const { customer } = useAuth();
@@ -72,6 +73,22 @@ export default function MyAccount() {
       image: "/images/products/product-4.jpg",
     },
   ];
+
+  const { data: ordersData, isLoading } = useQuery({
+    queryKey: ["orders", customer?.id],
+    queryFn: async () => {
+      if (!customer?.id) return { orders: [] };
+      const res = await medusaSDK.store.order.list({
+        fields: "+items.title,+items.thumbnail,+items.quantity,+items.unit_price,+items.variant_title",
+        limit: 5, // Show recent 5 orders
+        offset: 0,
+      });
+      return res;
+    },
+    enabled: !!customer?.id,
+  });
+
+  const orders = ordersData?.orders || [];
 
   return (
     <section className="flat-spacing">
@@ -273,84 +290,98 @@ export default function MyAccount() {
                       </tr>
                     </thead>
                     <tbody>
-                      {orders.map((order, index) => (
-                        <tr key={index} className="border-bottom-0">
-                          <td className="p-3">
-                            <span className="fw-bold text-dark">
-                              {order.code}
-                            </span>
-                            <div className="mt-1 text-muted text-small">
-                              Oct 24, 2023
-                            </div>
-                          </td>
-                          <td className="p-3">
-                            <div className="gap-3 d-flex align-items-center">
-                              <div
-                                className="flex-shrink-0 border rounded position-relative"
-                                style={{ width: "50px", height: "50px" }}
-                              >
-                                <Image
-                                  src={order.imgSrc}
-                                  alt={order.alt}
-                                  fill
-                                  className="rounded object-fit-cover"
-                                />
-                              </div>
-                              <div>
-                                <h6
-                                  className="mb-1 text-truncate"
-                                  style={{ maxWidth: "180px" }}
-                                >
-                                  <Link
-                                    href={`/product-detail/${order.id}`}
-                                    className="text-dark"
-                                  >
-                                    {order.title}
-                                  </Link>
-                                </h6>
-                                <div className="text-small text-muted">
-                                  Size: {order.size} | Qty: 1
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="p-3">
-                            <span className="fw-bold">
-                              ${order.price.toFixed(2)}
-                            </span>
-                          </td>
-                          <td className="p-3">
-                            <span
-                              className={`badge  px-3 py-2 ${
-                                order.status === "Completed"
-                                  ? "bg-success-subtle text-success"
-                                  : order.status === "Pending"
-                                  ? "bg-warning-subtle text-warning"
-                                  : order.status === "Canceled"
-                                  ? "bg-danger-subtle text-danger"
-                                  : "bg-info-subtle text-info"
-                              }`}
-                            >
-                              {order.status}
-                            </span>
-                          </td>
-                          <td className="p-3">
-                            <div className="gap-2 d-flex">
-                              <Link
-                                href={`/account-orders/${order.id}`}
-                                className=" tf-btn btn-outline-dark type-very-small rounded-pill hover-effect"
-                              >
-                                View
-                              </Link>
-                              {order.status === "Completed" && (
-                                <button className=" tf-btn btn-fill type-very-small rounded-pill hover-effect">
-                                  Reorder
-                                </button>
-                              )}
-                            </div>
-                          </td>
+                      {isLoading ? (
+                        <tr>
+                          <td colSpan={5} className="p-4 text-center">Loading orders...</td>
                         </tr>
-                      ))}
+                      ) : orders.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="p-4 text-center">No recent orders found.</td>
+                        </tr>
+                      ) : (
+                        orders.map((order, index) => (
+                          <tr key={order.id} className="border-bottom-0">
+                            <td className="p-3">
+                              <span className="fw-bold text-dark">
+                                #{order.display_id}
+                              </span>
+                              <div className="mt-1 text-muted text-small">
+                                {new Date(order.created_at).toLocaleDateString()}
+                              </div>
+                            </td>
+                            <td className="p-3">
+                              {order.items?.slice(0, 1).map((item) => (
+                                <div key={item.id} className="gap-3 d-flex align-items-center">
+                                  <div
+                                    className="flex-shrink-0 border rounded position-relative"
+                                    style={{ width: "50px", height: "50px" }}
+                                  >
+                                    <Image
+                                      src={item.thumbnail || "https://placehold.co/50"}
+                                      alt={item.title}
+                                      fill
+                                      className="rounded object-fit-cover"
+                                    />
+                                  </div>
+                                  <div>
+                                    <h6
+                                      className="mb-1 text-truncate"
+                                      style={{ maxWidth: "180px" }}
+                                    >
+                                      <Link
+                                        href={`/product-detail/${item.variant?.product_id || ""}`}
+                                        className="text-dark"
+                                      >
+                                        {item.title}
+                                      </Link>
+                                    </h6>
+                                    <div className="text-small text-muted">
+                                      {item.variant_title && <span>{item.variant_title} | </span>}
+                                      Qty: {item.quantity}
+                                      {order.items.length > 1 && <span className="ms-1"> + {order.items.length - 1} more</span>}
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </td>
+                            <td className="p-3">
+                              <span className="fw-bold">
+                                {order.currency_code?.toUpperCase()} {(order.total / 100).toFixed(2)}
+                              </span>
+                            </td>
+                            <td className="p-3">
+                              <span
+                                className={`badge px-3 py-2 ${
+                                  order.status === "completed"
+                                    ? "bg-success-subtle text-success"
+                                    : order.status === "pending"
+                                    ? "bg-warning-subtle text-warning"
+                                    : order.status === "canceled"
+                                    ? "bg-danger-subtle text-danger"
+                                    : "bg-info-subtle text-info"
+                                }`}
+                              >
+                                {order.status}
+                              </span>
+                            </td>
+                            <td className="p-3">
+                              <div className="gap-2 d-flex">
+                                <Link
+                                  href={`/account-orders-detail/${order.id}`}
+                                  className=" tf-btn btn-outline-dark type-very-small rounded-pill hover-effect"
+                                >
+                                  View
+                                </Link>
+                                {order.status === "completed" && (
+                                  <button className=" tf-btn btn-fill type-very-small rounded-pill hover-effect">
+                                    Reorder
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>

@@ -10,6 +10,7 @@ import WishlistButton from "../productActionButtons/WishlistButton";
 import CompareButton from "../productActionButtons/CompareButton";
 import QuickViewButton from "../productActionButtons/QuickViewButton";
 import CountdownTimer from "../common/Countdown";
+import { Eye, ShoppingCart } from "lucide-react";
 
 export default function ProductCard1({ product, style = 1 }) {
   const [currentImg, setCurrentImg] = useState(product.imgSrc);
@@ -96,7 +97,7 @@ export default function ProductCard1({ product, style = 1 }) {
               href={`/product-detail/${product.id}`}
               className="tf-btn rounded-0 animate-btn type-very-small"
             >
-              Quick Add <i className="icon icon-shopping-cart-simple" />
+              Quick Add <ShoppingCart size={16} />
             </Link>
           </div>
         )}
@@ -148,14 +149,14 @@ export default function ProductCard1({ product, style = 1 }) {
               data-bs-toggle="modal"
               className="tf-btn btn-white animate-btn animate-dark"
             >
-              Quick View <i className="icon icon-view" />
+              Quick View <Eye size={16} />
             </a>
             {style === 3 && (
               <Link
                 href={`/product-detail/${product.id}`}
                 className="tf-btn btn-white animate-btn animate-dark"
               >
-                Quick Add <i className="icon icon-shopping-cart-simple" />
+                Quick Add <ShoppingCart size={16} />
               </Link>
             )}
           </div>
@@ -166,7 +167,7 @@ export default function ProductCard1({ product, style = 1 }) {
             {product.badges.map((badge, i) => (
               <li key={i} className={`product-badge_item h6 ${badge.type}`}>
                 {badge.type === "flash-sale" && (
-                  <i className="icon icon-thunder" />
+                  <ThunderIcon />
                 )}{" "}
                 {badge.text}
               </li>
@@ -254,7 +255,7 @@ export default function ProductCard1({ product, style = 1 }) {
           href={`/product-detail/${product.id}`}
           className="tf-btn rounded-0 animate-btn type-very-small card-product_action-bot"
         >
-          Quick Add <i className="icon icon-shopping-cart-simple" />
+          Quick Add <ShoppingCart size={16} />
         </Link>
       )}
     </div>

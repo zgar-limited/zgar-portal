@@ -13,6 +13,8 @@ import StickyProduct from "@/components/product-details/StickyProduct";
 import React from "react";
 import { allProducts } from "@/data/products";
 import { notFound } from "next/navigation";
+import HomeTips from "@/widgets/HomeTips";
+import HomeHeader from "@/widgets/HomeHeader";
 
 export const metadata = {
   title:
@@ -28,44 +30,14 @@ export default async function page({ params }) {
 
   return (
     <>
-      <Topbar1 />
-      <Header1 parentClass="tf-header header-fix bg-off-white" />
-      <section className="s-page-title style-2">
-        <div className="container">
-          <div className="content">
-            <ul className="breadcrumbs-page">
-              <li>
-                <Link href={`/`} className="h6 link">
-                  Home
-                </Link>
-              </li>
-              <li className="d-flex">
-                <i className="icon icon-caret-right" />
-              </li>
-              <li>
-                <Link href={`/shop-default`} className="h6 link">
-                  Shop
-                </Link>
-              </li>
-              <li className="d-flex">
-                <i className="icon icon-caret-right" />
-              </li>
-              <li>
-                <h6 className="current-page fw-normal">{product.title}</h6>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </section>
+      <HomeTips />
+      <HomeHeader />
+
       <Details1
         product={product}
         features={["countdown-style-1", "varientPicker"]}
       />
-      <CustomerPhotos />
       <ProductSpecifications1 />
-      <Features />
-      <SimilerProducts />
-      <RelatedProducts />
       <StickyProduct />
       <Footer1 />
     </>
