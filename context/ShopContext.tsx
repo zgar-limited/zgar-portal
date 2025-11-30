@@ -10,7 +10,7 @@ import React, {
   useEffect,
 } from "react";
 import { GetInventoryListRes } from "@/types/inventory-list";
-import { StoreAddCartLineItem } from "@medusajs/types";
+import { StoreAddCartLineItem, StoreCart, StoreCartLineItem } from "@medusajs/types";
 import { allProducts } from "@/data/products";
 
 type ShopContextType = {
@@ -20,12 +20,12 @@ type ShopContextType = {
   skuDetails: Record<string, any>;
   expandedProductIds: string[];
   toggleProduct: (id: string) => void;
-  cart: any;
+  cart: StoreCart;
   cartLoading: boolean;
   addToCart: (cardLineItem: StoreAddCartLineItem) => Promise<void>;
   removeFromCart: (lineId: string) => Promise<void>;
   updateCartItem: (lineId: string, quantity: number) => Promise<void>;
-  cartProducts: any[];
+  cartProducts: StoreCartLineItem[];
   totalPrice: number;
 };
 
