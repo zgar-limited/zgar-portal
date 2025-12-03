@@ -60,6 +60,11 @@ export default function MobileMenu() {
                 <span>AUTHENTICATION</span>
               </a>
             </li>
+            <li className="nav-mb-item">
+              <a href="/view-cart" className="mb-menu-link collapsed">
+                <span>VIEW CART</span>
+              </a>
+            </li>
           </ul>
         </div>
 

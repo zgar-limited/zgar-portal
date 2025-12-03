@@ -9,6 +9,7 @@ import React, {
   useMemo,
 } from "react";
 import { useShopContext } from "./ShopContext";
+import { useToast } from "@/components/common/ToastProvider";
 
 const dataContext = createContext(undefined);
 
@@ -22,6 +23,7 @@ export const useContextElement = () => {
 
 export default function Context({ children }) {
   const { cart, addToCart, removeFromCart, updateCartItem, cartLoading } = useShopContext();
+  const { showToast } = useToast();
   const [wishList, setWishList] = useState([]);
   const [compareItem, setCompareItem] = useState([]);
   const [quickViewItem, setQuickViewItem] = useState(null);
@@ -129,7 +131,15 @@ export default function Context({ children }) {
     }
 
     if (variantId) {
-      await addToCart(variantId, quantity);
+      try {
+        await addToCart(variantId, quantity);
+        showToast("Added to cart successfully", "success");
+      } catch (error) {
+        console.error("Failed to add to cart:", error);
+        showToast("Failed to add to cart. Please try again.", "danger");
+      }
+    } else {
+        showToast("Product variant not found", "danger");
     }
   };
 

@@ -3,15 +3,16 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": " next dev --turbopack",
+    "dev:proxy": "NODE_TLS_REJECT_UNAUTHORIZED=0 next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
-    "@medusajs/js-sdk": "^2.11.2",
-    "@medusajs/types": "^2.11.2",
+    "@medusajs/js-sdk": "^2.11.3",
+    "@medusajs/types": "^2.11.3",
     "@tanstack/react-query": "^5.90.10",
     "@use-gesture/react": "^10.3.1",
     "axios": "^1.11.0",

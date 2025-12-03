@@ -14,6 +14,7 @@ import GlobalEffectsProvider from "@/components/common/GlobalEffectProvider";
 import QueryContext from "@/context/QueryContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { ShopProvider } from "@/context/ShopContext";
+import ToastProvider from "@/components/common/ToastProvider";
 
 // import ScrollTop from "@/components/common/ScrollTop";
 // import GlobalEffectsProvider from "@/components/common/FlobalEffectProvider";
@@ -29,10 +30,11 @@ export default function RootLayout({ children }) {
         <main id="wrapper">
           <AuthProvider>
             <QueryContext>
-              <ShopProvider>
-                <Context>
-                  {children}
-                  <CartModal />
+              <ToastProvider>
+                <ShopProvider>
+                  <Context>
+                    {children}
+                    <CartModal />
               {/* <CompareColorModal /> */}
               {/* <CompareModal /> */}
               {/* <DemoModal /> */}
@@ -44,10 +46,11 @@ export default function RootLayout({ children }) {
               {/* <ShipAndDaliveryModal /> */}
               {/* <SizeGuideModal /> */}
               {/* <ToolbarModal /> */}
-                {/* <NewsLetterModal /> */}
-                {/* <ProductsSelectModal /> */}
-                </Context>
-              </ShopProvider>
+                  {/* <NewsLetterModal /> */}
+                  {/* <ProductsSelectModal /> */}
+                  </Context>
+                </ShopProvider>
+              </ToastProvider>
             </QueryContext>
           </AuthProvider>
           <GlobalEffectsProvider />

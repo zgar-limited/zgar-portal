@@ -32,6 +32,10 @@ import {
 } from "react-bootstrap";
 import { useShopContext } from "@/context/ShopContext";
 import { useRouter } from "next/navigation";
+import {
+  StoreCartResponse,
+  StorePaymentCollectionResponse,
+} from "@medusajs/types";
 
 export default function ShopCart() {
   return <ShopCartContent />;
@@ -43,8 +47,10 @@ function ShopCartContent() {
     totalPrice,
     removeFromCart,
     updateCartItem,
+    refreshCart,
     cartLoading,
     cart,
+    getSkuDetails,
   } = useShopContext();
 
   const [showModal, setShowModal] = useState(false);
@@ -132,53 +138,59 @@ function ShopCartContent() {
     if (selectedItems.length === 0) return;
 
     setCheckoutLoading(true);
+
     try {
-      // 1. Identify items to remove (unselected items)
-      // If we are strictly following "only checkout selected items", we must remove unselected ones from the cart
-      // because medusaSDK.store.cart.complete() completes the entire cart.
-      const unselectedItems = cartProducts.filter(
-        (p) => !selectedItems.includes(p.id)
-      );
+      // 1. Prepare items for the new cart
+      const itemsToCheckout = cartProducts
+        .filter((p) => selectedItems.includes(p.id))
+        .map((p) => ({
+          variant_id: p.variantId,
+          quantity: p.quantity,
+          metadata: p.metadata,
+        }));
 
-      if (unselectedItems.length > 0) {
-        await Promise.all(
-          unselectedItems.map((item) => removeFromCart(item.id))
-        );
-      }
+      // 2. Create temporary cart with selected items using fetch
+      // const createCartRes: StoreCartResponse = await medusaSDK.client.fetch(
+      //   "/store/carts",
+      //   {
+      //     method: "POST",
+      //     body: {
+      //       region_id: "reg_01K9M1A9NHMN4MXBACKAS5F4V1",
+      //       sales_channel_id: "sc_01K9KAK0MDCMSWCXRV0WH70EQK",
+      //       items: itemsToCheckout,
+      //       // currency_code: "usd",
+      //     },
+      //   }
+      // );
+      // const createCartRes: StoreCartResponse =
+      //   await medusaSDK.store.cart.create({
+      //     sales_channel_id: "sc_01K9KAK0MDCMSWCXRV0WH70EQK",
+      //     region_id: "reg_01K9M1A9NHMN4MXBACKAS5F4V1",
+      //     items: itemsToCheckout.map(item => {
+      //       return {...item,}
+      //     })
+      //   });
 
-      // 2. Complete the current cart
-      if (!cart?.id) throw new Error("Cart not found");
+      // await medusaSDK.client.fetch("/store/custom/cart-add", {
+      //   method:"POST",
+      //   body: {
+      //     cart_id: createCartRes.cart.id,
+      //     items: itemsToCheckout,
+      //   },
+      // });
 
-      const session = await medusaSDK.store.payment.initiatePaymentSession(
-        cart,
-        {
-          provider_id: "pp_system_default",
-        }
-      );
+      // const tempCart = createCartRes.cart;
 
-      const completionRes = await medusaSDK.store.cart.complete(cart.id);
-
-      if (completionRes.type === "cart") {
-        if (completionRes.error) {
-          throw new Error(completionRes.error.message);
-        }
-        // If still cart, it implies incomplete cart steps (e.g. no shipping address), but we proceed as instructed to "submit".
-      } else if (completionRes.type === "order") {
-        // Order successful
-        // The cart is now completed/archived. Local storage cart_id should be cleared or refreshed.
-        localStorage.removeItem("cart_id");
-        // Ideally, ShopContext should handle this reset, but we can trigger a reload or context refresh if needed.
-        // For now, we clear the UI state.
-      }
-
-      setSelectedItems([]);
-      setToastMessage("Order submitted successfully!");
-      setToastVariant("success");
-      setShowToast(true);
-
-      // Force reload or redirect to clear/refresh cart state if needed?
-      // ShopContext will handle "cart not found" by creating a new one if we invalidate queries.
-      // But let's let the user decide next step (Continue shopping).
+      // if (!tempCart) throw new Error("Failed to create checkout session");
+      await medusaSDK.client.fetch("/store/custom/cart-complete", {
+        method: "POST",
+        body: {
+          // cart_id: tempCart.id,
+          // sales_channel_id: "sc_01K9KAK0MDCMSWCXRV0WH70EQK",
+          items: itemsToCheckout,
+          // currency_code: "usd",
+        },
+      });
     } catch (error: any) {
       console.error("Checkout error:", error);
       setToastMessage(error.message || "Failed to submit order");

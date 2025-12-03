@@ -1,5 +1,8 @@
-const MEDUSA_BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000";
-const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_7bf9b3f0d739c9d6326a062f6d94db5c60e6dfec12a581cfe213cc3ca382d9ed";
+const MEDUSA_BACKEND_URL =
+  process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000";
+const PUBLISHABLE_KEY =
+  process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY ||
+  "pk_7bf9b3f0d739c9d6326a062f6d94db5c60e6dfec12a581cfe213cc3ca382d9ed";
 
 interface MedusaFetchOptions extends RequestInit {
   query?: Record<string, string | number | boolean>;
@@ -15,7 +18,10 @@ export async function medusaFetch<T>(
 
   if (query) {
     const queryString = Object.entries(query)
-      .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
+      .map(
+        ([key, value]) =>
+          `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`
+      )
       .join("&");
     url += `?${queryString}`;
   }

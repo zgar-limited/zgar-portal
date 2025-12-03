@@ -1,7 +1,13 @@
 "use client";
 
 import { medusaSDK } from "@/utils/medusa";
-import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  QueryObserverResult,
+  RefetchOptions,
+  useQueries,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import React, {
   createContext,
   useContext,
@@ -10,7 +16,13 @@ import React, {
   useEffect,
 } from "react";
 import { GetInventoryListRes } from "@/types/inventory-list";
-import { StoreAddCartLineItem, StoreCart, StoreCartLineItem, StoreProduct } from "@medusajs/types";
+import {
+  StoreAddCartLineItem,
+  StoreCart,
+  StoreCartLineItem,
+  StoreCartResponse,
+  StoreProduct,
+} from "@medusajs/types";
 import { allProducts } from "@/data/products";
 
 type ShopContextType = {
@@ -24,9 +36,17 @@ type ShopContextType = {
   cartLoading: boolean;
   addToCart: (cardLineItem: StoreAddCartLineItem) => Promise<void>;
   removeFromCart: (lineId: string) => Promise<void>;
-  updateCartItem: (lineId: string, quantity: number) => Promise<void>;
+  updateCartItem: (
+    lineId: string,
+    quantity: number,
+    metadata?: Record<string, any>
+  ) => Promise<void>;
   cartProducts: any[]; // Using any for UI mapped type for now, or define a specific UI type if strictness needed
   totalPrice: number;
+  refreshCart: (
+    options?: RefetchOptions
+  ) => Promise<QueryObserverResult<StoreCart, Error>>;
+  getSkuDetails: (productId: string) => Promise<any>;
 };
 
 const ShopContext = createContext<ShopContextType | undefined>(undefined);
@@ -60,6 +80,7 @@ export const ShopProvider = ({ children }: { children: React.ReactNode }) => {
       const { cart } = await medusaSDK.store.cart.create({
         sales_channel_id: "sc_01K9KAK0MDCMSWCXRV0WH70EQK",
         region_id: "reg_01K9M1A9NHMN4MXBACKAS5F4V1",
+        currency_code: "usd",
       });
       setCartId(cart.id);
       localStorage.setItem("cart_id", cart.id);
@@ -69,12 +90,25 @@ export const ShopProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const { data: cart, isLoading: cartLoading } = useQuery({
+  const {
+    data: cart,
+    isLoading: cartLoading,
+    refetch: refreshCart,
+  } = useQuery({
     queryKey: ["cart", cartId],
     queryFn: async () => {
       if (!cartId) return null;
       try {
-        const { cart } = await medusaSDK.store.cart.retrieve(cartId);
+        const { cart } = await medusaSDK.client.fetch<StoreCartResponse>(
+          `/store/carts/${cartId}`,
+          {
+            method: "GET",
+            query:{
+              fields: "*items,*items.variant_option_values,*items.variant,*items.variant.options,"
+            }
+          }
+        );
+
         return cart;
       } catch (error) {
         // If cart not found (e.g. expired), create a new one
@@ -88,7 +122,13 @@ export const ShopProvider = ({ children }: { children: React.ReactNode }) => {
   });
 
   const addToCart = async (cardLineItem: StoreAddCartLineItem) => {
-    console.log('%c [ cardLineItem ]-91', 'font-size:13px; background:pink; color:#bf2c9f;', cardLineItem)
+    // Find product and metadata
+    value.products.forEach((p) => {
+      const variant = p.variants.find((v) => v.id === cardLineItem.variant_id);
+      if (variant) {
+        cardLineItem.metadata = variant?.metadata;
+      }
+    });
     try {
       let currentCartId = cartId;
       if (!currentCartId) {
@@ -97,11 +137,20 @@ export const ShopProvider = ({ children }: { children: React.ReactNode }) => {
         currentCartId = newCart.id;
       }
 
-      await medusaSDK.store.cart.createLineItem(currentCartId, cardLineItem);
+      await medusaSDK.client.fetch(`/store/carts/${currentCartId}/line-items`, {
+        method: "POST",
+        body: {
+          ...cardLineItem,
+        },
+        query: {
+          // fields: "*items,+items.variants",
+        },
+      });
 
       queryClient.invalidateQueries({ queryKey: ["cart", currentCartId] });
     } catch (error) {
       console.error("Error adding to cart:", error);
+      throw error;
     }
   };
 
@@ -112,6 +161,7 @@ export const ShopProvider = ({ children }: { children: React.ReactNode }) => {
       queryClient.invalidateQueries({ queryKey: ["cart", cartId] });
     } catch (error) {
       console.error("Error removing from cart:", error);
+      throw error;
     }
   };
 
@@ -124,6 +174,7 @@ export const ShopProvider = ({ children }: { children: React.ReactNode }) => {
       queryClient.invalidateQueries({ queryKey: ["cart", cartId] });
     } catch (error) {
       console.error("Error updating cart item:", error);
+      throw error;
     }
   };
 
@@ -140,6 +191,7 @@ export const ShopProvider = ({ children }: { children: React.ReactNode }) => {
       quantity: item.quantity,
       imgSrc: item.thumbnail || "https://picsum.photos/100/100", // Fallback image
       options: item.variant?.options || [],
+      metadata: item.metadata || {},
       // Add other necessary fields mapped from Medusa item
     }));
   }, [cart]);
@@ -161,34 +213,43 @@ export const ShopProvider = ({ children }: { children: React.ReactNode }) => {
     queryFn: async () => {
       const productsRes = await medusaSDK.store.product.list({
         limit: 99,
-        fields: "*external_id,*variants",
+        fields: "*external_id,*variants,+variants.metadata",
       });
+    
+      console.log(
+        "%c [ productsRes ]-200",
+        "font-size:13px; background:pink; color:#bf2c9f;",
+        productsRes
+      );
       return productsRes;
     },
   });
 
-  const allInventoryRes = useQueries({
-    queries:
-      productsRes?.data?.products?.length > 0
-        ? productsRes.data.products.map((product) => {
-            return {
-              queryKey: ["inventoryRes", product.id],
-              queryFn: async () => {
-                const inventoryListRes = (await medusaSDK.client.fetch(
-                  "/jdc-erp/inventory",
-                  {
-                    method: "get",
-                    query: {
-                      filter_material_category: product.external_id,
-                    },
-                  }
-                )) as GetInventoryListRes;
-                return { productId: product.id, data: inventoryListRes };
-              },
-            };
-          })
-        : [],
-  });
+  const allInventoryRes = [];
+  // const allInventoryRes = useQueries({
+  //   queries:
+  //     productsRes?.data?.products?.length > 0
+  //       ? productsRes.data.products.map((product) => {
+  //           return {
+  //             queryKey: ["inventoryRes", product.id],
+  //             queryFn: async () => {
+  //               const inventoryListRes = (await medusaSDK.client.fetch(
+  //                 "/jdc-erp/inventory",
+  //                 {
+  //                   method: "get",
+  //                   query: {
+  //                     filter_material_category: product.external_id,
+  //                   },
+  //                 }
+  //               )) as GetInventoryListRes;
+  //               return { productId: product.id, data: inventoryListRes };
+  //             },
+  //             staleTime: 1000 * 60 * 5,
+  //             refetchOnWindowFocus: false,
+  //           };
+  //         })
+  //       : [],
+  // });
 
   const allProductSkuDetails = useQueries({
     queries:
@@ -220,6 +281,35 @@ export const ShopProvider = ({ children }: { children: React.ReactNode }) => {
         ? prev.filter((id) => id !== productId)
         : [...prev, productId]
     );
+  };
+
+  const getSkuDetails = async (productId: string) => {
+    if (skuDetails[productId]) return skuDetails[productId];
+
+    const product = productsRes.data?.products.find((p) => p.id === productId);
+    if (!product) return null;
+
+    try {
+      const skuDetailList = await medusaSDK.client.fetch(
+        "/jdc-erp/sku-detail/batch",
+        {
+          method: "post",
+          body: {
+            variant_ids: product.variants?.map((v) => v.id) || [],
+          },
+        }
+      );
+
+      queryClient.setQueryData(["skuDetail", productId], {
+        productId,
+        data: skuDetailList,
+      });
+
+      return skuDetailList;
+    } catch (error) {
+      console.error("Error fetching sku details:", error);
+      return null;
+    }
   };
 
   const inventory = useMemo(() => {
@@ -257,6 +347,8 @@ export const ShopProvider = ({ children }: { children: React.ReactNode }) => {
       updateCartItem,
       cartProducts,
       totalPrice,
+      refreshCart,
+      getSkuDetails,
     }),
     [
       productsRes.data?.products,
@@ -268,6 +360,7 @@ export const ShopProvider = ({ children }: { children: React.ReactNode }) => {
       cartLoading,
       cartProducts,
       totalPrice,
+      refreshCart,
     ]
   );
 

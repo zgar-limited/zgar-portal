@@ -1,45 +1,49 @@
-import Link from "next/link";
-
-import Footer1 from "@/components/footers/Footer1";
-import Header1 from "@/components/header/Header1";
-import Topbar1 from "@/components/header/Topbar1";
-import CustomerPhotos from "@/components/product-details/CustomerPhotos";
-import ProductSpecifications1 from "@/components/product-details/ProductSpecifications1";
-import Details1 from "@/components/product-details/Details1";
-import Features from "@/components/product-details/Features";
-import RelatedProducts from "@/components/product-details/RelatedProducts";
-import SimilerProducts from "@/components/product-details/SimilerProducts";
-import StickyProduct from "@/components/product-details/StickyProduct";
 import React from "react";
-import { allProducts } from "@/data/products";
 import { notFound } from "next/navigation";
-import HomeTips from "@/widgets/HomeTips";
 import HomeHeader from "@/widgets/HomeHeader";
+import HomeFooter from "@/widgets/HomeFooter";
+import ProductMain from "@/components/product-details/ProductMain";
+import { medusaFetch } from "@/utils/medusa-fetch";
+import { StoreProductResponse } from "@medusajs/types";
 
-export const metadata = {
-  title:
-    "Product Details || Ochaka - Multipurpose eCommerce React Nextjs Template",
-  description: "Ochaka - Multipurpose eCommerce React Nextjs Template",
-};
-export default async function page({ params }) {
+export async function generateMetadata({ params }: { params: { id: string } }) {
+  const { id } = await params;
+  try {
+      const { product } = await medusaFetch<StoreProductResponse>(`/store/products/${id}`);
+      return {
+          title: `${product.title} | Zgar Shop`,
+          description: product.description || "Zgar Product Details",
+      };
+  } catch (e) {
+      return {
+          title: "Product Details | Zgar Shop",
+      };
+  }
+}
+
+export default async function ProductDetailPage({ params }: { params: { id: string } }) {
   const { id } = await params;
 
-  const product = allProducts.find((p) => p.id == id);
+  let product;
+  try {
+    const data = await medusaFetch<StoreProductResponse>(`/store/products/${id}`, {
+        next: { revalidate: 60 }
+    });
+    product = data.product;
+  } catch (error) {
+    console.error(`Error fetching product ${id}:`, error);
+    return notFound();
+  }
 
   if (!product) return notFound();
 
   return (
     <>
-      <HomeTips />
       <HomeHeader />
-
-      <Details1
-        product={product}
-        features={["countdown-style-1", "varientPicker"]}
-      />
-      <ProductSpecifications1 />
-      <StickyProduct />
-      <Footer1 />
+      <main>
+          <ProductMain product={product} />
+      </main>
+      <HomeFooter />
     </>
   );
 }

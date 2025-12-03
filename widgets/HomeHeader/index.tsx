@@ -4,9 +4,9 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import Nav from "./Nav";
 import LanguageSelect from "@/components/common/LanguageSelect";
-import { User } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-// import CartLength from "./CartLength";
+import CartIcon from "@/components/header/CartIcon";
+import UserIcon from "@/components/header/UserIcon";
 
 export default function HomeHeader({
   containerFull = true,
@@ -72,13 +72,8 @@ export default function HomeHeader({
           <div className="col-xl-3 col-md-4 col-3">
             <ul className="nav-icon-list">
 
-              <li className="d-none d-lg-flex">
-                <Link
-                  className="nav-icon-item link"
-                  href={customer ? "/account-page" : "/login"}
-                >
-                  <User />
-                </Link>
+              <li className="d-flex">
+                <UserIcon />
               </li>
               {/* <li className="d-none d-md-flex">
                 <a
@@ -95,22 +90,9 @@ export default function HomeHeader({
                 </Link>
               </li> */}
               <LanguageSelect />
-              {/* <li
-                className="shop-cart"
-                data-bs-toggle="offcanvas"
-                data-bs-target="#shoppingCart"
-              >
-                <a
-                  className="nav-icon-item link"
-                  href="#shoppingCart"
-                  data-bs-toggle="offcanvas"
-                >
-                  <i className="icon icon-shopping-cart-simple" />
-                </a>
-                <span className="count">
-                  <CartLength />
-                </span>
-              </li> */}
+              <li className="d-none d-lg-flex align-items-center ms">
+                  <CartIcon />
+              </li>
             </ul>
 
           </div>

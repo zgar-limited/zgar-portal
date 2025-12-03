@@ -8,6 +8,7 @@ import ShopBanner from "@/widgets/ShopBanner";
 import Categories from "@/components/products/Categories";
 import { medusaFetch } from "@/utils/medusa-fetch";
 import { StoreProductListResponse } from "@medusajs/types";
+import { medusaSDK } from "@/utils/medusa";
 
 export const metadata = {
   title: "Shop || Ochaka - Multipurpose eCommerce React Nextjs Template",
@@ -16,14 +17,22 @@ export const metadata = {
 
 async function getProducts() {
   try {
-    const data = await medusaFetch<StoreProductListResponse>("/store/products", {
-      query: {
-        limit: 50,
-        fields: "*variants",
-      },
-      next: { revalidate: 60 },
-    });
-    
+
+    const data = await medusaSDK.client.fetch<StoreProductListResponse>(
+      "/store/products",
+      {
+        method: "GET",
+        query: {
+          limit: 50,
+          fields: "*variants.calculated_price,+variants.inventory_quantity",
+          region_id: "reg_01K9M1A9NHMN4MXBACKAS5F4V1",
+        },
+
+        cache: "no-cache",
+        // next: { revalidate: 60 },
+      }
+    );
+
     return data.products || [];
   } catch (error) {
     console.error("Error fetching products:", error);

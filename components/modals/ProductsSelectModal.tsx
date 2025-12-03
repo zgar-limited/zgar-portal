@@ -17,6 +17,8 @@ const ProductsSelectModal = ({ show, onHide }: Props) => {
     expandedProductIds,
     toggleProduct,
     inventory,
+    skuDetails,
+    getSkuDetails,
     addToCart,
     removeFromCart,
     updateCartItem,
@@ -68,14 +70,16 @@ const ProductsSelectModal = ({ show, onHide }: Props) => {
 
   const toggleProductSelection = (product: any) => {
     const allSkuIds = product.variants?.map((v: any) => v.id) || [];
-    const allSelected = allSkuIds.every((id: string) => selectedSkus.includes(id));
+    const allSelected = allSkuIds.every((id: string) =>
+      selectedSkus.includes(id)
+    );
 
     if (allSelected) {
       // Deselect all
-      setSelectedSkus(prev => prev.filter(id => !allSkuIds.includes(id)));
+      setSelectedSkus((prev) => prev.filter((id) => !allSkuIds.includes(id)));
     } else {
       // Select all
-      setSelectedSkus(prev => {
+      setSelectedSkus((prev) => {
         const newSelected = [...prev];
         allSkuIds.forEach((id: string) => {
           if (!newSelected.includes(id)) newSelected.push(id);
@@ -95,6 +99,8 @@ const ProductsSelectModal = ({ show, onHide }: Props) => {
       for (const skuId of selectedSkus) {
         const quantity = quantities[skuId] || 50;
         const existingItem = cartMap.get(skuId);
+
+        
 
         if (existingItem) {
           // Update if quantity changed
@@ -124,7 +130,12 @@ const ProductsSelectModal = ({ show, onHide }: Props) => {
   };
 
   return (
-    <Offcanvas show={show} onHide={onHide} placement="bottom" style={{ height: '90vh' }}>
+    <Offcanvas
+      show={show}
+      onHide={onHide}
+      placement="bottom"
+      style={{ height: "90vh" }}
+    >
       <Offcanvas.Header closeButton>
         <Offcanvas.Title>Select Products</Offcanvas.Title>
       </Offcanvas.Header>
@@ -146,8 +157,12 @@ const ProductsSelectModal = ({ show, onHide }: Props) => {
               {products?.map((product) => {
                 const isExpanded = expandedProductIds.includes(product.id);
                 const allSkuIds = product.variants?.map((v: any) => v.id) || [];
-                const isAllSelected = allSkuIds.length > 0 && allSkuIds.every((id: string) => selectedSkus.includes(id));
-                const isIndeterminate = allSkuIds.some((id: string) => selectedSkus.includes(id)) && !isAllSelected;
+                const isAllSelected =
+                  allSkuIds.length > 0 &&
+                  allSkuIds.every((id: string) => selectedSkus.includes(id));
+                const isIndeterminate =
+                  allSkuIds.some((id: string) => selectedSkus.includes(id)) &&
+                  !isAllSelected;
 
                 return (
                   <Fragment key={product.id}>
@@ -164,12 +179,15 @@ const ProductsSelectModal = ({ show, onHide }: Props) => {
                           <ChevronDown size={16} />
                         )}
                       </td>
-                      <td className="text-center" onClick={(e) => e.stopPropagation()}>
+                      <td
+                        className="text-center"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <input
                           type="checkbox"
                           className="form-check-input"
                           checked={isAllSelected}
-                          ref={input => {
+                          ref={(input) => {
                             if (input) input.indeterminate = isIndeterminate;
                           }}
                           onChange={() => toggleProductSelection(product)}
@@ -185,13 +203,31 @@ const ProductsSelectModal = ({ show, onHide }: Props) => {
                           <div className="p-3">
                             <h6 className="mb-2 text-muted">选项:</h6>
                             <div className="table-responsive">
-                              <Table bordered striped size="sm" className="mb-0 bg-white" style={{ minWidth: '600px' }}>
+                              <Table
+                                bordered
+                                striped
+                                size="sm"
+                                className="mb-0 bg-white"
+                                style={{ minWidth: "600px" }}
+                              >
                                 <thead>
                                   <tr>
-                                    <th className="text-center bg-white position-sticky start-0" style={{ left: 0, zIndex: 5, width: '40px' }}>
-                                      选择
+                                    <th
+                                      className="text-center bg-white position-sticky start-0"
+                                      style={{
+                                        left: 0,
+                                        zIndex: 5,
+                                        width: "40px",
+                                      }}
+                                    >
+                                      Select
                                     </th>
-                                    <th className="text-center bg-white position-sticky" style={{ left: '40px', zIndex: 5 }}>名称</th>
+                                    <th
+                                      className="text-center bg-white position-sticky"
+                                      style={{ left: "40px", zIndex: 5 }}
+                                    >
+                                      名称
+                                    </th>
                                     <th className="text-center">Feature</th>
                                     <th className="text-center">价格</th>
                                     <th className="text-center">库存</th>
@@ -201,44 +237,57 @@ const ProductsSelectModal = ({ show, onHide }: Props) => {
                                 </thead>
                                 <tbody>
                                   {product.variants?.map((sku: any) => {
-                                    const isSelected = selectedSkus.includes(sku.id);
+                                    const isSelected = selectedSkus.includes(
+                                      sku.id
+                                    );
                                     const quantity = quantities[sku.id] || 50;
 
                                     return (
-                                    <tr className="text-center" key={sku.id}>
-                                      <td className="bg-white position-sticky start-0" style={{ left: 0, zIndex: 5 }}>
-                                        <input
-                                          type="checkbox"
-                                          className="form-check-input"
-                                          checked={isSelected}
-                                          onChange={() => toggleSkuSelection(sku.id)}
-                                        />
-                                      </td>
-                                      <td className="bg-white position-sticky" style={{ left: '40px', zIndex: 5 }}>{sku.title}</td>
-                                      <td>
-                                        {sku.options
-                                          .map((option: any) => option.value)
-                                          .join(",")}
-                                      </td>
-                                      <td>$0</td>
-                                      <td>
-                                        {
-                                          inventory[product.id]?.rows.find(
+                                      <tr className="text-center" key={sku.id}>
+                                        <td
+                                          className="bg-white position-sticky start-0"
+                                          style={{ left: 0, zIndex: 5 }}
+                                        >
+                                          <input
+                                            type="checkbox"
+                                            className="form-check-input"
+                                            checked={isSelected}
+                                            onChange={() =>
+                                              toggleSkuSelection(sku.id)
+                                            }
+                                          />
+                                        </td>
+                                        <td
+                                          className="bg-white position-sticky"
+                                          style={{ left: "40px", zIndex: 5 }}
+                                        >
+                                          {sku.title}
+                                        </td>
+                                        <td>
+                                          {sku.options
+                                            .map((option: any) => option.value)
+                                            .join(",")}
+                                        </td>
+                                        <td>$0</td>
+                                        <td>
+                                          {inventory[product.id]?.rows.find(
                                             (row: any) =>
                                               row.material_number === sku.sku
-                                          )?.valid_qty || 0
-                                        }
-                                      </td>
-                                      <td style={{ width: '150px' }}>
-                                        <QuantitySelect
-                                          quantity={quantity}
-                                          setQuantity={(val: number) => updateQuantity(sku.id, val)}
-                                          step={50}
-                                        />
-                                      </td>
-                                      <td className="text-center">pcs</td>
-                                    </tr>
-                                  )})}
+                                          )?.valid_qty || 0}
+                                        </td>
+                                        <td style={{ width: "150px" }}>
+                                          <QuantitySelect
+                                            quantity={quantity}
+                                            setQuantity={(val: number) =>
+                                              updateQuantity(sku.id, val)
+                                            }
+                                            step={50}
+                                          />
+                                        </td>
+                                        <td className="text-center">pcs</td>
+                                      </tr>
+                                    );
+                                  })}
                                 </tbody>
                               </Table>
                             </div>
@@ -253,10 +302,20 @@ const ProductsSelectModal = ({ show, onHide }: Props) => {
           </Table>
         </div>
         <div className="gap-2 pt-3 mt-3 d-flex justify-content-end border-top">
-          <Button variant="outline-secondary" onClick={onHide} className="rounded-0" disabled={submitting}>
+          <Button
+            variant="outline-secondary"
+            onClick={onHide}
+            className="rounded-0"
+            disabled={submitting}
+          >
             Cancel
           </Button>
-          <Button variant="dark" onClick={handleSubmit} className="gap-2 rounded-0 d-flex align-items-center" disabled={submitting}>
+          <Button
+            variant="dark"
+            onClick={handleSubmit}
+            className="gap-2 rounded-0 d-flex align-items-center"
+            disabled={submitting}
+          >
             {submitting && <Spinner size="sm" animation="border" />}
             Confirm Selection
           </Button>

@@ -1,0 +1,110 @@
+"use client";
+import React, { useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { ShoppingCart, X } from "lucide-react";
+import { useShopContext } from "@/context/ShopContext";
+import { useAuth } from "@/context/AuthContext";
+
+export default function CartIcon() {
+  const { cartProducts, totalPrice } = useShopContext();
+  const { customer } = useAuth();
+  const [isHovered, setIsHovered] = useState(false);
+
+  // Calculate total items (sum of quantities)
+  const itemCount = cartProducts.reduce((acc, item) => acc + item.quantity, 0);
+
+  // Auth Guard: If not logged in, show icon but redirect to login on click
+  if (!customer) {
+      return (
+        <div className="position-relative d-flex align-items-center h-100">
+             <Link href="/login" className="nav-icon-item link position-relative text-dark">
+                <ShoppingCart />
+             </Link>
+        </div>
+      );
+  }
+
+  return (
+    <div 
+        className="position-relative d-flex align-items-center h-100"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+    >
+      <Link href="/view-cart" className="nav-icon-item link position-relative text-dark">
+        <ShoppingCart />
+        {itemCount > 0 && (
+            <span className="top-0 position-absolute start-100 translate-middle badge rounded-pill bg-danger" style={{ fontSize: '0.6rem' }}>
+                {itemCount}
+            </span>
+        )}
+      </Link>
+
+      {/* Mini Cart Dropdown */}
+      {isHovered && (
+        <div
+            className="p-3 bg-white border shadow-lg position-absolute end-0 top-100 rounded-3 dropdown-menu-custom"
+            style={{ width: '320px', zIndex: 1000, marginTop: '10px' }}
+        >
+            {/* Arrow/Triangle */}
+            <div 
+                className="bg-white position-absolute border-top border-start" 
+                style={{ width: '12px', height: '12px', top: '-7px', right: '10px', transform: 'rotate(45deg)' }}
+            ></div>
+
+            <div className="pb-2 mb-3 d-flex justify-content-between align-items-center border-bottom">
+                <h6 className="mb-0 fw-bold">Shopping Cart ({itemCount})</h6>
+                <span className="text-muted small">${totalPrice.toFixed(2)}</span>
+            </div>
+
+            {cartProducts.length === 0 ? (
+                <p className="py-3 text-center text-muted small">Your cart is empty.</p>
+            ) : (
+                <div className="gap-3 mb-3 d-flex flex-column" style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                    {cartProducts.slice(0, 3).map((item) => (
+                        <div key={item.id} className="gap-2 d-flex">
+                            <div className="flex-shrink-0 overflow-hidden rounded position-relative bg-light" style={{ width: '60px', height: '60px' }}>
+                                <Image 
+                                    src={item.imgSrc || "https://placehold.co/100x100"} 
+                                    alt={item.title} 
+                                    fill 
+                                    className="object-fit-cover"
+                                />
+                            </div>
+                            <div className="overflow-hidden flex-grow-1">
+                                <p className="mb-0 small fw-bold text-truncate">{item.title}</p>
+                                <p className="mb-0 x-small text-muted text-truncate">{item.variantTitle}</p>
+                                <p className="mb-0 small text-primary">{item.quantity} x ${item.price.toFixed(2)}</p>
+                            </div>
+                        </div>
+                    ))}
+                    {cartProducts.length > 3 && (
+                        <p className="mb-0 text-center x-small text-muted">And {cartProducts.length - 3} more items...</p>
+                    )}
+                </div>
+            )}
+
+            <div className="gap-2 d-grid">
+                <Link href="/view-cart" className="btn btn-dark btn-sm rounded-pill">
+                    View Cart
+                </Link>
+                {/* <Link href="/checkout" className="btn btn-outline-dark btn-sm rounded-pill">
+                    Checkout
+                </Link> */}
+            </div>
+        </div>
+      )}
+      <style jsx>{`
+        .dropdown-menu-custom::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: 0;
+            width: 100%;
+            height: 20px;
+            background: transparent;
+        }
+      `}</style>
+    </div>
+  );
+}
