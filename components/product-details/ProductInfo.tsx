@@ -1,19 +1,18 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
 import { StoreProduct, StoreProductVariant } from "@medusajs/types";
-import { useShopContext } from "@/context/ShopContext";
 import { useAuth } from "@/context/AuthContext";
 import { ShoppingCart, Check, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/common/ToastProvider";
 import QuantitySelect from "../common/QuantitySelect";
+import { medusaSDK } from "@/utils/medusa";
 
 interface ProductInfoProps {
   product: StoreProduct;
 }
 
 export default function ProductInfo({ product }: ProductInfoProps) {
-  const { addToCart, cartLoading } = useShopContext();
   const { customer } = useAuth();
   const router = useRouter();
   const { showToast } = useToast();
@@ -69,11 +68,16 @@ export default function ProductInfo({ product }: ProductInfoProps) {
 
     setIsAdding(true);
     try {
-      console.log('%c [ selectedVariant ]-73', 'font-size:13px; background:pink; color:#bf2c9f;', selectedVariant)
-      await addToCart({
+      const cartId = localStorage.getItem("cart_id");
+      if (!cartId) {
+        throw new Error("No cart found");
+      }
+
+      await medusaSDK.store.cart.createLineItem(cartId, {
         variant_id: selectedVariant.id,
         quantity: quantity,
       });
+      router.refresh();
 
       setIsAdded(true);
       showToast("Added to cart successfully", "success");
@@ -175,7 +179,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
         {/* Add to Cart */}
         <button
           onClick={handleAddToCart}
-          disabled={!selectedVariant || isAdding || isAdded || cartLoading}
+          disabled={!selectedVariant || isAdding || isAdded}
           className={`btn flex-grow-1 rounded-pill d-flex align-items-center justify-content-center gap-2 ${
             isAdded ? "btn-success" : "btn-dark"
           }`}

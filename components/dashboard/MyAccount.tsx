@@ -9,6 +9,7 @@ import Sidebar from "./Sidebar";
 import { useAuth } from "@/context/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { medusaSDK } from "@/utils/medusa";
+import { Eye } from "lucide-react";
 
 export default function MyAccount() {
   const { customer } = useAuth();
@@ -278,112 +279,152 @@ export default function MyAccount() {
               {/* 5. Orders Table */}
               <div className="mb-5">
                 <h4 className="mb-4">Recent Orders</h4>
-                <div className="p-3 bg-white account-box-shadow table-responsive rounded-4">
-                  <table className="table mb-0 align-middle table-hover w-100">
-                    <thead className="bg-light">
-                      <tr>
-                        <th className="p-3 border-bottom-0 text-muted text-small text-uppercase">Order ID</th>
-                        <th className="p-3 border-bottom-0 text-muted text-small text-uppercase">Product Details</th>
-                        <th className="p-3 border-bottom-0 text-muted text-small text-uppercase">Total</th>
-                        <th className="p-3 border-bottom-0 text-muted text-small text-uppercase">Status</th>
-                        <th className="p-3 border-bottom-0 text-muted text-small text-uppercase">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {isLoading ? (
+                <div
+                  className="overflow-hidden bg-white rounded-3"
+                  style={{
+                    boxShadow: "0 2px 12px rgba(0, 0, 0, 0.08)",
+                    border: "1px solid rgba(0,0,0,0.05)",
+                  }}
+                >
+                  <div className="table-responsive">
+                    <table className="table mb-0 align-middle" style={{ fontSize: "0.8125rem" }}>
+                      <colgroup>
+                        <col style={{ width: "8%", minWidth: "70px" }} />
+                        <col style={{ width: "37%", minWidth: "250px" }} />
+                        <col style={{ width: "12%", minWidth: "90px" }} />
+                        <col style={{ width: "10%", minWidth: "80px" }} />
+                        <col style={{ width: "33%", minWidth: "240px" }} />
+                      </colgroup>
+                      <thead className="bg-light">
                         <tr>
-                          <td colSpan={5} className="p-4 text-center">Loading orders...</td>
+                          <th className="py-2 ps-3 border-bottom-0 text-muted text-uppercase small fw-bold" style={{ letterSpacing: "0.5px" }}>Order</th>
+                          <th className="py-2 border-bottom-0 text-muted text-uppercase small fw-bold" style={{ letterSpacing: "0.5px" }}>Products</th>
+                          <th className="py-2 border-bottom-0 text-muted text-uppercase small fw-bold text-end" style={{ letterSpacing: "0.5px" }}>Total</th>
+                          <th className="py-2 text-center border-bottom-0 text-muted text-uppercase small fw-bold" style={{ letterSpacing: "0.5px" }}>Status</th>
+                          <th className="py-2 pe-3 border-bottom-0 text-muted text-uppercase small fw-bold text-end" style={{ letterSpacing: "0.5px" }}>Action</th>
                         </tr>
-                      ) : orders.length === 0 ? (
-                        <tr>
-                          <td colSpan={5} className="p-4 text-center">No recent orders found.</td>
-                        </tr>
-                      ) : (
-                        orders.map((order, index) => (
-                          <tr key={order.id} className="border-bottom-0">
-                            <td className="p-3">
-                              <span className="fw-bold text-dark">
-                                #{order.display_id}
-                              </span>
-                              <div className="mt-1 text-muted text-small">
-                                {new Date(order.created_at).toLocaleDateString()}
-                              </div>
-                            </td>
-                            <td className="p-3">
-                              {order.items?.slice(0, 1).map((item) => (
-                                <div key={item.id} className="gap-3 d-flex align-items-center">
-                                  <div
-                                    className="flex-shrink-0 border rounded position-relative"
-                                    style={{ width: "50px", height: "50px" }}
-                                  >
-                                    <Image
-                                      src={item.thumbnail || "https://placehold.co/50"}
-                                      alt={item.title}
-                                      fill
-                                      className="rounded object-fit-cover"
-                                    />
-                                  </div>
-                                  <div>
-                                    <h6
-                                      className="mb-1 text-truncate"
-                                      style={{ maxWidth: "180px" }}
-                                    >
-                                      <Link
-                                        href={`/product-detail/${item.variant?.product_id || ""}`}
-                                        className="text-dark"
-                                      >
-                                        {item.title}
-                                      </Link>
-                                    </h6>
-                                    <div className="text-small text-muted">
-                                      {item.variant_title && <span>{item.variant_title} | </span>}
-                                      Qty: {item.quantity}
-                                      {order.items.length > 1 && <span className="ms-1"> + {order.items.length - 1} more</span>}
-                                    </div>
-                                  </div>
-                                </div>
-                              ))}
-                            </td>
-                            <td className="p-3">
-                              <span className="fw-bold">
-                                {order.currency_code?.toUpperCase()} {(order.total / 100).toFixed(2)}
-                              </span>
-                            </td>
-                            <td className="p-3">
-                              <span
-                                className={`badge px-3 py-2 ${
-                                  order.status === "completed"
-                                    ? "bg-success-subtle text-success"
-                                    : order.status === "pending"
-                                    ? "bg-warning-subtle text-warning"
-                                    : order.status === "canceled"
-                                    ? "bg-danger-subtle text-danger"
-                                    : "bg-info-subtle text-info"
-                                }`}
-                              >
-                                {order.status}
-                              </span>
-                            </td>
-                            <td className="p-3">
-                              <div className="gap-2 d-flex">
-                                <Link
-                                  href={`/account-orders-detail/${order.id}`}
-                                  className=" tf-btn btn-outline-dark type-very-small rounded-pill hover-effect"
-                                >
-                                  View
-                                </Link>
-                                {order.status === "completed" && (
-                                  <button className=" tf-btn btn-fill type-very-small rounded-pill hover-effect">
-                                    Reorder
-                                  </button>
-                                )}
-                              </div>
+                      </thead>
+                      <tbody>
+                        {isLoading ? (
+                          <tr>
+                            <td colSpan={5} className="py-5 text-center text-muted">
+                              Loading orders...
                             </td>
                           </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
+                        ) : orders.length === 0 ? (
+                          <tr>
+                            <td colSpan={5} className="py-5 text-center text-muted">
+                              No recent orders found.
+                            </td>
+                          </tr>
+                        ) : (
+                          orders.map((order) => (
+                            <tr key={order.id} style={{ transition: "background-color 0.2s" }}>
+                              <td className="py-2 fw-medium ps-3">
+                                #{order.display_id}
+                              </td>
+                              <td className="py-2">
+                                {order.items?.slice(0, 1).map((item) => (
+                                  <div
+                                    key={item.id}
+                                    className="gap-2 mb-1 d-flex align-items-center"
+                                  >
+                                    <div
+                                      className="flex-shrink-0"
+                                      style={{
+                                        width: "36px",
+                                        height: "36px",
+                                        position: "relative",
+                                        overflow: "hidden",
+                                        borderRadius: "6px",
+                                        boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
+                                        border: "1px solid rgba(0,0,0,0.05)",
+                                      }}
+                                    >
+                                      <Image
+                                        src={item.thumbnail || "https://placehold.co/100"}
+                                        alt={item.title}
+                                        fill
+                                        className="object-fit-cover"
+                                        sizes="36px"
+                                      />
+                                    </div>
+                                    <div className="flex-grow-1" style={{ minWidth: 0 }}>
+                                      <h6
+                                        className="mb-0 text-truncate"
+                                        style={{
+                                          fontSize: "0.8125rem",
+                                          maxWidth: "220px",
+                                          lineHeight: "1.2",
+                                        }}
+                                      >
+                                        <Link
+                                          href={`/product-detail/${
+                                            item.product_id ||
+                                            item.variant?.product_id ||
+                                            ""
+                                          }`}
+                                          className="text-dark text-decoration-none hover-primary"
+                                        >
+                                          {item.title}
+                                        </Link>
+                                      </h6>
+                                      <div className="gap-1 mt-0 text-muted small d-flex align-items-center">
+                                        {item.variant_title && (
+                                          <span className="px-1 border badge bg-light text-secondary fw-normal" style={{ fontSize: "0.65rem" }}>
+                                            {item.variant_title}
+                                          </span>
+                                        )}
+                                        <span style={{ fontSize: "0.7rem" }}>
+                                          x{item.quantity}
+                                          {order.items.length > 1 && ` + ${order.items.length - 1} more`}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </td>
+                              <td className="py-2 fw-medium text-end font-monospace">
+                                {order.currency_code?.toUpperCase()} {(order.total / 100).toFixed(2)}
+                              </td>
+                              <td className="py-2 text-center">
+                                <span
+                                  className={`badge px-2 py-0.5 shadow-sm fw-normal rounded-pill ${
+                                    order.status === "completed"
+                                      ? "bg-success text-white"
+                                      : order.status === "pending"
+                                      ? "bg-warning text-dark"
+                                      : "bg-danger text-white"
+                                  }`}
+                                  style={{
+                                    fontSize: "0.7rem",
+                                    letterSpacing: "0.3px",
+                                  }}
+                                >
+                                  {order.status}
+                                </span>
+                              </td>
+                              <td className="py-2 pe-3">
+                                <div className="d-flex justify-content-end">
+                                  <Link
+                                    href={`/account-orders-detail/${order.id}`}
+                                    className="gap-1 px-2 py-0.5 border-0 btn btn-outline-secondary btn-sm d-inline-flex align-items-center bg-light text-dark"
+                                    style={{
+                                      fontSize: "0.75rem",
+                                      boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+                                    }}
+                                  >
+                                    <Eye size={13} />
+                                    <span className="d-none d-xl-inline">View</span>
+                                  </Link>
+                                </div>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
                 <div className="mt-4 text-center">
                   <Link href="/account-orders" className="tf-btn btn-line">

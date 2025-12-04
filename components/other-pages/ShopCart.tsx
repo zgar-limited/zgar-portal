@@ -30,28 +30,31 @@ import {
   Toast,
   ToastContainer,
 } from "react-bootstrap";
-import { useShopContext } from "@/context/ShopContext";
 import { useRouter } from "next/navigation";
 import {
   StoreCartResponse,
   StorePaymentCollectionResponse,
+  StoreCart,
+  StoreProduct,
 } from "@medusajs/types";
 
-export default function ShopCart() {
-  return <ShopCartContent />;
+export default function ShopCart({
+  cart,
+  products,
+}: {
+  cart: StoreCart | null;
+  products: StoreProduct[];
+}) {
+  return <ShopCartContent cart={cart} products={products} />;
 }
 
-function ShopCartContent() {
-  const {
-    cartProducts,
-    removeFromCart,
-    updateCartItem,
-    refreshCart,
-    cartLoading,
-    cart,
-    getSkuDetails,
-  } = useShopContext();
-
+function ShopCartContent({
+  cart,
+  products,
+}: {
+  cart: StoreCart | null;
+  products: StoreProduct[];
+}) {
   const [showModal, setShowModal] = useState(false);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -68,6 +71,24 @@ function ShopCartContent() {
   const [selectedTotalWeight, setSelectedTotalWeight] = useState(0);
 
   const itemsPerPage = 5;
+
+  const cartProducts = React.useMemo(() => {
+    if (!cart?.items) return [];
+    return cart.items.map((item: any) => ({
+      id: item.id, // Line item ID for removal/update
+      variantId: item.variant_id,
+      productId: item.product_id,
+      title: item.product_title,
+      variantTitle: item.variant_title,
+      price: item.unit_price, // Medusa prices are usually in cents, check if division is needed. Assuming unit_price is correct for now or adjust if needed.
+      quantity: item.quantity,
+      imgSrc: item.thumbnail || "https://picsum.photos/100/100", // Fallback image
+      options: item.variant?.options || [],
+      metadata: item.metadata || {},
+      weight: item.variant?.weight || 0,
+      // Add other necessary fields mapped from Medusa item
+    }));
+  }, [cart]);
 
   // Reset page when cart items change significantly (e.g. all deleted)
   useEffect(() => {
@@ -118,12 +139,46 @@ function ShopCartContent() {
     }
   };
 
+  const router = useRouter();
+
+  const removeFromCart = async (lineId: string) => {
+    if (!cart?.id) return;
+    try {
+      await medusaSDK.store.cart.deleteLineItem(cart.id, lineId);
+      router.refresh();
+    } catch (error) {
+      console.error("Error removing from cart:", error);
+      throw error;
+    }
+  };
+
+  const updateCartItem = async (lineId: string, quantity: number) => {
+    if (!cart?.id) return;
+    try {
+      await medusaSDK.store.cart.updateLineItem(cart.id, lineId, {
+        quantity,
+      });
+      router.refresh();
+    } catch (error) {
+      console.error("Error updating cart item:", error);
+      throw error;
+    }
+  };
+
   const handleBatchDelete = async () => {
     if (selectedItems.length === 0) return;
+    if (!cart?.id) return;
 
     setIsDeleting(true);
     try {
-      await Promise.all(selectedItems.map((id) => removeFromCart(id)));
+      await medusaSDK.client.fetch(`/store/zgar/cart/delete`, {
+        method: "POST",
+        body: {
+          cart_id: cart.id,
+          items: selectedItems,
+        },
+      });
+      router.refresh();
       setSelectedItems([]);
     } catch (error) {
       console.error("Error deleting items:", error);
@@ -156,6 +211,7 @@ function ShopCartContent() {
 
   const handleCheckout = async () => {
     if (selectedItems.length === 0) return;
+    if (!cart?.id) return;
 
     setCheckoutLoading(true);
 
@@ -169,17 +225,18 @@ function ShopCartContent() {
           metadata: p.metadata,
         }));
 
-      await medusaSDK.store.cart.complete(cart.id);
+      // await medusaSDK.store.cart.complete(cart.id);
+
       // if (!tempCart) throw new Error("Failed to create checkout session");
-      // await medusaSDK.client.fetch("/store/zgar/cart/complete", {
-      //   method: "POST",
-      //   body: {
-      //     // cart_id: tempCart.id,
-      //     // sales_channel_id: "sc_01K9KAK0MDCMSWCXRV0WH70EQK",
-      //     items: itemsToCheckout,
-      //     // currency_code: "usd",
-      //   },
-      // });
+      await medusaSDK.client.fetch("/store/zgar/cart/complete", {
+        method: "POST",
+        body: {
+          // cart_id: tempCart.id,
+          // sales_channel_id: "sc_01K9KAK0MDCMSWCXRV0WH70EQK",
+          items: itemsToCheckout,
+          // currency_code: "usd",
+        },
+      });
     } catch (error: any) {
       console.error("Checkout error:", error);
       setToastMessage(error.message || "Failed to submit order");
@@ -207,16 +264,6 @@ function ShopCartContent() {
           <Col xxl={9} xl={8}>
             <Form onSubmit={(e) => e.preventDefault()}>
               <div className="table-responsive position-relative">
-                {cartLoading && (
-                  <div
-                    className="top-0 bg-white bg-opacity-75 position-absolute start-0 w-100 h-100 d-flex justify-content-center align-items-center"
-                    style={{ zIndex: 10 }}
-                  >
-                    <div className="spinner-border text-primary" role="status">
-                      <span className="visually-hidden">Loading...</span>
-                    </div>
-                  </div>
-                )}
                 <Table hover className="align-middle tf-table-page-cart">
                   <thead>
                     <tr>
@@ -484,6 +531,8 @@ function ShopCartContent() {
       <ProductsSelectModal
         show={showModal}
         onHide={() => setShowModal(false)}
+        cart={cart}
+        products={products}
       />
 
       <ToastContainer

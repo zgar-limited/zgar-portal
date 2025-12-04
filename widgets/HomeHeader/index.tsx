@@ -7,10 +7,16 @@ import LanguageSelect from "@/components/common/LanguageSelect";
 import { useAuth } from "@/context/AuthContext";
 import CartIcon from "@/components/header/CartIcon";
 import UserIcon from "@/components/header/UserIcon";
+import { StoreCart } from "@medusajs/types";
 
 export default function HomeHeader({
   containerFull = true,
   parentClass = "tf-header header-fix header-abs-1",
+  cart,
+}: {
+  containerFull?: boolean;
+  parentClass?: string;
+  cart?: StoreCart | null;
 }) {
   const { customer } = useAuth();
   const [isScrollingUp, setIsScrollingUp] = useState(false);
@@ -91,7 +97,7 @@ export default function HomeHeader({
               </li> */}
               <LanguageSelect />
               <li className="d-none d-lg-flex align-items-center ms">
-                  <CartIcon />
+                  <CartIcon cart={cart || null} />
               </li>
             </ul>
 

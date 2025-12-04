@@ -8,8 +8,9 @@ import React, {
   useRef,
   useMemo,
 } from "react";
-import { useShopContext } from "./ShopContext";
 import { useToast } from "@/components/common/ToastProvider";
+import { medusaSDK } from "@/utils/medusa";
+import { useRouter } from "next/navigation";
 
 const dataContext = createContext(undefined);
 
@@ -21,9 +22,9 @@ export const useContextElement = () => {
   return context;
 };
 
-export default function Context({ children }) {
-  const { cart, addToCart, removeFromCart, updateCartItem, cartLoading } = useShopContext();
+export default function Context({ children, cart }) {
   const { showToast } = useToast();
+  const router = useRouter();
   const [wishList, setWishList] = useState([]);
   const [compareItem, setCompareItem] = useState([]);
   const [quickViewItem, setQuickViewItem] = useState(null);
@@ -99,10 +100,11 @@ export default function Context({ children }) {
   };
 
   const addProductToCart = async (productOrId, qty = 1) => {
+    if (!cart?.id) return;
     let variantId;
     let quantity = qty;
 
-    if (typeof productOrId === 'object') {
+    if (typeof productOrId === "object") {
       // Assuming product object has a default variant or we need to select one.
       // For now, let's assume we pick the first variant if available, or the ID itself is the variant ID if passed explicitly.
       // Ideally, the UI should pass a variant ID.
@@ -112,52 +114,62 @@ export default function Context({ children }) {
       } else {
         variantId = productOrId.id; // Fallback
       }
-      
+
       if (productOrId.quantity) {
         quantity = productOrId.quantity;
       }
     } else {
       // If it's an ID, we assume it's a variant ID or we need to find the product to get the variant.
-      // Since we don't have full product list here easily without fetching, 
+      // Since we don't have full product list here easily without fetching,
       // we might need to rely on the caller passing a valid variant ID.
       // However, existing code might be passing product ID.
       // Let's try to find it in allProducts if possible, or assume it's a variant ID.
       const product = allProducts.find((p) => p.id == productOrId);
       if (product && product.variants && product.variants.length > 0) {
-         variantId = product.variants[0].id; // Default to first variant
+        variantId = product.variants[0].id; // Default to first variant
       } else {
-         variantId = productOrId;
+        variantId = productOrId;
       }
     }
 
     if (variantId) {
       try {
-        await addToCart(variantId, quantity);
+        await medusaSDK.store.cart.createLineItem(cart.id, {
+          variant_id: variantId,
+          quantity,
+        });
+        router.refresh();
         showToast("Added to cart successfully", "success");
       } catch (error) {
         console.error("Failed to add to cart:", error);
         showToast("Failed to add to cart. Please try again.", "danger");
       }
     } else {
-        showToast("Product variant not found", "danger");
+      showToast("Product variant not found", "danger");
     }
   };
 
   const addEmptyProductToCart = (id, qty = 1) => {
-     // This seems to be for adding a placeholder? 
-     // With Medusa, we probably just want to add the real product.
-     addProductToCart(id, qty);
+    // This seems to be for adding a placeholder?
+    // With Medusa, we probably just want to add the real product.
+    addProductToCart(id, qty);
   };
 
   const removeProductFromCart = async (id) => {
+    if (!cart?.id) return;
     // id here corresponds to the line item ID in our mapped cartProducts
-    await removeFromCart(id);
+    await medusaSDK.store.cart.deleteLineItem(cart.id, id);
+    router.refresh();
   };
 
   const updateQuantity = async (id, qty) => {
+    if (!cart?.id) return;
     if (qty < 1) return;
     // id is line item ID
-    await updateCartItem(id, qty);
+    await medusaSDK.store.cart.updateLineItem(cart.id, id, {
+      quantity: qty,
+    });
+    router.refresh();
   };
 
   const quantityInCart = (id) => {
@@ -213,7 +225,6 @@ export default function Context({ children }) {
       updateQuantity,
       quantityInCart,
       wishList,
-      cartLoading, // Expose loading state
     }),
     [
       cartProducts,
@@ -236,7 +247,6 @@ export default function Context({ children }) {
       // updateQuantity,
       // quantityInCart,
       wishList,
-      cartLoading,
     ]
   );
 

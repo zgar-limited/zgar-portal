@@ -13,8 +13,9 @@ import CartModal from "@/components/modals/CartModal";
 import GlobalEffectsProvider from "@/components/common/GlobalEffectProvider";
 import QueryContext from "@/context/QueryContext";
 import { AuthProvider } from "@/context/AuthContext";
-import { ShopProvider } from "@/context/ShopContext";
 import ToastProvider from "@/components/common/ToastProvider";
+import { getCart } from "@/utils/server-cart";
+import CartManager from "@/components/common/CartManager";
 
 // import ScrollTop from "@/components/common/ScrollTop";
 // import GlobalEffectsProvider from "@/components/common/FlobalEffectProvider";
@@ -22,34 +23,34 @@ export const metadata = {
   title: "Zgar Vape Website",
   description: "Zgar - Home",
 };
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const cart = await getCart();
   return (
     <html lang="zh-hant">
       <head></head>
       <body>
         <main id="wrapper">
+          <CartManager />
           <AuthProvider>
             <QueryContext>
               <ToastProvider>
-                <ShopProvider>
-                  <Context>
-                    {children}
-                    <CartModal />
-              {/* <CompareColorModal /> */}
-              {/* <CompareModal /> */}
-              {/* <DemoModal /> */}
-              <MobileMenu />
-              {/* <QuestionModal /> */}
-              {/* <QuickViewModal /> */}
-              {/* <SearchModal /> */}
-              {/* <ShareModal /> */}
-              {/* <ShipAndDaliveryModal /> */}
-              {/* <SizeGuideModal /> */}
-              {/* <ToolbarModal /> */}
+                <Context cart={cart}>
+                  {children}
+                  <CartModal />
+                  {/* <CompareColorModal /> */}
+                  {/* <CompareModal /> */}
+                  {/* <DemoModal /> */}
+                  <MobileMenu />
+                  {/* <QuestionModal /> */}
+                  {/* <QuickViewModal /> */}
+                  {/* <SearchModal /> */}
+                  {/* <ShareModal /> */}
+                  {/* <ShipAndDaliveryModal /> */}
+                  {/* <SizeGuideModal /> */}
+                  {/* <ToolbarModal /> */}
                   {/* <NewsLetterModal /> */}
                   {/* <ProductsSelectModal /> */}
-                  </Context>
-                </ShopProvider>
+                </Context>
               </ToastProvider>
             </QueryContext>
           </AuthProvider>

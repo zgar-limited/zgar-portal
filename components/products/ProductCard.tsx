@@ -4,18 +4,18 @@ import Link from "next/link";
 import Image from "next/image";
 import { ShoppingCart, Check, Loader2 } from "lucide-react";
 import { StoreProduct } from "@medusajs/types";
-import { useShopContext } from "@/context/ShopContext";
 import { useAuth } from "@/context/AuthContext";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/common/ToastProvider";
+import { medusaSDK } from "@/utils/medusa";
+import { getCartId } from "@/utils/server-cart";
 
 interface ProductCardProps {
   product: any; // Using any for flexible mapping from Medusa/Internal types
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const { addToCart, cartLoading } = useShopContext();
   const { customer } = useAuth();
   const router = useRouter();
   const { showToast } = useToast();
@@ -55,10 +55,16 @@ export default function ProductCard({ product }: ProductCardProps) {
 
     setAdding(true);
     try {
-      await addToCart({
+      const cartId = localStorage.getItem("cart_id");
+      if (!cartId) {
+        throw new Error("No cart found");
+      }
+
+      await medusaSDK.store.cart.createLineItem(cartId, {
         variant_id: variantId,
         quantity: 1,
       });
+      router.refresh();
 
       setIsAdded(true);
       showToast("Added to cart successfully", "success");
@@ -104,7 +110,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         <div className="bottom-0 p-2 transition-transform duration-300 position-absolute start-0 w-100 translate-y-100 group-hover-translate-y-0 d-none d-md-block">
           <button
             onClick={handleQuickAdd}
-            disabled={adding || isAdded || cartLoading}
+            disabled={adding || isAdded}
             className={`gap-2 shadow-sm btn w-100 btn-sm rounded-pill d-flex align-items-center justify-content-center ${
               isAdded ? "btn-success" : "btn-dark"
             }`}
@@ -139,7 +145,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           {/* Mobile Cart Icon (Always visible on mobile) */}
           <button
             onClick={handleQuickAdd}
-            disabled={adding || isAdded || cartLoading}
+            disabled={adding || isAdded}
             className={`p-1 btn btn-sm rounded-circle d-md-none d-flex align-items-center justify-content-center ${
               isAdded ? "btn-success text-white" : "btn-outline-dark"
             }`}

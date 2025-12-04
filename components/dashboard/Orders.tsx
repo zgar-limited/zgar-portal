@@ -261,40 +261,34 @@ export default function Orders() {
                               <div className="gap-1 d-flex justify-content-end">
                                 <Link
                                   href={`/account-orders-detail/${order.id}`}
-                                  passHref
+                                  className="btn btn-outline-secondary btn-sm gap-1 px-2 py-0.5 border-0 d-inline-flex align-items-center bg-light text-dark"
+                                  title="View Details"
+                                  style={{
+                                    fontSize: "0.75rem",
+                                    boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+                                  }}
                                 >
-                                  <Button
-                                    variant="outline-secondary"
-                                    size="sm"
-                                    className="gap-1 px-2 py-0.5 border-0 d-inline-flex align-items-center bg-light text-dark"
-                                    title="View Details"
-                                    style={{
-                                      fontSize: "0.75rem",
-                                      boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
-                                    }}
-                                  >
-                                    <Eye size={13} />
-                                    <span className="d-none d-xl-inline">
-                                      View
-                                    </span>
-                                  </Button>
+                                  <Eye size={13} />
+                                  <span className="d-none d-xl-inline">
+                                    View
+                                  </span>
                                 </Link>
                                 <Button
                                   variant={
-                                    order.zgar_order
+                                    (order as any).zgar_order
                                       ?.payment_voucher_uploaded_at
                                       ? "outline-success"
                                       : "outline-primary"
                                   }
                                   size="sm"
                                   className={`gap-1 px-2 py-0.5 border-0 d-inline-flex align-items-center ${
-                                    order.zgar_order
+                                    (order as any).zgar_order
                                       ?.payment_voucher_uploaded_at
                                       ? "bg-success-subtle text-success"
                                       : "bg-primary-subtle text-primary"
                                   }`}
                                   title={
-                                    order.zgar_order
+                                    (order as any).zgar_order
                                       ?.payment_voucher_uploaded_at
                                       ? "Edit Payment Voucher"
                                       : "Upload Payment Voucher"
@@ -302,7 +296,7 @@ export default function Orders() {
                                   onClick={() => {
                                     setSelectedOrderId(order.id);
                                     const vouchers =
-                                      order.zgar_order?.payment_voucher_url;
+                                      (order as any).zgar_order?.payment_voucher_url;
                                     let voucherList: string[] = [];
                                     if (typeof vouchers === "string") {
                                       voucherList = vouchers
@@ -320,7 +314,7 @@ export default function Orders() {
                                 >
                                   <Upload size={13} />
                                   <span className="d-none d-xl-inline">
-                                    {order.zgar_order
+                                    {(order as any).zgar_order
                                       ?.payment_voucher_uploaded_at
                                       ? "Edit Voucher"
                                       : "Voucher"}
@@ -328,20 +322,20 @@ export default function Orders() {
                                 </Button>
                                 <Button
                                   variant={
-                                    order.zgar_order
+                                    (order as any).zgar_order
                                       ?.packing_requirement_uploaded_at
                                       ? "outline-info"
                                       : "outline-secondary"
                                   }
                                   size="sm"
                                   className={`gap-1 px-2 py-0.5 border-0 d-inline-flex align-items-center ${
-                                    order.zgar_order
+                                    (order as any).zgar_order
                                       ?.packing_requirement_uploaded_at
                                       ? "bg-info-subtle text-info-emphasis"
                                       : "bg-light text-secondary"
                                   }`}
                                   title={
-                                    order.zgar_order
+                                    (order as any).zgar_order
                                       ?.packing_requirement_uploaded_at
                                       ? "Edit Packing Requirements"
                                       : "Upload Packing Requirements"
@@ -349,9 +343,9 @@ export default function Orders() {
                                   onClick={() => {
                                     setSelectedOrderId(order.id);
                                     const files =
-                                      order.zgar_order
+                                      (order as any).zgar_order
                                         ?.packing_requirement_url ||
-                                      order.zgar_order?.packing_requirement;
+                                      (order as any).zgar_order?.packing_requirement;
                                     let fileList: string[] = [];
                                     if (typeof files === "string") {
                                       fileList = files
@@ -371,7 +365,7 @@ export default function Orders() {
                                 >
                                   <Package size={13} />
                                   <span className="d-none d-xl-inline">
-                                    {order.zgar_order
+                                    {(order as any).zgar_order
                                       ?.packing_requirement_uploaded_at
                                       ? "Edit Packing"
                                       : "Packing"}

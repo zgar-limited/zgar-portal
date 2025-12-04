@@ -3,13 +3,36 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ShoppingCart, X } from "lucide-react";
-import { useShopContext } from "@/context/ShopContext";
 import { useAuth } from "@/context/AuthContext";
+import { StoreCart } from "@medusajs/types";
 
-export default function CartIcon() {
-  const { cartProducts, totalPrice } = useShopContext();
+export default function CartIcon({ cart }: { cart: StoreCart | null }) {
   const { customer } = useAuth();
   const [isHovered, setIsHovered] = useState(false);
+
+  const cartProducts = React.useMemo(() => {
+    if (!cart?.items) return [];
+    return cart.items.map((item: any) => ({
+      id: item.id,
+      variantId: item.variant_id,
+      productId: item.product_id,
+      title: item.product_title,
+      variantTitle: item.variant_title,
+      price: item.unit_price,
+      quantity: item.quantity,
+      imgSrc: item.thumbnail || "https://picsum.photos/100/100",
+      options: item.variant?.options || [],
+      metadata: item.metadata || {},
+      weight: item.variant?.weight || 0,
+    }));
+  }, [cart]);
+
+  const totalPrice = React.useMemo(() => {
+    return cartProducts.reduce(
+      (acc, product) => acc + product.quantity * product.price,
+      0
+    );
+  }, [cartProducts]);
 
   // Calculate total items (sum of quantities)
   const itemCount = cartProducts.reduce((acc, item) => acc + item.quantity, 0);

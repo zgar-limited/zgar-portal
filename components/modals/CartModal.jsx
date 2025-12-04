@@ -2,18 +2,18 @@
 import Link from "next/link";
 import Image from "next/image";
 import React, { useState } from "react";
-import { useShopContext } from "@/context/ShopContext";
 import { cartSimilerItems } from "@/data/products";
+import { useContextElement } from "@/context/Context";
 
 export default function CartModal() {
-  const { cartProducts, totalPrice, removeFromCart, cartLoading } =
-    useShopContext();
+  const { cartProducts, totalPrice, removeProductFromCart, cartLoading } =
+    useContextElement();
   const [removingId, setRemovingId] = useState(null);
 
   const handleRemove = async (id) => {
     setRemovingId(id);
     try {
-      await removeFromCart(id);
+      await removeProductFromCart(id);
     } catch (error) {
       console.error("Error removing item:", error);
     } finally {
