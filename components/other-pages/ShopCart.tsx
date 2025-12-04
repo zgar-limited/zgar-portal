@@ -44,7 +44,6 @@ export default function ShopCart() {
 function ShopCartContent() {
   const {
     cartProducts,
-    totalPrice,
     removeFromCart,
     updateCartItem,
     refreshCart,
@@ -65,6 +64,9 @@ function ShopCartContent() {
     "success"
   );
 
+  const [selectedTotalPrice, setSelectedTotalPrice] = useState(0);
+  const [selectedTotalWeight, setSelectedTotalWeight] = useState(0);
+
   const itemsPerPage = 5;
 
   // Reset page when cart items change significantly (e.g. all deleted)
@@ -81,6 +83,24 @@ function ShopCartContent() {
       prev.filter((id) => cartProducts.some((p) => p.id === id))
     );
   }, [cartProducts, itemsPerPage]); // cartProducts dependency covers length changes and item removal
+
+  useEffect(() => {
+    const selectedProducts = cartProducts.filter((p) =>
+      selectedItems.includes(p.id)
+    );
+
+    const newTotalPrice = selectedProducts.reduce(
+      (acc, product) => acc + product.quantity * product.price,
+      0
+    );
+    setSelectedTotalPrice(newTotalPrice);
+
+    const newTotalWeight = selectedProducts.reduce(
+      (acc, product) => acc + product.quantity * product.weight,
+      0
+    );
+    setSelectedTotalWeight(newTotalWeight);
+  }, [selectedItems, cartProducts]);
 
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
@@ -149,48 +169,17 @@ function ShopCartContent() {
           metadata: p.metadata,
         }));
 
-      // 2. Create temporary cart with selected items using fetch
-      // const createCartRes: StoreCartResponse = await medusaSDK.client.fetch(
-      //   "/store/carts",
-      //   {
-      //     method: "POST",
-      //     body: {
-      //       region_id: "reg_01K9M1A9NHMN4MXBACKAS5F4V1",
-      //       sales_channel_id: "sc_01K9KAK0MDCMSWCXRV0WH70EQK",
-      //       items: itemsToCheckout,
-      //       // currency_code: "usd",
-      //     },
-      //   }
-      // );
-      // const createCartRes: StoreCartResponse =
-      //   await medusaSDK.store.cart.create({
-      //     sales_channel_id: "sc_01K9KAK0MDCMSWCXRV0WH70EQK",
-      //     region_id: "reg_01K9M1A9NHMN4MXBACKAS5F4V1",
-      //     items: itemsToCheckout.map(item => {
-      //       return {...item,}
-      //     })
-      //   });
-
-      // await medusaSDK.client.fetch("/store/custom/cart-add", {
-      //   method:"POST",
+      await medusaSDK.store.cart.complete(cart.id);
+      // if (!tempCart) throw new Error("Failed to create checkout session");
+      // await medusaSDK.client.fetch("/store/zgar/cart/complete", {
+      //   method: "POST",
       //   body: {
-      //     cart_id: createCartRes.cart.id,
+      //     // cart_id: tempCart.id,
+      //     // sales_channel_id: "sc_01K9KAK0MDCMSWCXRV0WH70EQK",
       //     items: itemsToCheckout,
+      //     // currency_code: "usd",
       //   },
       // });
-
-      // const tempCart = createCartRes.cart;
-
-      // if (!tempCart) throw new Error("Failed to create checkout session");
-      await medusaSDK.client.fetch("/store/custom/cart-complete", {
-        method: "POST",
-        body: {
-          // cart_id: tempCart.id,
-          // sales_channel_id: "sc_01K9KAK0MDCMSWCXRV0WH70EQK",
-          items: itemsToCheckout,
-          // currency_code: "usd",
-        },
-      });
     } catch (error: any) {
       console.error("Checkout error:", error);
       setToastMessage(error.message || "Failed to submit order");
@@ -231,7 +220,7 @@ function ShopCartContent() {
                 <Table hover className="align-middle tf-table-page-cart">
                   <thead>
                     <tr>
-                      <th style={{ width: "50px" }}>
+                      <th style={{ width: "50px", minWidth: "50px" }}>
                         <Form.Check
                           type="checkbox"
                           checked={
@@ -241,10 +230,21 @@ function ShopCartContent() {
                           onChange={handleSelectAll}
                         />
                       </th>
-                      <th className="h6">Product</th>
-                      <th className="h6">Price</th>
-                      <th className="h6">Quantity</th>
-                      <th className="h6">Total price</th>
+                      <th className="h6" style={{ minWidth: "300px" }}>
+                        Product
+                      </th>
+                      <th className="h6" style={{ minWidth: "100px" }}>
+                        Price
+                      </th>
+                      <th className="h6" style={{ minWidth: "100px" }}>
+                        Weight
+                      </th>
+                      <th className="h6" style={{ minWidth: "150px" }}>
+                        Quantity
+                      </th>
+                      <th className="h6" style={{ minWidth: "100px" }}>
+                        Total price
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -322,6 +322,9 @@ function ShopCartContent() {
                         </td>
                         <td className="cart_price h6 each-price">
                           ${product.price.toFixed(2)}
+                        </td>
+                        <td className="cart_price h6 each-price">
+                          {product.weight} g
                         </td>
                         <td className="cart_quantity">
                           <div
@@ -433,8 +436,12 @@ function ShopCartContent() {
                 <div className="mb-3 d-flex justify-content-between align-items-center">
                   <h6 className="mb-0 fw-bold">Subtotal</h6>
                   <span className="total fw-bold">
-                    -${totalPrice.toFixed(2)}
+                    -${selectedTotalPrice.toFixed(2)}
                   </span>
+                </div>
+                <div className="mb-3 d-flex justify-content-between align-items-center">
+                  <h6 className="mb-0 fw-bold">Total Weight</h6>
+                  <span className="total fw-bold">{selectedTotalWeight} g</span>
                 </div>
 
                 <hr className="my-3" />
@@ -442,7 +449,7 @@ function ShopCartContent() {
                 <div className="mb-4 d-flex justify-content-between align-items-center">
                   <h5 className="mb-0">Total</h5>
                   <span className="mb-0 total h5 text-primary">
-                    ${totalPrice.toFixed(2)}
+                    ${selectedTotalPrice.toFixed(2)}
                   </span>
                 </div>
                 <div className="gap-2 d-grid">

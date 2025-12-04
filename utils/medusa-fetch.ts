@@ -1,3 +1,5 @@
+import { medusaSDK } from "./medusa";
+
 const MEDUSA_BACKEND_URL =
   process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000";
 const PUBLISHABLE_KEY =
@@ -26,15 +28,26 @@ export async function medusaFetch<T>(
     url += `?${queryString}`;
   }
 
-  const defaultHeaders = {
-    "Content-Type": "application/json",
+  // Get token from medusaSDK
+  const token = await medusaSDK.client.getToken();
+
+  const defaultHeaders: Record<string, string> = {
     "x-publishable-api-key": PUBLISHABLE_KEY,
   };
+
+  if (token) {
+    defaultHeaders["Authorization"] = `Bearer ${token}`;
+  }
+
+  // Only set Content-Type to application/json if body is not FormData
+  if (!(restOptions.body instanceof FormData)) {
+    defaultHeaders["Content-Type"] = "application/json";
+  }
 
   const response = await fetch(url, {
     headers: {
       ...defaultHeaders,
-      ...headers,
+      ...(headers as Record<string, string>),
     },
     ...restOptions,
   });

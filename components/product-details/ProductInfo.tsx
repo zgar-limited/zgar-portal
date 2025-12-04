@@ -3,9 +3,10 @@ import React, { useState, useEffect, useMemo } from "react";
 import { StoreProduct, StoreProductVariant } from "@medusajs/types";
 import { useShopContext } from "@/context/ShopContext";
 import { useAuth } from "@/context/AuthContext";
-import { ShoppingCart, Check, Minus, Plus, Loader2 } from "lucide-react";
+import { ShoppingCart, Check, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/common/ToastProvider";
+import QuantitySelect from "../common/QuantitySelect";
 
 interface ProductInfoProps {
   product: StoreProduct;
@@ -21,7 +22,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
   const [selectedOptions, setSelectedOptions] = useState<
     Record<string, string>
   >({});
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState(50);
   const [isAdding, setIsAdding] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
 
@@ -165,30 +166,11 @@ export default function ProductInfo({ product }: ProductInfoProps) {
       {/* Actions */}
       <div className="gap-3 mt-2 d-flex flex-column flex-sm-row">
         {/* Quantity */}
-        <div
-          className="px-3 border d-flex align-items-center rounded-pill"
-          style={{ height: "48px", width: "fit-content" }}
-        >
-          <button
-            onClick={() => setQuantity(Math.max(1, quantity - 1))}
-            className="p-0 btn btn-link text-dark"
-            disabled={quantity <= 1}
-          >
-            <Minus size={16} />
-          </button>
-          <span
-            className="mx-3 fw-bold"
-            style={{ minWidth: "20px", textAlign: "center" }}
-          >
-            {quantity}
-          </span>
-          <button
-            onClick={() => setQuantity(quantity + 1)}
-            className="p-0 btn btn-link text-dark"
-          >
-            <Plus size={16} />
-          </button>
-        </div>
+        <QuantitySelect
+          quantity={quantity}
+          setQuantity={setQuantity}
+          step={50}
+        />
 
         {/* Add to Cart */}
         <button

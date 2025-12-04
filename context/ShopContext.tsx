@@ -43,6 +43,7 @@ type ShopContextType = {
   ) => Promise<void>;
   cartProducts: any[]; // Using any for UI mapped type for now, or define a specific UI type if strictness needed
   totalPrice: number;
+  totalWeight: number;
   refreshCart: (
     options?: RefetchOptions
   ) => Promise<QueryObserverResult<StoreCart, Error>>;
@@ -64,6 +65,7 @@ export const ShopProvider = ({ children }: { children: React.ReactNode }) => {
   const [cartId, setCartId] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const [totalPrice, setTotalPrice] = useState(0);
+  const [totalWeight, setTotalWeight] = useState(0);
 
   // Initialize cart ID from localStorage
   useEffect(() => {
@@ -82,6 +84,7 @@ export const ShopProvider = ({ children }: { children: React.ReactNode }) => {
         region_id: "reg_01K9M1A9NHMN4MXBACKAS5F4V1",
         currency_code: "usd",
       });
+
       setCartId(cart.id);
       localStorage.setItem("cart_id", cart.id);
       return cart;
@@ -103,11 +106,13 @@ export const ShopProvider = ({ children }: { children: React.ReactNode }) => {
           `/store/carts/${cartId}`,
           {
             method: "GET",
-            query:{
-              fields: "*items,*items.variant_option_values,*items.variant,*items.variant.options,"
-            }
+            query: {
+              fields:
+                "*items,*items.variant_option_values,*items.variant,*items.variant.options",
+            },
           }
         );
+        
 
         return cart;
       } catch (error) {
@@ -192,6 +197,7 @@ export const ShopProvider = ({ children }: { children: React.ReactNode }) => {
       imgSrc: item.thumbnail || "https://picsum.photos/100/100", // Fallback image
       options: item.variant?.options || [],
       metadata: item.metadata || {},
+      weight: item.variant?.weight || 0,
       // Add other necessary fields mapped from Medusa item
     }));
   }, [cart]);
@@ -205,6 +211,12 @@ export const ShopProvider = ({ children }: { children: React.ReactNode }) => {
         0
       );
       setTotalPrice(subtotal);
+
+      const totalWeight = cartProducts.reduce(
+        (acc, product) => acc + product.quantity * product.weight,
+        0
+      );
+      setTotalWeight(totalWeight);
     }
   }, [cartProducts, cart]);
 
@@ -215,7 +227,7 @@ export const ShopProvider = ({ children }: { children: React.ReactNode }) => {
         limit: 99,
         fields: "*external_id,*variants,+variants.metadata",
       });
-    
+
       console.log(
         "%c [ productsRes ]-200",
         "font-size:13px; background:pink; color:#bf2c9f;",
@@ -347,6 +359,7 @@ export const ShopProvider = ({ children }: { children: React.ReactNode }) => {
       updateCartItem,
       cartProducts,
       totalPrice,
+      totalWeight,
       refreshCart,
       getSkuDetails,
     }),
@@ -360,6 +373,7 @@ export const ShopProvider = ({ children }: { children: React.ReactNode }) => {
       cartLoading,
       cartProducts,
       totalPrice,
+      totalWeight,
       refreshCart,
     ]
   );
