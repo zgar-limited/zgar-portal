@@ -25,9 +25,8 @@ export default function CartManager() {
             region_id: "reg_01K9M1A9NHMN4MXBACKAS5F4V1",
             currency_code: "usd",
           });
-          
+
           localStorage.setItem("cart_id", cart.id);
-          document.cookie = `cart_id=${cart.id}; path=/; max-age=31536000`;
           router.refresh();
         } catch (error) {
           console.error("Error creating cart:", error);

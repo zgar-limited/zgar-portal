@@ -62,7 +62,8 @@ export default function ProductCard({ product }: ProductCardProps) {
 
       await medusaSDK.store.cart.createLineItem(cartId, {
         variant_id: variantId,
-        quantity: 1,
+        quantity: 50,
+        metadata: product.variants?.[0]?.metadata
       });
       router.refresh();
 

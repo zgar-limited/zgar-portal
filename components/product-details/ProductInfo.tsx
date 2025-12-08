@@ -76,6 +76,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
       await medusaSDK.store.cart.createLineItem(cartId, {
         variant_id: selectedVariant.id,
         quantity: quantity,
+        metadata: selectedVariant.metadata
       });
       router.refresh();
 
