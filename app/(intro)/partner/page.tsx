@@ -1,13 +1,15 @@
 
+import { retrieveCustomer } from "@/data/customer";
 import HomeFooter from "@/widgets/HomeFooter";
 import HomeHeader from "@/widgets/HomeHeader";
 import Image from "next/image";
 import React from "react";
 
-const PartnerPage = () => {
+const PartnerPage = async () => {
+  const customer = await retrieveCustomer();
   return (
     <>
-      <HomeHeader />
+      <HomeHeader customer={customer} />
       <div className="overflow-hidden page_image">
         <Image
           className="lazyload ani-zoom"

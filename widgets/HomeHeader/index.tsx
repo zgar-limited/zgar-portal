@@ -6,16 +6,18 @@ import Nav from "./Nav";
 import LanguageSelect from "@/components/common/LanguageSelect";
 import CartIcon from "@/components/header/CartIcon";
 import UserIcon from "@/components/header/UserIcon";
-import { StoreCart } from "@medusajs/types";
+import { StoreCart, StoreCustomer } from "@medusajs/types";
 
 export default function HomeHeader({
   containerFull = true,
   parentClass = "tf-header header-fix header-abs-1",
   cart,
+  customer,
 }: {
   containerFull?: boolean;
   parentClass?: string;
   cart?: StoreCart | null;
+  customer?: StoreCustomer;
 }) {
   const [isScrollingUp, setIsScrollingUp] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -77,7 +79,7 @@ export default function HomeHeader({
             <ul className="nav-icon-list">
 
               <li className="d-flex">
-                <UserIcon />
+                <UserIcon customer={customer} />
               </li>
               {/* <li className="d-none d-md-flex">
                 <a

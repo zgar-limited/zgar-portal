@@ -4,7 +4,7 @@ import Image from "next/image";
 
 import { useEffect, useRef } from "react";
 
-export default function Footer6({ parentClass = "tf-footer style-4" }) {
+export default function HomeFooter({ parentClass = "tf-footer style-4" }) {
   const isBgDark = parentClass.includes("bg-deep-green");
   const footerRef = useRef(null);
 

@@ -27,13 +27,13 @@ export default function ProductGrid({ initialProducts = [] }: ProductGridProps) 
       <div className="container">
         {/* Control Bar */}
         <div className="flex-wrap gap-3 mb-4 d-flex justify-content-between align-items-center">
-          <div className="gap-2 d-flex align-items-center">
+          {/* <div className="gap-2 d-flex align-items-center">
             <button className="gap-2 px-4 btn btn-outline-dark d-flex align-items-center rounded-pill">
               <Filter size={18} />
               <span>Filter</span>
             </button>
             <span className="text-muted small ms-2">{displayedProducts.length} Products</span>
-          </div>
+          </div> */}
 
           <div className="gap-2 d-flex align-items-center">
              <span className="text-muted small d-none d-sm-inline">Sort by:</span>

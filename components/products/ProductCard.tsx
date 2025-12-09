@@ -77,7 +77,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     <div className="overflow-hidden transition-all bg-white shadow-sm group position-relative d-flex flex-column h-100 rounded-3 hover-shadow-md">
       {/* Image Container */}
       <Link
-        href={`/product-detail/${product.id}`}
+        href={`/products/${product.id}`}
         className="overflow-hidden d-block position-relative bg-light"
         style={{ aspectRatio: "3/4" }}
       >

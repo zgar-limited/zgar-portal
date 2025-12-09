@@ -2,10 +2,10 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { User } from "lucide-react";
+import { StoreCustomer } from "@medusajs/types";
 
-export default function UserIcon() {
+export default function UserIcon({ customer }: { customer: StoreCustomer }) {
   const [isHovered, setIsHovered] = useState(false);
-  const customer = null; // Mock customer
 
   return (
     <div
