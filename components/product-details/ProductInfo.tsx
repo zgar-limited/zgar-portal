@@ -5,6 +5,7 @@ import { ShoppingCart, Check, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/common/ToastProvider";
 import QuantitySelect from "../common/QuantitySelect";
+import { addToCart } from "@/data/cart";
 
 interface ProductInfoProps {
   product: StoreProduct;
@@ -46,7 +47,6 @@ export default function ProductInfo({ product }: ProductInfoProps) {
   }, [product, selectedOptions]);
 
   // Mock function
-  const addProductToCart = async () => {};
 
   const handleOptionSelect = (optionId: string, value: string) => {
     setSelectedOptions((prev) => ({
@@ -63,8 +63,11 @@ export default function ProductInfo({ product }: ProductInfoProps) {
 
     setIsAdding(true);
     try {
-      await addProductToCart();
-
+      await addToCart({
+        quantity,
+        variant_id: selectedVariant.id,
+        metadata: selectedVariant.metadata,
+      });
       setIsAdded(true);
       showToast("Added to cart successfully", "success");
 

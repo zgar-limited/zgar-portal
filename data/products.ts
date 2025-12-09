@@ -2,7 +2,7 @@
 
 import { getAuthHeaders, getCacheOptions } from "@/utils/cookies";
 import { medusaSDK } from "@/utils/medusa";
-import { HttpTypes } from "@medusajs/types";
+import { HttpTypes, StoreProduct } from "@medusajs/types";
 
 export const fetchProducts = async ({
   pageParam = 1,
@@ -65,4 +65,27 @@ export const fetchProducts = async ({
         queryParams,
       };
     });
+};
+
+export const fetchProduct = async (id: string) => {
+  const headers = {
+    ...(await getAuthHeaders()),
+  };
+
+  const next = {
+    ...(await getCacheOptions(`product-${id}`)),
+  };
+
+  return medusaSDK.client
+    .fetch<HttpTypes.StoreProductResponse>(`/store/products/${id}`, {
+      method: "GET",
+      query: {
+        fields:
+          "*variants,*variants.calculated_price,+variants.inventory_quantity,*variants.images,+metadata,+tags,",
+      },
+      headers,
+      next,
+      cache: "no-cache",
+    })
+    .then((res) => res.product);
 };

@@ -16,7 +16,7 @@ export default function HomeHeader({
 }: {
   containerFull?: boolean;
   parentClass?: string;
-  cart?: StoreCart | null;
+  cart?: StoreCart;
   customer?: StoreCustomer;
 }) {
   const [isScrollingUp, setIsScrollingUp] = useState(false);
@@ -43,9 +43,9 @@ export default function HomeHeader({
   }, [lastScrollY]);
   return (
     <header
-
-      className={`${parentClass} ${lastScrollY > 200 && isScrollingUp ? "header-sticky" : ""
-        } ${lastScrollY > 100 ? "will-sticky" : ""}`}
+      className={`${parentClass} ${
+        lastScrollY > 200 && isScrollingUp ? "header-sticky" : ""
+      } ${lastScrollY > 100 ? "will-sticky" : ""}`}
     >
       <div className="px-[6%]">
         <div className="row align-items-center ">
@@ -77,7 +77,6 @@ export default function HomeHeader({
           </div>
           <div className="col-xl-3 col-md-4 col-3">
             <ul className="nav-icon-list">
-
               <li className="d-flex">
                 <UserIcon customer={customer} />
               </li>
@@ -97,14 +96,12 @@ export default function HomeHeader({
               </li> */}
               <LanguageSelect />
               <li className="d-none d-lg-flex align-items-center ms">
-                  <CartIcon cart={cart || null} />
+                <CartIcon cart={cart} />
               </li>
             </ul>
-
           </div>
         </div>
       </div>
-
     </header>
   );
 }

@@ -1,15 +1,4 @@
-import {
-  bannerItems,
-  blogMenuItems,
-  demoItems,
-  infoPages,
-  productMenuColumns,
-  shopPages,
-} from "@/data/menu";
-import { recentProducts } from "@/data/products";
-import Image from "next/image";
 import Link from "next/link";
-import React from "react";
 
 export default function Nav() {
   return (
@@ -154,7 +143,6 @@ export default function Nav() {
           </Link>
         </div>
       </li>
-
     </>
   );
 }
