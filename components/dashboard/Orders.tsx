@@ -5,7 +5,6 @@ import React, { useState } from "react";
 import Sidebar from "./Sidebar";
 import { useQuery } from "@tanstack/react-query";
 import { medusaSDK } from "@/utils/medusa";
-import { useAuth } from "@/context/AuthContext";
 import { Table, Button, Badge, Pagination, Spinner } from "react-bootstrap";
 import { Eye, Upload, Package, ShoppingBag } from "lucide-react";
 import UploadVoucherModal from "../modals/UploadVoucherModal";
@@ -13,7 +12,6 @@ import UploadPackingModal from "../modals/UploadPackingModal";
 import { StoreOrderListResponse } from "@medusajs/types";
 
 export default function Orders() {
-  const { customer } = useAuth();
   const [currentPage, setCurrentPage] = useState(1);
   const [showVoucherModal, setShowVoucherModal] = useState(false);
   const [showPackingModal, setShowPackingModal] = useState(false);
@@ -28,7 +26,7 @@ export default function Orders() {
   const offset = (currentPage - 1) * limit;
 
   const { data: ordersData, isLoading } = useQuery({
-    queryKey: ["orders", customer?.id, offset, limit],
+    queryKey: ["orders", offset, limit],
     queryFn: async () => {
       const res = await medusaSDK.store.order.list({
         fields:
@@ -39,7 +37,7 @@ export default function Orders() {
       });
       return res;
     },
-    enabled: !!customer?.id,
+    enabled: true,
   });
 
   const orders = ordersData?.orders || [];

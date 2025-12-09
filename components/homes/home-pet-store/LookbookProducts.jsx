@@ -8,7 +8,7 @@ import { useContextElement } from "@/context/Context";
 
 export default function LookbookProducts() {
   const [currentLookbookHover, setCurrentLookbookHover] = useState(null);
-  const { addProductToCart, isAddedToCartProducts } = useContextElement();
+  const { addProductToCart, isAddedToCartProducts } = useMockContextElement();
 
   // Live total (sum of product prices)
   const totalPrice = useMemo(

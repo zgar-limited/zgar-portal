@@ -2,11 +2,13 @@
 import Link from "next/link";
 import Image from "next/image";
 import React from "react";
-import { useContextElement } from "@/context/Context";
 
 export default function CompareModal() {
-  const { removeFromCompareItem, compareItem, setCompareItem } =
-    useContextElement();
+  // Mock data
+  const compareItem = []; // Mock empty compare list
+  const removeFromCompareItem = () => {}; // Mock function
+  const setCompareItem = () => {}; // Mock function
+
   return (
     <div className="offcanvas offcanvas-bottom canvas-compare" id="compare">
       <div className="canvas-wrapper">

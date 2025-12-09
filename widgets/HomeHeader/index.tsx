@@ -4,7 +4,6 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import Nav from "./Nav";
 import LanguageSelect from "@/components/common/LanguageSelect";
-import { useAuth } from "@/context/AuthContext";
 import CartIcon from "@/components/header/CartIcon";
 import UserIcon from "@/components/header/UserIcon";
 import { StoreCart } from "@medusajs/types";
@@ -18,7 +17,6 @@ export default function HomeHeader({
   parentClass?: string;
   cart?: StoreCart | null;
 }) {
-  const { customer } = useAuth();
   const [isScrollingUp, setIsScrollingUp] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
 

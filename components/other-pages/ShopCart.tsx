@@ -36,6 +36,7 @@ import {
   StorePaymentCollectionResponse,
   StoreCart,
   StoreProduct,
+  CartLineItemDTO,
 } from "@medusajs/types";
 
 export default function ShopCart({
@@ -217,12 +218,12 @@ function ShopCartContent({
 
     try {
       // 1. Prepare items for the new cart
-      const itemsToCheckout = cartProducts
+      const itemsToCheckout: CartLineItemDTO[] = cartProducts
         .filter((p) => selectedItems.includes(p.id))
         .map((p) => ({
-          variant_id: p.variantId,
-          quantity: p.quantity,
-          metadata: p.metadata,
+          variant_id: p.variantId as string,
+          quantity: p.quantity as number,
+          metadata: p.metadata as any,
         }));
 
       // await medusaSDK.store.cart.complete(cart.id);
@@ -234,6 +235,7 @@ function ShopCartContent({
           // cart_id: tempCart.id,
           // sales_channel_id: "sc_01K9KAK0MDCMSWCXRV0WH70EQK",
           items: itemsToCheckout,
+
           // currency_code: "usd",
         },
       });

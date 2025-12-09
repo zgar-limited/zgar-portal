@@ -1,6 +1,5 @@
 "use client";
 
-import { useContextElement } from "@/context/Context";
 import { useCallback, useMemo } from "react";
 
 export default function CompareButton({
@@ -8,19 +7,21 @@ export default function CompareButton({
   product,
   parentClass = "hover-tooltip box-icon",
 }) {
-  const { addToCompareItem, isAddedtoCompareItem } = useContextElement();
+  // Mock functions
+  const addToCompareItem = () => {};
+  const isAddedtoCompareItem = () => false;
 
   const isCompared = useMemo(
-    () => isAddedtoCompareItem(product),
-    [isAddedtoCompareItem, product]
+    () => false,
+    []
   );
 
   const handleClick = useCallback(
     (e) => {
       e.preventDefault();
-      if (!isCompared) addToCompareItem(product);
+      // Mock function - no action
     },
-    [addToCompareItem, product, isCompared]
+    []
   );
 
   return (

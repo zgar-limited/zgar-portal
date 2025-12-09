@@ -6,14 +6,11 @@ import { Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pencil } from "lucide-react";
 import Sidebar from "./Sidebar";
-import { useAuth } from "@/context/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { medusaSDK } from "@/utils/medusa";
 import { Eye } from "lucide-react";
 
 export default function MyAccount() {
-  const { customer } = useAuth();
-
   const wallet = {
     balance: 1250.0,
     points: 350,
@@ -76,9 +73,8 @@ export default function MyAccount() {
   ];
 
   const { data: ordersData, isLoading } = useQuery({
-    queryKey: ["orders", customer?.id],
+    queryKey: ["orders"],
     queryFn: async () => {
-      if (!customer?.id) return { orders: [] };
       const res = await medusaSDK.store.order.list({
         fields: "+items.title,+items.thumbnail,+items.quantity,+items.unit_price,+items.variant_title",
         limit: 5, // Show recent 5 orders
@@ -86,7 +82,7 @@ export default function MyAccount() {
       });
       return res;
     },
-    enabled: !!customer?.id,
+    enabled: true,
   });
 
   const orders = ordersData?.orders || [];
@@ -115,10 +111,10 @@ export default function MyAccount() {
                       </button>
                       <div className="flex-grow-1">
                         <h5 className="mb-1">
-                          {customer?.first_name} {customer?.last_name}
+                          Guest User
                         </h5>
                         <p className="mb-2 text-muted text-small">
-                          {customer?.email}
+                          guest@example.com
                         </p>
                         <div className="gap-2 mb-3 d-flex align-items-center">
                           <span className="badge bg-primary-subtle text-primary rounded-pill">
@@ -126,10 +122,7 @@ export default function MyAccount() {
                           </span>
                         </div>
                         <p className="mb-0 text-muted text-small">
-                          Member since{" "}
-                          {customer?.created_at
-                            ? new Date(customer.created_at).toLocaleDateString()
-                            : ""}
+                          Member since today
                         </p>
                       </div>
                     </div>

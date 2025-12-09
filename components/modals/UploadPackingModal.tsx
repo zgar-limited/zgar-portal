@@ -2,7 +2,8 @@
 import React, { useState, useRef } from "react";
 import { Modal, Button, Spinner, Alert } from "react-bootstrap";
 import { Upload, X, CheckCircle, AlertCircle, Plus, FileText } from "lucide-react";
-import { medusaFetch } from "@/utils/medusa-fetch";
+import { medusaSDK } from "@/utils/medusa";
+;
 
 interface UploadPackingModalProps {
   show: boolean;
@@ -193,7 +194,7 @@ export default function UploadPackingModal({
           if (f.file) formData.append("files", f.file);
         });
 
-        const uploadRes = await medusaFetch<{ files: { url: string }[] }>(
+        const uploadRes = await medusaSDK.client.fetch<{ files: { url: string }[] }>(
           "/store/zgar/files",
           {
             method: "POST",
@@ -212,7 +213,7 @@ export default function UploadPackingModal({
       const fileUrls = allUrls.join(',');
 
       // 2. Submit packing requirements to order
-      await medusaFetch(
+      await medusaSDK.client.fetch(
         `/store/zgar/orders/${orderId}/packing-requirement`,
         {
           method: "POST",

@@ -1,19 +1,20 @@
 "use client";
 
-import { useContextElement } from "@/context/Context";
 import { useCallback, useMemo } from "react";
 
 export default function WishlistButton2({ product }) {
-  const { addToWishlist, isAddedtoWishlist } = useContextElement();
+  // Mock functions
+  const addToWishlist = () => {};
+  const isAddedtoWishlist = () => false;
 
   const isWishlisted = useMemo(
-    () => isAddedtoWishlist(product),
-    [isAddedtoWishlist, product]
+    () => false,
+    []
   );
 
   const handleClick = useCallback(() => {
-    addToWishlist(product);
-  }, [addToWishlist, product]);
+    // Mock function - no action
+  }, []);
 
   return (
     <button

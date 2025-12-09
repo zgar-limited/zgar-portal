@@ -10,7 +10,7 @@ import WishlistButton from "../productActionButtons/WishlistButton";
 
 export default function QuickViewModal() {
   const { quickViewItem, addProductToCart, isAddedToCartProducts } =
-    useContextElement();
+    useMockContextElement();
 
   const slides = [
     {

@@ -1,19 +1,16 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
 import { StoreProduct, StoreProductVariant } from "@medusajs/types";
-import { useAuth } from "@/context/AuthContext";
 import { ShoppingCart, Check, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/common/ToastProvider";
 import QuantitySelect from "../common/QuantitySelect";
-import { medusaSDK } from "@/utils/medusa";
 
 interface ProductInfoProps {
   product: StoreProduct;
 }
 
 export default function ProductInfo({ product }: ProductInfoProps) {
-  const { customer } = useAuth();
   const router = useRouter();
   const { showToast } = useToast();
 
@@ -48,6 +45,9 @@ export default function ProductInfo({ product }: ProductInfoProps) {
     });
   }, [product, selectedOptions]);
 
+  // Mock function
+  const addProductToCart = async () => {};
+
   const handleOptionSelect = (optionId: string, value: string) => {
     setSelectedOptions((prev) => ({
       ...prev,
@@ -56,11 +56,6 @@ export default function ProductInfo({ product }: ProductInfoProps) {
   };
 
   const handleAddToCart = async () => {
-    if (!customer) {
-      router.push("/login");
-      return;
-    }
-
     if (!selectedVariant) {
       showToast("Please select options", "warning");
       return;
@@ -68,17 +63,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
 
     setIsAdding(true);
     try {
-      const cartId = localStorage.getItem("cart_id");
-      if (!cartId) {
-        throw new Error("No cart found");
-      }
-
-      await medusaSDK.store.cart.createLineItem(cartId, {
-        variant_id: selectedVariant.id,
-        quantity: quantity,
-        metadata: selectedVariant.metadata
-      });
-      router.refresh();
+      await addProductToCart();
 
       setIsAdded(true);
       showToast("Added to cart successfully", "success");

@@ -6,7 +6,7 @@ import { productsBookTogether } from "@/data/products";
 import { useContextElement } from "@/context/Context";
 
 export default function Products3() {
-  const { addProductToCart, isAddedToCartProducts } = useContextElement();
+  const { addProductToCart, isAddedToCartProducts } = useMockContextElement();
 
   // Sum up the whole bundle price (adjust if you have discounts)
   const totalPrice = useMemo(

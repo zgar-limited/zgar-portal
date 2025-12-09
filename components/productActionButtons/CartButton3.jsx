@@ -1,22 +1,23 @@
 "use client";
 
-import { useContextElement } from "@/context/Context";
 import { useCallback, useMemo } from "react";
 
 export default function CartButton3({ product }) {
-  const { addProductToCart, isAddedToCartProducts } = useContextElement();
+  // Mock functions
+  const addProductToCart = () => {};
+  const isAddedToCartProducts = () => false;
 
   const isInCart = useMemo(
-    () => isAddedToCartProducts(product.id),
-    [isAddedToCartProducts, product.id]
+    () => false,
+    []
   );
 
   const handleClick = useCallback(
     (e) => {
       e.preventDefault();
-      if (!isInCart) addProductToCart(product.id);
+      // Mock function - no action
     },
-    [addProductToCart, product.id, isInCart]
+    []
   );
 
   return (

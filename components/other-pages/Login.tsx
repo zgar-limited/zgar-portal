@@ -1,18 +1,14 @@
 "use client";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useState, useActionState } from "react";
 import CountryCodeSelect from "../common/CountryCodeSelect";
-import { medusaSDK } from "@/utils/medusa";
-import { useAuth } from "@/context/AuthContext";
+import { login, signup } from "@/data/customer";
 
 export default function Login() {
   const [isLogin, setIsLogin] = useState(true);
   const [showPass1, setShowPass1] = useState(false);
   const [showPass2, setShowPass2] = useState(false);
   const [countryCode, setCountryCode] = useState("+86");
-  const router = useRouter();
-  const { login, register } = useAuth();
 
   // Form States
   const [email, setEmail] = useState("");
@@ -21,35 +17,25 @@ export default function Login() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    const result = await login(email, password);
-    setLoading(false);
-    if (result.success) {
-      router.push("/");
-    } else {
-      alert(result.error);
-    }
-  };
+  const [loginState, loginAction, isLoginPending] = useActionState(login, null);
+  const [registerState, registerAction, isRegisterPending] = useActionState(signup, null);
 
-  const handleRegister = async (e) => {
+  const handleRegisterSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (password !== confirmPassword) {
       alert("Passwords do not match");
       return;
     }
-    setLoading(true);
-    const fullPhone = `${countryCode}${phoneNumber}`;
-    const result = await register(email, password, firstName, lastName, fullPhone);
-    setLoading(false);
-    if (result.success) {
-      router.push("/");
-    } else {
-      alert(result.error);
-    }
+    const formData = new FormData(e.currentTarget);
+    formData.set("phone", `${countryCode}${phoneNumber}`);
+    
+    // We need to call the action with the formData
+    // Since useActionState gives us a dispatch function that takes the payload (FormData in this case)
+    // We can call it directly.
+    React.startTransition(() => {
+      registerAction(formData);
+    });
   };
 
   return (
@@ -117,10 +103,11 @@ export default function Login() {
           <div className="form-content">
             {isLogin ? (
               // Login Form
-              <form className="form-login" onSubmit={handleLogin}>
+              <form className="form-login" action={loginAction}>
                 <div className="list-ver" style={{ gap: "20px" }}>
                   <fieldset>
                     <input
+                      name="email"
                       type="email"
                       placeholder="Enter your email address *"
                       required
@@ -131,6 +118,7 @@ export default function Login() {
                   </fieldset>
                   <fieldset className="password-wrapper">
                     <input
+                      name="password"
                       className="password-field"
                       type={showPass1 ? "text" : "password"}
                       placeholder="Password *"
@@ -164,6 +152,9 @@ export default function Login() {
                       </a>
                     </h6>
                   </div>
+                  {loginState?.error && (
+                    <div className="mt-2 text-danger">{loginState.error}</div>
+                  )}
                 </div>
 
                 <button
@@ -171,18 +162,19 @@ export default function Login() {
                   type="submit"
                   className="tf-btn animate-btn w-100"
                   style={{ marginTop: "24px", borderRadius: "8px" }}
-                  disabled={loading}
+                  disabled={isLoginPending}
                 >
-                  {loading ? "Loading..." : "Login"}
+                  {isLoginPending ? "Loading..." : "Login"}
                 </button>
               </form>
             ) : (
               // Register Form
-              <form className="form-register" onSubmit={handleRegister}>
+              <form className="form-register" onSubmit={handleRegisterSubmit}>
                 <div className="list-ver" style={{ gap: "20px" }}>
                   <div style={{ display: "flex", gap: "20px" }}>
                     <fieldset style={{ flex: 1 }}>
                       <input
+                        name="first_name"
                         type="text"
                         placeholder="First Name *"
                         required
@@ -193,6 +185,7 @@ export default function Login() {
                     </fieldset>
                     <fieldset style={{ flex: 1 }}>
                       <input
+                        name="last_name"
                         type="text"
                         placeholder="Last Name *"
                         required
@@ -204,6 +197,7 @@ export default function Login() {
                   </div>
                   <fieldset>
                     <input
+                      name="email"
                       type="email"
                       placeholder="Enter your email address *"
                       required
@@ -218,6 +212,7 @@ export default function Login() {
                     <CountryCodeSelect onSelect={setCountryCode} initialCode="+86" />
                     <fieldset style={{ flex: 1 }}>
                       <input
+                        name="phone_number"
                         type="tel"
                         placeholder="Phone number *"
                         required
@@ -230,6 +225,7 @@ export default function Login() {
 
                   <fieldset className="password-wrapper">
                     <input
+                      name="password"
                       className="password-field"
                       type={showPass1 ? "text" : "password"}
                       placeholder="Password *"
@@ -264,6 +260,9 @@ export default function Login() {
                       style={{ right: "15px" }}
                     />
                   </fieldset>
+                  {registerState?.error && (
+                    <div className="mt-2 text-danger">{registerState.error}</div>
+                  )}
                 </div>
 
                 {/* <div className="check-bottom" style={{ marginTop: "20px" }}>
@@ -285,9 +284,9 @@ export default function Login() {
                   type="submit"
                   className="tf-btn animate-btn w-100"
                   style={{ marginTop: "24px", borderRadius: "8px" }}
-                  disabled={loading}
+                  disabled={isRegisterPending}
                 >
-                  {loading ? "Loading..." : "Register"}
+                  {isRegisterPending ? "Loading..." : "Register"}
                 </button>
               </form>
             )}

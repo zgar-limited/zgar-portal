@@ -1,20 +1,11 @@
 "use client";
 import React, { useState } from "react";
 import Link from "next/link";
-import { User, LogOut, FileText } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
+import { User } from "lucide-react";
 
 export default function UserIcon() {
-  const { customer, logout } = useAuth();
   const [isHovered, setIsHovered] = useState(false);
-
-  if (!customer) {
-    return (
-      <Link href="/login" className="nav-icon-item link text-dark">
-        <User />
-      </Link>
-    );
-  }
+  const customer = null; // Mock customer
 
   return (
     <div
@@ -22,7 +13,7 @@ export default function UserIcon() {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Link href="/account-page" className="nav-icon-item link text-dark">
+      <Link href={customer ? "/account-page" : "/login"} className="nav-icon-item link text-dark">
         <User />
       </Link>
 
@@ -44,40 +35,42 @@ export default function UserIcon() {
             }}
           ></div>
 
-          <div className="px-3 py-2 mb-2 border-bottom">
-            <p className="mb-0 small fw-bold text-truncate">
-              {customer.first_name || "User"} {customer.last_name || ""}
-            </p>
-            <p className="mb-0 x-small text-muted text-truncate">
-              {customer.email}
-            </p>
-          </div>
-
-          <Link
-            href="/account-page"
-            className="gap-2 px-3 py-2 dropdown-item d-flex align-items-center hover-bg-light text-dark text-decoration-none small"
-          >
-            <User size={16} />
-            <span>My Account</span>
-          </Link>
-          
-          <Link
-             href="/account-orders"
-             className="gap-2 px-3 py-2 dropdown-item d-flex align-items-center hover-bg-light text-dark text-decoration-none small"
-          >
-             <FileText size={16} />
-             <span>My Orders</span>
-          </Link>
-
-          <div className="my-2 border-top"></div>
-
-          <button
-            onClick={() => logout()}
-            className="gap-2 px-3 py-2 bg-transparent border-0 dropdown-item d-flex align-items-center hover-bg-light text-danger w-100 text-start small"
-          >
-            <LogOut size={16} />
-            <span>Sign Out</span>
-          </button>
+          {customer ? (
+            <>
+              <Link
+                href="/account-page"
+                className="gap-2 px-3 py-2 dropdown-item d-flex align-items-center hover-bg-light text-dark text-decoration-none small"
+              >
+                <User size={16} />
+                <span>My Account</span>
+              </Link>
+              <button
+                onClick={() => {}}
+                className="gap-2 px-3 py-2 bg-transparent border-0 dropdown-item d-flex align-items-center hover-bg-light text-dark text-decoration-none small w-100 text-start"
+              >
+                <User size={16} />
+                <span>Logout</span>
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="gap-2 px-3 py-2 dropdown-item d-flex align-items-center hover-bg-light text-dark text-decoration-none small"
+              >
+                <User size={16} />
+                <span>Login</span>
+              </Link>
+              
+              <Link
+                 href="/login"
+                 className="gap-2 px-3 py-2 dropdown-item d-flex align-items-center hover-bg-light text-dark text-decoration-none small"
+              >
+                 <User size={16} />
+                 <span>Register</span>
+              </Link>
+            </>
+          )}
         </div>
       )}
       

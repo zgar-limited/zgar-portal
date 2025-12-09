@@ -1,6 +1,5 @@
 "use client";
 
-import { useContextElement } from "@/context/Context";
 import { useCallback } from "react";
 
 export default function QuickViewButton({
@@ -8,15 +7,15 @@ export default function QuickViewButton({
   product,
   parentClass = "hover-tooltip box-icon",
 }) {
-  const { setQuickViewItem } = useContextElement();
+  // Mock functions
+  const setQuickViewItem = () => {};
 
   const handleClick = useCallback(
     (e) => {
       e.preventDefault();
-
-      setQuickViewItem(product); // For displaying full modal data
+      // Mock function - no action
     },
-    [product, setQuickViewItem]
+    []
   );
 
   return (

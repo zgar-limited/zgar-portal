@@ -7,7 +7,7 @@ import { useContextElement } from "@/context/Context";
 
 export default function VolumeThumbnail() {
   const [activeId, setActiveId] = useState(1); // Default active item
-  const { addProductToCart, isAddedToCartProducts } = useContextElement();
+  const { addProductToCart, isAddedToCartProducts } = useMockContextElement();
 
   const activeItem = useMemo(
     () => volumeDiscounts.find((v) => v.id === activeId),

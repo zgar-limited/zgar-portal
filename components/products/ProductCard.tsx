@@ -4,19 +4,17 @@ import Link from "next/link";
 import Image from "next/image";
 import { ShoppingCart, Check, Loader2 } from "lucide-react";
 import { StoreProduct } from "@medusajs/types";
-import { useAuth } from "@/context/AuthContext";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/common/ToastProvider";
 import { medusaSDK } from "@/utils/medusa";
-import { getCartId } from "@/utils/server-cart";
+
 
 interface ProductCardProps {
   product: any; // Using any for flexible mapping from Medusa/Internal types
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const { customer } = useAuth();
   const router = useRouter();
   const { showToast } = useToast();
 
@@ -37,11 +35,6 @@ export default function ProductCard({ product }: ProductCardProps) {
   const handleQuickAdd = async (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent link navigation
     e.stopPropagation();
-
-    if (!customer) {
-      router.push("/login");
-      return;
-    }
 
     if (adding || isAdded) return;
 

@@ -11,7 +11,7 @@ export default function SingleProduct() {
   const [quantity, setQuantity] = useState(1);
   const [activeColor, setActiveColor] = useState(product.colors[0]);
 
-  const { addProductToCart, isAddedToCartProducts } = useContextElement();
+  const { addProductToCart, isAddedToCartProducts } = useMockContextElement();
   return (
     <div className="banner-card_product wow fadeInUp">
       <Link href={`/product-detail/${product.id}`} className="product-image">

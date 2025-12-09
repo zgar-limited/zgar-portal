@@ -10,7 +10,7 @@ export default function SingleProduct() {
   const product = singleStyleProducts[4];
   const [currentImg, setCurrentImg] = useState(product.imgSrc);
   const [quantity, setQuantity] = useState(1);
-  const { addProductToCart, isAddedToCartProducts } = useContextElement();
+  const { addProductToCart, isAddedToCartProducts } = useMockContextElement();
   useEffect(() => {
     setCurrentImg(product.imgSrc);
   }, [product]);

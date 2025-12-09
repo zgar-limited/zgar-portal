@@ -1,16 +1,14 @@
 "use client";
 
-import { useContextElement } from "@/context/Context";
 import Image from "next/image";
 import Link from "next/link";
 
 export default function Compare() {
-  const {
-    compareItem,
-    removeFromCompareItem,
-    addProductToCart,
-    isAddedToCartProducts,
-  } = useContextElement();
+  const compareItem = []; // Mock empty compare list
+  const removeFromCompareItem = () => {}; // Mock function
+  const addProductToCart = () => {}; // Mock function
+  const isAddedToCartProducts = () => false; // Mock function
+
   return (
     <div className="flat-spacing">
       <div className="container">
@@ -152,7 +150,7 @@ export default function Compare() {
                 <tr className="compare-row">
                   <td className="compare-col compare-title">Buy</td>
                   {compareItem.map((product, i) => (
-                    <td key={i} className="compare-col compare-value p-0">
+                    <td key={i} className="p-0 compare-col compare-value">
                       <a
                         href="#shoppingCart"
                         className="tf-btn style-transparent w-100 rounded-0"

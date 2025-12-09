@@ -1,11 +1,11 @@
 "use client";
 
-import { useContextElement } from "@/context/Context";
 import ProductCard1 from "../productCards/ProductCard1";
 import Link from "next/link";
 
 export default function Wishlist() {
-  const { wishList } = useContextElement();
+  const wishList = []; // Mock empty wishlist
+
   return (
     <div className="flat-spacing">
       <div className="container">

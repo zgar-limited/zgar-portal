@@ -6,7 +6,7 @@ import { useContextElement } from "@/context/Context";
 
 export default function VolumeDiscount() {
   const [activeId, setActiveId] = useState(1); // default active is first
-  const { addProductToCart, isAddedToCartProducts } = useContextElement();
+  const { addProductToCart, isAddedToCartProducts } = useMockContextElement();
 
   const activeItem = useMemo(
     () => volumeDiscounts.find((v) => v.id === activeId),

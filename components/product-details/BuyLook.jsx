@@ -6,7 +6,7 @@ import { useContextElement } from "@/context/Context";
 import { buyTheLooksProducts } from "@/data/products";
 
 export default function BuyLook() {
-  const { addProductToCart, isAddedToCartProducts } = useContextElement();
+  const { addProductToCart, isAddedToCartProducts } = useMockContextElement();
 
   // track selected size per item (default = first size)
   const [selectedSizes, setSelectedSizes] = useState(

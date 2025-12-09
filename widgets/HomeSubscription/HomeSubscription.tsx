@@ -24,13 +24,13 @@ const HomeSubscription = (props: Props) => {
           showBorder={false}
           colors={["#45d4fb", "#9dfbd3", "#45d4fb", "#9dfbd3", "#45d4fb"]}
         > */}
-        <p className="text-white">
+        <div className="text-white">
           <p className="h1">SUBSCRIBE</p>
           <p className="h6">
             Get the latest product launches, promotions, and giveaway delivered
             straight to your inbox for free!
           </p>
-        </p>
+        </div>
         {/* </GradientText> */}
         <div className="flex-1">
           <div className="relative flex items-center max-w-2xl mx-auto">

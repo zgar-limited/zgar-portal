@@ -8,7 +8,7 @@ import WishlistButton from "../productActionButtons/WishlistButton";
 
 export default function ProductActionPanel({ product }) {
   const [quantity, setQuantity] = useState(1);
-  const { addProductToCart, isAddedToCartProducts } = useContextElement();
+  const { addProductToCart, isAddedToCartProducts } = useMockContextElement();
   return (
     <div className="tf-product-total-quantity">
       <div className="group-btn">

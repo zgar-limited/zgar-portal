@@ -22,7 +22,7 @@ export default function SingleProduct() {
   const product = singleStyleProducts[3];
   const [activeColor, setActiveColor] = useState("rose"); // Default active color
   const [quantity, setQuantity] = useState(1);
-  const { addProductToCart, isAddedToCartProducts } = useContextElement();
+  const { addProductToCart, isAddedToCartProducts } = useMockContextElement();
   return (
     <section className="flat-spacing bg-rose-white s-banner-shop">
       <div className="container">

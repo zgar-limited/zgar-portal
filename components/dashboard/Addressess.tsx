@@ -5,27 +5,24 @@ import Sidebar from "./Sidebar";
 import AccountEditModal from "./AccountEditModal";
 import { useQuery } from "@tanstack/react-query";
 import { medusaSDK } from "@/utils/medusa";
-import { useAuth } from "@/context/AuthContext";
 import { Spinner } from "react-bootstrap";
 import { StoreCustomerAddress } from "@medusajs/types";
 // import { toast } from "react-toastify";
 // import "react-toastify/dist/ReactToastify.css";
 
 export default function Addressess() {
-  const { customer } = useAuth();
   const [editing, setEditing] = useState<Partial<StoreCustomerAddress> | null>(null);
   const [isCreating, setIsCreating] = useState(false);
 
   const { data: addresses, isLoading, refetch } = useQuery({
-    queryKey: ["addresses", customer?.id],
+    queryKey: ["addresses"],
     queryFn: async () => {
-      if (!customer?.id) return [];
       const res = await medusaSDK.client.fetch(`/store/customers/me/addresses`, {
         method: "GET",
       });
       return (res as any).addresses;
     },
-    enabled: !!customer?.id,
+    enabled: true,
   });
 
   const openEdit = (addr: any) => {

@@ -8,7 +8,7 @@ import QuantitySelect from "../common/QuantitySelect";
 
 export default function StickyProduct() {
   const [isVisible, setIsVisible] = useState(false);
-  const { addProductToCart, isAddedToCartProducts } = useContextElement();
+  const { addProductToCart, isAddedToCartProducts } = useMockContextElement();
   const [quantity, setQuantity] = useState(1);
   useEffect(() => {
     const handleScroll = () => {

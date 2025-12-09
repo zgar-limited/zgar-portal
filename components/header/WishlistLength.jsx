@@ -1,8 +1,6 @@
 "use client";
 
-import { useContextElement } from "@/context/Context";
-
 export default function WishlistLength() {
-  const { wishList } = useContextElement();
+  const wishList = []; // Mock empty wishlist
   return <>{wishList.length}</>;
 }

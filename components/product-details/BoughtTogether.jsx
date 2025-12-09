@@ -4,25 +4,25 @@ import Link from "next/link";
 import Image from "next/image";
 import React from "react";
 import { boughtTogetherProducts } from "@/data/products";
-import { useContextElement } from "@/context/Context";
 
 export default function BoughtTogether() {
-  const { addProductToCart, isAddedToCartProducts } = useContextElement();
+  // Mock functions
+  const addProductToCart = () => {};
+  const isAddedToCartProducts = () => false;
 
   // 💰 Calculate total with reducer
   const totalPrice = boughtTogetherProducts.reduce(
     (sum, product) => sum + product.price,
     0
   );
-  const allAdded = boughtTogetherProducts.every((p) =>
-    isAddedToCartProducts(p.id)
-  );
+  const allAdded = false; // Mock value
   const addAll = () => {
-    boughtTogetherProducts.forEach((p) => addProductToCart(p.id));
+    // Mock function - no action
   };
+
   return (
     <div className="tf-product-fbt">
-      <h4 className="title text-xl fw-medium">Frequently Bought Together</h4>
+      <h4 className="text-xl title fw-medium">Frequently Bought Together</h4>
 
       <form
         className="tf-product-form-bundle"
@@ -69,7 +69,7 @@ export default function BoughtTogether() {
         <div>
           <div className="bundle-total-submit">
             <div className="text">Total price:</div>
-            <span className="total-price fw-7 text-black">
+            <span className="text-black total-price fw-7">
               ${totalPrice.toFixed(2)}
             </span>
           </div>

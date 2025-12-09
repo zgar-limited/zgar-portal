@@ -1,15 +1,14 @@
 "use client";
-import { useContextElement } from "@/context/Context";
 import Image from "next/image";
 import React from "react";
 
 export default function CompareColorModal() {
-  const {
-    compareItem,
-    removeFromCompareItem,
-    addProductToCart,
-    isAddedToCartProducts,
-  } = useContextElement();
+  // Mock data
+  const compareItem = []; // Mock empty compare list
+  const removeFromCompareItem = () => {}; // Mock function
+  const addProductToCart = () => {}; // Mock function
+  const isAddedToCartProducts = () => false; // Mock function
+
   return (
     <div
       className="modal modalCentered fade modal-compare_color"
@@ -24,7 +23,7 @@ export default function CompareColorModal() {
               data-bs-dismiss="modal"
             />
           </div>
-          <div className="compare-color_list list-empty tf-grid-layout tf-col-4 gap-0">
+          <div className="gap-0 compare-color_list list-empty tf-grid-layout tf-col-4">
             {compareItem.length ? (
               <>
                 {compareItem.map((product, i) => (
@@ -46,7 +45,7 @@ export default function CompareColorModal() {
                     </div>
                     <div className="compare_colour">
                       <span className="color bg-teal-blue" />
-                      <span className="fw-medium text-black">Teal Blue</span>
+                      <span className="text-black fw-medium">Teal Blue</span>
                     </div>
                     <div className="compare_bot">
                       <div className="tf-select style-border">

@@ -8,7 +8,7 @@ import { useContextElement } from "@/context/Context";
 
 export default function Products2() {
   const [currentLookbookHover, setCurrentLookbookHover] = useState(null);
-  const { addProductToCart, isAddedToCartProducts } = useContextElement();
+  const { addProductToCart, isAddedToCartProducts } = useMockContextElement();
 
   // Precompute ids, total, and all-added state
   const productIds = useMemo(() => products3.map((p) => p.id), []);

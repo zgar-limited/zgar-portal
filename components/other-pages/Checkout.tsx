@@ -1,11 +1,12 @@
 "use client";
 
-import { useContextElement } from "@/context/Context";
 import Image from "next/image";
 import Link from "next/link";
 
 export default function Checkout() {
-  const { cartProducts, totalPrice } = useContextElement();
+  const cartProducts = []; // Mock empty cart
+  const totalPrice = 0; // Mock total price
+
   return (
     <section className="flat-spacing">
       <div className="container">
@@ -18,7 +19,7 @@ export default function Checkout() {
                   <span className="text-primary">Enter your code</span>
                 </h5>
                 <form onSubmit={(e) => e.preventDefault()}>
-                  <div className="ip-discount-code mb-0">
+                  <div className="mb-0 ip-discount-code">
                     <input type="text" placeholder="Enter your code" required />
                     <button className="tf-btn animate-btn" type="submit">
                       Apply Code
@@ -347,7 +348,7 @@ export default function Checkout() {
                       />
                     </div>
                   </div>
-                  <p className="h6 mb-20">
+                  <p className="mb-20 h6">
                     Your personal data will be used to process your order,
                     support your experience throughout this website, and for
                     other purposes described in our privacy policy.
@@ -368,7 +369,7 @@ export default function Checkout() {
                 </div>
                 <div className="box-ip-shipping">
                   <h2 className="title type-semibold">Shipping Method</h2>
-                  <label htmlFor="freeship" className="check-ship mb-12">
+                  <label htmlFor="freeship" className="mb-12 check-ship">
                     <input
                       type="radio"
                       id="freeship"
@@ -470,15 +471,15 @@ export default function Checkout() {
                 )}
                 <ul className="list-total">
                   <li className="total-item h6">
-                    <span className="fw-bold text-black">Discounts</span>
+                    <span className="text-black fw-bold">Discounts</span>
                     <span>$00.00</span>
                   </li>
                   <li className="total-item h6">
-                    <span className="fw-bold text-black">Shipping</span>
+                    <span className="text-black fw-bold">Shipping</span>
                     <span>Free</span>
                   </li>
                 </ul>
-                <div className="last-total h5 fw-medium text-black">
+                <div className="text-black last-total h5 fw-medium">
                   <span>Total</span>
                   <span>${totalPrice.toFixed(2)}</span>
                 </div>

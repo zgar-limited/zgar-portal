@@ -3,23 +3,11 @@ import Link from "next/link";
 import Image from "next/image";
 import React, { useState } from "react";
 import { cartSimilerItems } from "@/data/products";
-import { useContextElement } from "@/context/Context";
 
 export default function CartModal() {
-  const { cartProducts, totalPrice, removeProductFromCart, cartLoading } =
-    useContextElement();
-  const [removingId, setRemovingId] = useState(null);
-
-  const handleRemove = async (id) => {
-    setRemovingId(id);
-    try {
-      await removeProductFromCart(id);
-    } catch (error) {
-      console.error("Error removing item:", error);
-    } finally {
-      setRemovingId(null);
-    }
-  };
+  const [activeAction, setActiveAction] = useState(null);
+  const cartProducts = []; // Mock empty cart
+  const totalPrice = 0; // Mock total price
 
   const miniCartActions = [
     {
@@ -38,7 +26,7 @@ export default function CartModal() {
       iconClass: "icon-gift",
     },
   ];
-  const [activeAction, setActiveAction] = useState(null);
+
   return (
     <div
       className="offcanvas offcanvas-end popup-shopping-cart"
@@ -97,98 +85,31 @@ export default function CartModal() {
             <div className="tf-mini-cart-main">
               <div className="tf-mini-cart-sroll">
                 <div className="tf-mini-cart-items list-empty">
-                  {cartLoading ? (
-                    <div className="d-flex justify-content-center align-items-center" style={{ height: "200px" }}>
-                      <div className="spinner-border text-primary" role="status">
-                        <span className="visually-hidden">Loading...</span>
-                      </div>
+                  <div className="box-text_empty type-shop_cart">
+                    <div className="shop-empty_top">
+                      <span className="icon">
+                        <i className="icon-shopping-cart-simple" />
+                      </span>
+                      <h3 className="text-emp fw-normal">
+                        Your cart is empty
+                      </h3>
+                      <p className="h6 text-main">
+                        Your cart is currently empty. Let us assist you in
+                        finding the right product
+                      </p>
                     </div>
-                  ) : !cartProducts.length ? (
-                    <div className="box-text_empty type-shop_cart">
-                      <div className="shop-empty_top">
-                        <span className="icon">
-                          <i className="icon-shopping-cart-simple" />
-                        </span>
-                        <h3 className="text-emp fw-normal">
-                          Your cart is empty
-                        </h3>
-                        <p className="h6 text-main">
-                          Your cart is currently empty. Let us assist you in
-                          finding the right product
-                        </p>
-                      </div>
-                      <div className="shop-empty_bot">
-                        <Link
-                          href={`/shop-default`}
-                          className="tf-btn animate-btn"
-                        >
-                          Shopping
-                        </Link>
-                        <Link href={`/`} className="tf-btn style-line">
-                          Back to home
-                        </Link>
-                      </div>
+                    <div className="shop-empty_bot">
+                      <Link
+                        href={`/shop-default`}
+                        className="tf-btn animate-btn"
+                      >
+                        Shopping
+                      </Link>
+                      <Link href={`/`} className="tf-btn style-line">
+                        Back to home
+                      </Link>
                     </div>
-                  ) : (
-                    <>
-                      {cartProducts.map((product, i) => (
-                        <div key={i} className="tf-mini-cart-item file-delete">
-                          <div className="tf-mini-cart-image">
-                            <Image
-                              className="lazyload"
-                              alt="img-product"
-                              src={product.imgSrc}
-                              width={1044}
-                              height={1392}
-                            />
-                          </div>
-                          <div className="tf-mini-cart-info">
-                            <div className="text-small text-main-2 sub">
-                              T-shirt
-                            </div>
-                            <h6 className="title">
-                              <Link
-                                href={`/product-detail/${product.id}`}
-                                className="link text-line-clamp-1"
-                              >
-                                {product.title}
-                              </Link>
-                            </h6>
-                            <div className="size">
-                              <div className="text-small text-main-2 sub">
-                                Size: XS
-                              </div>
-                              <div className="text-small text-main-2 sub">
-                                Color:
-                              </div>
-                              <div className="dot-color bg-caramel" />
-                            </div>
-                            <div className="d-flex justify-content-between align-items-center">
-                              <div className="h6 fw-semibold">
-                                <span className="number">
-                                  {product.quantity}x
-                                </span>
-                                <span className="price text-primary tf-mini-card-price">
-                                  ${product.price.toFixed(2)}
-                                </span>
-                              </div>
-                              {removingId === product.id ? (
-                                <div className="spinner-border spinner-border-sm text-secondary" role="status">
-                                  <span className="visually-hidden">Loading...</span>
-                                </div>
-                              ) : (
-                                <i
-                                  className="icon link icon-close remove"
-                                  onClick={() => handleRemove(product.id)}
-                                  style={{ cursor: "pointer" }}
-                                />
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </>
-                  )}
+                  </div>
                 </div>
               </div>
             </div>

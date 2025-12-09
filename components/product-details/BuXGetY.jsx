@@ -2,7 +2,6 @@
 import Image from "next/image";
 import React, { useState, Fragment } from "react";
 import QuantitySelect from "../common/QuantitySelect";
-import { useContextElement } from "@/context/Context";
 import { getXproducts } from "@/data/products";
 
 const PlusCircle = () => (
@@ -15,19 +14,15 @@ const PlusCircle = () => (
 );
 
 export default function BuXGetY() {
-  const { addProductToCart } = useContextElement();
+  // Mock function
+  const addProductToCart = () => {};
 
   const [quantities, setQuantities] = useState(getXproducts.map(() => 1));
   const setQtyByIndex = (idx, next) =>
     setQuantities((prev) => prev.map((q, i) => (i === idx ? next : q)));
 
   const handleAddAllToCart = () => {
-    getXproducts.forEach((item, idx) => {
-      const qty = quantities[idx] ?? 1;
-      if (qty <= 0) return;
-
-      addProductToCart(item.id, qty);
-    });
+    // Mock function - no action
   };
 
   return (
@@ -35,7 +30,7 @@ export default function BuXGetY() {
       <div className="buyX-getY-wrap">
         {getXproducts.map((item, idx) => (
           <Fragment key={item.id}>
-            <div className="volume-discount-thumbnail-item p-0 border-0">
+            <div className="p-0 border-0 volume-discount-thumbnail-item">
               <div className="image-box type-1">
                 <Image
                   className="ls-is-cached lazyloaded"
@@ -59,8 +54,8 @@ export default function BuXGetY() {
                   <div className={`dot-color ${item.colorClass}`} />
                 </div>
 
-                <div className="mt-2 d-flex align-items-center gap-3">
-                  <span className="h6 mb-0">${item.price.toFixed(2)}</span>
+                <div className="gap-3 mt-2 d-flex align-items-center">
+                  <span className="mb-0 h6">${item.price.toFixed(2)}</span>
                   <QuantitySelect
                     quantity={quantities[idx]}
                     setQuantity={(n) => setQtyByIndex(idx, n)}

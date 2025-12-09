@@ -3,11 +3,9 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ShoppingCart, X } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
 import { StoreCart } from "@medusajs/types";
 
 export default function CartIcon({ cart }: { cart: StoreCart | null }) {
-  const { customer } = useAuth();
   const [isHovered, setIsHovered] = useState(false);
 
   const cartProducts = React.useMemo(() => {
@@ -36,17 +34,6 @@ export default function CartIcon({ cart }: { cart: StoreCart | null }) {
 
   // Calculate total items (sum of quantities)
   const itemCount = cartProducts.reduce((acc, item) => acc + item.quantity, 0);
-
-  // Auth Guard: If not logged in, show icon but redirect to login on click
-  if (!customer) {
-      return (
-        <div className="position-relative d-flex align-items-center h-100">
-             <Link href="/login" className="nav-icon-item link position-relative text-dark">
-                <ShoppingCart />
-             </Link>
-        </div>
-      );
-  }
 
   return (
     <div 

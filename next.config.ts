@@ -1,6 +1,10 @@
 import path from "path";
 import type { NextConfig } from "next";
 
+import { loadEnvConfig } from "@next/env";
+
+const projectDir = process.cwd();
+loadEnvConfig(projectDir);
 const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
@@ -17,7 +21,6 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  
 };
 
 export default nextConfig;

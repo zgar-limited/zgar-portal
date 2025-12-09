@@ -2,7 +2,8 @@
 import React, { useState, useRef } from "react";
 import { Modal, Button, Spinner, Alert } from "react-bootstrap";
 import { Upload, X, CheckCircle, AlertCircle, Plus } from "lucide-react";
-import { medusaFetch } from "@/utils/medusa-fetch";
+
+import { medusaSDK } from "@/utils/medusa";
 
 interface UploadVoucherModalProps {
   show: boolean;
@@ -32,15 +33,17 @@ export default function UploadVoucherModal({
 
   React.useEffect(() => {
     if (show) {
-      const existingItems: VoucherItem[] = initialVouchers.map((url, index) => ({
-        id: `existing-${index}-${Date.now()}`,
-        url,
-        isExisting: true,
-      }));
+      const existingItems: VoucherItem[] = initialVouchers.map(
+        (url, index) => ({
+          id: `existing-${index}-${Date.now()}`,
+          url,
+          isExisting: true,
+        })
+      );
       setItems(existingItems);
     } else {
       // Cleanup blob URLs
-      items.forEach(item => {
+      items.forEach((item) => {
         if (!item.isExisting) {
           URL.revokeObjectURL(item.url);
         }
@@ -156,8 +159,8 @@ export default function UploadVoucherModal({
     setError(null);
 
     try {
-      const newFiles = items.filter(i => !i.isExisting && i.file);
-      const existingUrls = items.filter(i => i.isExisting).map(i => i.url);
+      const newFiles = items.filter((i) => !i.isExisting && i.file);
+      const existingUrls = items.filter((i) => i.isExisting).map((i) => i.url);
       let newUploadedUrls: string[] = [];
 
       // 1. Upload new files to Medusa if any
@@ -167,13 +170,12 @@ export default function UploadVoucherModal({
           if (f.file) formData.append("files", f.file);
         });
 
-        const uploadRes = await medusaFetch<{ files: { url: string }[] }>(
-          "/store/zgar/files",
-          {
-            method: "POST",
-            body: formData,
-          }
-        );
+        const uploadRes = await medusaSDK.client.fetch<{
+          files: { url: string }[];
+        }>("/store/zgar/files", {
+          method: "POST",
+          body: formData,
+        });
 
         if (!uploadRes.files || uploadRes.files.length === 0) {
           throw new Error("Failed to upload files");
@@ -183,10 +185,10 @@ export default function UploadVoucherModal({
 
       // Combine existing and new URLs
       const allUrls = [...existingUrls, ...newUploadedUrls];
-      const fileUrls = allUrls.join(',');
+      const fileUrls = allUrls.join(",");
 
       // 2. Submit vouchers to order
-      await medusaFetch(
+      await medusaSDK.client.fetch(
         `/store/zgar/orders/${orderId}/payment-voucher`,
         {
           method: "POST",

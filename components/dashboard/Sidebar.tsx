@@ -4,11 +4,9 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { customer, logout } = useAuth();
 
   const navItems = [
     {
@@ -33,19 +31,14 @@ export default function Sidebar() {
     },
   ];
 
-  const handleLogout = (e: React.MouseEvent) => {
-    e.preventDefault();
-    logout();
-  };
-
   return (
     <div className="sidebar-account sidebar-content-wrap sticky-top">
       <div className="account-author">
        
         <h4 className="author_name">
-          {customer?.first_name} {customer?.last_name}
+          Guest User
         </h4>
-        <p className="author_email h6">{customer?.email}</p>
+        <p className="author_email h6">guest@example.com</p>
       </div>
 
       <ul className="my-account-nav">
@@ -64,16 +57,6 @@ export default function Sidebar() {
             </li>
           );
         })}
-        <li>
-          <a
-            href="#"
-            onClick={handleLogout}
-            className="my-account-nav_item h5"
-          >
-            <i className="icon icon-sign-out" />
-            Log out
-          </a>
-        </li>
       </ul>
     </div>
   );

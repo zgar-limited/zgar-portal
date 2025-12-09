@@ -12,7 +12,7 @@ import QuickViewButton from "@/components/productActionButtons/QuickViewButton";
 export default function SingleProduct() {
   const product = singleStyleProducts[2];
   const [quantity, setQuantity] = useState(1);
-  const { addProductToCart, isAddedToCartProducts } = useContextElement();
+  const { addProductToCart, isAddedToCartProducts } = useMockContextElement();
   return (
     <div className="card-product style-pading-4 style-2 tf-cart-item wow fadeInUp">
       <div className="card-product_wrapper aspect-ratio-0 d-flex">
