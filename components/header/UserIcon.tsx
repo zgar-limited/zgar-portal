@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { User } from "lucide-react";
 import { StoreCustomer } from "@medusajs/types";
+import { signout } from "@/data/customer";
 
 export default function UserIcon({ customer }: { customer: StoreCustomer }) {
   const [isHovered, setIsHovered] = useState(false);
@@ -13,7 +14,10 @@ export default function UserIcon({ customer }: { customer: StoreCustomer }) {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Link href={customer ? "/account-page" : "/login"} className="nav-icon-item link text-dark">
+      <Link
+        href={customer ? "/account-page" : "/login"}
+        className="nav-icon-item link text-dark"
+      >
         <User />
       </Link>
 
@@ -45,7 +49,7 @@ export default function UserIcon({ customer }: { customer: StoreCustomer }) {
                 <span>My Account</span>
               </Link>
               <button
-                onClick={() => {}}
+                onClick={signout}
                 className="gap-2 px-3 py-2 bg-transparent border-0 dropdown-item d-flex align-items-center hover-bg-light text-dark text-decoration-none small w-100 text-start"
               >
                 <User size={16} />
@@ -61,31 +65,31 @@ export default function UserIcon({ customer }: { customer: StoreCustomer }) {
                 <User size={16} />
                 <span>Login</span>
               </Link>
-              
+
               <Link
-                 href="/login"
-                 className="gap-2 px-3 py-2 dropdown-item d-flex align-items-center hover-bg-light text-dark text-decoration-none small"
+                href="/login"
+                className="gap-2 px-3 py-2 dropdown-item d-flex align-items-center hover-bg-light text-dark text-decoration-none small"
               >
-                 <User size={16} />
-                 <span>Register</span>
+                <User size={16} />
+                <span>Register</span>
               </Link>
             </>
           )}
         </div>
       )}
-      
+
       <style jsx>{`
         .hover-bg-light:hover {
-            background-color: #f8f9fa;
+          background-color: #f8f9fa;
         }
         .dropdown-menu-custom::before {
-            content: '';
-            position: absolute;
-            top: -20px;
-            left: 0;
-            width: 100%;
-            height: 20px;
-            background: transparent;
+          content: "";
+          position: absolute;
+          top: -20px;
+          left: 0;
+          width: 100%;
+          height: 20px;
+          background: transparent;
         }
       `}</style>
     </div>

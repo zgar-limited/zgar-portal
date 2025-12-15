@@ -1,7 +1,7 @@
 "use server";
 
 import { HttpTypes } from "@medusajs/types";
-import { revalidateTag } from "next/cache";
+import { revalidateTag, updateTag } from "next/cache";
 
 import { redirect } from "next/navigation";
 import {
@@ -125,20 +125,20 @@ export async function login(_currentState: unknown, formData: FormData) {
   redirect("/");
 }
 
-export async function signout(countryCode: string) {
+export async function signout() {
   await medusaSDK.auth.logout();
 
   await removeAuthToken();
 
   const customerCacheTag = await getCacheTag("customers");
-  revalidateTag(customerCacheTag, "max");
+  updateTag(customerCacheTag);
 
   await removeCartId();
 
   const cartCacheTag = await getCacheTag("carts");
-  revalidateTag(cartCacheTag, "max");
+  updateTag(cartCacheTag);
 
-  redirect(`/${countryCode}/account`);
+  redirect(`/login`);
 }
 
 // export async function transferCart() {
