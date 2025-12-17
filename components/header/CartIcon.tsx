@@ -4,9 +4,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { ShoppingCart, X } from "lucide-react";
 import { StoreCart } from "@medusajs/types";
+import { useTranslations } from "next-intl";
 
 export default function CartIcon({ cart }: { cart?: StoreCart }) {
   const [isHovered, setIsHovered] = useState(false);
+  const t = useTranslations("CartIcon");
 
   const cartProducts = React.useMemo(() => {
     if (!cart?.items) return [];
@@ -75,13 +77,13 @@ export default function CartIcon({ cart }: { cart?: StoreCart }) {
           ></div>
 
           <div className="pb-2 mb-3 d-flex justify-content-between align-items-center border-bottom">
-            <h6 className="mb-0 fw-bold">Shopping Cart ({itemCount})</h6>
+            <h6 className="mb-0 fw-bold">{t("shoppingCart")} ({itemCount})</h6>
             <span className="text-muted small">${totalPrice.toFixed(2)}</span>
           </div>
 
           {cartProducts.length === 0 ? (
             <p className="py-3 text-center text-muted small">
-              Your cart is empty.
+              {t("emptyCart")}
             </p>
           ) : (
             <div
@@ -116,7 +118,7 @@ export default function CartIcon({ cart }: { cart?: StoreCart }) {
               ))}
               {cartProducts.length > 3 && (
                 <p className="mb-0 text-center x-small text-muted">
-                  And {cartProducts.length - 3} more items...
+                  {t("moreItems", { count: cartProducts.length - 3 })}
                 </p>
               )}
             </div>
@@ -127,7 +129,7 @@ export default function CartIcon({ cart }: { cart?: StoreCart }) {
               href="/view-cart"
               className="btn btn-dark btn-sm rounded-pill"
             >
-              View Cart
+              {t("viewCart")}
             </Link>
             {/* <Link href="/checkout" className="btn btn-outline-dark btn-sm rounded-pill">
                     Checkout

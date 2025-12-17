@@ -1,19 +1,25 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useTransition } from "react";
 import { Globe } from "lucide-react";
-
-const languages = ["English", "繁體中文"];
+import { useLocale, useTranslations } from "next-intl";
+import { usePathname, useRouter } from "@/i18n/routing";
 
 export default function LanguageSelect({
   placement = "bottom-end",
   textBlack = false,
   textColor = "var(--black)",
 }) {
-  const [selectedLanguage, setSelectedLanguage] = useState(languages[0]);
+  const t = useTranslations('LocaleSwitcher');
+  const locale = useLocale();
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const pathname = usePathname();
 
-  const handleSelect = (lang) => {
-    setSelectedLanguage(lang);
+  const handleSelect = (nextLocale) => {
+    startTransition(() => {
+      router.replace(pathname, {locale: nextLocale});
+    });
   };
 
   return (
@@ -34,14 +40,15 @@ export default function LanguageSelect({
         }`}
         style={{ minWidth: "auto" }}
       >
-        {languages.map((lang, index) => (
-          <li key={index}>
+        {['en-us', 'zh-hk'].map((cur) => (
+          <li key={cur}>
             <button
-              className={`dropdown-item ${selectedLanguage === lang ? "active" : ""}`}
+              className={`dropdown-item ${locale === cur ? "active" : ""}`}
               type="button"
-              onClick={() => handleSelect(lang)}
+              onClick={() => handleSelect(cur)}
+              disabled={isPending}
             >
-              {lang}
+              {t(cur)}
             </button>
           </li>
         ))}

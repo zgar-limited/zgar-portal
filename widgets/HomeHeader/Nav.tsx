@@ -1,13 +1,16 @@
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 
 export default function Nav() {
+  const t = useTranslations("Navigation");
+  
   return (
     <>
       <li className="menu-item">
-        <a href="/" className="item-link">
-          HOME
+        <Link href="/" className="item-link">
+          {t("home")}
           {/* <i className="icon icon-caret-down" /> */}
-        </a>
+        </Link>
         {/* <div className="sub-menu mega-menu mega-home">
           <div className="container">
             <div className="row-demo">
@@ -49,10 +52,10 @@ export default function Nav() {
         </div> */}
       </li>
       <li className="menu-item">
-        <a href="/shop" className="item-link">
-          PRODUCTS
+        <Link href="/shop" className="item-link">
+          {t("products")}
           {/* <i className="icon icon-caret-down" /> */}
-        </a>
+        </Link>
         {/* <div className="sub-menu mega-menu">
           <div className="container">
             <div className="row">
@@ -102,22 +105,22 @@ export default function Nav() {
         </div> */}
       </li>
       <li className="menu-item">
-        <a href="/about-us" className="item-link">
-          ABOUT
+        <Link href="/about-us" className="item-link">
+          {t("about")}
           {/* <i className="icon icon-caret-down" /> */}
-        </a>
+        </Link>
       </li>
       <li className="menu-item position-relative">
-        <a href="/partner" className="item-link">
-          PARTNERS
+        <Link href="/partner" className="item-link">
+          {t("partners")}
           {/* <i className="icon icon-caret-down" /> */}
-        </a>
+        </Link>
       </li>
       <li className="menu-item position-relative">
-        <a href="/care" className="item-link">
-          CARE
+        <Link href="/care" className="item-link">
+          {t("care")}
           {/* <i className="icon icon-caret-down" /> */}
-        </a>
+        </Link>
         {/* <div className="sub-menu">
           <ul className="sub-menu_list">
             {blogMenuItems.map((item, index) => (
@@ -131,15 +134,15 @@ export default function Nav() {
         </div> */}
       </li>
       <li className="menu-item">
-        <a href="/verify-guide" className="item-link">
-          AUTHENTICATION
-        </a>
+        <Link href="/verify-guide" className="item-link">
+          {t("authentication")}
+        </Link>
       </li>
 
       <li>
         <div className="animated-border-box radius-style-2">
           <Link className="tp-btn-gradient sm p-relative" href="/register">
-            CLUB
+            {t("club")}
           </Link>
         </div>
       </li>

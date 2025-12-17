@@ -1,0 +1,30 @@
+{
+  "LocaleSwitcher": {
+    "label": "Change language",
+    "en-us": "English",
+    "zh-hk": "Traditional Chinese"
+  },
+  "Navigation": {
+    "home": "HOME",
+    "products": "PRODUCTS",
+    "about": "ABOUT",
+    "partners": "PARTNERS",
+    "care": "CARE",
+    "authentication": "AUTHENTICATION",
+    "club": "CLUB",
+    "contact": "Contact"
+  },
+  "UserIcon": {
+    "myAccount": "My Account",
+    "logout": "Logout",
+    "login": "Login",
+    "register": "Register"
+  },
+  "CartIcon": {
+    "shoppingCart": "Shopping Cart",
+    "emptyCart": "Your cart is empty.",
+    "viewCart": "View Cart",
+    "checkout": "Checkout",
+    "moreItems": "And {count} more items..."
+  }
+}

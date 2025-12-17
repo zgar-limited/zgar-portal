@@ -4,9 +4,11 @@ import Link from "next/link";
 import { User } from "lucide-react";
 import { StoreCustomer } from "@medusajs/types";
 import { signout } from "@/data/customer";
+import { useTranslations } from "next-intl";
 
 export default function UserIcon({ customer }: { customer: StoreCustomer }) {
   const [isHovered, setIsHovered] = useState(false);
+  const t = useTranslations("UserIcon");
 
   return (
     <div
@@ -46,14 +48,14 @@ export default function UserIcon({ customer }: { customer: StoreCustomer }) {
                 className="gap-2 px-3 py-2 dropdown-item d-flex align-items-center hover-bg-light text-dark text-decoration-none small"
               >
                 <User size={16} />
-                <span>My Account</span>
+                <span>{t("myAccount")}</span>
               </Link>
               <button
                 onClick={signout}
                 className="gap-2 px-3 py-2 bg-transparent border-0 dropdown-item d-flex align-items-center hover-bg-light text-dark text-decoration-none small w-100 text-start"
               >
                 <User size={16} />
-                <span>Logout</span>
+                <span>{t("logout")}</span>
               </button>
             </>
           ) : (
@@ -63,7 +65,7 @@ export default function UserIcon({ customer }: { customer: StoreCustomer }) {
                 className="gap-2 px-3 py-2 dropdown-item d-flex align-items-center hover-bg-light text-dark text-decoration-none small"
               >
                 <User size={16} />
-                <span>Login</span>
+                <span>{t("login")}</span>
               </Link>
 
               <Link
@@ -71,7 +73,7 @@ export default function UserIcon({ customer }: { customer: StoreCustomer }) {
                 className="gap-2 px-3 py-2 dropdown-item d-flex align-items-center hover-bg-light text-dark text-decoration-none small"
               >
                 <User size={16} />
-                <span>Register</span>
+                <span>{t("register")}</span>
               </Link>
             </>
           )}

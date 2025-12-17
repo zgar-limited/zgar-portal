@@ -1,0 +1,30 @@
+{
+  "LocaleSwitcher": {
+    "label": "切換語言",
+    "en-us": "英文",
+    "zh-hk": "繁體中文"
+  },
+  "Navigation": {
+    "home": "首頁",
+    "products": "產品",
+    "about": "關於我們",
+    "partners": "合作夥伴",
+    "care": "客戶服務",
+    "authentication": "防偽驗證",
+    "club": "會員俱樂部",
+    "contact": "聯絡我們"
+  },
+  "UserIcon": {
+    "myAccount": "我的賬戶",
+    "logout": "登出",
+    "login": "登入",
+    "register": "註冊"
+  },
+  "CartIcon": {
+    "shoppingCart": "購物車",
+    "emptyCart": "您的購物車是空的。",
+    "viewCart": "查看購物車",
+    "checkout": "結賬",
+    "moreItems": "還有 {count} 件商品..."
+  }
+}
