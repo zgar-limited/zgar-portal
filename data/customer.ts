@@ -141,6 +141,82 @@ export async function signout() {
   redirect(`/login`);
 }
 
+export async function resetPassword(
+  _currentState: unknown,
+  formData: FormData
+) {
+  const email = formData.get("email") as string;
+
+  try {
+    // Attempt to send reset password request
+    // The endpoint might vary based on your Medusa backend configuration
+    // Assuming standard Medusa V2 auth structure: /auth/customer/emailpass/reset-password
+    // or similar. If using a specific plugin, check its documentation.
+
+    // Using fetch via SDK client to ensure headers/config are handled
+    // Note: Medusa JS SDK might not have a direct method for this in v2 yet, or it's under a specific module.
+    // We'll use the client to hit the endpoint directly.
+    // Common endpoint for emailpass provider reset password request
+    await medusaSDK.auth.resetPassword("customer", "emailpass", {
+      identifier: email,
+    });
+
+    return {
+      success: true,
+      message:
+        "If an account exists with this email, a password reset link has been sent.",
+    };
+  } catch (error: any) {
+    // Even if it fails (e.g. user not found), for security reasons we might want to show success
+    // But for debugging/development, we might return the error.
+    // Standard practice is to not reveal user existence.
+    console.error("Reset password error:", error);
+    return {
+      success: true,
+      message:
+        "If an account exists with this email, a password reset link has been sent.",
+    };
+  }
+}
+
+export async function updatePassword(
+  _currentState: unknown,
+  formData: FormData
+) {
+  const password = formData.get("password") as string;
+  const token = formData.get("token") as string;
+  const email = formData.get("email") as string;
+
+  try {
+    await medusaSDK.auth.updateProvider(
+      "customer",
+      "emailpass",
+      {
+        password: password,
+      },
+      token
+    );
+
+    // After updating password, we can automatically login the user
+    // or redirect them to login page.
+    // Let's try to login them in.
+    const loginToken = await medusaSDK.auth.login("customer", "emailpass", {
+      email,
+      password,
+    });
+
+    await setAuthToken(loginToken as string);
+
+    const customerCacheTag = await getCacheTag("customers");
+    revalidateTag(customerCacheTag, "max");
+
+  } catch (error: any) {
+    return { success: false, error: error.message || error.toString() };
+  }
+  
+  redirect("/");
+}
+
 // export async function transferCart() {
 //   const cartId = await getCartId();
 

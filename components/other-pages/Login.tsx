@@ -147,9 +147,9 @@ export default function Login() {
                       </label>
                     </div>
                     <h6>
-                      <a href="#" className="link">
+                      <Link href="/reset-password" className="link">
                         Forgot your password?
-                      </a>
+                      </Link>
                     </h6>
                   </div>
                   {loginState?.error && (

@@ -16,9 +16,9 @@ export default async function page({
 }) {
   const { response } = await fetchProducts({
     countryCode: "us",
-    queryParams: {
-      limit: 12,
-    },
+    // queryParams: {
+    //   limit: 12,
+    // },
   });
   console.log(
     "%c [ response ]-25",

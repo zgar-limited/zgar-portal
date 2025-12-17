@@ -84,13 +84,25 @@ export default function ProductInfo({ product }: ProductInfoProps) {
   // Safe price display
   const price = useMemo(() => {
     // @ts-ignore
+    if (selectedVariant?.calculated_price?.calculated_amount) {
+      // @ts-ignore
+      return selectedVariant.calculated_price.calculated_amount;
+    }
+    // @ts-ignore
     if (selectedVariant?.prices?.[0]?.amount) {
       // @ts-ignore
       return selectedVariant.prices[0].amount; // Medusa v2 might be raw number, usually implies currency handling elsewhere, assuming direct value for now or /100 if cents
     }
+    
     // Fallback to product price or first variant
+    const firstVariant = product.variants?.[0];
     // @ts-ignore
-    return product.variants?.[0]?.prices?.[0]?.amount || 0;
+    if (firstVariant?.calculated_price?.calculated_amount) {
+      // @ts-ignore
+      return firstVariant.calculated_price.calculated_amount;
+    }
+    // @ts-ignore
+    return firstVariant?.prices?.[0]?.amount || 0;
   }, [selectedVariant, product]);
 
   const isSoldOut = selectedVariant && selectedVariant.inventory_quantity === 0; // Check inventory logic if needed

@@ -19,9 +19,9 @@ export const fetchProducts = async ({
   nextPage: number | null;
   queryParams?: HttpTypes.FindParams & HttpTypes.StoreProductListParams;
 }> => {
-  if (!countryCode && !regionId) {
-    throw new Error("Country code or region ID is required");
-  }
+  // if (!countryCode && !regionId) {
+  //   throw new Error("Country code or region ID is required");
+  // }
 
   const limit = queryParams?.limit || 12;
   const _pageParam = Math.max(pageParam, 1);

@@ -318,9 +318,9 @@ export default function Details1({
 
   function SimpleMetaBlock() {
     return (
-      <div className="tf-product-heading justify-content-start align-items-center pt-0 border-top-0">
+      <div className="pt-0 tf-product-heading justify-content-start align-items-center border-top-0">
         <PriceBlock />
-        <div className="tf-product-info-liveview mb-0">
+        <div className="mb-0 tf-product-info-liveview">
           <div className="liveview-count size-40">
             <span className="count fw-6 h6">23</span>
           </div>
@@ -333,7 +333,7 @@ export default function Details1({
   function DefaultMetaBlock() {
     return (
       <div className="product-info-meta">
-        <div className="rating d-flex gap-4">
+        <div className="gap-4 rating d-flex">
           {[...Array(5)].map((_, i) => (
             <svg key={i} width={14} height={14} viewBox="0 0 14 14" fill="none">
               <path
