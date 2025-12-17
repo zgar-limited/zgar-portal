@@ -7,12 +7,25 @@
   "Navigation": {
     "home": "首頁",
     "products": "產品",
-    "about": "關於我們",
+    "products_sub": {
+      "close_pod": "換彈系列",
+      "disposable": "一次性系列",
+      "open_system": "開放式系列"
+    },
+    "about": "關於ZGAR",
+    "about_sub": {
+      "about_us": "關於我們",
+      "blog_news": "博客動態",
+      "partners": "合作夥伴"
+    },
     "partners": "合作夥伴",
-    "care": "客戶服務",
+    "care": "ZGAR關懷",
     "authentication": "防偽驗證",
-    "club": "會員俱樂部",
-    "contact": "聯絡我們"
+    "club": "ZGAR會員",
+    "contact": "聯繫我們",
+    "contact_sub": {
+      "wholesaler": "批發商登記表"
+    }
   },
   "UserIcon": {
     "myAccount": "我的賬戶",
@@ -26,5 +39,16 @@
     "viewCart": "查看購物車",
     "checkout": "結賬",
     "moreItems": "還有 {count} 件商品..."
+  },
+  "HomeTips": {
+    "warning": "警告：產品含有尼古丁。尼古丁具有成癮性。"
+  },
+  "AgeVerification": {
+    "title": "21+ 年齡確認",
+    "warning": "警告：產品含有尼古丁。尼古丁具有成癮性。",
+    "subWarning": "以上警告適用於產品與含有尼古丁的電子液體一起使用時。",
+    "description": "您必須年滿 21 歲才能瀏覽 ZGAR.com 上的產品。",
+    "confirm": "我已年滿 21 歲",
+    "reject": "離開並關閉"
   }
 }

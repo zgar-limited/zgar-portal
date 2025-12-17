@@ -1,5 +1,6 @@
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
+import { Box, Zap, Layers, Info, Newspaper, Handshake, UserPlus } from "lucide-react";
 
 export default function Nav() {
   const t = useTranslations("Navigation");
@@ -7,7 +8,7 @@ export default function Nav() {
   return (
     <>
       <li className="menu-item">
-        <Link href="/" className="item-link">
+        <Link href="/" className="item-link" style={{ fontSize: '17px', fontWeight: 'bold' }}>
           {t("home")}
           {/* <i className="icon icon-caret-down" /> */}
         </Link>
@@ -51,11 +52,33 @@ export default function Nav() {
           </div>
         </div> */}
       </li>
-      <li className="menu-item">
-        <Link href="/shop" className="item-link">
+      <li className="menu-item position-relative">
+        <Link href="/shop" className="item-link" style={{ fontSize: '17px', fontWeight: 'bold' }}>
           {t("products")}
-          {/* <i className="icon icon-caret-down" /> */}
+          <i className="icon icon-caret-down" />
         </Link>
+        <div className="sub-menu" style={{ left: '0', minWidth: '260px', borderRadius: '12px', padding: '12px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', border: '1px solid #f0f0f0' }}>
+          <ul className="sub-menu_list" style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '0' }}>
+            <li>
+              <Link href="/shop?category=close-pod" className="sub-menu_link" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', borderRadius: '8px', transition: 'all 0.2s', fontSize: '15px', fontWeight: '500' }}>
+                <Box size={18} color="black" />
+                {t("products_sub.close_pod")}
+              </Link>
+            </li>
+            <li>
+              <Link href="/shop?category=disposable" className="sub-menu_link" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', borderRadius: '8px', transition: 'all 0.2s', fontSize: '15px', fontWeight: '500' }}>
+                <Zap size={18} color="black" />
+                {t("products_sub.disposable")}
+              </Link>
+            </li>
+            <li>
+              <Link href="/shop?category=open-system" className="sub-menu_link" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', borderRadius: '8px', transition: 'all 0.2s', fontSize: '15px', fontWeight: '500' }}>
+                <Layers size={18} color="black" />
+                {t("products_sub.open_system")}
+              </Link>
+            </li>
+          </ul>
+        </div>
         {/* <div className="sub-menu mega-menu">
           <div className="container">
             <div className="row">
@@ -104,37 +127,57 @@ export default function Nav() {
           </div>
         </div> */}
       </li>
-      <li className="menu-item">
-        <Link href="/about-us" className="item-link">
+      <li className="menu-item position-relative">
+        <Link href="/about-us" className="item-link" style={{ fontSize: '17px', fontWeight: 'bold' }}>
           {t("about")}
-          {/* <i className="icon icon-caret-down" /> */}
+          <i className="icon icon-caret-down" />
         </Link>
-      </li>
-      <li className="menu-item position-relative">
-        <Link href="/partner" className="item-link">
-          {t("partners")}
-          {/* <i className="icon icon-caret-down" /> */}
-        </Link>
-      </li>
-      <li className="menu-item position-relative">
-        <Link href="/care" className="item-link">
-          {t("care")}
-          {/* <i className="icon icon-caret-down" /> */}
-        </Link>
-        {/* <div className="sub-menu">
-          <ul className="sub-menu_list">
-            {blogMenuItems.map((item, index) => (
-              <li key={index}>
-                <Link href={item.href} className="sub-menu_link">
-                  {item.label}
-                </Link>
-              </li>
-            ))}
+        <div className="sub-menu" style={{ left: '0', minWidth: '240px', borderRadius: '12px', padding: '12px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', border: '1px solid #f0f0f0' }}>
+          <ul className="sub-menu_list" style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '0' }}>
+            <li>
+              <Link href="/about-us" className="sub-menu_link" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', borderRadius: '8px', transition: 'all 0.2s', fontSize: '15px', fontWeight: '500' }}>
+                <Info size={18} color="black" />
+                {t("about_sub.about_us")}
+              </Link>
+            </li>
+            {/* <li>
+              <Link href="/blog" className="sub-menu_link" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', borderRadius: '8px', transition: 'all 0.2s', fontSize: '15px', fontWeight: '500' }}>
+                <Newspaper size={18} color="black" />
+                {t("about_sub.blog_news")}
+              </Link>
+            </li> */}
+            <li>
+              <Link href="/partner" className="sub-menu_link" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', borderRadius: '8px', transition: 'all 0.2s', fontSize: '15px', fontWeight: '500' }}>
+                <Handshake size={18} color="black" />
+                {t("about_sub.partners")}
+              </Link>
+            </li>
           </ul>
-        </div> */}
+        </div>
+      </li>
+      <li className="menu-item position-relative">
+        <Link href="/contact-us" className="item-link" style={{ fontSize: '17px', fontWeight: 'bold' }}>
+          {t("contact")}
+          <i className="icon icon-caret-down" />
+        </Link>
+        <div className="sub-menu" style={{ left: '0', minWidth: '300px', borderRadius: '12px', padding: '12px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', border: '1px solid #f0f0f0' }}>
+          <ul className="sub-menu_list" style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '0' }}>
+            <li>
+              <Link href="/register" className="sub-menu_link" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', borderRadius: '8px', transition: 'all 0.2s', fontSize: '15px', fontWeight: '500' }}>
+                <UserPlus size={18} color="black" />
+                {t("contact_sub.wholesaler")}
+              </Link>
+            </li>
+          </ul>
+        </div>
+      </li>
+      <li className="menu-item position-relative">
+        <Link href="/care" className="item-link" style={{ fontSize: '17px', fontWeight: 'bold' }}>
+          {t("care")}
+        </Link>
       </li>
       <li className="menu-item">
-        <Link href="/verify-guide" className="item-link">
+        <Link href="/verify-guide" className="item-link" style={{ fontSize: '17px', fontWeight: 'bold' }}>
           {t("authentication")}
         </Link>
       </li>

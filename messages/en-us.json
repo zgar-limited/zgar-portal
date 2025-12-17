@@ -6,13 +6,26 @@
   },
   "Navigation": {
     "home": "HOME",
-    "products": "PRODUCTS",
-    "about": "ABOUT",
+    "products": "PRODUCT",
+    "products_sub": {
+      "close_pod": "CLOSE-POD SYSTEM",
+      "disposable": "DISPOSABLE VAPE",
+      "open_system": "OPEN SYSTEM"
+    },
+    "about": "ABOUT ZGAR",
+    "about_sub": {
+      "about_us": "ABOUT US",
+      "blog_news": "BLOG & NEWS",
+      "partners": "PARTNERS"
+    },
     "partners": "PARTNERS",
-    "care": "CARE",
+    "care": "ZGAR CARE",
     "authentication": "AUTHENTICATION",
-    "club": "CLUB",
-    "contact": "Contact"
+    "club": "ZGAR CLUB",
+    "contact": "CONTACT US",
+    "contact_sub": {
+      "wholesaler": "WHOLESALER REGISTRATION"
+    }
   },
   "UserIcon": {
     "myAccount": "My Account",
@@ -26,5 +39,16 @@
     "viewCart": "View Cart",
     "checkout": "Checkout",
     "moreItems": "And {count} more items..."
+  },
+  "HomeTips": {
+    "warning": "WARNING: This product contains nicotine. Nicotine is an addictive chemical."
+  },
+  "AgeVerification": {
+    "title": "21+ Age Verification",
+    "warning": "WARNING: This product contains nicotine. Nicotine is an addictive chemical.",
+    "subWarning": "The above warning applies when the product is used with nicotine-containing e-liquids.",
+    "description": "You must be at least 21 years old to view products on ZGAR.com.",
+    "confirm": "I AM OLDER THAN 21",
+    "reject": "LEAVE AND CLOSE"
   }
 }

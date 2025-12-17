@@ -5,8 +5,10 @@ import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 export default function NewsLetterModal() {
+  const t = useTranslations("AgeVerification");
   const [modalShown, setModalShown] = useState(false);
   const pathname = usePathname();
   const modalElement = useRef();
@@ -41,9 +43,9 @@ export default function NewsLetterModal() {
       id="newsletterPopup"
     >
       <div className="modal-dialog modal-dialog-centered">
-        <div className="modal-content p-0">
+        <div className="p-0 modal-content">
           <div className="modal-heading">
-            <div className="image">
+            {/* <div className="image">
               <Image
                 className="lazyload"
                 src="/images/section/newletter.jpg"
@@ -51,32 +53,36 @@ export default function NewsLetterModal() {
                 width={1044}
                 height={666}
               />
-            </div>
-            <span className="icon-close-popup" data-bs-dismiss="modal">
+            </div> */}
+            {/* <span className="icon-close-popup" data-bs-dismiss="modal">
               <i className="icon-close" />
-            </span>
+            </span> */}
           </div>
-          <div className="modal-body">
-            <p className="h6 sub-title">Zgar Tips!</p>
-            <h3 className="fw-normal title">
-              This website contains adult material and is only suitable for
-              those 21 years or older. Click Enter only if you are at least 21
-              years of age.
+          <div className="p-5 text-center modal-body">
+            <p className="mb-4 h6 sub-title">{t("title")}</p>
+            
+            <div className="mb-4 alert alert-warning">
+              <strong>{t("warning")}</strong>
+              <p className="mt-2 text-sm">{t("subWarning")}</p>
+            </div>
+
+            <h3 className="mb-4 fw-normal title h5">
+              {t("description")}
             </h3>
-            <div className="d-flex justify-content-center gap-2">
+            <div className="gap-2 d-flex justify-content-center flex-column">
               <button
                 type="button"
-                className="btn btn-light "
+                className="btn btn-dark w-100"
                 data-bs-dismiss="modal"
               >
-                Exit
+                {t("confirm")}
               </button>
               <button
                 type="button"
-                className="btn btn-dark "
-                data-bs-dismiss="modal"
+                className="btn btn-light w-100"
+                onClick={() => window.history.back()}
               >
-                I'm over 21
+                {t("reject")}
               </button>
             </div>
           </div>

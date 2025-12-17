@@ -59,7 +59,7 @@ export default function HomeHeader({
             </a>
           </div>
           <div className="col-xl-3 col-md-4 col-6 d-flex justify-content-center justify-content-xl-start">
-            <Link href={`/`} className="logo-site">
+            <Link href={`/`} className="py-2 logo-site">
               <Image
                 alt="Logo"
                 src="/images/logo/logo-zgar.png"

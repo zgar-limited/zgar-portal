@@ -1,9 +1,11 @@
 import ScrollVelocity from "@/components/scroll-velocity/ScrollVelocity";
+import { useTranslations } from "next-intl";
 import React from "react";
 
 type Props = {};
 
 const HomeTips = (props: Props) => {
+  const t = useTranslations("HomeTips");
   return (
     <section
       style={{
@@ -15,7 +17,7 @@ const HomeTips = (props: Props) => {
       <ScrollVelocity
         className=" me-[80px]"
         texts={[
-          "WARNING: This product contains nicotine. Nicotine is an addictivechemical",
+          t("warning"),
         ]}
       />
     </section>
