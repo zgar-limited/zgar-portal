@@ -12,13 +12,13 @@ export default function UserIcon({ customer }: { customer: StoreCustomer }) {
 
   return (
     <div
-      className="position-relative d-flex align-items-center h-100"
+      className="position-relative d-flex align-items-center"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <Link
         href={customer ? "/account-page" : "/login"}
-        className="nav-icon-item link text-dark"
+        className="p-0 link text-dark"
       >
         <User />
       </Link>
@@ -26,8 +26,8 @@ export default function UserIcon({ customer }: { customer: StoreCustomer }) {
       {/* Dropdown Menu */}
       {isHovered && (
         <div
-          className="py-2 bg-white border shadow-lg position-absolute end-0 top-100 rounded-3 dropdown-menu-custom"
-          style={{ width: "200px", zIndex: 1000, marginTop: "10px" }}
+          className="py-2 bg-white border shadow-lg position-absolute end-0 rounded-3 dropdown-menu-custom"
+          style={{ width: "200px", zIndex: 1000, top: "25px" }}
         >
           {/* Arrow/Triangle */}
           <div

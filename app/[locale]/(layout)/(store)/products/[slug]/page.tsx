@@ -27,7 +27,7 @@ import { fetchProduct } from "@/data/products";
 // }
 
 export default async function ProductDetailPage(
-  props: PageProps<"/products/[slug]">
+  props: PageProps<"/[locale]/products/[slug]">
 ) {
   const { slug } = await props.params;
 

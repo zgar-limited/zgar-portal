@@ -1,8 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import Footer1 from "@/components/footers/Footer1";
-import Header1 from "@/components/header/Header1";
-import Topbar1 from "@/components/header/Topbar1";
+
 import React from "react";
 import HomeTips from "@/widgets/HomeTips";
 import HomeHeader from "@/widgets/HomeHeader";
@@ -15,8 +13,7 @@ export const metadata = {
 export default function page() {
   return (
     <>
-      <HomeTips />
-      <HomeHeader parentClass="tf-header header-fix" />
+      
       <section className="s-404 flat-spacing">
         <div className="container">
           <div className="row">

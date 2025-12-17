@@ -1,21 +1,20 @@
-import { NextIntlClientProvider } from 'next-intl';
-import { getMessages } from 'next-intl/server';
-import { notFound } from 'next/navigation';
-import { routing } from '@/i18n/routing';
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages } from "next-intl/server";
+import { notFound } from "next/navigation";
+import { routing } from "@/i18n/routing";
 
+
+
+// import "../../public/css/tailwind.css";
 import "../../public/scss/main.scss";
-
-import "./global.css";
 import "../../public/css/harmonyos_sans.css";
 import "../../public/css/harmonyos_sans_tc.css";
 
 import MobileMenu from "@/components/modals/MobileMenu";
 
 import GlobalEffectsProvider from "@/components/common/GlobalEffectProvider";
-import QueryContext from "@/context/QueryContext";
 
 import ToastProvider from "@/components/common/ToastProvider";
-import HomeHeader from "@/widgets/HomeHeader";
 
 export const metadata = {
   title: "Zgar Vape Website",
@@ -24,10 +23,10 @@ export const metadata = {
 
 export default async function RootLayout({
   children,
-  params
+  params,
 }: {
   children: React.ReactNode;
-  params: Promise<{locale: string}>;
+  params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
 
@@ -46,12 +45,10 @@ export default async function RootLayout({
       <body>
         <NextIntlClientProvider messages={messages}>
           <main id="wrapper">
-            <QueryContext>
-              <ToastProvider>
-                {children}
-                <MobileMenu />
-              </ToastProvider>
-            </QueryContext>
+            <ToastProvider>
+              {children}
+              <MobileMenu />
+            </ToastProvider>
 
             <GlobalEffectsProvider />
           </main>

@@ -1,8 +1,7 @@
 import OffcanvasSidebar from "@/components/dashboard/OffcanvasSidebar";
 import SidebarToggler from "@/components/dashboard/SidebarToggler";
 import Footer1 from "@/components/footers/Footer1";
-import Header1 from "@/components/header/Header1";
-import Topbar1 from "@/components/header/Topbar1";
+
 import { retrieveCustomer } from "@/data/customer";
 import HomeHeader from "@/widgets/HomeHeader";
 import HomeTips from "@/widgets/HomeTips";

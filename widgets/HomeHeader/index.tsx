@@ -76,26 +76,14 @@ export default function HomeHeader({
             </nav>
           </div>
           <div className="col-xl-3 col-md-4 col-3">
-            <ul className="nav-icon-list">
-              <li className="d-flex">
+            <ul className="nav-icon-list justify-content-end">
+              <li className="">
                 <UserIcon customer={customer} />
               </li>
-              {/* <li className="d-none d-md-flex">
-                <a
-                  className="nav-icon-item link"
-                  href="#search"
-                  data-bs-toggle="modal"
-                >
-                  <i className="icon icon-magnifying-glass" />
-                </a>
-              </li> */}
-              {/* <li className="d-none d-sm-flex">
-                <Link className="nav-icon-item link" href={`/wishlist`}>
-                  <i className="icon icon-translate" />
-                </Link>
-              </li> */}
-              <LanguageSelect />
-              <li className="d-none d-lg-flex align-items-center ms">
+              <li className="">
+                <LanguageSelect />
+              </li>
+              <li className=" d-none d-lg-flex">
                 <CartIcon cart={cart} />
               </li>
             </ul>

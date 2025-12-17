@@ -1,15 +1,10 @@
 @use "sass:meta";
-// @import "../icon/icomoon/style.css";
 
-// CSS
-@import "../css/bootstrap-select.min.css";
-// @import "../css/bootstrap.min.css";
-@import "../css/swiper-bundle.min.css";
-@import "../css/animate.css";
 @import "react-photo-view/dist/react-photo-view.css";
+@include meta.load-css("../css/tailwind.css");
 
 @include meta.load-css("bootstrap/scss/bootstrap");
-
+@include meta.load-css("swiper/css");
 @include meta.load-css("app.scss");
 .infiniteSlider {
   display: flex;
@@ -60,7 +55,7 @@
   box-shadow: none !important;
 }
 
-.rc-slider .rc-slider-track,
+.rc-slider .rc-slider-handle-track,
 .rc-slider .rc-slider-tracks {
   background-color: var(--black);
 }

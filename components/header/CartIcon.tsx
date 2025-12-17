@@ -39,13 +39,13 @@ export default function CartIcon({ cart }: { cart?: StoreCart }) {
 
   return (
     <div
-      className="position-relative d-flex align-items-center h-100"
+      className="position-relative d-flex align-items-center"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <Link
         href="/view-cart"
-        className="nav-icon-item link position-relative text-dark"
+        className="p-0 link position-relative text-dark"
       >
         <ShoppingCart />
         {itemCount > 0 && (
@@ -61,8 +61,8 @@ export default function CartIcon({ cart }: { cart?: StoreCart }) {
       {/* Mini Cart Dropdown */}
       {isHovered && (
         <div
-          className="p-3 bg-white border shadow-lg position-absolute end-0 top-100 rounded-3 dropdown-menu-custom"
-          style={{ width: "320px", zIndex: 1000, marginTop: "10px" }}
+          className="p-3 bg-white border shadow-lg position-absolute end-0 rounded-3 dropdown-menu-custom"
+          style={{ width: "320px", zIndex: 1000, top: "25px" }}
         >
           {/* Arrow/Triangle */}
           <div
@@ -93,7 +93,7 @@ export default function CartIcon({ cart }: { cart?: StoreCart }) {
               {cartProducts.slice(0, 3).map((item) => (
                 <div key={item.id} className="gap-2 d-flex">
                   <div
-                    className="shrink-0 overflow-hidden rounded-sm position-relative bg-light"
+                    className="overflow-hidden rounded-sm shrink-0 position-relative bg-light"
                     style={{ width: "60px", height: "60px" }}
                   >
                     <Image

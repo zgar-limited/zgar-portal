@@ -438,48 +438,7 @@ header {
   }
 }
 
-.nav-icon-item {
-  display: flex;
 
-  .count {
-    top: -8px;
-    right: -8px;
-  }
-
-  .icon {
-    font-size: 24px;
-  }
-}
-
-.nav-icon-item-2 {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  position: relative;
-
-  .icon {
-    font-size: 24px;
-  }
-
-  .nav-icon-item_sub {
-    display: grid;
-  }
-
-  .text-sub {
-    color: var(--line-4);
-  }
-
-  .count {
-    top: -8px;
-    right: -8px;
-  }
-
-  @include res(md, min) {
-    .icon {
-      font-size: 40px;
-    }
-  }
-}
 
 .tf-header {
   @include res(xl) {

@@ -23,10 +23,10 @@ export default function LanguageSelect({
   };
 
   return (
-    <div className="dropdown">
+    <div className="dropdown d-flex align-items-center">
       <button
         type="button"
-        className="p-0 btn btn-link text-decoration-none d-flex align-items-center nav-icon-item"
+        className="p-0 btn btn-link text-decoration-none d-flex align-items-center "
         data-bs-toggle="dropdown"
         aria-expanded="false"
         style={{ color: textBlack ? "black" : textColor }}
