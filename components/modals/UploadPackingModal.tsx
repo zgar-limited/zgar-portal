@@ -285,7 +285,7 @@ export default function UploadPackingModal({
                   <Button
                     variant="light"
                     size="sm"
-                    className="top-0 p-0 m-1 shadow-sm position-absolute end-0 rounded-circle z-1 d-flex align-items-center justify-content-center"
+                    className="top-0 p-0 m-1 shadow-xs position-absolute end-0 rounded-circle z-1 d-flex align-items-center justify-content-center"
                     style={{ width: "20px", height: "20px" }}
                     onClick={() => handleRemoveFile(index)}
                     disabled={isUploading}
@@ -355,7 +355,7 @@ export default function UploadPackingModal({
                 variant="primary"
                 disabled={items.length === 0 || isUploading}
                 onClick={handleSubmit}
-                className="py-2 shadow-sm fw-medium"
+                className="py-2 shadow-xs fw-medium"
               >
                 {isUploading ? (
                   <>

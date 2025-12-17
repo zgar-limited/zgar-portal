@@ -12,7 +12,7 @@ export default function ProductTabs({ product }: ProductTabsProps) {
   const tabStyle = (tab: string) => `
     btn btn-link text-decoration-none px-4 py-2 rounded-pill transition-all
     ${activeTab === tab 
-        ? "bg-dark text-white fw-bold shadow-sm" 
+        ? "bg-dark text-white fw-bold shadow-xs" 
         : "text-muted hover-bg-light"}
   `;
 

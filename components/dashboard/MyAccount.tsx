@@ -109,7 +109,7 @@ export default function MyAccount() {
                         <Pencil size={14} />
                         <span>Edit</span>
                       </button>
-                      <div className="flex-grow-1">
+                      <div className="grow">
                         <h5 className="mb-1">
                           Guest User
                         </h5>
@@ -226,7 +226,7 @@ export default function MyAccount() {
                         index !== tasks.length - 1 ? "border-bottom" : ""
                       }`}
                     >
-                      <div className="text-center flex-grow-1 text-md-start">
+                      <div className="text-center grow text-md-start">
                         <h6 className="mb-1">{task.title}</h6>
                         <p className="mb-2 text-muted text-small">
                           {task.description}
@@ -323,7 +323,7 @@ export default function MyAccount() {
                                     className="gap-2 mb-1 d-flex align-items-center"
                                   >
                                     <div
-                                      className="flex-shrink-0"
+                                      className="shrink-0"
                                       style={{
                                         width: "36px",
                                         height: "36px",
@@ -342,7 +342,7 @@ export default function MyAccount() {
                                         sizes="36px"
                                       />
                                     </div>
-                                    <div className="flex-grow-1" style={{ minWidth: 0 }}>
+                                    <div className="grow" style={{ minWidth: 0 }}>
                                       <h6
                                         className="mb-0 text-truncate"
                                         style={{
@@ -382,7 +382,7 @@ export default function MyAccount() {
                               </td>
                               <td className="py-2 text-center">
                                 <span
-                                  className={`badge px-2 py-0.5 shadow-sm fw-normal rounded-pill ${
+                                  className={`badge px-2 py-0.5 shadow-xs fw-normal rounded-pill ${
                                     order.status === "completed"
                                       ? "bg-success text-white"
                                       : order.status === "pending"

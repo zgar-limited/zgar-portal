@@ -93,7 +93,7 @@ export default function CartIcon({ cart }: { cart?: StoreCart }) {
               {cartProducts.slice(0, 3).map((item) => (
                 <div key={item.id} className="gap-2 d-flex">
                   <div
-                    className="flex-shrink-0 overflow-hidden rounded position-relative bg-light"
+                    className="shrink-0 overflow-hidden rounded-sm position-relative bg-light"
                     style={{ width: "60px", height: "60px" }}
                   >
                     <Image
@@ -103,7 +103,7 @@ export default function CartIcon({ cart }: { cart?: StoreCart }) {
                       className="object-fit-cover"
                     />
                   </div>
-                  <div className="overflow-hidden flex-grow-1">
+                  <div className="overflow-hidden grow">
                     <p className="mb-0 small fw-bold text-truncate">
                       {item.title}
                     </p>

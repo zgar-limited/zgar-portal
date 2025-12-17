@@ -45,7 +45,7 @@ export default function Details2({ product }) {
                           ""
                         )}
                       </div>
-                      <div className="rating d-flex gap-10 align-items-center flex-grow-1">
+                      <div className="rating d-flex gap-10 align-items-center grow">
                         <div className="d-flex gap-4">
                           {Array.from({ length: 5 }).map((_, i) => (
                             <svg

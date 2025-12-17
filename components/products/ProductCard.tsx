@@ -74,7 +74,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <div className="overflow-hidden transition-all bg-white shadow-sm group position-relative d-flex flex-column h-100 rounded-3 hover-shadow-md">
+    <div className="overflow-hidden transition-all bg-white shadow-xs group position-relative d-flex flex-column h-100 rounded-3 hover-shadow-md">
       {/* Image Container */}
       <Link
         href={`/products/${product.id}`}
@@ -105,7 +105,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           <button
             onClick={handleQuickAdd}
             disabled={adding || isAdded}
-            className={`gap-2 shadow-sm btn w-100 btn-sm rounded-pill d-flex align-items-center justify-content-center ${
+            className={`gap-2 shadow-xs btn w-100 btn-sm rounded-pill d-flex align-items-center justify-content-center ${
               isAdded ? "btn-success" : "btn-dark"
             }`}
           >
@@ -124,7 +124,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       </Link>
 
       {/* Product Info */}
-      <div className="p-3 d-flex flex-column flex-grow-1">
+      <div className="p-3 d-flex flex-column grow">
         <h3 className="mb-1 h6 text-truncate">
           <Link
             href={`/product-detail/${product.id}`}

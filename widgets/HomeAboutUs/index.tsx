@@ -15,7 +15,7 @@ type Props = {};
 
 const HomeAboutUs = (props: Props) => {
   return (
-    <div className="relative  aspect-[5/2] mt-16  max-w-[1920px] mx-auto ">
+    <div className="relative  aspect-5/2 mt-16  max-w-[1920px] mx-auto ">
       <div className="container row">
         <div className="col-lg-6">
           <div className="relative dgm-about-thumb-wrap">

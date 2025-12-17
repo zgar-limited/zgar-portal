@@ -43,8 +43,8 @@ export default function Hero() {
         initialSlide={1}
       >
         {[...sliderItems5, ...sliderItems5].map((item, index) => (
-          <SwiperSlide className="h-auto md:w-[65vw] sm:w-[100vw]">
-            <div className="h-full w-full border-[3px] border-[#fff] border-solid rounded-[16px] overflow-hidden">
+          <SwiperSlide className="h-auto md:w-[65vw] sm:w-screen">
+            <div className="h-full w-full border-[3px] border-white border-solid rounded-[16px] overflow-hidden">
               <Image
                 src={item.imgSrc}
                 alt={item.alt}
@@ -55,7 +55,7 @@ export default function Hero() {
             </div>
           </SwiperSlide>
         ))}
-        <div className="sw-dot-default !mt-[16px] cursor-pointer style-black home-banner-pagination" />
+        <div className="sw-dot-default mt-[16px]! cursor-pointer style-black home-banner-pagination" />
       </Swiper>
     </div>
   );

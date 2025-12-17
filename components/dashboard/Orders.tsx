@@ -168,7 +168,7 @@ export default function Orders() {
                                       item.variant?.product_id ||
                                       ""
                                     }`}
-                                    className="flex-shrink-0"
+                                    className="shrink-0"
                                   >
                                     <div
                                       style={{
@@ -194,7 +194,7 @@ export default function Orders() {
                                     </div>
                                   </Link>
                                   <div
-                                    className="flex-grow-1"
+                                    className="grow"
                                     style={{ minWidth: 0 }}
                                   >
                                     <h6
@@ -246,7 +246,7 @@ export default function Orders() {
                                     ? "warning"
                                     : "danger"
                                 }
-                                className="px-2 py-0.5 shadow-sm fw-normal rounded-pill"
+                                className="px-2 py-0.5 shadow-xs fw-normal rounded-pill"
                                 style={{
                                   fontSize: "0.7rem",
                                   letterSpacing: "0.3px",
@@ -381,7 +381,7 @@ export default function Orders() {
 
               {totalPages > 1 && (
                 <div className="mt-4 d-flex justify-content-center">
-                  <div className="p-1 bg-white border shadow-sm rounded-pill">
+                  <div className="p-1 bg-white border shadow-xs rounded-pill">
                     <Pagination className="gap-1 mb-0">
                       <Pagination.Prev
                         onClick={() => handlePageChange(currentPage - 1)}

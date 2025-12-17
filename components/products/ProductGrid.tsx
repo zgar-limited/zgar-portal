@@ -41,7 +41,7 @@ export default function ProductGrid({ initialProducts = [] }: ProductGridProps) 
                 <button className="gap-1 btn btn-link text-dark text-decoration-none dropdown-toggle d-flex align-items-center" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                   {sortOption === 'default' ? 'Featured' : sortOption === 'price-asc' ? 'Price: Low to High' : 'Price: High to Low'}
                 </button>
-                <ul className="border-0 shadow-sm dropdown-menu dropdown-menu-end">
+                <ul className="border-0 shadow-xs dropdown-menu dropdown-menu-end">
                   <li><button className="dropdown-item" onClick={() => setSortOption('default')}>Featured</button></li>
                   <li><button className="dropdown-item" onClick={() => setSortOption('price-asc')}>Price: Low to High</button></li>
                   <li><button className="dropdown-item" onClick={() => setSortOption('price-desc')}>Price: High to Low</button></li>

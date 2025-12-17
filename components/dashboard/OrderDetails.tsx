@@ -140,7 +140,7 @@ export default function OrderDetails() {
                 {/* Main Content Area */}
                 <Col lg={8}>
                   {/* Order Items */}
-                  <Card className="mb-4 border-0 shadow-sm rounded-4">
+                  <Card className="mb-4 border-0 shadow-xs rounded-4">
                     <Card.Header className="py-3 bg-white border-bottom-0">
                       <h5 className="mb-0 fw-bold">Order Items</h5>
                     </Card.Header>
@@ -168,7 +168,7 @@ export default function OrderDetails() {
                               <td className="ps-4">
                                 <div className="gap-3 d-flex align-items-center">
                                   <div
-                                    className="flex-shrink-0 overflow-hidden border rounded position-relative"
+                                    className="shrink-0 overflow-hidden border rounded-sm position-relative"
                                     style={{ width: "60px", height: "60px" }}
                                   >
                                     <Image
@@ -269,7 +269,7 @@ export default function OrderDetails() {
                   {/* Payment & Packing */}
                   <Row className="g-4">
                     <Col md={6}>
-                      <Card className="border-0 shadow-sm h-100 rounded-4">
+                      <Card className="border-0 shadow-xs h-100 rounded-4">
                         <Card.Body>
                           <div className="mb-3 d-flex justify-content-between align-items-start">
                             <div className="gap-2 d-flex align-items-center">
@@ -329,7 +329,7 @@ export default function OrderDetails() {
                     </Col>
 
                     <Col md={6}>
-                      <Card className="border-0 shadow-sm h-100 rounded-4">
+                      <Card className="border-0 shadow-xs h-100 rounded-4">
                         <Card.Body>
                           <div className="mb-3 d-flex justify-content-between align-items-start">
                             <div className="gap-2 d-flex align-items-center">
@@ -400,7 +400,7 @@ export default function OrderDetails() {
                 <Col lg={4}>
                   <div className="gap-3 d-flex flex-column">
                     {/* Order Summary */}
-                    <Card className="border-0 shadow-sm rounded-4">
+                    <Card className="border-0 shadow-xs rounded-4">
                       <Card.Body>
                         <h6 className="mb-3 fw-bold">Order Summary</h6>
                         <div className="gap-3 d-flex flex-column">
@@ -451,7 +451,7 @@ export default function OrderDetails() {
                     </Card>
 
                     {/* Shipping Address */}
-                    <Card className="border-0 shadow-sm rounded-4">
+                    <Card className="border-0 shadow-xs rounded-4">
                       <Card.Body>
                         <h6 className="gap-2 mb-3 fw-bold d-flex align-items-center">
                           <MapPin size={18} /> Shipping Address

@@ -120,7 +120,7 @@ export default function Addressess() {
                   ) : (
                     addresses?.map((addr: any) => (
                       <div key={addr.id} className="col-md-6">
-                        <div className="p-4 transition-all border-0 shadow-sm card h-100 rounded-4 position-relative hover-shadow">
+                        <div className="p-4 transition-all border-0 shadow-xs card h-100 rounded-4 position-relative hover-shadow">
                           <div className="mb-3 d-flex justify-content-between align-items-start">
                             <h5 className="mb-0 fw-semibold text-truncate pe-3">
                               {addr.company || `${addr.first_name} ${addr.last_name}`}

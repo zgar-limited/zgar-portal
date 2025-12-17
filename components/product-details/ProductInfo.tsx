@@ -181,7 +181,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
         <button
           onClick={handleAddToCart}
           disabled={!selectedVariant || isAdding || isAdded}
-          className={`btn flex-grow-1 rounded-pill d-flex align-items-center justify-content-center gap-2 ${
+          className={`btn grow rounded-pill d-flex align-items-center justify-content-center gap-2 ${
             isAdded ? "btn-success" : "btn-dark"
           }`}
           style={{ height: "48px" }}

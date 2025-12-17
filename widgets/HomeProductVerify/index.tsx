@@ -9,10 +9,10 @@ const index = () => {
     <div
       className={`${scope.background} d-flex flex-column align-items-center pb-[70px] mt-[50px]`}
     >
-      <div className="mt-[88px]  h1  title font-bold text-[#000]">
+      <div className="mt-[88px]  h1  title font-bold text-black">
         SCAN TO VERIFY
       </div>
-      <div className="font-light text-center h3 text-[#000]">
+      <div className="font-light text-center h3 text-black">
         please scan the <span className="font-bold">QR code</span> with the
         phone on the product <span className="font-bold ">packaging</span> to
         enter <span className="font-bold ">Two-Step Product Verification</span>

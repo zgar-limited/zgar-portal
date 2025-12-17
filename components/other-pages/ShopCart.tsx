@@ -319,7 +319,7 @@ function ShopCartContent({
                               className="img-prd"
                             >
                               <Image
-                                className="rounded lazyload"
+                                className="rounded-sm lazyload"
                                 src={"https://picsum.photos/100/100"}
                                 alt="T Shirt"
                                 width={80}
@@ -351,7 +351,7 @@ function ShopCartContent({
                                     : product.title}
                                   <ChevronDown
                                     size={16}
-                                    className="flex-shrink-0"
+                                    className="shrink-0"
                                   />
                                 </Button>
                               </h6>
@@ -477,7 +477,7 @@ function ShopCartContent({
           </Col>
           <Col xxl={3} xl={4}>
             <Card
-              className="border-0 shadow-sm bg-light sticky-top"
+              className="border-0 shadow-xs bg-light sticky-top"
               style={{ top: "20px" }}
             >
               <Card.Body>

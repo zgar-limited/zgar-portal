@@ -146,7 +146,7 @@ export default function SearchModal() {
           </div>
           <div className="trend-product-wrap">
             <div className="heading">
-              <h4 className="title flex-grow-1">Trending product</h4>
+              <h4 className="title grow">Trending product</h4>
               <a
                 href="#"
                 className="tf-btn-line has-icon none-line fw-medium fs-18 text-normal"

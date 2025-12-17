@@ -14,10 +14,10 @@ export default function ShopBanner() {
 
       <div className="container row align-items-center">
         <div className="text-center col-md-6 col-12 ">
-          <p className="h2 text-[#fff]">
+          <p className="h2 text-white">
             Cloud Chaser Pro Supreme Vaping Experience Awaits
           </p>
-          <p className="h-3 text-[#fff]">
+          <p className="h-3 text-white">
             The Cloud Chaser Pro delivers a powerful and sleek vaping
             experience.
           </p>

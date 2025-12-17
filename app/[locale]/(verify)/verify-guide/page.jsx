@@ -21,7 +21,7 @@ const page = () => {
           return (
             <Image
               key={step}
-              className="block w-[calc(100%_-_24px)] h-auto mx-auto "
+              className="block w-[calc(100%-24px)] h-auto mx-auto "
               src={`/images/guide/detail_pc_zh/${step}.webp`}
               alt={"verify step " + step}
               width={1442}

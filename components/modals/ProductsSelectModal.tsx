@@ -253,7 +253,7 @@ const ProductsSelectModal = ({ show, onHide, cart, products }: Props) => {
           </InputGroup>
         </div>
 
-        <div className="table-responsive flex-grow-1">
+        <div className="table-responsive grow">
           <Table hover className="mb-0 align-middle">
             <thead className="bg-light sticky-top" style={{ zIndex: 10 }}>
               <tr>
@@ -345,7 +345,7 @@ const ProductsSelectModal = ({ show, onHide, cart, products }: Props) => {
                         </td>
                         <td>
                           <div
-                            className="overflow-hidden border rounded position-relative"
+                            className="overflow-hidden border rounded-sm position-relative"
                             style={{ width: "60px", height: "60px" }}
                           >
                             <Image
@@ -379,7 +379,7 @@ const ProductsSelectModal = ({ show, onHide, cart, products }: Props) => {
                         <tr>
                           <td colSpan={5} className="p-0">
                             <div className="p-3 bg-light border-bottom ps-5">
-                              <div className="border-0 shadow-sm card">
+                              <div className="border-0 shadow-xs card">
                                 <div className="table-responsive">
                                   <Table
                                     hover

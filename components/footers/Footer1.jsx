@@ -52,7 +52,7 @@ export default function Footer1({
       ) : (
         ""
       )}
-      <div className="footer-body bg-[#fff]">
+      <div className="footer-body bg-white">
         <div className="container">
           <div className="row">
             <div className="col-xl-3 col-sm-6 mb_30 mb-xl-0">

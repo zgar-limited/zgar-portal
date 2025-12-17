@@ -277,7 +277,7 @@ export default function Review() {
             </div>
             <div>
               <div className="user">
-                <div className="flex-grow-1">
+                <div className="grow">
                   <h4 className="name">
                     <a href="#" className="link">
                       Esther Howard
@@ -392,7 +392,7 @@ export default function Review() {
             </div>
             <div>
               <div className="user">
-                <div className="flex-grow-1">
+                <div className="grow">
                   <h4 className="name">
                     <a href="#" className="link">
                       Eleanor Pena
@@ -507,7 +507,7 @@ export default function Review() {
             </div>
             <div>
               <div className="user">
-                <div className="flex-grow-1">
+                <div className="grow">
                   <h4 className="name">
                     <a href="#" className="link">
                       Cody Fisher
