@@ -1,21 +1,36 @@
 "use client";
 
-import { ChevronDown, ChevronUp, Search, Package } from "lucide-react";
-import React, { Fragment, useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import {
-  Offcanvas,
-  Table,
-  Button,
-  Spinner,
-  Form,
-  InputGroup,
-  Badge,
-} from "react-bootstrap";
-import QuantitySelect from "@/components/common/QuantitySelect";
+  Search,
+  Package,
+  ChevronDown,
+  ChevronUp,
+  Plus,
+  Minus,
+  ShoppingCart,
+  Check,
+  AlertCircle,
+  Filter,
+  Grid3X3,
+  List
+} from "lucide-react";
+
+// Import shadcn components
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { InputNumber } from "@/components/ui/input-number";
+
+// Import other components
 import Image from "next/image";
 import { medusaSDK } from "@/utils/medusa";
 import { StoreCart, StoreProduct } from "@medusajs/types";
-import { useRouter } from "next/navigation";
 
 type Props = {
   show: boolean;
@@ -26,21 +41,52 @@ type Props = {
 
 const ProductsSelectModal = ({ show, onHide, cart, products }: Props) => {
   const router = useRouter();
+
+  // State management
   const [expandedProductIds, setExpandedProductIds] = useState<string[]>([]);
   const [selectedSkus, setSelectedSkus] = useState<string[]>([]);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [submitting, setSubmitting] = useState(false);
-  const [inventory, setInventory] = useState<Record<string, any>>({});
   const [searchQuery, setSearchQuery] = useState("");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("list");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
-  const filteredProducts = React.useMemo(() => {
-    if (!searchQuery) return products;
-    return products.filter((p) =>
-      p.title?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [products, searchQuery]);
+  // Filter products based on search and categories
+  const filteredProducts = useMemo(() => {
+    let result = products;
 
-  const cartProducts = React.useMemo(() => {
+    // Filter by search query
+    if (searchQuery) {
+      result = result.filter((p) =>
+        p.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.variants?.some((v: any) =>
+          v.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          v.options?.some((opt: any) =>
+            opt.value?.toLowerCase().includes(searchQuery.toLowerCase())
+          )
+        )
+      );
+    }
+
+    // Filter by categories
+    if (selectedCategories.length > 0) {
+      result = result.filter((p) =>
+        selectedCategories.includes(p.collection?.title || 'Uncategorized')
+      );
+    }
+
+    return result;
+  }, [products, searchQuery, selectedCategories]);
+
+  // Get unique categories
+  const categories = useMemo(() => {
+    const cats = products.map(p => p.collection?.title || 'Uncategorized');
+    return Array.from(new Set(cats));
+  }, [products]);
+
+  // Sync with existing cart
+  const cartProducts = useMemo(() => {
     if (!cart?.items) return [];
     return cart.items.map((item: any) => ({
       id: item.id,
@@ -50,29 +96,20 @@ const ProductsSelectModal = ({ show, onHide, cart, products }: Props) => {
       variantTitle: item.variant_title,
       price: item.unit_price,
       quantity: item.quantity,
-      imgSrc: item.thumbnail || "https://picsum.photos/100/100",
+      imgSrc: item.thumbnail || `https://picsum.photos/100/100?random=${item.id}`,
       options: item.variant?.options || [],
       metadata: item.metadata || {},
       weight: item.variant?.weight || 0,
     }));
   }, [cart]);
 
-  const toggleProduct = (productId: string) => {
-    setExpandedProductIds((prev) =>
-      prev.includes(productId)
-        ? prev.filter((id) => id !== productId)
-        : [...prev, productId]
-    );
-  };
-
-  // Sync local state with cart when modal opens
+  // Initialize state with cart data
   useEffect(() => {
     if (show) {
       const initialSelected: string[] = [];
       const initialQuantities: Record<string, number> = {};
 
       cartProducts.forEach((item: any) => {
-        // Use variantId to check selection status as item.id is line item id
         if (item.variantId) {
           initialSelected.push(item.variantId);
           initialQuantities[item.variantId] = item.quantity;
@@ -83,11 +120,20 @@ const ProductsSelectModal = ({ show, onHide, cart, products }: Props) => {
     }
   }, [show, cartProducts]);
 
+  // Toggle functions
+  const toggleProduct = (productId: string) => {
+    setExpandedProductIds((prev) =>
+      prev.includes(productId)
+        ? prev.filter((id) => id !== productId)
+        : [...prev, productId]
+    );
+  };
+
   const toggleSkuSelection = (skuId: string) => {
     setSelectedSkus((prev) => {
       const isSelected = prev.includes(skuId);
       if (!isSelected) {
-        // When selecting, ensure there is a default quantity if none exists
+        // Set default quantity when selecting
         if (!quantities[skuId]) {
           setQuantities((q) => ({ ...q, [skuId]: 50 }));
         }
@@ -99,52 +145,57 @@ const ProductsSelectModal = ({ show, onHide, cart, products }: Props) => {
 
   const updateQuantity = (skuId: string, qty: number) => {
     setQuantities((prev) => ({ ...prev, [skuId]: qty }));
-    // If quantity is set > 0 and not selected, should we select it?
-    // Let's assume user explicitly selects via checkbox, but setting quantity is enough intent?
-    // For now, let's keep selection explicit via checkbox to avoid confusion.
   };
 
   const toggleProductSelection = (product: any) => {
     const allSkuIds = product.variants?.map((v: any) => v.id) || [];
-    const allSelected = allSkuIds.every((id: string) =>
-      selectedSkus.includes(id)
-    );
+    const isAllSelected = allSkuIds.every((id: string) => selectedSkus.includes(id));
 
-    if (allSelected) {
+    if (isAllSelected) {
       // Deselect all
       setSelectedSkus((prev) => prev.filter((id) => !allSkuIds.includes(id)));
     } else {
-      // Select all
+      // Select all with default quantities
       setSelectedSkus((prev) => {
         const newSelected = [...prev];
+        const newQuantities = { ...quantities };
+
         allSkuIds.forEach((id: string) => {
-          if (!newSelected.includes(id)) newSelected.push(id);
+          if (!newSelected.includes(id)) {
+            newSelected.push(id);
+            if (!newQuantities[id]) {
+              newQuantities[id] = 50;
+            }
+          }
         });
+
+        setQuantities(newQuantities);
         return newSelected;
       });
     }
   };
 
+  // Submit selection
   const handleSubmit = async () => {
     if (!cart?.id) return;
     setSubmitting(true);
+
     try {
       const cartMap = new Map(cartProducts.map((p: any) => [p.variantId, p]));
 
-      // 1. Identify items to Add, Update, and Delete
-      const itemsToAdd: {
+      // Prepare operations
+      const itemsToAdd: Array<{
         variant_id: string;
         quantity: number;
         metadata?: Record<string, unknown>;
-      }[] = [];
-      const itemsToUpdate: {
+      }> = [];
+      const itemsToUpdate: Array<{
         variant_id: string;
         quantity: number;
         metadata?: Record<string, unknown>;
-      }[] = [];
-      const itemsToDelete: string[] = [];
+      }> = [];
 
-      // Check selected SKUs for additions and updates
+      // Check selected SKUs
       for (const skuId of selectedSkus) {
         const quantity = quantities[skuId] || 50;
         const existingItem = cartMap.get(skuId);
@@ -166,16 +217,9 @@ const ProductsSelectModal = ({ show, onHide, cart, products }: Props) => {
         }
       }
 
-      // Check for removals (items in cart but not in selectedSkus)
-      for (const item of cartProducts) {
-        if (item.variantId && !selectedSkus.includes(item.variantId)) {
-          itemsToDelete.push(item.id);
-        }
-      }
-
       const promises: Promise<any>[] = [];
 
-      // 2. Execute Batch Operations
+      // Execute operations
       if (itemsToAdd.length > 0) {
         promises.push(
           medusaSDK.client.fetch(`/store/zgar/cart/add`, {
@@ -183,7 +227,7 @@ const ProductsSelectModal = ({ show, onHide, cart, products }: Props) => {
             body: {
               cart_id: cart.id,
               items: itemsToAdd.map((item) => ({
-                variant_id: item.variant_id, // API expects 'id' for variant_id in add
+                variant_id: item.variant_id,
                 quantity: item.quantity,
                 metadata: item.metadata,
               })),
@@ -204,21 +248,7 @@ const ProductsSelectModal = ({ show, onHide, cart, products }: Props) => {
         );
       }
 
-      if (itemsToDelete.length > 0) {
-        promises.push(
-          medusaSDK.client.fetch(`/store/zgar/cart/delete`, {
-            method: "POST",
-            body: {
-              cart_id: cart.id,
-              items: itemsToDelete,
-            },
-          })
-        );
-      }
-
       await Promise.all(promises);
-
-      // 3. Refresh and Close
       router.refresh();
       onHide();
     } catch (error) {
@@ -228,297 +258,283 @@ const ProductsSelectModal = ({ show, onHide, cart, products }: Props) => {
     }
   };
 
+  // Calculate summary
+  const summary = useMemo(() => {
+    const selectedProducts = products
+      .flatMap(p => p.variants || [])
+      .filter(v => selectedSkus.includes(v.id));
+
+    const totalItems = selectedProducts.reduce((sum, variant) => {
+      return sum + (quantities[variant.id] || 50);
+    }, 0);
+
+    const totalPrice = selectedProducts.reduce((sum, variant) => {
+      const price = variant.calculated_price?.calculated_amount || 0;
+      const quantity = quantities[variant.id] || 50;
+      return sum + (price * quantity);
+    }, 0);
+
+    return {
+      products: selectedProducts.length,
+      items: totalItems,
+      total: totalPrice
+    };
+  }, [products, selectedSkus, quantities]);
+
   return (
-    <Offcanvas
-      show={show}
-      onHide={onHide}
-      placement="bottom"
-      style={{ height: "90vh" }}
-    >
-      <Offcanvas.Header closeButton className="border-bottom">
-        <Offcanvas.Title className="mb-0 h5">Select Products</Offcanvas.Title>
-      </Offcanvas.Header>
-      <Offcanvas.Body className="p-0 d-flex flex-column">
-        <div className="p-3 border-bottom bg-light">
-          <InputGroup>
-            <InputGroup.Text className="bg-white border-end-0">
-              <Search size={18} className="text-muted" />
-            </InputGroup.Text>
-            <Form.Control
-              placeholder="Search products by name..."
-              className="shadow-none border-start-0 ps-0"
+    <Dialog open={show} onOpenChange={onHide}>
+      <DialogContent className="max-w-7xl max-h-[90vh] flex flex-col">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <ShoppingCart className="h-5 w-5" />
+            添加商品到购物车
+          </DialogTitle>
+          <DialogDescription>
+            快速批量选择和添加商品，支持搜索、筛选和数量调整
+          </DialogDescription>
+        </DialogHeader>
+
+        {/* Search and Filters */}
+        <div className="flex flex-col gap-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="搜索商品名称、SKU或规格..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
             />
-          </InputGroup>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Button
+                variant={viewMode === "list" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setViewMode("list")}
+              >
+                <List className="h-4 w-4 mr-1" />
+                列表
+              </Button>
+              <Button
+                variant={viewMode === "grid" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setViewMode("grid")}
+              >
+                <Grid3X3 className="h-4 w-4 mr-1" />
+                网格
+              </Button>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4" />
+              <div className="flex gap-1">
+                {categories.map((cat) => (
+                  <Button
+                    key={cat}
+                    variant={selectedCategories.includes(cat) ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => {
+                      setSelectedCategories(prev =>
+                        prev.includes(cat)
+                          ? prev.filter(c => c !== cat)
+                          : [...prev, cat]
+                      );
+                    }}
+                  >
+                    {cat}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="table-responsive grow">
-          <Table hover className="mb-0 align-middle">
-            <thead className="bg-light sticky-top" style={{ zIndex: 10 }}>
-              <tr>
-                <th
-                  scope="col"
-                  style={{ width: "50px" }}
-                  className="text-center bg-light border-bottom-0"
-                ></th>
-                <th
-                  scope="col"
-                  style={{ width: "50px" }}
-                  className="text-center bg-light border-bottom-0"
-                >
-                  {/* Select All could go here */}
-                </th>
-                <th
-                  scope="col"
-                  style={{ width: "80px" }}
-                  className="bg-light border-bottom-0"
-                >
-                  Image
-                </th>
-                <th scope="col" className="bg-light border-bottom-0">
-                  Product Information
-                </th>
-                <th
-                  scope="col"
-                  className="text-end bg-light border-bottom-0 pe-4"
-                >
-                  Variants
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredProducts?.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="py-5 text-center text-muted">
-                    <Package size={48} className="mb-3 opacity-50" />
-                    <p className="mb-0">No products found</p>
-                  </td>
-                </tr>
-              ) : (
-                filteredProducts?.map((product) => {
-                  const isExpanded = expandedProductIds.includes(product.id);
-                  const allSkuIds =
-                    product.variants?.map((v: any) => v.id) || [];
-                  const isAllSelected =
-                    allSkuIds.length > 0 &&
-                    allSkuIds.every((id: string) => selectedSkus.includes(id));
-                  const isIndeterminate =
-                    allSkuIds.some((id: string) => selectedSkus.includes(id)) &&
-                    !isAllSelected;
+        {/* Products List/Grid */}
+        <div className="flex-1 overflow-y-auto min-h-0">
+          {filteredProducts.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <Package className="h-12 w-12 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">没有找到商品</h3>
+              <p className="text-muted-foreground">
+                {searchQuery || selectedCategories.length > 0
+                  ? "尝试调整搜索条件或筛选器"
+                  : "商品列表为空"}
+              </p>
+            </div>
+          ) : viewMode === "list" ? (
+            <div className="space-y-4">
+              {filteredProducts.map((product) => {
+                const isExpanded = expandedProductIds.includes(product.id);
+                const allSkuIds = product.variants?.map((v: any) => v.id) || [];
+                const isAllSelected = allSkuIds.length > 0 && allSkuIds.every((id: string) => selectedSkus.includes(id));
+                const isIndeterminate = allSkuIds.some((id: string) => selectedSkus.includes(id)) && !isAllSelected;
 
-                  return (
-                    <Fragment key={product.id}>
-                      {/* Main Product Row */}
-                      <tr
-                        className={`cursor-pointer ${
-                          isExpanded ? "bg-light" : ""
-                        }`}
-                        onClick={() => toggleProduct(product.id)}
-                        style={{ cursor: "pointer" }}
-                      >
-                        <td className="text-center">
-                          <div className="d-flex justify-content-center align-items-center h-100">
-                            {isExpanded ? (
-                              <ChevronUp size={18} className="text-primary" />
-                            ) : (
-                              <ChevronDown size={18} className="text-muted" />
-                            )}
-                          </div>
-                        </td>
-                        <td
-                          className="text-center"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <div className="d-flex justify-content-center align-items-center h-100">
-                            <Form.Check
-                              type="checkbox"
-                              checked={isAllSelected}
-                              ref={(input: HTMLInputElement | null) => {
-                                if (input)
-                                  input.indeterminate = isIndeterminate;
-                              }}
-                              onChange={() => toggleProductSelection(product)}
-                              className="cursor-pointer"
-                            />
-                          </div>
-                        </td>
-                        <td>
-                          <div
-                            className="overflow-hidden border rounded-sm position-relative"
-                            style={{ width: "60px", height: "60px" }}
+                return (
+                  <Card key={product.id}>
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center gap-4">
+                        <Image
+                          src={product.thumbnail || `https://picsum.photos/100/100?random=${product.id}`}
+                          alt={product.title || "Product"}
+                          width={60}
+                          height={60}
+                          className="rounded-lg object-cover"
+                        />
+                        <div className="flex-1">
+                          <CardTitle className="text-lg">{product.title}</CardTitle>
+                          <p className="text-sm text-muted-foreground">
+                            {product.variants?.length || 0} 个规格可选
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Checkbox
+                            checked={isAllSelected}
+                            ref={(input: HTMLInputElement | null) => {
+                              if (input) input.indeterminate = isIndeterminate;
+                            }}
+                            onCheckedChange={() => toggleProductSelection(product)}
+                          />
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => toggleProduct(product.id)}
                           >
-                            <Image
-                              src={
-                                product.thumbnail ||
-                                "https://picsum.photos/100/100"
-                              }
-                              alt={product.title || "Product"}
-                              fill
-                              className="object-fit-cover"
-                            />
-                          </div>
-                        </td>
-                        <td>
-                          <div className="fw-bold text-dark">
-                            {product.title}
-                          </div>
-                          <div className="small text-muted">
-                            {product.variants?.length || 0} variants available
-                          </div>
-                        </td>
-                        <td className="text-end pe-4">
-                          <Badge bg="secondary" className="fw-normal">
-                            {product.variants?.length} SKUs
-                          </Badge>
-                        </td>
-                      </tr>
+                            {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                          </Button>
+                        </div>
+                      </div>
+                    </CardHeader>
 
-                      {/* Nested SKU Table Row */}
-                      {isExpanded && (
-                        <tr>
-                          <td colSpan={5} className="p-0">
-                            <div className="p-3 bg-light border-bottom ps-5">
-                              <div className="border-0 shadow-xs card">
-                                <div className="table-responsive">
-                                  <Table
-                                    hover
+                    {isExpanded && (
+                      <CardContent className="pt-0">
+                        <div className="space-y-3">
+                          {product.variants?.map((variant: any) => {
+                            const isSelected = selectedSkus.includes(variant.id);
+                            const quantity = quantities[variant.id] || 50;
+                            const price = variant.calculated_price?.calculated_amount || 0;
+
+                            return (
+                              <div key={variant.id} className="flex items-center gap-4 p-4 border rounded-lg hover:bg-muted/50">
+                                <Checkbox
+                                  checked={isSelected}
+                                  onCheckedChange={() => toggleSkuSelection(variant.id)}
+                                />
+
+                                <div className="flex-1">
+                                  <div className="font-medium">{variant.title || '默认规格'}</div>
+                                  <div className="text-sm text-muted-foreground">
+                                    {variant.options?.map((opt: any) => opt.value).join(", ") || "无规格"}
+                                  </div>
+                                </div>
+
+                                <div className="text-right">
+                                  <div className="font-semibold">${price.toFixed(2)}</div>
+                                  <div className="text-xs text-muted-foreground">单价</div>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                  <InputNumber
+                                    value={quantity}
+                                    onChange={(value) => updateQuantity(variant.id, value)}
+                                    min={50}
+                                    step={50}
                                     size="sm"
-                                    className="mb-0 align-middle"
-                                    style={{ minWidth: "600px" }}
-                                  >
-                                    <thead className="bg-white">
-                                      <tr>
-                                        <th
-                                          className="py-3 text-center"
-                                          style={{ width: "50px" }}
-                                        >
-                                          Select
-                                        </th>
-                                        <th className="py-3">Variant Name</th>
-                                        <th className="py-3">Options</th>
-                                        <th className="py-3 text-end">Price</th>
-                                        <th className="py-3 text-center">
-                                          Stock
-                                        </th>
-                                        <th
-                                          className="py-3 text-center"
-                                          style={{ width: "160px" }}
-                                        >
-                                          Quantity
-                                        </th>
-                                        <th className="py-3 text-center">
-                                          Unit
-                                        </th>
-                                      </tr>
-                                    </thead>
-                                    <tbody>
-                                      {product.variants?.map((sku: any) => {
-                                        const isSelected =
-                                          selectedSkus.includes(sku.id);
-                                        const quantity =
-                                          quantities[sku.id] || 50;
-                                        // Try to get price
-                                        const price = sku.calculated_price
-                                          ?.calculated_amount
-                                          ? `$${sku.calculated_price.calculated_amount.toFixed(
-                                              2
-                                            )}`
-                                          : "N/A";
-
-                                        return (
-                                          <tr key={sku.id}>
-                                            <td className="text-center">
-                                              <div className="d-flex justify-content-center align-items-center h-100">
-                                                <Form.Check
-                                                  type="checkbox"
-                                                  checked={isSelected}
-                                                  onChange={() =>
-                                                    toggleSkuSelection(sku.id)
-                                                  }
-                                                />
-                                              </div>
-                                            </td>
-                                            <td className="fw-medium text-dark">
-                                              {sku.title}
-                                            </td>
-                                            <td className="text-muted small">
-                                              {sku.options
-                                                ?.map(
-                                                  (option: any) => option.value
-                                                )
-                                                .join(", ") || "-"}
-                                            </td>
-                                            <td className="text-end font-monospace">
-                                              {price}
-                                            </td>
-                                            <td className="text-center">
-                                              {inventory[product.id]?.rows.find(
-                                                (row: any) =>
-                                                  row.material_number ===
-                                                  sku.sku
-                                              )?.valid_qty || "-"}
-                                            </td>
-                                            <td>
-                                              <div
-                                                style={{
-                                                  width: "140px",
-                                                  margin: "0 auto",
-                                                }}
-                                              >
-                                                <QuantitySelect
-                                                  quantity={quantity}
-                                                  setQuantity={(val: number) =>
-                                                    updateQuantity(sku.id, val)
-                                                  }
-                                                  step={50}
-                                                />
-                                              </div>
-                                            </td>
-                                            <td className="text-center text-muted small">
-                                              pcs
-                                            </td>
-                                          </tr>
-                                        );
-                                      })}
-                                    </tbody>
-                                  </Table>
+                                  />
+                                  <span className="text-sm text-muted-foreground">件</span>
                                 </div>
                               </div>
-                            </div>
-                          </td>
-                        </tr>
-                      )}
-                    </Fragment>
-                  );
-                })
-              )}
-            </tbody>
-          </Table>
+                            );
+                          })}
+                        </div>
+                      </CardContent>
+                    )}
+                  </Card>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredProducts.map((product) => (
+                <Card key={product.id} className="hover:shadow-lg transition-shadow">
+                  <CardContent className="p-4">
+                    <div className="space-y-3">
+                      <Image
+                        src={product.thumbnail || `https://picsum.photos/200/200?random=${product.id}`}
+                        alt={product.title || "Product"}
+                        width={200}
+                        height={200}
+                        className="w-full h-40 object-cover rounded-lg"
+                      />
+
+                      <div>
+                        <h3 className="font-semibold text-sm">{product.title}</h3>
+                        <p className="text-xs text-muted-foreground">
+                          {product.variants?.length || 0} 个规格
+                        </p>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="flex-1"
+                          onClick={() => toggleProductSelection(product)}
+                        >
+                          <Plus className="h-3 w-3 mr-1" />
+                          全选规格
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
-        {selectedSkus.length > 0 && (
-          <div className="gap-2 pt-3 pb-4 mt-3 d-flex justify-content-center border-top">
-            <Button
-              variant="outline-secondary"
-              onClick={onHide}
-              className="px-4 rounded-0"
-              disabled={submitting}
-            >
-              Cancel
+
+        {/* Footer with Summary */}
+        <div className="border-t pt-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="space-y-1">
+              <div className="text-sm text-muted-foreground">
+                已选择 <span className="font-semibold text-foreground">{summary.products}</span> 个商品
+              </div>
+              <div className="text-sm text-muted-foreground">
+                总共 <span className="font-semibold text-foreground">{summary.items}</span> 件
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-sm text-muted-foreground">总价</div>
+              <div className="text-xl font-bold">${summary.total.toFixed(2)}</div>
+            </div>
+          </div>
+
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={onHide} disabled={submitting}>
+              取消
             </Button>
             <Button
-              variant="dark"
               onClick={handleSubmit}
-              className="gap-2 px-4 rounded-0 d-flex align-items-center"
-              disabled={submitting}
+              disabled={submitting || selectedSkus.length === 0}
+              className="flex-1"
             >
-              {submitting && <Spinner size="sm" animation="border" />}
-              Confirm Selection ({selectedSkus.length})
+              {submitting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
+                  添加中...
+                </>
+              ) : (
+                <>
+                  <ShoppingCart className="h-4 w-4 mr-2" />
+                  确认添加 {selectedSkus.length} 个商品
+                </>
+              )}
             </Button>
           </div>
-        )}
-      </Offcanvas.Body>
-    </Offcanvas>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

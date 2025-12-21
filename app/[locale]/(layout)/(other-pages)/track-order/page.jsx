@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from '@/i18n/routing';
 
 import Footer1 from "@/components/footers/Footer1";
 import Header1 from "@/components/header/Header1";

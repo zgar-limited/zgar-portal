@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import { Link } from '@/i18n/routing';
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import ProductSaleMarquee from "../common/ProductSaleMarquee";

@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import { Link } from '@/i18n/routing';
 import Image from "next/image";
 import { testimonialV04Data3 } from "@/data/testimonials";
 import React from "react";

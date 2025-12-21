@@ -434,3 +434,46 @@ export async function listCartOptions() {
     cache: "force-cache",
   });
 }
+
+/**
+ * ZGAR 购物车结算
+ * 在服务端执行，自动包含用户认证信息
+ * @param items - 要结算的商品列表
+ * @returns 结算结果
+ */
+export async function completeZgarCartCheckout(items: HttpTypes.StoreAddCartLineItem[]) {
+  const cartId = await getCartId();
+
+  if (!cartId) {
+    throw new Error("No existing cart found");
+  }
+
+  if (!items || !Array.isArray(items) || items.length === 0) {
+    throw new Error("Invalid items data");
+  }
+
+  const headers = {
+    ...(await getAuthHeaders()),
+  };
+
+  try {
+    // 调用 Medusa 的 zgar cart complete 接口
+    // 这个调用会在服务端执行，自动包含认证信息
+    const result = await medusaSDK.client.fetch("/store/zgar/cart/complete", {
+      method: "POST",
+      body: {
+        items: items,
+      },
+      headers,
+    });
+
+    // 清除购物车缓存
+    const cartCacheTag = await getCacheTag("carts");
+    revalidateTag(cartCacheTag);
+
+    return result;
+  } catch (error: any) {
+    console.error("Server-side checkout error:", error);
+    throw medusaError(error);
+  }
+}

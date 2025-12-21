@@ -20,11 +20,6 @@ export default async function page({
     //   limit: 12,
     // },
   });
-  console.log(
-    "%c [ response ]-25",
-    "font-size:13px; background:pink; color:#bf2c9f;",
-    response
-  );
 
   return (
     <>

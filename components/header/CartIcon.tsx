@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import Link from "next/link";
+import { Link } from '@/i18n/routing';
 import Image from "next/image";
 import { ShoppingCart, X } from "lucide-react";
 import { StoreCart } from "@medusajs/types";

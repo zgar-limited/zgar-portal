@@ -1,434 +1,304 @@
 "use client";
-import Link from "next/link";
+
+import { Link } from '@/i18n/routing';
 import Image from "next/image";
 import React from "react";
-import { Pagination } from "swiper/modules";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Pencil } from "lucide-react";
+import {
+  Package,
+  MapPin,
+  Settings,
+  Star,
+  ShoppingBag,
+  LogOut,
+  User,
+  Eye,
+  CreditCard,
+  ChevronRight
+} from "lucide-react";
 import Sidebar from "./Sidebar";
-import { useQuery } from "@tanstack/react-query";
-import { medusaSDK } from "@/utils/medusa";
-import { Eye } from "lucide-react";
+import { HttpTypes } from "@medusajs/types";
 
-export default function MyAccount() {
-  const wallet = {
-    balance: 1250.0,
+interface MyAccountProps {
+  customer?: HttpTypes.StoreCustomer | null;
+  orders?: HttpTypes.StoreOrder[];
+}
+
+export default function MyAccount({ customer, orders = [] }: MyAccountProps) {
+  // 计算真实数据
+  const stats = {
+    totalOrders: customer?.orders?.length || orders.length || 0,
+    balance: 1250.50,
     points: 350,
-    coupons: 5,
-    currency: "$",
+    memberSince: customer?.created_at
+      ? new Date(customer.created_at).toLocaleDateString('zh-CN', {
+          year: 'numeric',
+          month: 'long'
+        })
+      : '今天'
   };
 
-  const tasks = [
+  // 快捷操作
+  const quickActions = [
     {
-      id: 1,
-      title: "Complete Profile",
-      description: "Fill in all your personal details",
-      status: "Pending",
-      progress: 70,
-      reward: "50 Points",
+      icon: Package,
+      title: "订单管理",
+      count: stats.totalOrders,
+      link: "/account-orders",
+      color: "primary"
     },
     {
-      id: 2,
-      title: "First Order",
-      description: "Place your first order over $100",
-      status: "Completed",
-      progress: 100,
-      reward: "100 Points",
+      icon: MapPin,
+      title: "地址管理",
+      count: 3,
+      link: "/account-addresses",
+      color: "primary"
     },
     {
-      id: 3,
-      title: "Subscribe Newsletter",
-      description: "Get updates on latest products",
-      status: "Pending",
-      progress: 0,
-      reward: "20 Points",
+      icon: CreditCard,
+      title: "余额详情",
+      count: null,
+      link: "/account-balance",
+      color: "primary"
     },
+    {
+      icon: Settings,
+      title: "账户设置",
+      count: null,
+      link: "/account-setting",
+      color: "primary"
+    }
   ];
 
-  const redemptionItems = [
+  // 积分任务
+  const pointTasks = [
     {
-      id: 1,
-      title: "$10 Discount Coupon",
-      cost: 100,
-      image: "/images/products/product-1.jpg",
+      icon: Package,
+      title: "完成首次下单",
+      description: "新用户专享",
+      points: "+100",
+      status: stats.totalOrders > 0 ? "completed" : "pending",
+      progress: stats.totalOrders > 0 ? 100 : 0
     },
     {
-      id: 2,
-      title: "Free Shipping Voucher",
-      cost: 50,
-      image: "/images/products/product-2.jpg",
+      icon: User,
+      title: "完善个人资料",
+      description: "填写完整信息",
+      points: "+50",
+      status: customer?.first_name && customer?.last_name ? "completed" : "pending",
+      progress: customer?.first_name && customer?.last_name ? 100 : 60
     },
     {
-      id: 3,
-      title: "$25 Gift Card",
-      cost: 250,
-      image: "/images/products/product-3.jpg",
+      icon: Star,
+      title: "每日签到",
+      description: "连续签到奖励",
+      points: "+10",
+      status: "pending",
+      progress: 0
     },
     {
-      id: 4,
-      title: "Premium Support",
-      cost: 500,
-      image: "/images/products/product-4.jpg",
-    },
+      icon: Package,
+      title: "评价已购商品",
+      description: "分享使用体验",
+      points: "+20",
+      status: "pending",
+      progress: 30
+    }
   ];
-
-  const { data: ordersData, isLoading } = useQuery({
-    queryKey: ["orders"],
-    queryFn: async () => {
-      const res = await medusaSDK.store.order.list({
-        fields: "+items.title,+items.thumbnail,+items.quantity,+items.unit_price,+items.variant_title",
-        limit: 5, // Show recent 5 orders
-        offset: 0,
-      });
-      return res;
-    },
-    enabled: true,
-  });
-
-  const orders = ordersData?.orders || [];
 
   return (
-    <section className="flat-spacing">
-      <div className="container">
-        <div className="row">
-          <div className="col-xl-3 d-none d-xl-block">
-            <Sidebar />
+    <div className="min-h-screen bg-white dark:bg-[#191818]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* 侧边栏 */}
+          <div className="lg:col-span-1">
+            <Sidebar customer={customer} />
           </div>
-          <div className="col-xl-9">
-            <div className="my-account-content">
-              {/* 1. User Info & Wallet Section */}
-              <div className="mb-5">
-                <div className="row g-4">
-                  {/* User Info */}
-                  <div className="col-md-4">
-                    <div className="p-4 bg-white border-0 account-box-shadow rounded-4 h-100 d-flex flex-column position-relative">
-                      <button
-                        className="top-0 gap-1 p-0 m-3 position-absolute end-0 btn btn-link text-muted text-decoration-none d-flex align-items-center"
-                        style={{ fontSize: "0.875rem" }}
-                      >
-                        <Pencil size={14} />
-                        <span>Edit</span>
-                      </button>
-                      <div className="grow">
-                        <h5 className="mb-1">
-                          Guest User
-                        </h5>
-                        <p className="mb-2 text-muted text-small">
-                          guest@example.com
-                        </p>
-                        <div className="gap-2 mb-3 d-flex align-items-center">
-                          <span className="badge bg-primary-subtle text-primary rounded-pill">
-                            Member
-                          </span>
+
+          {/* 主内容区 */}
+          <div className="lg:col-span-3 space-y-6">
+            {/* 账户数据卡片 - 只保留积分和订单 */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="rounded-2xl border border-[#ededed] dark:border-[#ffffff1a] p-4 bg-white dark:bg-[#191818]">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">可用积分</p>
+                    <p className="text-2xl font-bold text-black dark:text-white">{stats.points}</p>
+                  </div>
+                  <div className="w-12 h-12 bg-black/5 dark:bg-white/10 rounded-xl flex items-center justify-center">
+                    <Star size={20} className="text-black dark:text-white" />
+                  </div>
+                </div>
+                <button className="mt-3 w-full text-sm text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white font-medium">
+                  积分商城 →
+                </button>
+              </div>
+
+              <div className="rounded-2xl border border-[#ededed] dark:border-[#ffffff1a] p-4 bg-white dark:bg-[#191818]">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">全部订单</p>
+                    <p className="text-2xl font-bold text-black dark:text-white">{stats.totalOrders}</p>
+                  </div>
+                  <div className="w-12 h-12 bg-black/5 dark:bg-white/10 rounded-xl flex items-center justify-center">
+                    <Package size={20} className="text-black dark:text-white" />
+                  </div>
+                </div>
+                <button className="mt-3 w-full text-sm text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white font-medium">
+                  查看订单 →
+                </button>
+              </div>
+            </div>
+
+            {/* 快捷操作 - 只保留地址管理和账户设置 */}
+            <div className="grid grid-cols-2 sm:grid-cols-2 gap-3">
+              {quickActions.filter((action, index) => index === 1 || index === 3).map((action, index) => (
+                <Link
+                  key={index}
+                  href={action.link}
+                  className="group rounded-2xl border border-[#ededed] dark:border-[#ffffff1a] p-4 bg-white dark:bg-[#191818] hover:border-black dark:hover:border-white transition-all"
+                >
+                  <div className="w-10 h-10 bg-black/5 dark:bg-white/10 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-200">
+                    <action.icon size={18} className="text-black dark:text-white" />
+                  </div>
+                  <h3 className="font-medium text-black dark:text-white text-sm mb-1">{action.title}</h3>
+                  {action.count && (
+                    <p className="text-xs text-gray-500 dark:text-gray-500">{action.count} 项</p>
+                  )}
+                </Link>
+              ))}
+            </div>
+
+            {/* 积分任务 */}
+            <div className="rounded-2xl border border-[#ededed] dark:border-[#ffffff1a] bg-white dark:bg-[#191818]">
+              <div className="p-6 border-b border-[#ededed] dark:border-[#ffffff1a]">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-bold text-black dark:text-white">积分任务</h2>
+                  <span className="text-sm text-black dark:text-white font-medium">
+                    当前积分: {stats.points}
+                  </span>
+                </div>
+              </div>
+              <div className="divide-y divide-[#ededed] dark:divide-[#ffffff1a]">
+                {pointTasks.map((task, index) => (
+                  <div key={index} className="p-4 hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-3">
+                        <div className={`
+                          w-10 h-10 rounded-xl flex items-center justify-center
+                          ${task.status === 'completed' ? 'bg-black dark:bg-white' : 'bg-black/5 dark:bg-white/10'}
+                        `}>
+                          <task.icon size={18} className={task.status === 'completed' ? 'text-white dark:text-black' : 'text-black dark:text-white'} />
                         </div>
-                        <p className="mb-0 text-muted text-small">
-                          Member since today
-                        </p>
+                        <div>
+                          <h4 className="font-medium text-black dark:text-white text-sm">{task.title}</h4>
+                          <p className="text-xs text-gray-500 dark:text-gray-500">{task.description}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-sm font-bold text-black dark:text-white">{task.points}</span>
+                        {task.status === 'completed' && (
+                          <span className="ml-2 text-xs text-green-600 dark:text-green-400 font-medium">✓ 已完成</span>
+                        )}
                       </div>
                     </div>
+                    <div className="w-full bg-black/10 dark:bg-white/10 rounded-full h-1.5">
+                      <div
+                        className={`
+                          h-1.5 rounded-full transition-all duration-500
+                          ${task.status === 'completed' ? 'bg-green-600 dark:bg-green-400' : 'bg-black dark:bg-white'}
+                        `}
+                        style={{ width: `${task.progress}%` }}
+                      ></div>
+                    </div>
                   </div>
+                ))}
+              </div>
+              <div className="p-4 bg-black/5 dark:bg-white/5 border-t border-[#ededed] dark:border-[#ffffff1a]">
+                <p className="text-sm text-black/60 dark:text-white/60 text-center">
+                  完成任务获取积分，可在积分商城兑换商品
+                </p>
+              </div>
+            </div>
 
-                  {/* Balance */}
-                  <div className="col-md-4">
-                    <div className="p-4 bg-white border-0 account-box-shadow rounded-4 h-100 d-flex flex-column">
-                      <div className="mb-2 text-muted text-small text-uppercase fw-bold">
-                        Balance
-                      </div>
-                      <h3 className="mb-0 text-primary">
-                        {wallet.currency}
-                        {wallet.balance.toFixed(2)}
-                      </h3>
-                      <div className="pt-3 mt-auto">
+            {/* 最近订单 */}
+            <div className="rounded-2xl border border-[#ededed] dark:border-[#ffffff1a] bg-white dark:bg-[#191818]">
+              <div className="p-6 border-b border-[#ededed] dark:border-[#ffffff1a]">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-bold text-black dark:text-white">最近订单</h2>
+                  <Link
+                    href="/account-orders"
+                    className="text-sm text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white font-medium"
+                  >
+                    查看全部 →
+                  </Link>
+                </div>
+              </div>
+
+              {orders.length === 0 ? (
+                <div className="p-12 text-center">
+                  <Package size={48} className="text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-black dark:text-white mb-2">还没有订单</h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-6">快去选购心仪的商品吧</p>
+                  <Link
+                    href="/shop"
+                    className="inline-flex items-center gap-2 bg-black dark:bg-white text-white dark:text-black px-6 py-2 rounded-xl hover:opacity-80 transition-opacity text-sm font-medium"
+                  >
+                    <ShoppingBag size={18} />
+                    开始购物
+                  </Link>
+                </div>
+              ) : (
+                <div className="divide-y divide-[#ededed] dark:divide-[#ffffff1a]">
+                  {orders.slice(0, 5).map((order) => (
+                    <div key={order.id} className="p-4 hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-black/10 dark:bg-white/10 rounded-xl overflow-hidden flex-shrink-0">
+                            <Image
+                              src={order.items?.[0]?.thumbnail || "https://placehold.co/100"}
+                              alt="商品"
+                              fill
+                              className="object-cover w-full h-full"
+                            />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <h4 className="font-medium text-black dark:text-white">订单 #{order.display_id}</h4>
+                              <span className={`
+                                px-2 py-0.5 rounded-full text-xs font-medium
+                                ${order.status === "completed" ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" :
+                                  order.status === "pending" ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400" :
+                                  "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-400"}
+                              `}>
+                                {order.status === "completed" ? "已完成" :
+                                 order.status === "pending" ? "处理中" : "已取消"}
+                              </span>
+                            </div>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 truncate max-w-xs">
+                              {order.items?.[0]?.title}
+                              {order.items.length > 1 && ` 等${order.items.length}件商品`}
+                            </p>
+                            <p className="text-sm font-medium text-black dark:text-white">
+                              ¥{(order.total / 100).toFixed(2)}
+                            </p>
+                          </div>
+                        </div>
                         <Link
-                          href="/account-wallet"
-                          className="text-decoration-underline text-small fw-semibold"
+                          href={`/account-orders-detail/${order.id}`}
+                          className="p-2 text-gray-400 hover:text-black dark:hover:text-white transition-colors"
                         >
-                          View History
+                          <Eye size={18} />
                         </Link>
                       </div>
                     </div>
-                  </div>
-
-                  {/* Points */}
-                  <div className="col-md-4">
-                    <div className="p-4 bg-white border-0 account-box-shadow rounded-4 h-100 d-flex flex-column">
-                      <div className="mb-2 text-muted text-small text-uppercase fw-bold">
-                        Points
-                      </div>
-                      <h3 className="mb-0 text-warning">{wallet.points}</h3>
-                      <div className="mt-2 text-small text-muted">
-                        Points available
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* 3. Redemption Center */}
-              <div className="mb-5">
-                <div className="mb-4 d-flex justify-content-between align-items-center">
-                  <h4 className="mb-0">Redemption Center</h4>
-                  <Link href="/rewards" className="tf-btn-link">
-                    View All <i className="icon-arrow-right" />
-                  </Link>
-                </div>
-                <Swiper
-                  dir="ltr"
-                  className="swiper tf-swiper swiper-shadow-fix"
-                  spaceBetween={16}
-                  breakpoints={{
-                    0: { slidesPerView: 2, spaceBetween: 16 },
-                    768: { slidesPerView: 3, spaceBetween: 24 },
-                    1200: { slidesPerView: 4, spaceBetween: 24 },
-                  }}
-                  modules={[Pagination]}
-                  pagination={{ clickable: true, el: ".spd-redemption" }}
-                >
-                  {redemptionItems.map((item) => (
-                    <SwiperSlide key={item.id}>
-                      <div className="overflow-hidden border-0 account-box-shadow card h-100 rounded-4">
-                        <div className="position-relative aspect-ratio-1x1">
-                          <Image
-                            src={item.image}
-                            alt={item.title}
-                            fill
-                            className="object-fit-cover"
-                          />
-                        </div>
-                        <div className="p-3">
-                          <h6 className="mb-2 text-truncate" title={item.title}>
-                            {item.title}
-                          </h6>
-                          <div className="d-flex justify-content-between align-items-center">
-                            <span className="text-warning fw-bold text-small">
-                              {item.cost} Pts
-                            </span>
-                            <button className="h-auto px-3 py-1 tf-btn btn-sm btn-fill rounded-pill fs-12 hover-effect">
-                              Redeem
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </SwiperSlide>
-                  ))}
-                  <div className="mt-4 sw-dot-default tf-sw-pagination spd-redemption" />
-                </Swiper>
-              </div>
-
-              {/* 4. Task Center */}
-              <div className="mb-5">
-                <h4 className="mb-4">Task Center</h4>
-                <div className="overflow-hidden bg-white border-0 account-box-shadow rounded-4">
-                  {tasks.map((task, index) => (
-                    <div
-                      key={task.id}
-                      className={`p-4 d-flex flex-column flex-md-row align-items-center gap-4 ${
-                        index !== tasks.length - 1 ? "border-bottom" : ""
-                      }`}
-                    >
-                      <div className="text-center grow text-md-start">
-                        <h6 className="mb-1">{task.title}</h6>
-                        <p className="mb-2 text-muted text-small">
-                          {task.description}
-                        </p>
-                        <div
-                          className="progress"
-                          style={{ height: "6px", maxWidth: "200px" }}
-                        >
-                          <div
-                            className="progress-bar bg-success"
-                            role="progressbar"
-                            style={{ width: `${task.progress}%` }}
-                            aria-valuenow={task.progress}
-                            aria-valuemin={0}
-                            aria-valuemax={100}
-                          ></div>
-                        </div>
-                      </div>
-                      <div className="text-center">
-                        <span className="mb-2 badge bg-warning-subtle text-warning d-block">
-                          +{task.reward}
-                        </span>
-                      </div>
-                      <div>
-                        {task.status === "Completed" ? (
-                          <button
-                            className="tf-btn type-very-small btn-outline-success rounded-pill"
-                            disabled
-                          >
-                            Completed
-                          </button>
-                        ) : (
-                          <button className="tf-btn type-very-small btn-fill rounded-pill hover-effect">
-                            Go to Task
-                          </button>
-                        )}
-                      </div>
-                    </div>
                   ))}
                 </div>
-              </div>
-
-              {/* 5. Orders Table */}
-              <div className="mb-5">
-                <h4 className="mb-4">Recent Orders</h4>
-                <div
-                  className="overflow-hidden bg-white rounded-3"
-                  style={{
-                    boxShadow: "0 2px 12px rgba(0, 0, 0, 0.08)",
-                    border: "1px solid rgba(0,0,0,0.05)",
-                  }}
-                >
-                  <div className="table-responsive">
-                    <table className="table mb-0 align-middle" style={{ fontSize: "0.8125rem" }}>
-                      <colgroup>
-                        <col style={{ width: "8%", minWidth: "70px" }} />
-                        <col style={{ width: "37%", minWidth: "250px" }} />
-                        <col style={{ width: "12%", minWidth: "90px" }} />
-                        <col style={{ width: "10%", minWidth: "80px" }} />
-                        <col style={{ width: "33%", minWidth: "240px" }} />
-                      </colgroup>
-                      <thead className="bg-light">
-                        <tr>
-                          <th className="py-2 ps-3 border-bottom-0 text-muted text-uppercase small fw-bold" style={{ letterSpacing: "0.5px" }}>Order</th>
-                          <th className="py-2 border-bottom-0 text-muted text-uppercase small fw-bold" style={{ letterSpacing: "0.5px" }}>Products</th>
-                          <th className="py-2 border-bottom-0 text-muted text-uppercase small fw-bold text-end" style={{ letterSpacing: "0.5px" }}>Total</th>
-                          <th className="py-2 text-center border-bottom-0 text-muted text-uppercase small fw-bold" style={{ letterSpacing: "0.5px" }}>Status</th>
-                          <th className="py-2 pe-3 border-bottom-0 text-muted text-uppercase small fw-bold text-end" style={{ letterSpacing: "0.5px" }}>Action</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {isLoading ? (
-                          <tr>
-                            <td colSpan={5} className="py-5 text-center text-muted">
-                              Loading orders...
-                            </td>
-                          </tr>
-                        ) : orders.length === 0 ? (
-                          <tr>
-                            <td colSpan={5} className="py-5 text-center text-muted">
-                              No recent orders found.
-                            </td>
-                          </tr>
-                        ) : (
-                          orders.map((order) => (
-                            <tr key={order.id} style={{ transition: "background-color 0.2s" }}>
-                              <td className="py-2 fw-medium ps-3">
-                                #{order.display_id}
-                              </td>
-                              <td className="py-2">
-                                {order.items?.slice(0, 1).map((item) => (
-                                  <div
-                                    key={item.id}
-                                    className="gap-2 mb-1 d-flex align-items-center"
-                                  >
-                                    <div
-                                      className="shrink-0"
-                                      style={{
-                                        width: "36px",
-                                        height: "36px",
-                                        position: "relative",
-                                        overflow: "hidden",
-                                        borderRadius: "6px",
-                                        boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
-                                        border: "1px solid rgba(0,0,0,0.05)",
-                                      }}
-                                    >
-                                      <Image
-                                        src={item.thumbnail || "https://placehold.co/100"}
-                                        alt={item.title}
-                                        fill
-                                        className="object-fit-cover"
-                                        sizes="36px"
-                                      />
-                                    </div>
-                                    <div className="grow" style={{ minWidth: 0 }}>
-                                      <h6
-                                        className="mb-0 text-truncate"
-                                        style={{
-                                          fontSize: "0.8125rem",
-                                          maxWidth: "220px",
-                                          lineHeight: "1.2",
-                                        }}
-                                      >
-                                        <Link
-                                          href={`/product-detail/${
-                                            item.product_id ||
-                                            item.variant?.product_id ||
-                                            ""
-                                          }`}
-                                          className="text-dark text-decoration-none hover-primary"
-                                        >
-                                          {item.title}
-                                        </Link>
-                                      </h6>
-                                      <div className="gap-1 mt-0 text-muted small d-flex align-items-center">
-                                        {item.variant_title && (
-                                          <span className="px-1 border badge bg-light text-secondary fw-normal" style={{ fontSize: "0.65rem" }}>
-                                            {item.variant_title}
-                                          </span>
-                                        )}
-                                        <span style={{ fontSize: "0.7rem" }}>
-                                          x{item.quantity}
-                                          {order.items.length > 1 && ` + ${order.items.length - 1} more`}
-                                        </span>
-                                      </div>
-                                    </div>
-                                  </div>
-                                ))}
-                              </td>
-                              <td className="py-2 fw-medium text-end font-monospace">
-                                {order.currency_code?.toUpperCase()} {(order.total / 100).toFixed(2)}
-                              </td>
-                              <td className="py-2 text-center">
-                                <span
-                                  className={`badge px-2 py-0.5 shadow-xs fw-normal rounded-pill ${
-                                    order.status === "completed"
-                                      ? "bg-success text-white"
-                                      : order.status === "pending"
-                                      ? "bg-warning text-dark"
-                                      : "bg-danger text-white"
-                                  }`}
-                                  style={{
-                                    fontSize: "0.7rem",
-                                    letterSpacing: "0.3px",
-                                  }}
-                                >
-                                  {order.status}
-                                </span>
-                              </td>
-                              <td className="py-2 pe-3">
-                                <div className="d-flex justify-content-end">
-                                  <Link
-                                    href={`/account-orders-detail/${order.id}`}
-                                    className="gap-1 px-2 py-0.5 border-0 btn btn-outline-secondary btn-sm d-inline-flex align-items-center bg-light text-dark"
-                                    style={{
-                                      fontSize: "0.75rem",
-                                      boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
-                                    }}
-                                  >
-                                    <Eye size={13} />
-                                    <span className="d-none d-xl-inline">View</span>
-                                  </Link>
-                                </div>
-                              </td>
-                            </tr>
-                          ))
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-                <div className="mt-4 text-center">
-                  <Link href="/account-orders" className="tf-btn btn-line">
-                    View All Orders
-                  </Link>
-                </div>
-              </div>
+              )}
             </div>
+
           </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 }

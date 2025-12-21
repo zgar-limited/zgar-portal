@@ -5,7 +5,7 @@ import Image from "next/image";
 import { galleryImagesStyle2 } from "@/data/instagramPosts";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination } from "swiper/modules";
-import Link from "next/link";
+import { Link } from '@/i18n/routing';
 
 export default function ShopGram() {
   return (

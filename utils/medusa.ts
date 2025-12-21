@@ -9,9 +9,9 @@ if (process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL) {
 export const medusaSDK = new Medusa({
   baseUrl: MEDUSA_BACKEND_URL,
   debug: process.env.NODE_ENV === "development",
-  publishableKey: process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY,
+  publishableKey: process.env.MEDUSA_PUBLISHABLE_KEY,
   globalHeaders:{
-    "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
+    "x-publishable-api-key": process.env.MEDUSA_PUBLISHABLE_KEY
   },
   auth: {
     jwtTokenStorageKey: "token",

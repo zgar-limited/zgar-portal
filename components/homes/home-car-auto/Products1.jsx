@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import { Link } from '@/i18n/routing';
 import Image from "next/image";
 import ProductCard17 from "@/components/productCards/ProductCard17";
 import { carAutoProducts } from "@/data/products";

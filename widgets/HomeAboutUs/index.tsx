@@ -7,7 +7,7 @@ import gsap from "gsap";
 import Image from "next/image";
 
 import { ArrowFour } from "@/svg";
-import Link from "next/link";
+import { Link } from '@/i18n/routing';
 import "./index.scss"
 
 

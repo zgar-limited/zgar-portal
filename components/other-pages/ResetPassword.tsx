@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useActionState } from "react";
 import { resetPassword } from "@/data/customer";
-import Link from "next/link";
+import { Link } from '@/i18n/routing';
 
 export default function ResetPassword() {
   const [email, setEmail] = useState("");

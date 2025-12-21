@@ -2,7 +2,7 @@
 import { LeftArrowIcon, RightArrowIcon } from "@/svg";
 
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from '@/i18n/routing';
 
 // Import Swiper components and modules
 import { project_swiper_params } from "@/constants/swiper";

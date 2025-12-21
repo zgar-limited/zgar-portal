@@ -1,7 +1,7 @@
 "use client";
 
 import ProductCard1 from "../productCards/ProductCard1";
-import Link from "next/link";
+import { Link } from '@/i18n/routing';
 
 export default function Wishlist() {
   const wishList = []; // Mock empty wishlist

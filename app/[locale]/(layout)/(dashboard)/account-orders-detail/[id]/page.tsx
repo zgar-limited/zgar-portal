@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from '@/i18n/routing';
 
 import OrderDetails from "@/components/dashboard/OrderDetails";
 import React from "react";

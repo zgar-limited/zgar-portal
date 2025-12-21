@@ -43,9 +43,9 @@ export const fetchProducts = async ({
         query: {
           limit,
           offset,
-          // region_id: region?.id,
+          // region_id: regionId,
           fields:
-            "*variants.calculated_price,+variants.inventory_quantity,*variants.images,+metadata,+tags,",
+            "*variants.calculated_price,*variants.prices,+variants.inventory_quantity,*variants.images,*variants.options,+metadata,+tags,*thumbnail,*images",
           ...queryParams,
         },
         headers,
@@ -81,7 +81,7 @@ export const fetchProduct = async (id: string) => {
       method: "GET",
       query: {
         fields:
-          "*variants,*variants.calculated_price,+variants.inventory_quantity,*variants.images,+metadata,+tags,",
+          "*variants,*variants.calculated_price,+variants.inventory_quantity,*variants.images,*variants.options,+metadata,+tags,",
       },
       headers,
       next,

@@ -5,7 +5,7 @@ import { galleryItems } from "@/data/instagramPosts";
 import React from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination } from "swiper/modules";
-import Link from "next/link";
+import { Link } from '@/i18n/routing';
 
 export default function ShopGram() {
   return (

@@ -25,23 +25,35 @@ export const retrieveCustomer =
       ...authHeaders,
     };
 
-    const next = {
-      ...(await getCacheOptions("customers")),
-    };
-
     return await medusaSDK.client
       .fetch<{ customer: HttpTypes.StoreCustomer }>(`/store/customers/me`, {
         method: "GET",
         query: {
-          fields: "*orders",
+          fields: "*orders,+addresses",
         },
         headers,
-        next,
-        cache: "force-cache",
       })
       .then(({ customer }) => customer)
       .catch(() => null);
   };
+
+export const retrieveCustomerAddresses = async (): Promise<HttpTypes.StoreCustomerAddress[]> => {
+  const authHeaders = await getAuthHeaders();
+
+  if (!authHeaders) return [];
+
+  const headers = {
+    ...authHeaders,
+  };
+
+  return await medusaSDK.client
+    .fetch<{ addresses: HttpTypes.StoreCustomerAddress[] }>(`/store/customers/me/addresses`, {
+      method: "GET",
+      headers,
+    })
+    .then(({ addresses }) => addresses || [])
+    .catch(() => []);
+};
 
 export const updateCustomer = async (body: HttpTypes.StoreUpdateCustomer) => {
   const headers = {

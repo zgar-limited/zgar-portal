@@ -2,7 +2,7 @@
 import React, { useState, useActionState, useEffect } from "react";
 import { updatePassword } from "@/data/customer";
 import { useSearchParams } from "next/navigation";
-import Link from "next/link";
+import { Link } from '@/i18n/routing';
 
 export default function UpdatePassword() {
   const searchParams = useSearchParams();

@@ -8,7 +8,7 @@ import { Swiper, SwiperSlide, SwiperRef } from 'swiper/react';
 // import { parallaxSlideItems } from '@/data/portfolioTwoData';
 // import { ArrowSvg, ButtonBlurFilter } from '@/svg';
 import React, { useRef } from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/routing';
 
 interface SlideItem {
     backgroundImage: string;

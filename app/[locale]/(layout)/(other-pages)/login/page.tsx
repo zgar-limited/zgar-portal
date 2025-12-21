@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import HomeFooter from "@/widgets/HomeFooter";
 import HomeHeader from "@/widgets/HomeHeader";
 import HomeTips from "@/widgets/HomeTips";
-import Link from "next/link";
+import { Link } from '@/i18n/routing';
 import React from "react";
 export const metadata = {
   title: "Login ",

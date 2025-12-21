@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Link from "next/link";
+import { Link } from '@/i18n/routing';
 import Image from "next/image";
 
 import ThunderIcon from "../common/ThunderIcon";

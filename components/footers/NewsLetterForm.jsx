@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 
 import axios from "axios";
-import Link from "next/link";
+import { Link } from '@/i18n/routing';
 
 export default function NewsLetterForm({ isBgDark = false }) {
   const [success, setSuccess] = useState(true);

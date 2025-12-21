@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from '@/i18n/routing';
 import Sidebar from "./Sidebar";
 import { useQuery } from "@tanstack/react-query";
 import { medusaSDK } from "@/utils/medusa";

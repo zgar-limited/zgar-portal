@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from '@/i18n/routing';
 
 import BlogList1 from "@/components/blogs/BlogList1";
 

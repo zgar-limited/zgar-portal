@@ -1,6 +1,6 @@
 "use client";
-import React from "react";
-import { StoreProduct } from "@medusajs/types";
+import React, { useState } from "react";
+import { StoreProduct, StoreProductVariant } from "@medusajs/types";
 import ProductGallery from "./ProductGallery";
 import ProductInfo from "./ProductInfo";
 import ProductTabs from "./ProductTabs";
@@ -10,28 +10,39 @@ interface ProductMainProps {
 }
 
 export default function ProductMain({ product }: ProductMainProps) {
+  const [selectedVariant, setSelectedVariant] = useState<StoreProductVariant | undefined>(
+    product.variants?.[0]
+  );
+
   return (
-    <section className="py-5 bg-white">
-      <div className="container">
-        <div className="row g-5">
+    <section className="py-12 bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-16">
           {/* Left: Gallery */}
-          <div className="col-lg-7">
-            <ProductGallery 
-                images={product.images || []} 
-                thumbnail={product.thumbnail} 
+          <div className="lg:col-span-1">
+            <ProductGallery
+              product={product}
+              selectedVariant={selectedVariant}
+              onVariantSelect={setSelectedVariant}
             />
           </div>
 
           {/* Right: Info */}
-          <div className="col-lg-5">
-            <div className="sticky-top" style={{ top: '100px', zIndex: 1 }}>
-                <ProductInfo product={product} />
+          <div className="lg:col-span-1">
+            <div className="sticky top-24" style={{ zIndex: 1 }}>
+              <ProductInfo
+                product={product}
+                selectedVariant={selectedVariant}
+                onVariantSelect={setSelectedVariant}
+              />
             </div>
           </div>
         </div>
 
         {/* Tabs / Bottom Section */}
-        <ProductTabs product={product} />
+        <div className="mt-16">
+          <ProductTabs product={product} />
+        </div>
       </div>
     </section>
   );

@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import { Link } from '@/i18n/routing';
 import React, { useState, useActionState } from "react";
 import CountryCodeSelect from "../common/CountryCodeSelect";
 import { login, signup } from "@/data/customer";

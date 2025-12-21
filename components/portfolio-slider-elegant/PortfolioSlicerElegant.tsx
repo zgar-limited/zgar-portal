@@ -7,7 +7,7 @@ import { fadeAnimation } from "@/hooks/useGsapAnimation";
 import useScrollSmooth from "@/hooks/useScrollSmooth";
 import { useGSAP } from "@gsap/react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from '@/i18n/routing';
 
 const PortfolioSlicerElegant = () => {
   // Initialize custom cursor and background styles

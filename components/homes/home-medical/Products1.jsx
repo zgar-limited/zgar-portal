@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import { Link } from '@/i18n/routing';
 
 import ProductCard14 from "@/components/productCards/ProductCard14";
 import { productsMedical } from "@/data/products";

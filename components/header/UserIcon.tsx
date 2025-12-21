@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import Link from "next/link";
+import { Link } from '@/i18n/routing';
 import { User } from "lucide-react";
 import { StoreCustomer } from "@medusajs/types";
 import { signout } from "@/data/customer";

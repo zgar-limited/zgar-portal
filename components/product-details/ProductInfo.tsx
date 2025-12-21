@@ -9,9 +9,11 @@ import { addToCart } from "@/data/cart";
 
 interface ProductInfoProps {
   product: StoreProduct;
+  selectedVariant?: StoreProductVariant;
+  onVariantSelect?: (variant: StoreProductVariant) => void;
 }
 
-export default function ProductInfo({ product }: ProductInfoProps) {
+export default function ProductInfo({ product, selectedVariant, onVariantSelect }: ProductInfoProps) {
   const router = useRouter();
   const { showToast } = useToast();
 
@@ -26,17 +28,20 @@ export default function ProductInfo({ product }: ProductInfoProps) {
   // Initialize options with first variant's options or defaults
   useEffect(() => {
     if (product.variants && product.variants.length > 0) {
-      const defaultVariant = product.variants[0];
+      // 如果有传入的selectedVariant，使用它的选项，否则使用第一个variant的选项
+      const variantToUse = selectedVariant || product.variants[0];
       const initialOptions: Record<string, string> = {};
-      defaultVariant.options?.forEach((opt: any) => {
+      variantToUse.options?.forEach((opt: any) => {
         initialOptions[opt.option_id] = opt.value;
       });
       setSelectedOptions(initialOptions);
     }
-  }, [product]);
+  }, [product, selectedVariant]);
 
   // Find the variant matching all selected options
-  const selectedVariant = useMemo(() => {
+  const currentVariant = useMemo(() => {
+    if (selectedVariant) return selectedVariant;
+
     if (!product.variants) return undefined;
 
     return product.variants.find((variant) => {
@@ -44,19 +49,41 @@ export default function ProductInfo({ product }: ProductInfoProps) {
         return selectedOptions[opt.option_id] === opt.value;
       });
     });
-  }, [product, selectedOptions]);
+  }, [product, selectedOptions, selectedVariant]);
 
   // Mock function
 
   const handleOptionSelect = (optionId: string, value: string) => {
-    setSelectedOptions((prev) => ({
-      ...prev,
+    const newOptions = {
+      ...selectedOptions,
       [optionId]: value,
-    }));
+    };
+
+    setSelectedOptions(newOptions);
+
+    // 查找匹配的variant并通知父组件
+    const newVariant = product.variants?.find((variant) => {
+      return variant.options?.every((opt: any) => {
+        return newOptions[opt.option_id] === opt.value;
+      });
+    });
+
+    console.log('Option selected:', { optionId, value });
+    console.log('New options:', newOptions);
+    console.log('Found variant:', newVariant);
+    console.log('All variants:', product.variants?.map(v => ({
+      id: v.id,
+      title: v.title,
+      options: v.options
+    })));
+
+    if (newVariant && onVariantSelect) {
+      onVariantSelect(newVariant);
+    }
   };
 
   const handleAddToCart = async () => {
-    if (!selectedVariant) {
+    if (!currentVariant) {
       showToast("Please select options", "warning");
       return;
     }
@@ -65,8 +92,8 @@ export default function ProductInfo({ product }: ProductInfoProps) {
     try {
       await addToCart({
         quantity,
-        variant_id: selectedVariant.id,
-        metadata: selectedVariant.metadata,
+        variant_id: currentVariant.id,
+        metadata: currentVariant.metadata,
       });
       setIsAdded(true);
       showToast("Added to cart successfully", "success");
@@ -84,16 +111,16 @@ export default function ProductInfo({ product }: ProductInfoProps) {
   // Safe price display
   const price = useMemo(() => {
     // @ts-ignore
-    if (selectedVariant?.calculated_price?.calculated_amount) {
+    if (currentVariant?.calculated_price?.calculated_amount) {
       // @ts-ignore
-      return selectedVariant.calculated_price.calculated_amount;
+      return currentVariant.calculated_price.calculated_amount;
     }
     // @ts-ignore
-    if (selectedVariant?.prices?.[0]?.amount) {
+    if (currentVariant?.prices?.[0]?.amount) {
       // @ts-ignore
-      return selectedVariant.prices[0].amount; // Medusa v2 might be raw number, usually implies currency handling elsewhere, assuming direct value for now or /100 if cents
+      return currentVariant.prices[0].amount; // Medusa v2 might be raw number, usually implies currency handling elsewhere, assuming direct value for now or /100 if cents
     }
-    
+
     // Fallback to product price or first variant
     const firstVariant = product.variants?.[0];
     // @ts-ignore
@@ -103,102 +130,110 @@ export default function ProductInfo({ product }: ProductInfoProps) {
     }
     // @ts-ignore
     return firstVariant?.prices?.[0]?.amount || 0;
-  }, [selectedVariant, product]);
+  }, [currentVariant, product]);
 
-  const isSoldOut = selectedVariant && selectedVariant.inventory_quantity === 0; // Check inventory logic if needed
+  const isSoldOut = currentVariant && currentVariant.inventory_quantity === 0; // Check inventory logic if needed
 
   return (
-    <div className="gap-4 d-flex flex-column">
+    <div className="flex flex-col gap-6">
       {/* Header */}
       <div>
         {product.collection && (
-          <span className="mb-2 tracking-wider text-uppercase text-muted small fw-bold d-block">
+          <span className="mb-3 inline-block px-3 py-1 bg-gray-100 text-gray-600 text-sm font-semibold rounded-full tracking-wide uppercase">
             {product.collection.title}
           </span>
         )}
-        <h1 className="mb-2 h2 fw-bold">{product.title}</h1>
-        <div className="gap-3 d-flex align-items-center">
-          <span className="mb-0 h3 fw-bold text-primary">
+        <h1 className="mb-3 text-3xl lg:text-4xl font-bold text-gray-900 leading-tight">
+          {product.title}
+        </h1>
+        <div className="flex items-center gap-3">
+          <span className="text-3xl lg:text-4xl font-bold text-black">
             ${price.toFixed(2)}
           </span>
-          {/* Optional: Compare at price if available */}
+          <span className="text-lg text-gray-500">/pcs</span>
         </div>
       </div>
 
-      <hr className="my-1 border-secondary opacity-10" />
+      <div className="border-t border-gray-200"></div>
 
       {/* Description Preview */}
       {product.description && (
-        <p className="leading-relaxed text-muted">{product.description}</p>
+        <p className="text-lg text-gray-600 leading-relaxed">{product.description}</p>
       )}
 
-      {/* Options Selector */}
-      {product.options?.map((option) => (
-        <div key={option.id}>
-          <label className="mb-2 fw-semibold d-block small text-uppercase text-muted">
-            {option.title}:{" "}
-            <span className="text-dark">{selectedOptions[option.id]}</span>
-          </label>
-          <div className="flex-wrap gap-2 d-flex">
-            {option.values?.map((val: any) => {
-              // Medusa option values are distinct strings in v2? or objects. Usually objects in response, but let's handle uniqueness
-              // Need to deduplicate values if they are repeated in the list (Medusa usually returns all values associated)
-              return (
-                <button
-                  key={val.value}
-                  onClick={() => handleOptionSelect(option.id, val.value)}
-                  className={`btn btn-sm ${
-                    selectedOptions[option.id] === val.value
-                      ? "btn-dark"
-                      : "btn-outline-secondary"
-                  } px-3 py-2`}
-                  style={{ minWidth: "3rem" }}
-                >
-                  {val.value}
-                </button>
-              );
-            })}
+      {/* Options Selector - 增大区域 */}
+      <div className="space-y-6">
+        {product.options?.map((option) => (
+          <div key={option.id} className="space-y-3">
+            <div className="flex items-center justify-between">
+              <label className="text-lg font-bold text-gray-800">
+                {option.title}
+              </label>
+              <span className="text-lg font-semibold text-black bg-gray-100 px-3 py-1 rounded-lg">
+                {selectedOptions[option.id]}
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              {option.values?.map((val: any) => {
+                return (
+                  <button
+                    key={val.value}
+                    onClick={() => handleOptionSelect(option.id, val.value)}
+                    className={`px-4 py-3 text-base font-semibold rounded-xl border-2 transition-all duration-200 ${
+                      selectedOptions[option.id] === val.value
+                        ? "bg-black text-white border-black shadow-lg"
+                        : "bg-white text-gray-700 border-gray-300 hover:border-gray-400 hover:shadow-md"
+                    } min-w-[80px]`}
+                  >
+                    {val.value}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
 
-      {/* Unique values filtering might be needed if option.values contains duplicates. 
-          Usually Medusa product object has 'options' array with unique values in 'values' array? 
-          Actually Medusa product.options.values is array of {id, value, variant_id?}. 
-          We should dedupe by value string. 
-      */}
+      
+      <div className="border-t border-gray-200"></div>
 
-      {/* Actions */}
-      <div className="gap-3 mt-2 d-flex flex-column flex-sm-row">
+      {/* Actions - 增大区域 */}
+      <div className="flex flex-col gap-4">
         {/* Quantity */}
-        <QuantitySelect
-          quantity={quantity}
-          setQuantity={setQuantity}
-          step={50}
-        />
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">Quantity</label>
+          <QuantitySelect
+            quantity={quantity}
+            setQuantity={setQuantity}
+            step={50}
+          />
+        </div>
 
         {/* Add to Cart */}
         <button
           onClick={handleAddToCart}
-          disabled={!selectedVariant || isAdding || isAdded}
-          className={`btn grow rounded-pill d-flex align-items-center justify-content-center gap-2 ${
-            isAdded ? "btn-success" : "btn-dark"
+          disabled={!currentVariant || isAdding || isAdded}
+          className={`w-full flex items-center justify-center gap-3 py-4 px-6 rounded-xl font-bold text-lg transition-all duration-200 ${
+            isAdded
+              ? "bg-green-600 text-white hover:bg-green-700"
+              : !currentVariant
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-black text-white hover:bg-gray-800 shadow-lg"
           }`}
-          style={{ height: "48px" }}
         >
           {isAdding ? (
-            <Loader2 size={20} className="animate-spin" />
+            <Loader2 size={24} className="animate-spin" />
           ) : isAdded ? (
-            <Check size={20} />
+            <Check size={24} />
           ) : (
-            <ShoppingCart size={20} />
+            <ShoppingCart size={24} />
           )}
-          <span className="fw-bold">
+          <span>
             {isAdding
               ? "Adding..."
               : isAdded
               ? "Added to Cart"
-              : !selectedVariant
+              : !currentVariant
               ? "Select Options"
               : "Add to Cart"}
           </span>
@@ -206,14 +241,18 @@ export default function ProductInfo({ product }: ProductInfoProps) {
       </div>
 
       {/* Additional Info / Policies */}
-      <div className="gap-2 mt-2 d-flex flex-column">
-        <div className="gap-2 d-flex align-items-center text-muted small">
-          <Check size={16} className="text-success" />
-          <span>Free shipping on orders over $100</span>
+      <div className="space-y-3">
+        <div className="flex items-center gap-3 text-gray-600">
+          <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+            <Check size={16} className="text-green-600" />
+          </div>
+          <span className="text-base">Free shipping on orders over $100</span>
         </div>
-        <div className="gap-2 d-flex align-items-center text-muted small">
-          <Check size={16} className="text-success" />
-          <span>30-day return policy</span>
+        <div className="flex items-center gap-3 text-gray-600">
+          <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+            <Check size={16} className="text-green-600" />
+          </div>
+          <span className="text-base">30-day return policy</span>
         </div>
       </div>
     </div>

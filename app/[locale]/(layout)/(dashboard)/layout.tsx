@@ -11,14 +11,14 @@ export default async function layout({ children }) {
   const customer = await retrieveCustomer();
   return (
     <>
-      <HomeTips />
-      <HomeHeader customer={customer} />
+      {/* <HomeTips /> */}
+      {/* <HomeHeader customer={customer} /> */}
 
       {children}
       <SidebarToggler />
       <OffcanvasSidebar />
 
-      <Footer1 />
+      {/* <Footer1 /> */}
     </>
   );
 }
