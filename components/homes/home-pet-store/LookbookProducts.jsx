@@ -1,10 +1,10 @@
 "use client";
 import { Link } from '@/i18n/routing';
 import Image from "next/image";
-import { products10 } from "@/data/products";
+
 import React, { useMemo, useState } from "react";
 import LookbookProductCard from "@/components/productCards/LookbookProductCard";
-import { useContextElement } from "@/context/Context";
+
 
 export default function LookbookProducts() {
   const [currentLookbookHover, setCurrentLookbookHover] = useState(null);

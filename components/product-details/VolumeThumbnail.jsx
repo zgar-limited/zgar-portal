@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import React, { useState, useMemo, useCallback } from "react";
-import { volumeDiscounts } from "@/data/products";
-import { useContextElement } from "@/context/Context";
+
+
 
 export default function VolumeThumbnail() {
   const [activeId, setActiveId] = useState(1); // Default active item
@@ -51,7 +51,7 @@ export default function VolumeThumbnail() {
   );
 
   return (
-    <div className="tf-product-volume-discount overflow-x-auto">
+    <div className="overflow-x-auto tf-product-volume-discount">
       <div className="product-badge_item flash-sale w-maxcontent heading">
         <i className="icon icon-thunder" />
         Best deal for you

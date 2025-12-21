@@ -1,8 +1,8 @@
 import { Link } from '@/i18n/routing';
 
 import Footer1 from "@/components/footers/Footer1";
-import Header1 from "@/components/header/Header1";
-import Topbar1 from "@/components/header/Topbar1";
+
+
 import CustomerPhotos from "@/components/product-details/CustomerPhotos";
 import ProductSpecifications1 from "@/components/product-details/ProductSpecifications1";
 import Details1 from "@/components/product-details/Details1";
@@ -13,7 +13,7 @@ import StickyProduct from "@/components/product-details/StickyProduct";
 import React from "react";
 import BuyLook from "@/components/product-details/BuyLook";
 import { notFound } from "next/navigation";
-import { allProducts } from "@/data/products";
+
 
 export const metadata = {
   title:

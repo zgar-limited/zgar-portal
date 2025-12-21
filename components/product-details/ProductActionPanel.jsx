@@ -2,7 +2,7 @@
 import { Link } from '@/i18n/routing';
 import React, { useState } from "react";
 import QuantitySelect from "../common/QuantitySelect";
-import { useContextElement } from "@/context/Context";
+
 import CompareButton from "../productActionButtons/CompareButton";
 import WishlistButton from "../productActionButtons/WishlistButton";
 

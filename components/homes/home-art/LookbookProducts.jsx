@@ -2,9 +2,9 @@
 import { Link } from '@/i18n/routing';
 import Image from "next/image";
 import React, { useState, useMemo, useCallback } from "react";
-import { artProducts2 } from "@/data/products";
+
 import LookbookProductCard from "@/components/productCards/LookbookProductCard";
-import { useContextElement } from "@/context/Context";
+
 
 export default function LookbookProducts() {
   const [currentLookbookHover, setCurrentLookbookHover] = useState(null);

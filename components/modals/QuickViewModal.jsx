@@ -3,7 +3,7 @@ import { Link } from '@/i18n/routing';
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { useContextElement } from "@/context/Context";
+
 import QuantitySelect from "../common/QuantitySelect";
 import CompareButton from "../productActionButtons/CompareButton";
 import WishlistButton from "../productActionButtons/WishlistButton";

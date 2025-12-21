@@ -2,7 +2,7 @@
 import { Link } from '@/i18n/routing';
 import Image from "next/image";
 
-import { decorBundleProducts } from "@/data/products";
+
 import { Swiper, SwiperSlide } from "swiper/react";
 import CartButton from "@/components/productActionButtons/CartButton";
 import WishlistButton from "@/components/productActionButtons/WishlistButton";

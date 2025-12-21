@@ -5,7 +5,7 @@ import ProductCard19 from "@/components/productCards/ProductCard19";
 import {
   miniProductsAccreeories2,
   miniProductsAccreeories3,
-} from "@/data/products";
+
 import React from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import SingleProduct2 from "./SingleProduct2";

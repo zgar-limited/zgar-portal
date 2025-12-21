@@ -2,8 +2,8 @@
 import { Link } from '@/i18n/routing';
 import Image from "next/image";
 import React, { useCallback, useMemo } from "react";
-import { productsBookTogether } from "@/data/products";
-import { useContextElement } from "@/context/Context";
+
+
 
 export default function Products3() {
   const { addProductToCart, isAddedToCartProducts } = useMockContextElement();

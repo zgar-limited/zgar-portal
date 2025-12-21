@@ -2,7 +2,7 @@
 import { Link } from '@/i18n/routing';
 
 import ProductCard3 from "@/components/productCards/ProductCard3";
-import { products7 } from "@/data/products";
+
 import React, { useMemo, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination } from "swiper/modules";

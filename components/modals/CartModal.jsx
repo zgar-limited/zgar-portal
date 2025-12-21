@@ -2,7 +2,7 @@
 import { Link } from '@/i18n/routing';
 import Image from "next/image";
 import React, { useState } from "react";
-import { cartSimilerItems } from "@/data/products";
+
 
 export default function CartModal() {
   const [activeAction, setActiveAction] = useState(null);

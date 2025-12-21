@@ -1,6 +1,6 @@
 "use client";
 import ProductCard8 from "@/components/productCards/ProductCard8";
-import { productSlides } from "@/data/products";
+
 import React from "react";
 import { Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";

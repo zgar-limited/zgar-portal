@@ -2,7 +2,7 @@
 import { Link } from '@/i18n/routing';
 import Image from "next/image";
 import ProductCard4 from "@/components/productCards/ProductCard4";
-import { style5Products } from "@/data/products";
+
 import React from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination } from "swiper/modules";

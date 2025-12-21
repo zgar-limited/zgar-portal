@@ -20,7 +20,7 @@ import {
   clearFilter,
   setBrands,
 } from "@/reducer/filterActions";
-import { products } from "@/data/products";
+
 
 export default function FilterSidebar({ state, dispatch }) {
   const collapseId = useId(); // unique ID for Bootstrap collapse

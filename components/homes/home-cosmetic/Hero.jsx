@@ -1,7 +1,7 @@
 "use client";
 import { Link } from '@/i18n/routing';
 import Image from "next/image";
-import { sliderProducts } from "@/data/products";
+
 import React from "react";
 import { Autoplay, Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";

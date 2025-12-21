@@ -3,7 +3,7 @@ import { Link } from '@/i18n/routing';
 
 import ProductCard13 from "@/components/productCards/ProductCard13";
 import ProductCard15 from "@/components/productCards/ProductCard15";
-import { productsMedicalMini, productsMedicalMiniType3 } from "@/data/products";
+
 import React from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination } from "swiper/modules";

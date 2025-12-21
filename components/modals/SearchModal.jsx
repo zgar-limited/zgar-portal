@@ -2,7 +2,7 @@
 import { Link } from '@/i18n/routing';
 import Image from "next/image";
 import React from "react";
-import { products } from "@/data/products";
+
 
 export default function SearchModal() {
   return (

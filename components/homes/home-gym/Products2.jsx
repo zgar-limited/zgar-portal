@@ -1,15 +1,15 @@
 "use client";
 import ProductCard17 from "@/components/productCards/ProductCard17";
-import { gymProducts2 } from "@/data/products";
+
 import React from "react";
 import { Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 
 export default function Products2() {
   return (
-    <div className="flat-spacing pt-0">
+    <div className="pt-0 flat-spacing">
       <div className="container">
-        <div className="h1 sect-title text-black fw-medium text-center wow fadeInUp">
+        <div className="text-center text-black h1 sect-title fw-medium wow fadeInUp">
           BEST SELLER
         </div>
         <Swiper

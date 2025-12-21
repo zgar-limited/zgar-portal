@@ -14,7 +14,7 @@ import {
   setAvailability,
   setBrands,
 } from "@/reducer/filterActions";
-import { products } from "@/data/products";
+
 
 export default function FilterDropdown({ state, dispatch }) {
   return (

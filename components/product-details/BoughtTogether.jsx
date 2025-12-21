@@ -3,7 +3,7 @@
 import { Link } from '@/i18n/routing';
 import Image from "next/image";
 import React from "react";
-import { boughtTogetherProducts } from "@/data/products";
+
 
 export default function BoughtTogether() {
   // Mock functions
