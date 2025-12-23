@@ -13,7 +13,7 @@ export default function page() {
   return (
     <>
 
-      <HomeHeader/>
+
       <PageTitle />
       <Hero />
       <About />

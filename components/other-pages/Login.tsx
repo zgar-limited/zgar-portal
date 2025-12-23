@@ -1,297 +1,288 @@
 "use client";
 import { Link } from '@/i18n/routing';
-import React, { useState, useActionState } from "react";
+import React, { useState, useActionState, useTransition } from "react";
 import CountryCodeSelect from "../common/CountryCodeSelect";
 import { login, signup } from "@/data/customer";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function Login() {
   const [isLogin, setIsLogin] = useState(true);
-  const [showPass1, setShowPass1] = useState(false);
-  const [showPass2, setShowPass2] = useState(false);
+  const [showLoginPass, setShowLoginPass] = useState(false);
+  const [showRegPass1, setShowRegPass1] = useState(false);
+  const [showRegPass2, setShowRegPass2] = useState(false);
   const [countryCode, setCountryCode] = useState("+86");
+  const [isPending, startTransition] = useTransition();
 
-  // Form States
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [loginState, loginAction] = useActionState(login, null);
+  const [registerState, registerAction] = useActionState(signup, null);
 
-  const [loginState, loginAction, isLoginPending] = useActionState(login, null);
-  const [registerState, registerAction, isRegisterPending] = useActionState(signup, null);
+  const handleLoginSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    startTransition(() => {
+      loginAction(formData);
+    });
+  };
 
   const handleRegisterSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+
+    const password = formData.get("password") as string;
+    const confirmPassword = formData.get("confirmPassword") as string;
+
     if (password !== confirmPassword) {
       alert("Passwords do not match");
       return;
     }
-    const formData = new FormData(e.currentTarget);
-    formData.set("phone", `${countryCode}${phoneNumber}`);
-    
-    // We need to call the action with the formData
-    // Since useActionState gives us a dispatch function that takes the payload (FormData in this case)
-    // We can call it directly.
-    React.startTransition(() => {
+
+    formData.set("phone", `${countryCode}${formData.get("phone_number")}`);
+
+    startTransition(() => {
       registerAction(formData);
     });
   };
 
   return (
-    <section className="flat-spacing">
-      <div className="container">
-        <div
-          className="login-register-wrapper account-box-shadow"
-          style={{
-            maxWidth: "500px",
-            margin: "0 auto",
-            width: "100%",
-            padding: "40px",
-            backgroundColor: "#fff",
-            borderRadius: "12px",
-          }}
-        >
-          {/* Tab Header */}
-          <div
-            className="tabs-header"
-            style={{
-              display: "flex",
-              marginBottom: "30px",
-              borderBottom: "1px solid #eee",
-            }}
-          >
-            <button
-              className={`tab-btn ${isLogin ? "active" : ""}`}
-              onClick={() => setIsLogin(true)}
-              style={{
-                flex: 1,
-                padding: "15px",
-                background: "none",
-                border: "none",
-                borderBottom: isLogin ? "2px solid var(--black)" : "2px solid transparent",
-                fontWeight: isLogin ? "600" : "400",
-                fontSize: "18px",
-                color: isLogin ? "var(--black)" : "var(--text-2)",
-                cursor: "pointer",
-                transition: "all 0.3s",
-              }}
+    <section className="min-h-screen flex items-start justify-center bg-gray-50/50 pt-20 pb-12 px-4">
+      <div className="w-full max-w-md">
+        <Card className="shadow-xl border-0">
+          <CardHeader className="space-y-2 text-center pb-8">
+            <CardTitle className="text-3xl font-bold tracking-tight">
+              {isLogin ? "Welcome back" : "Create account"}
+            </CardTitle>
+            <CardDescription className="text-base">
+              {isLogin
+                ? "Enter your credentials to access your account"
+                : "Fill in the form to create your account"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <Tabs
+              value={isLogin ? "login" : "register"}
+              onValueChange={(value) => setIsLogin(value === "login")}
+              className="w-full"
             >
-              Login
-            </button>
-            <button
-              className={`tab-btn ${!isLogin ? "active" : ""}`}
-              onClick={() => setIsLogin(false)}
-              style={{
-                flex: 1,
-                padding: "15px",
-                background: "none",
-                border: "none",
-                borderBottom: !isLogin ? "2px solid var(--black)" : "2px solid transparent",
-                fontWeight: !isLogin ? "600" : "400",
-                fontSize: "18px",
-                color: !isLogin ? "var(--black)" : "var(--text-2)",
-                cursor: "pointer",
-                transition: "all 0.3s",
-              }}
-            >
-              Register
-            </button>
-          </div>
+              <TabsList className="grid w-full grid-cols-2 h-11 p-1 bg-gray-100/80">
+                <TabsTrigger
+                  value="login"
+                  className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm text-sm font-medium"
+                >
+                  Login
+                </TabsTrigger>
+                <TabsTrigger
+                  value="register"
+                  className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm text-sm font-medium"
+                >
+                  Register
+                </TabsTrigger>
+              </TabsList>
 
-          {/* Form Content */}
-          <div className="form-content">
-            {isLogin ? (
-              // Login Form
-              <form className="form-login" action={loginAction}>
-                <div className="list-ver" style={{ gap: "20px" }}>
-                  <fieldset>
-                    <input
+              {/* Login Form */}
+              <TabsContent value="login" className="mt-8">
+                <form onSubmit={handleLoginSubmit} className="space-y-5">
+                  <div className="space-y-2">
+                    <Label htmlFor="login-email" className="text-sm font-medium text-gray-700">
+                      Email
+                    </Label>
+                    <Input
+                      id="login-email"
                       name="email"
                       type="email"
-                      placeholder="Enter your email address *"
+                      placeholder="name@example.com"
                       required
-                      style={{ borderRadius: "8px", padding: "15px" }}
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      className="h-11 border-gray-200 focus-visible:ring-gray-900"
                     />
-                  </fieldset>
-                  <fieldset className="password-wrapper">
-                    <input
-                      name="password"
-                      className="password-field"
-                      type={showPass1 ? "text" : "password"}
-                      placeholder="Password *"
-                      required
-                      style={{ borderRadius: "8px", padding: "15px" }}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                    <span
-                      onClick={() => setShowPass1((pre) => !pre)}
-                      className={`toggle-pass ${
-                        showPass1 ? "icon-view" : "icon-show-password"
-                      } `}
-                      style={{ right: "15px" }}
-                    />
-                  </fieldset>
-                  <div className="check-bottom">
-                    <div className="checkbox-wrap">
-                      <input
-                        id="remember"
-                        type="checkbox"
-                        className="tf-check"
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="login-password" className="text-sm font-medium text-gray-700">
+                      Password
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        id="login-password"
+                        name="password"
+                        type={showLoginPass ? "text" : "password"}
+                        placeholder="Enter your password"
+                        required
+                        className="h-11 border-gray-200 pr-10 focus-visible:ring-gray-900"
                       />
-                      <label htmlFor="remember" className="h6">
-                        Keep me signed in
+                      <button
+                        type="button"
+                        onClick={() => setShowLoginPass(!showLoginPass)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                      >
+                        {showLoginPass ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="remember" className="border-gray-300" />
+                      <label
+                        htmlFor="remember"
+                        className="text-gray-600 cursor-pointer select-none"
+                      >
+                        Remember me
                       </label>
                     </div>
-                    <h6>
-                      <Link href="/reset-password" className="link">
-                        Forgot your password?
-                      </Link>
-                    </h6>
+                    <Link href="/reset-password" className="text-gray-900 hover:underline font-medium">
+                      Forgot password?
+                    </Link>
                   </div>
-                  {loginState?.error && (
-                    <div className="mt-2 text-danger">{loginState.error}</div>
-                  )}
-                </div>
 
-                <button
-                  id="btnLogin"
-                  type="submit"
-                  className="tf-btn animate-btn w-100"
-                  style={{ marginTop: "24px", borderRadius: "8px" }}
-                  disabled={isLoginPending}
-                >
-                  {isLoginPending ? "Loading..." : "Login"}
-                </button>
-              </form>
-            ) : (
-              // Register Form
-              <form className="form-register" onSubmit={handleRegisterSubmit}>
-                <div className="list-ver" style={{ gap: "20px" }}>
-                  <div style={{ display: "flex", gap: "20px" }}>
-                    <fieldset style={{ flex: 1 }}>
-                      <input
+                  {loginState?.error && (
+                    <div className="rounded-md bg-red-50 border border-red-200 p-3 text-sm text-red-800">
+                      {loginState.error}
+                    </div>
+                  )}
+
+                  <Button
+                    type="submit"
+                    className="w-full h-11 bg-gray-900 text-white hover:bg-gray-800 font-medium text-base"
+                    disabled={isPending}
+                  >
+                    {isPending ? "Loading..." : "Sign in"}
+                  </Button>
+                </form>
+              </TabsContent>
+
+              {/* Register Form */}
+              <TabsContent value="register" className="mt-8">
+                <form onSubmit={handleRegisterSubmit} className="space-y-5">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="first-name" className="text-sm font-medium text-gray-700">
+                        First Name
+                      </Label>
+                      <Input
+                        id="first-name"
                         name="first_name"
                         type="text"
-                        placeholder="First Name *"
+                        placeholder="John"
                         required
-                        style={{ borderRadius: "8px", padding: "15px" }}
-                        value={firstName}
-                        onChange={(e) => setFirstName(e.target.value)}
+                        className="h-11 border-gray-200 focus-visible:ring-gray-900"
                       />
-                    </fieldset>
-                    <fieldset style={{ flex: 1 }}>
-                      <input
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="last-name" className="text-sm font-medium text-gray-700">
+                        Last Name
+                      </Label>
+                      <Input
+                        id="last-name"
                         name="last_name"
                         type="text"
-                        placeholder="Last Name *"
+                        placeholder="Doe"
                         required
-                        style={{ borderRadius: "8px", padding: "15px" }}
-                        value={lastName}
-                        onChange={(e) => setLastName(e.target.value)}
+                        className="h-11 border-gray-200 focus-visible:ring-gray-900"
                       />
-                    </fieldset>
+                    </div>
                   </div>
-                  <fieldset>
-                    <input
+
+                  <div className="space-y-2">
+                    <Label htmlFor="register-email" className="text-sm font-medium text-gray-700">
+                      Email
+                    </Label>
+                    <Input
+                      id="register-email"
                       name="email"
                       type="email"
-                      placeholder="Enter your email address *"
+                      placeholder="name@example.com"
                       required
-                      style={{ borderRadius: "8px", padding: "15px" }}
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      className="h-11 border-gray-200 focus-visible:ring-gray-900"
                     />
-                  </fieldset>
-                  
-                  {/* Phone Number with Country Code */}
-                  <div className="phone-input-group" style={{ display: "flex", gap: "12px" }}>
-                    <CountryCodeSelect onSelect={setCountryCode} initialCode="+86" />
-                    <fieldset style={{ flex: 1 }}>
-                      <input
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="phone" className="text-sm font-medium text-gray-700">
+                      Phone Number
+                    </Label>
+                    <div className="flex gap-3">
+                      <CountryCodeSelect onSelect={setCountryCode} initialCode="+86" />
+                      <Input
+                        id="phone"
                         name="phone_number"
                         type="tel"
-                        placeholder="Phone number *"
+                        placeholder="1234567890"
                         required
-                        style={{ borderRadius: "8px", padding: "15px" }}
-                        value={phoneNumber}
-                        onChange={(e) => setPhoneNumber(e.target.value)}
+                        className="flex-1 h-11 border-gray-200 focus-visible:ring-gray-900"
                       />
-                    </fieldset>
+                    </div>
                   </div>
 
-                  <fieldset className="password-wrapper">
-                    <input
-                      name="password"
-                      className="password-field"
-                      type={showPass1 ? "text" : "password"}
-                      placeholder="Password *"
-                      required
-                      style={{ borderRadius: "8px", padding: "15px" }}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                    <span
-                      onClick={() => setShowPass1((pre) => !pre)}
-                      className={`toggle-pass ${
-                        showPass1 ? "icon-view" : "icon-show-password"
-                      } `}
-                      style={{ right: "15px" }}
-                    />
-                  </fieldset>
-                  <fieldset className="password-wrapper">
-                    <input
-                      className="password-field"
-                      type={showPass2 ? "text" : "password"}
-                      placeholder="Confirm Password *"
-                      required
-                      style={{ borderRadius: "8px", padding: "15px" }}
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                    />
-                    <span
-                      onClick={() => setShowPass2((pre) => !pre)}
-                      className={`toggle-pass ${
-                        showPass2 ? "icon-view" : "icon-show-password"
-                      } `}
-                      style={{ right: "15px" }}
-                    />
-                  </fieldset>
+                  <div className="space-y-2">
+                    <Label htmlFor="register-password" className="text-sm font-medium text-gray-700">
+                      Password
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        id="register-password"
+                        name="password"
+                        type={showRegPass1 ? "text" : "password"}
+                        placeholder="Enter your password"
+                        required
+                        className="h-11 border-gray-200 pr-10 focus-visible:ring-gray-900"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowRegPass1(!showRegPass1)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                      >
+                        {showRegPass1 ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="confirm-password" className="text-sm font-medium text-gray-700">
+                      Confirm Password
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        id="confirm-password"
+                        name="confirmPassword"
+                        type={showRegPass2 ? "text" : "password"}
+                        placeholder="Confirm your password"
+                        required
+                        className="h-11 border-gray-200 pr-10 focus-visible:ring-gray-900"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowRegPass2(!showRegPass2)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                      >
+                        {showRegPass2 ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  </div>
+
                   {registerState?.error && (
-                    <div className="mt-2 text-danger">{registerState.error}</div>
+                    <div className="rounded-md bg-red-50 border border-red-200 p-3 text-sm text-red-800">
+                      {registerState.error}
+                    </div>
                   )}
-                </div>
 
-                {/* <div className="check-bottom" style={{ marginTop: "20px" }}>
-                  <div className="checkbox-wrap">
-                    <input
-                      id="terms"
-                      type="checkbox"
-                      className="tf-check"
-                      required
-                    />
-                    <label htmlFor="terms" className="h6">
-                      I agree to the <a href="#" className="link">Terms of User</a>
-                    </label>
-                  </div>
-                </div> */}
-
-                <button
-                  id="btnRegister"
-                  type="submit"
-                  className="tf-btn animate-btn w-100"
-                  style={{ marginTop: "24px", borderRadius: "8px" }}
-                  disabled={isRegisterPending}
-                >
-                  {isRegisterPending ? "Loading..." : "Register"}
-                </button>
-              </form>
-            )}
-          </div>
-        </div>
+                  <Button
+                    type="submit"
+                    className="w-full h-11 bg-gray-900 text-white hover:bg-gray-800 font-medium text-base"
+                    disabled={isPending}
+                  >
+                    {isPending ? "Loading..." : "Create account"}
+                  </Button>
+                </form>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
       </div>
     </section>
   );

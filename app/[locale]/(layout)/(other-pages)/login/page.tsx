@@ -19,11 +19,11 @@ export default async function page() {
   }
   return (
     <>
-      <HomeTips />
-      <HomeHeader parentClass="tf-header header-fix" customer={customer} />
+
+
 
       <Login />
-      <HomeFooter />
+
     </>
   );
 }
