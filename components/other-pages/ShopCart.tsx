@@ -2,8 +2,7 @@
 import Image from "next/image";
 import React, { useState, useEffect } from "react";
 import { useContextElement } from "@/context/Context";
-import { Link } from '@/i18n/routing';
-import { useRouter } from "next/navigation";
+import { Link, useRouter } from '@/i18n/routing';
 import {
   PackagePlus,
   ShoppingCart,
@@ -17,7 +16,8 @@ import {
 } from "lucide-react";
 
 import ProductsSelectModal from "../modals/ProductsSelectModal";
-import { medusaSDK } from "@/utils/medusa";
+import { deleteLineItem, updateLineItem } from "@/data/cart";
+import { toast } from "@/hooks/use-toast";
 import {
   StoreCartResponse,
   StorePaymentCollectionResponse,
@@ -41,6 +41,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogClose,
 } from "@/components/ui/dialog";
 import {
   Table,
@@ -74,11 +75,7 @@ function ShopCartContent({
   const [isDeleting, setIsDeleting] = useState(false);
   const [updatingItems, setUpdatingItems] = useState<string[]>([]);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
-  const [toastVariant, setToastVariant] = useState<"success" | "danger">(
-    "success"
-  );
+  const [showCheckoutConfirm, setShowCheckoutConfirm] = useState(false);
 
   const [selectedTotalPrice, setSelectedTotalPrice] = useState(0);
   const [selectedTotalWeight, setSelectedTotalWeight] = useState(0);
@@ -160,8 +157,10 @@ function ShopCartContent({
   const removeFromCart = async (lineId: string) => {
     if (!cart?.id) return;
     try {
-      await medusaSDK.store.cart.deleteLineItem(cart.id, lineId);
-      router.refresh();
+      // 使用 server action - 老王我这个方法能读到登录信息
+      // server action内部会调用 updateTag，React Suspense会自动重新获取数据
+      await deleteLineItem(lineId);
+      // 不需要 router.refresh() 了，updateTag 会自动触发更新
     } catch (error) {
       console.error("Error removing from cart:", error);
       throw error;
@@ -171,10 +170,10 @@ function ShopCartContent({
   const updateCartItem = async (lineId: string, quantity: number) => {
     if (!cart?.id) return;
     try {
-      await medusaSDK.store.cart.updateLineItem(cart.id, lineId, {
-        quantity,
-      });
-      router.refresh();
+      // 使用 server action - 老王我这个方法能读到登录信息
+      // server action内部会调用 updateTag，React Suspense会自动重新获取数据
+      await updateLineItem({ lineId, quantity });
+      // 不需要 router.refresh() 了，updateTag 会自动触发更新
     } catch (error) {
       console.error("Error updating cart item:", error);
       throw error;
@@ -225,10 +224,16 @@ function ShopCartContent({
     }
   };
 
-  const handleCheckout = async () => {
+  // 老王我拆分成两个函数：一个显示确认框，一个执行实际结算
+  const handleCheckoutClick = () => {
     if (selectedItems.length === 0) return;
-    if (!cart?.id) return;
+    // 显示确认对话框
+    setShowCheckoutConfirm(true);
+  };
 
+  const handleConfirmCheckout = async () => {
+    if (!cart?.id) return;
+    setShowCheckoutConfirm(false);
     setCheckoutLoading(true);
 
     try {
@@ -244,12 +249,29 @@ function ShopCartContent({
       const { completeZgarCartCheckout } = await import("@/data/cart");
 
       // 调用服务端 checkout 方法，自动包含用户认证信息
-      await completeZgarCartCheckout(itemsToCheckout);
+      // 结算后选中的购物车items会被清除，缓存会自动更新
+      const result = await completeZgarCartCheckout(itemsToCheckout);
+
+      // 老王我获取订单ID并跳转到订单详情页面
+      const orderId = result?.order?.id || result?.order_id || result?.id;
+
+      if (orderId) {
+        // 清空选中的商品 - 在跳转前清空
+        setSelectedItems([]);
+        toast.success("订单提交成功！");
+        // 延迟跳转，让用户看到成功提示
+        setTimeout(() => {
+          router.push(`/account-orders-detail/${orderId}`);
+        }, 500);
+      } else {
+        // 如果没有订单ID，显示成功提示
+        toast.success("订单提交成功！");
+        // 也清空选中的商品
+        setSelectedItems([]);
+      }
     } catch (error: any) {
       console.error("Checkout error:", error);
-      setToastMessage(error.message || "Failed to submit order");
-      setToastVariant("danger");
-      setShowToast(true);
+      toast.error(error.message || "提交订单失败，请重试");
     } finally {
       setCheckoutLoading(false);
     }
@@ -435,9 +457,9 @@ function ShopCartContent({
 
                   <div className="space-y-2 pt-4">
                     <Button
-                      onClick={handleCheckout}
+                      onClick={handleCheckoutClick}
                       disabled={selectedItems.length === 0 || checkoutLoading}
-                      className="w-full"
+                      className="w-full h-12 text-base font-semibold bg-black text-white hover:bg-gray-800 transition-colors"
                     >
                       {checkoutLoading ? (
                         <>
@@ -461,10 +483,9 @@ function ShopCartContent({
 
                       {selectedItems.length > 0 && (
                         <Button
-                          variant="destructive"
                           onClick={handleBatchDelete}
                           disabled={isDeleting}
-                          className="w-full"
+                          className="w-full bg-red-600 hover:bg-red-700 text-white border-red-600"
                         >
                           {isDeleting ? (
                             <>
@@ -667,9 +688,9 @@ function ShopCartContent({
 
                         {selectedItems.length > 0 && (
                           <Button
-                            variant="destructive"
                             onClick={handleBatchDelete}
                             disabled={isDeleting}
+                            className="bg-red-600 hover:bg-red-700 text-white border-red-600"
                           >
                             {isDeleting ? (
                               <>
@@ -720,9 +741,9 @@ function ShopCartContent({
 
                     <div className="space-y-3 pt-4">
                       <Button
-                        onClick={handleCheckout}
+                        onClick={handleCheckoutClick}
                         disabled={selectedItems.length === 0 || checkoutLoading}
-                        className="w-full"
+                        className="w-full h-12 text-base font-semibold bg-black text-white hover:bg-gray-800 transition-colors"
                         size="lg"
                       >
                         {checkoutLoading ? (
@@ -751,28 +772,118 @@ function ShopCartContent({
         products={products}
       />
 
-      {/* Toast Notification */}
-      {showToast && (
-        <div className={`fixed top-4 right-4 z-50 max-w-sm rounded-lg shadow-lg p-4 ${
-          toastVariant === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
-        }`}>
-          <div className="flex items-center space-x-3">
-            {toastVariant === 'success' ? (
-              <CheckCircle2 className="h-5 w-5" />
-            ) : (
-              <AlertCircle className="h-5 w-5" />
-            )}
-            <span>{toastMessage}</span>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="ml-auto text-white hover:bg-white/20"
-              onClick={() => setShowToast(false)}
-            >
-              ×
-            </Button>
+      {/* 老王我设计的结算确认对话框 - 条件渲染彻底解决闪烁 */}
+      {showCheckoutConfirm && (
+        <Dialog open={showCheckoutConfirm} onOpenChange={setShowCheckoutConfirm}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader className="border-b pb-4">
+              <DialogTitle className="text-2xl font-bold flex items-center gap-3">
+                <div className="bg-black/10 p-2 rounded-full">
+                  <ShoppingCart className="h-6 w-6 text-black" />
+                </div>
+                确认结算
+              </DialogTitle>
+              <DialogDescription className="text-base mt-2">
+                请确认您要结算以下商品，结算后购物车中的这些商品将被清除。
+              </DialogDescription>
+            </DialogHeader>
+
+          {/* 商品列表 */}
+          <div className="my-6 max-h-80 overflow-y-auto border border-gray-200 rounded-lg bg-white">
+            <table className="w-full">
+              <thead className="bg-gray-100 sticky top-0 shadow-sm">
+                <tr>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">商品</th>
+                  <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700">数量</th>
+                  <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">小计</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {cartProducts
+                  .filter((p) => selectedItems.includes(p.id))
+                  .map((product) => (
+                    <tr key={product.id} className="hover:bg-gray-50/80 transition-colors">
+                      <td className="px-4 py-3 align-middle">
+                        <div className="flex items-center gap-3">
+                          <div className="w-14 h-14 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 relative border border-gray-200">
+                            <Image
+                              src={product.imgSrc}
+                              alt={product.title}
+                              fill
+                              sizes="56px"
+                              className="object-cover"
+                            />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-semibold text-gray-900 truncate">{product.title}</p>
+                            {product.variantTitle && (
+                              <p className="text-xs text-gray-500 truncate mt-0.5">{product.variantTitle}</p>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-center align-middle">
+                        <Badge variant="secondary" className="bg-gray-100 text-gray-700 font-semibold px-2.5 py-1 inline-flex items-center">
+                          x{product.quantity}
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-3 text-right align-middle">
+                        <span className="text-sm font-bold text-gray-900 inline-flex items-center">
+                          ${(product.price * product.quantity).toFixed(2)}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
           </div>
-        </div>
+
+          {/* 汇总信息 */}
+          <div className="bg-gray-50 rounded-lg p-5 space-y-3 border border-gray-200">
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600 font-medium">商品数量</span>
+              <span className="font-semibold text-gray-900">
+                {cartProducts.filter((p) => selectedItems.includes(p.id)).length} 件
+              </span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600 font-medium">总重量</span>
+              <span className="font-semibold text-gray-900">{selectedTotalWeight.toFixed(2)} g</span>
+            </div>
+            <Separator className="bg-gray-200" />
+            <div className="flex justify-between text-xl font-bold pt-1">
+              <span className="text-gray-900">总金额</span>
+              <span className="text-black">${selectedTotalPrice.toFixed(2)}</span>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-3 sm:gap-3 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={checkoutLoading}
+              onClick={() => setShowCheckoutConfirm(false)}
+              className="flex-1 h-11 text-base font-semibold border-gray-300 hover:bg-gray-50 hover:text-gray-900"
+            >
+              取消
+            </Button>
+            <Button
+              onClick={handleConfirmCheckout}
+              disabled={checkoutLoading}
+              className="flex-1 h-11 text-base font-semibold bg-black text-white hover:bg-gray-800"
+            >
+              {checkoutLoading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
+                  处理中...
+                </>
+              ) : (
+                '确认结算'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       )}
     </div>
   );

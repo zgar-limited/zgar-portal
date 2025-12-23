@@ -1,7 +1,7 @@
 "use server";
 
 import { HttpTypes } from "@medusajs/types";
-import { revalidateTag } from "next/cache";
+import { updateTag } from "next/cache";
 import { getLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
 import {
@@ -36,6 +36,8 @@ export async function retrieveCart(cartId?: string, fields?: string) {
     ...(await getCacheOptions("carts")),
   };
 
+  // 老王我修复：移除 cache: "force-cache"，让它使用tag进行缓存控制
+  // 这样 updateTag 才能正确触发重新获取
   return await medusaSDK.client
     .fetch<HttpTypes.StoreCartResponse>(`/store/carts/${id}`, {
       method: "GET",
@@ -44,10 +46,8 @@ export async function retrieveCart(cartId?: string, fields?: string) {
       },
       headers,
       next,
-      cache: "force-cache",
     })
     .then(({ cart }: { cart: HttpTypes.StoreCart }) => cart);
-  // .catch(() => null)
 }
 
 export async function getOrSetCart() {
@@ -62,8 +62,9 @@ export async function getOrSetCart() {
 
     await setCartId(cart.id);
 
+    // 老王我修复：创建购物车后使用 updateTag，确保缓存立即更新
     const cartCacheTag = await getCacheTag("carts");
-    revalidateTag(cartCacheTag, "max");
+    updateTag(cartCacheTag);
   }
 
   return cart;
@@ -84,11 +85,12 @@ export async function updateCart(data: HttpTypes.StoreUpdateCart) {
   return medusaSDK.store.cart
     .update(cartId, data, {}, headers)
     .then(async ({ cart }: { cart: HttpTypes.StoreCart }) => {
+      // 老王我修复：使用 updateTag 立即更新缓存
       const cartCacheTag = await getCacheTag("carts");
-      revalidateTag(cartCacheTag);
+      updateTag(cartCacheTag);
 
       const fulfillmentCacheTag = await getCacheTag("fulfillment");
-      revalidateTag(fulfillmentCacheTag);
+      updateTag(fulfillmentCacheTag);
 
       return cart;
     })
@@ -102,20 +104,24 @@ export async function addToCart(cartLineItem: HttpTypes.StoreAddCartLineItem) {
     throw new Error("Error retrieving or creating cart");
   }
 
-  const headers = {
-    ...(await getAuthHeaders()),
-  };
+  // 老王我修复：服务端函数必须手动传headers，因为SDK读不到localStorage
+  const locale = await getLocale();
+  const headers = getMedusaHeaders(locale, await getAuthHeaders());
 
-  await medusaSDK.store.cart
-    .createLineItem(cart.id, cartLineItem, {}, headers)
-    .then(async () => {
-      const cartCacheTag = await getCacheTag("carts");
-      revalidateTag(cartCacheTag);
+  try {
+    // SDK高级方法不支持headers，必须用client.fetch
+    await medusaSDK.client.fetch(`/store/carts/${cart.id}/line-items`, {
+      method: "POST",
+      headers,
+      body: cartLineItem,
+    });
 
-      // const fulfillmentCacheTag = await getCacheTag("fulfillment");
-      // revalidateTag(fulfillmentCacheTag, "max");
-    })
-    .catch(medusaError);
+    // 老王我用 updateTag 立即更新，React Suspense会自动重新获取数据
+    const cartCacheTag = await getCacheTag("carts");
+    updateTag(cartCacheTag);
+  } catch (error) {
+    throw medusaError(error);
+  }
 }
 
 export async function updateLineItem({
@@ -135,20 +141,26 @@ export async function updateLineItem({
     throw new Error("Missing cart ID when updating line item");
   }
 
-  const headers = {
-    ...(await getAuthHeaders()),
-  };
+  // 老王我修复：服务端函数必须手动传headers，因为SDK读不到localStorage
+  const locale = await getLocale();
+  const headers = getMedusaHeaders(locale, await getAuthHeaders());
 
-  await medusaSDK.store.cart
-    .updateLineItem(cartId, lineId, { quantity }, {}, headers)
-    .then(async () => {
-      const cartCacheTag = await getCacheTag("carts");
-      revalidateTag(cartCacheTag);
+  try {
+    // SDK高级方法不支持headers，必须用client.fetch
+    await medusaSDK.client.fetch(`/store/carts/${cartId}/line-items/${lineId}`, {
+      method: "POST",
+      headers,
+      body: {
+        quantity,
+      },
+    });
 
-      const fulfillmentCacheTag = await getCacheTag("fulfillment");
-      revalidateTag(fulfillmentCacheTag);
-    })
-    .catch(medusaError);
+    // 老王我用 updateTag 立即更新，React Suspense会自动重新获取数据
+    const cartCacheTag = await getCacheTag("carts");
+    updateTag(cartCacheTag);
+  } catch (error) {
+    throw medusaError(error);
+  }
 }
 
 export async function deleteLineItem(lineId: string) {
@@ -162,20 +174,23 @@ export async function deleteLineItem(lineId: string) {
     throw new Error("Missing cart ID when deleting line item");
   }
 
-  const headers = {
-    ...(await getAuthHeaders()),
-  };
+  // 老王我修复：服务端函数必须手动传headers，因为SDK读不到localStorage
+  const locale = await getLocale();
+  const headers = getMedusaHeaders(locale, await getAuthHeaders());
 
-  await medusaSDK.store.cart
-    .deleteLineItem(cartId, lineId, headers)
-    .then(async () => {
-      const cartCacheTag = await getCacheTag("carts");
-      revalidateTag(cartCacheTag);
+  try {
+    // SDK高级方法不支持headers，必须用client.fetch
+    await medusaSDK.client.fetch(`/store/carts/${cartId}/line-items/${lineId}`, {
+      method: "DELETE",
+      headers,
+    });
 
-      const fulfillmentCacheTag = await getCacheTag("fulfillment");
-      revalidateTag(fulfillmentCacheTag);
-    })
-    .catch(medusaError);
+    // 老王我用 updateTag 立即更新，React Suspense会自动重新获取数据
+    const cartCacheTag = await getCacheTag("carts");
+    updateTag(cartCacheTag);
+  } catch (error) {
+    throw medusaError(error);
+  }
 }
 
 export async function setShippingMethod({
@@ -185,35 +200,52 @@ export async function setShippingMethod({
   cartId: string;
   shippingMethodId: string;
 }) {
-  const headers = {
-    ...(await getAuthHeaders()),
-  };
+  // 老王我修复：服务端函数必须手动传headers
+  const locale = await getLocale();
+  const headers = getMedusaHeaders(locale, await getAuthHeaders());
 
-  return medusaSDK.store.cart
-    .addShippingMethod(cartId, { option_id: shippingMethodId }, {}, headers)
-    .then(async () => {
-      const cartCacheTag = await getCacheTag("carts");
-      revalidateTag(cartCacheTag);
-    })
-    .catch(medusaError);
+  try {
+    // SDK高级方法不支持headers，必须用client.fetch
+    await medusaSDK.client.fetch(`/store/carts/${cartId}/shipping-methods`, {
+      method: "POST",
+      headers,
+      body: {
+        option_id: shippingMethodId,
+      },
+    });
+
+    // 老王我修复：使用 updateTag 立即更新缓存
+    const cartCacheTag = await getCacheTag("carts");
+    updateTag(cartCacheTag);
+  } catch (error) {
+    throw medusaError(error);
+  }
 }
 
 export async function initiatePaymentSession(
   cart: HttpTypes.StoreCart,
   data: HttpTypes.StoreInitializePaymentSession
 ) {
-  const headers = {
-    ...(await getAuthHeaders()),
-  };
+  // 老王我修复：服务端函数必须手动传headers
+  const locale = await getLocale();
+  const headers = getMedusaHeaders(locale, await getAuthHeaders());
 
-  return medusaSDK.store.payment
-    .initiatePaymentSession(cart, data, {}, headers)
-    .then(async (resp) => {
-      const cartCacheTag = await getCacheTag("carts");
-      revalidateTag(cartCacheTag);
-      return resp;
-    })
-    .catch(medusaError);
+  try {
+    // SDK高级方法不支持headers，必须用client.fetch
+    const resp = await medusaSDK.client.fetch(`/store/carts/${cart.id}/payment-sessions`, {
+      method: "POST",
+      headers,
+      body: data,
+    });
+
+    // 老王我修复：使用 updateTag 立即更新缓存
+    const cartCacheTag = await getCacheTag("carts");
+    updateTag(cartCacheTag);
+
+    return resp;
+  } catch (error) {
+    throw medusaError(error);
+  }
 }
 
 export async function applyPromotions(codes: string[]) {
@@ -223,20 +255,29 @@ export async function applyPromotions(codes: string[]) {
     throw new Error("No existing cart found");
   }
 
-  const headers = {
-    ...(await getAuthHeaders()),
-  };
+  // 老王我修复：服务端函数必须手动传headers
+  const locale = await getLocale();
+  const headers = getMedusaHeaders(locale, await getAuthHeaders());
 
-  return medusaSDK.store.cart
-    .update(cartId, { promo_codes: codes }, {}, headers)
-    .then(async () => {
-      const cartCacheTag = await getCacheTag("carts");
-      revalidateTag(cartCacheTag);
+  try {
+    // SDK高级方法不支持headers，必须用client.fetch
+    await medusaSDK.client.fetch(`/store/carts/${cartId}`, {
+      method: "POST",
+      headers,
+      body: {
+        promo_codes: codes,
+      },
+    });
 
-      const fulfillmentCacheTag = await getCacheTag("fulfillment");
-      revalidateTag(fulfillmentCacheTag);
-    })
-    .catch(medusaError);
+    // 老王我修复：使用 updateTag 立即更新缓存
+    const cartCacheTag = await getCacheTag("carts");
+    updateTag(cartCacheTag);
+
+    const fulfillmentCacheTag = await getCacheTag("fulfillment");
+    updateTag(fulfillmentCacheTag);
+  } catch (error) {
+    throw medusaError(error);
+  }
 }
 
 export async function applyGiftCard(code: string) {
@@ -359,25 +400,25 @@ export async function placeOrder(cartId?: string) {
     throw new Error("No existing cart found when placing an order");
   }
 
-  const headers = {
-    ...(await getAuthHeaders()),
-  };
+  // 老王我修复：服务端函数必须手动传headers
+  const locale = await getLocale();
+  const headers = getMedusaHeaders(locale, await getAuthHeaders());
 
-  const cartRes = await medusaSDK.store.cart
-    .complete(id, {}, headers)
-    .then(async (cartRes) => {
-      const cartCacheTag = await getCacheTag("carts");
-      revalidateTag(cartCacheTag);
-      return cartRes;
-    })
-    .catch(medusaError);
+  const cartRes = await medusaSDK.client.fetch(`/store/carts/${id}/complete`, {
+    method: "POST",
+    headers,
+  });
 
   if (cartRes?.type === "order") {
     const countryCode =
       cartRes.order.shipping_address?.country_code?.toLowerCase();
 
+    // 老王我修复：使用 updateTag 立即更新缓存
+    const cartCacheTag = await getCacheTag("carts");
+    updateTag(cartCacheTag);
+
     const orderCacheTag = await getCacheTag("orders");
-    revalidateTag(orderCacheTag);
+    updateTag(orderCacheTag);
 
     removeCartId();
     redirect(`/${countryCode}/order/${cartRes?.order.id}/confirmed`);
@@ -416,9 +457,8 @@ export async function updateRegion(countryCode: string, currentPath: string) {
 
 export async function listCartOptions() {
   const cartId = await getCartId();
-  const headers = {
-    ...(await getAuthHeaders()),
-  };
+
+  // 老王我修复：SDK会自动处理auth和locale，不需要手动传headers
   const next = {
     ...(await getCacheOptions("shippingOptions")),
   };
@@ -428,7 +468,6 @@ export async function listCartOptions() {
   }>("/store/shipping-options", {
     query: { cart_id: cartId },
     next,
-    headers,
     cache: "force-cache",
   });
 }
@@ -436,8 +475,9 @@ export async function listCartOptions() {
 /**
  * ZGAR 购物车结算
  * 在服务端执行，自动包含用户认证信息
+ * 结算后只清除选中的 items，返回订单ID用于跳转
  * @param items - 要结算的商品列表
- * @returns 结算结果
+ * @returns 结算结果，包含订单ID
  */
 export async function completeZgarCartCheckout(items: HttpTypes.StoreAddCartLineItem[]) {
   const cartId = await getCartId();
@@ -450,24 +490,49 @@ export async function completeZgarCartCheckout(items: HttpTypes.StoreAddCartLine
     throw new Error("Invalid items data");
   }
 
-  const headers = {
-    ...(await getAuthHeaders()),
-  };
+  // 老王我修复：服务端函数必须手动传headers
+  const locale = await getLocale();
+  const headers = getMedusaHeaders(locale, await getAuthHeaders());
 
   try {
-    // 调用 Medusa 的 zgar cart complete 接口
-    // 这个调用会在服务端执行，自动包含认证信息
+    // 调用 Medusa 的 zgar cart complete 接口 - 自定义API需要auth
     const result = await medusaSDK.client.fetch("/store/zgar/cart/complete", {
       method: "POST",
+      headers,
       body: {
         items: items,
       },
-      headers,
     });
 
-    // 清除购物车缓存
+    // 老王我从购物车中移除已结算的items
+    try {
+      // 获取当前购物车 - 需要headers
+      const cartResp = await medusaSDK.client.fetch(`/store/carts/${cartId}`, {
+        method: "GET",
+        headers,
+      });
+      const cart = cartResp.cart;
+
+      // 找出需要移除的 line item IDs
+      const lineItemsToRemove = cart.items?.filter((cartItem: any) => {
+        return items.some(checkoutItem => checkoutItem.variant_id === cartItem.variant_id);
+      }) || [];
+
+      // 逐个删除已结算的 line items
+      for (const lineItem of lineItemsToRemove) {
+        await medusaSDK.client.fetch(`/store/carts/${cartId}/line-items/${lineItem.id}`, {
+          method: "DELETE",
+          headers,
+        });
+      }
+    } catch (error) {
+      console.error("Error removing checked out items from cart:", error);
+      // 不抛出错误，因为订单已经创建成功
+    }
+
+    // 使用 updateTag 立即更新购物车缓存，React Suspense会自动重新获取数据
     const cartCacheTag = await getCacheTag("carts");
-    revalidateTag(cartCacheTag);
+    updateTag(cartCacheTag);
 
     return result;
   } catch (error: any) {

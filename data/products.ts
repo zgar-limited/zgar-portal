@@ -31,9 +31,9 @@ export const fetchProducts = async ({
 
   const headers = getMedusaHeaders(locale, await getAuthHeaders());
 
-  const next = {
-    ...(await getCacheOptions("products")),
-  };
+  // 老王我禁用了缓存tag，因为产品列表应该实时更新
+  // 登录前后看到的必须是最新数据
+  const next = {};
 
   return medusaSDK.client
     .fetch<{ products: HttpTypes.StoreProduct[]; count: number }>(
@@ -50,7 +50,7 @@ export const fetchProducts = async ({
         },
         headers,
         next,
-        cache: "no-cache",
+        cache: "no-store",
       }
     )
     .then(({ products, count }) => {
@@ -71,9 +71,8 @@ export const fetchProduct = async (id: string) => {
   const locale = await getLocale();
   const headers = getMedusaHeaders(locale, await getAuthHeaders());
 
-  const next = {
-    ...(await getCacheOptions(`product-${id}`)),
-  };
+  // 单个产品也禁用缓存，确保实时数据
+  const next = {};
 
   return medusaSDK.client
     .fetch<HttpTypes.StoreProductResponse>(`/store/products/${id}`, {
@@ -84,7 +83,7 @@ export const fetchProduct = async (id: string) => {
       },
       headers,
       next,
-      cache: "no-cache",
+      cache: "no-store",
     })
     .then((res) => res.product);
 };

@@ -24,7 +24,7 @@ export const retrieveOrders = async (
 
   try {
     const response = await medusaSDK.store.order.list({
-      fields: "+items.title,+items.thumbnail,+items.quantity,+items.unit_price,+items.variant_title",
+      fields: "+items.title,+items.thumbnail,+items.quantity,+items.unit_price,+items.variant_title,+items.total,+items.subtotal,+items.tax_total",
       limit,
       offset,
     }, headers);
@@ -50,7 +50,7 @@ export const retrieveOrderById = async (
     const response = await medusaSDK.store.order.retrieve(
       id,
       {
-        fields: "*items,*shipping_address,*billing_address",
+        fields: "*items,+items.unit_price,+items.total,+items.subtotal,+items.tax_total,*shipping_address,*billing_address",
       },
       headers
     );

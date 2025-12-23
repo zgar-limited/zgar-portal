@@ -253,12 +253,14 @@ export default function MyAccount({ customer, orders = [] }: MyAccountProps) {
                     <div key={order.id} className="p-4 hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-black/10 dark:bg-white/10 rounded-xl overflow-hidden flex-shrink-0">
+                          {/* 老王我修复图片容器 - 添加relative定位，正确控制图片尺寸 */}
+                          <div className="w-12 h-12 bg-black/10 dark:bg-white/10 rounded-xl overflow-hidden relative flex-shrink-0">
                             <Image
                               src={order.items?.[0]?.thumbnail || "https://placehold.co/100"}
                               alt="商品"
                               fill
-                              className="object-cover w-full h-full"
+                              className="object-cover"
+                              sizes="48px"
                             />
                           </div>
                           <div>
@@ -279,7 +281,7 @@ export default function MyAccount({ customer, orders = [] }: MyAccountProps) {
                               {order.items.length > 1 && ` 等${order.items.length}件商品`}
                             </p>
                             <p className="text-sm font-medium text-black dark:text-white">
-                              ¥{(order.total / 100).toFixed(2)}
+                              ¥{order.total?.toFixed(2) || "0.00"}
                             </p>
                           </div>
                         </div>

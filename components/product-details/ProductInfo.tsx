@@ -4,7 +4,7 @@ import { StoreProduct, StoreProductVariant } from "@medusajs/types";
 import { ShoppingCart, Check, Loader2 } from "lucide-react";
 import { useRouter } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
-import { useToast } from "@/components/common/ToastProvider";
+import { toast } from "@/hooks/use-toast";
 import QuantitySelect from "../common/QuantitySelect";
 import { addToCart } from "@/data/cart";
 import { useCustomer } from "@/hooks/useCustomer";
@@ -17,7 +17,6 @@ interface ProductInfoProps {
 
 export default function ProductInfo({ product, selectedVariant, onVariantSelect }: ProductInfoProps) {
   const router = useRouter();
-  const { showToast } = useToast();
   const t = useTranslations("Product");
   const { isLoggedIn } = useCustomer();
 
@@ -88,13 +87,13 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
 
   const handleAddToCart = async () => {
     if (!currentVariant) {
-      showToast(t("pleaseSelectOptions"), "warning");
+      toast.warning(t("pleaseSelectOptions"));
       return;
     }
 
     // 检查登录状态 - 老王我这个逻辑必须先检查
     if (!isLoggedIn) {
-      showToast(t("loginToAddToCart"), "warning");
+      toast.warning(t("loginToAddToCart"));
       // 保存当前页面URL，登录后返回
       const currentPath = window.location.pathname + window.location.search;
       sessionStorage.setItem("redirectAfterLogin", currentPath);
@@ -110,13 +109,13 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
         metadata: currentVariant.metadata,
       });
       setIsAdded(true);
-      showToast(t("addedSuccess"), "success");
+      toast.success(t("addedSuccess"));
 
       // Reset added state
       setTimeout(() => setIsAdded(false), 2000);
     } catch (e) {
       console.error(e);
-      showToast(t("addFailed"), "danger");
+      toast.error(t("addFailed"));
     } finally {
       setIsAdding(false);
     }

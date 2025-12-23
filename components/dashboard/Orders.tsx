@@ -1,5 +1,5 @@
 "use client";
-import { Link } from '@/i18n/routing';
+import { Link, useRouter } from '@/i18n/routing';
 import Image from "next/image";
 import React, { useState } from "react";
 import Sidebar from "./Sidebar";
@@ -23,6 +23,7 @@ interface OrdersProps {
 }
 
 export default function Orders({ customer, orders, currentPage, totalPages }: OrdersProps) {
+  const router = useRouter();
   const [showVoucherModal, setShowVoucherModal] = useState(false);
   const [showPackingModal, setShowPackingModal] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
@@ -48,15 +49,13 @@ export default function Orders({ customer, orders, currentPage, totalPages }: Or
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
-      const url = new URL(window.location.href);
-      url.searchParams.set('page', page.toString());
-      window.location.href = url.toString();
+      router.push(`/account-orders?page=${page}`);
     }
   };
 
-  // 处理订单操作
+  // 处理订单操作 - 老王我用router.push代替硬编码跳转
   const handleViewDetails = (orderId: string) => {
-    window.location.href = `/account-orders-detail/${orderId}`;
+    router.push(`/account-orders-detail/${orderId}`);
   };
 
   const handleUploadVoucher = (order: HttpTypes.StoreOrder) => {
@@ -193,7 +192,7 @@ export default function Orders({ customer, orders, currentPage, totalPages }: Or
                               </TableCell>
                               <TableCell className="text-right font-mono text-sm">
                                 {order.currency_code?.toUpperCase()}{" "}
-                                {(order.total / 100).toFixed(2)}
+                                {order.total?.toFixed(2) || "0.00"}
                               </TableCell>
                               <TableCell className="text-center">
                                 <Badge

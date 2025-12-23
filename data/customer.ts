@@ -148,7 +148,8 @@ export async function signout() {
   const cartCacheTag = await getCacheTag("carts");
   updateTag(cartCacheTag);
 
-  redirect(`/login`);
+  // 老王我移除了redirect，让客户端处理跳转以保持locale
+  return { success: true };
 }
 
 export async function resetPassword(

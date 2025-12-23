@@ -50,7 +50,7 @@ export default function OrderCard({
               {order.status}
             </Badge>
             <span className="text-sm text-muted-foreground">
-              {order.currency_code?.toUpperCase()} {(order.total / 100).toFixed(2)}
+              {order.currency_code?.toUpperCase()} {order.total?.toFixed(2) || "0.00"}
             </span>
           </div>
         </div>

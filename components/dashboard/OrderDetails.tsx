@@ -1,19 +1,21 @@
 "use client";
+
 import React from "react";
 import Image from "next/image";
 import { Link } from '@/i18n/routing';
+import { useRouter } from "next/navigation";
 import Sidebar from "./Sidebar";
-import { useQuery } from "@tanstack/react-query";
-import { medusaSDK } from "@/utils/medusa";
-import { useParams } from "next/navigation";
-import { Spinner, Badge, Button, Card, Row, Col } from "react-bootstrap";
+import { HttpTypes } from "@medusajs/types";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import {
   ChevronLeft,
   Package,
   Calendar,
   CreditCard,
   MapPin,
-  Clock,
   CheckCircle,
   AlertCircle,
   FileText,
@@ -37,494 +39,409 @@ const AuditStatus = {
   REJECTED: "rejected",
 };
 
-export default function OrderDetails() {
-  const params = useParams();
-  const orderId = params.id as string;
+interface OrderDetailsProps {
+  order: HttpTypes.StoreOrder;
+}
+
+export default function OrderDetails({ order }: OrderDetailsProps) {
+  const router = useRouter();
   const [showVoucherModal, setShowVoucherModal] = useState(false);
   const [showPackingModal, setShowPackingModal] = useState(false);
-
-  const {
-    data: order,
-    isLoading,
-    refetch,
-  } = useQuery({
-    queryKey: ["order", orderId],
-    queryFn: async () => {
-      if (!orderId) return null;
-      const res = await medusaSDK.store.order.retrieve(orderId, {
-        fields:
-          "+items.title,+items.thumbnail,+items.quantity,+items.unit_price,+items.variant_title,+items.product_id,+items.variant.weight,+items.variant.options,+payment_voucher_uploaded_at,+payment_voucher_url,+packing_requirement_uploaded_at,+packing_requirement_url,zgar_order.*,+shipping_address.*,+billing_address.*",
-      });
-      return res.order;
-    },
-    enabled: !!orderId,
-  });
-
-  if (isLoading) {
-    return (
-      <div
-        className="py-5 d-flex justify-content-center align-items-center"
-        style={{ minHeight: "60vh" }}
-      >
-        <Spinner animation="border" variant="secondary" />
-      </div>
-    );
-  }
-
-  if (!order) {
-    return (
-      <div className="container py-5 text-center">
-        <h3>Order not found</h3>
-        <Link href="/account-orders" className="mt-3 btn btn-primary">
-          Back to Orders
-        </Link>
-      </div>
-    );
-  }
+  const orderId = order.id;
 
   const zgarOrder = (order as any).zgar_order || {};
 
+  const getOrderStatusVariant = (status: string) => {
+    switch (status) {
+      case OrderStatus.COMPLETED:
+        return "default";
+      case OrderStatus.PENDING:
+        return "secondary";
+      case OrderStatus.CANCELED:
+        return "destructive";
+      default:
+        return "outline";
+    }
+  };
+
+  const getAuditStatusVariant = (status: string) => {
+    switch (status) {
+      case AuditStatus.APPROVED:
+        return "default";
+      case AuditStatus.PENDING:
+        return "secondary";
+      case AuditStatus.REJECTED:
+        return "destructive";
+      default:
+        return "outline";
+    }
+  };
+
   return (
-    <section className="flat-spacing">
-      <div className="container">
-        <div className="row">
-          <div className="col-xl-3 d-none d-xl-block">
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* 侧边栏 */}
+          <div className="lg:col-span-1">
             <Sidebar />
           </div>
-          <div className="col-xl-9">
-            <div className="my-account-content">
-              {/* Header */}
-              <div className="mb-4 d-flex justify-content-between align-items-center">
-                <div className="gap-3 d-flex align-items-center">
-                  <Link
-                    href="/account-orders"
-                    className="text-muted hover-primary"
-                  >
-                    <ChevronLeft size={24} />
-                  </Link>
-                  <h2 className="mb-0 account-title type-semibold">
-                    Order #{order.display_id}
-                  </h2>
-                </div>
-                <div className="gap-2 d-flex">
-                  <Badge
-                    bg={
-                      order.status === OrderStatus.COMPLETED
-                        ? "success"
-                        : order.status === OrderStatus.PENDING
-                        ? "warning"
-                        : "danger"
-                    }
-                    className="px-3 py-2 fw-normal rounded-pill"
-                  >
-                    {order.status.toUpperCase()}
-                  </Badge>
-                  {zgarOrder.audit_status && (
-                    <Badge
-                      bg={
-                        zgarOrder.audit_status === AuditStatus.APPROVED
-                          ? "success"
-                          : zgarOrder.audit_status === AuditStatus.PENDING
-                          ? "info"
-                          : "danger"
-                      }
-                      className="px-3 py-2 fw-normal rounded-pill"
-                    >
-                      Audit: {zgarOrder.audit_status.toUpperCase()}
-                    </Badge>
-                  )}
-                </div>
-              </div>
 
-              <Row className="g-4">
-                {/* Main Content Area */}
-                <Col lg={8}>
-                  {/* Order Items */}
-                  <Card className="mb-4 border-0 shadow-xs rounded-4">
-                    <Card.Header className="py-3 bg-white border-bottom-0">
-                      <h5 className="mb-0 fw-bold">Order Items</h5>
-                    </Card.Header>
-                    <div className="table-responsive">
-                      <table className="table mb-0 align-middle">
-                        <thead className="bg-light">
+          {/* 主内容区 */}
+          <div className="lg:col-span-3 space-y-6">
+            {/* Header */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Link
+                      href="/account-orders"
+                      className="text-gray-400 hover:text-gray-900 dark:hover:text-gray-50 transition-colors"
+                    >
+                      <ChevronLeft size={24} />
+                    </Link>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                      Order #{order.display_id}
+                    </h2>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant={getOrderStatusVariant(order.status)} className="px-3 py-1">
+                      {order.status.toUpperCase()}
+                    </Badge>
+                    {zgarOrder.audit_status && (
+                      <Badge variant={getAuditStatusVariant(zgarOrder.audit_status)} className="px-3 py-1">
+                        Audit: {zgarOrder.audit_status.toUpperCase()}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Main Content Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Left Column - Order Items */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Order Items Card */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg font-bold">Order Items</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                           <tr>
-                            <th className="py-3 ps-4 border-bottom-0">
+                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-400">
                               Product
                             </th>
-                            <th className="py-3 text-end border-bottom-0">
+                            <th className="px-4 py-3 text-right text-sm font-medium text-gray-600 dark:text-gray-400">
                               Price
                             </th>
-                            <th className="py-3 text-center border-bottom-0">
+                            <th className="px-4 py-3 text-center text-sm font-medium text-gray-600 dark:text-gray-400">
                               Qty
                             </th>
-                            <th className="py-3 pe-4 text-end border-bottom-0">
+                            <th className="px-4 py-3 text-right text-sm font-medium text-gray-600 dark:text-gray-400">
                               Total
                             </th>
                           </tr>
                         </thead>
                         <tbody>
                           {order.items.map((item) => (
-                            <tr key={item.id}>
-                              <td className="ps-4">
-                                <div className="gap-3 d-flex align-items-center">
-                                  <div
-                                    className="shrink-0 overflow-hidden border rounded-sm position-relative"
-                                    style={{ width: "60px", height: "60px" }}
-                                  >
+                            <tr key={item.id} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                              <td className="px-4 py-4">
+                                <div className="flex items-center gap-3">
+                                  {/* 老王我修复图片容器 - 添加relative定位 */}
+                                  <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden relative flex-shrink-0 border border-gray-200 dark:border-gray-700">
                                     <Image
-                                      src={
-                                        item.thumbnail ||
-                                        "https://placehold.co/100"
-                                      }
+                                      src={item.thumbnail || "https://placehold.co/100"}
                                       alt={item.title}
                                       fill
-                                      className="object-fit-cover"
+                                      className="object-cover"
+                                      sizes="64px"
                                     />
                                   </div>
-                                  <div>
-                                    <h6
-                                      className="mb-1 text-truncate"
-                                      style={{ maxWidth: "200px" }}
+                                  <div className="flex-1 min-w-0">
+                                    <Link
+                                      href={`/product-detail/${item.variant?.product_id || ""}`}
+                                      className="text-gray-900 dark:text-white hover:text-gray-600 dark:hover:text-gray-300 font-medium text-sm truncate block mb-1"
                                     >
-                                      <Link
-                                        href={`/product-detail/${
-                                          item.variant?.product_id || ""
-                                        }`}
-                                        className="text-dark text-decoration-none"
-                                      >
-                                        {item.title}
-                                      </Link>
-                                    </h6>
-                                    <div className="text-muted small">
+                                      {item.title}
+                                    </Link>
+                                    <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                                       {item.variant_title && (
-                                        <span className="me-2">
-                                          {item.variant_title}
-                                        </span>
+                                        <span>{item.variant_title}</span>
                                       )}
-                                      <span className="text-secondary">
-                                        {(item.variant as any)?.weight}g / unit
-                                      </span>
+                                      {(item.variant as any)?.weight && (
+                                        <>
+                                          <span className="text-gray-300">•</span>
+                                          <span>{(item.variant as any)?.weight}g / unit</span>
+                                        </>
+                                      )}
                                     </div>
                                   </div>
                                 </div>
                               </td>
-                              <td className="text-end">
-                                {order.currency_code.toUpperCase()}{" "}
-                                {(item.unit_price / 100).toFixed(2)}
+                              <td className="px-4 py-4 text-right text-sm text-gray-900 dark:text-white font-medium">
+                                {order.currency_code.toUpperCase()} {item.unit_price?.toFixed(2) || "0.00"}
                               </td>
-                              <td className="text-center">{item.quantity}</td>
-                              <td className="pe-4 text-end fw-semibold">
-                                {order.currency_code.toUpperCase()}{" "}
-                                {(
-                                  (item.unit_price * item.quantity) /
-                                  100
-                                ).toFixed(2)}
+                              <td className="px-4 py-4 text-center text-sm text-gray-900 dark:text-white">
+                                {item.quantity}
+                              </td>
+                              <td className="px-4 py-4 text-right text-sm text-gray-900 dark:text-white font-semibold">
+                                {order.currency_code.toUpperCase()}
+                                {/* 老王我直接用接口返回的total字段 */}
+                                {item.total?.toFixed(2) || "0.00"}
                               </td>
                             </tr>
                           ))}
                         </tbody>
-                        <tfoot className="border-top">
+                        <tfoot className="bg-gray-50 dark:bg-gray-800/50 border-t-2 border-gray-200 dark:border-gray-700">
                           <tr>
-                            <td
-                              colSpan={3}
-                              className="pt-3 pb-1 border-0 text-end text-muted"
-                            >
+                            <td colSpan={3} className="px-4 py-3 text-right text-sm text-gray-600 dark:text-gray-400">
                               Subtotal
                             </td>
-                            <td className="pt-3 pb-1 border-0 text-end pe-4 fw-medium">
-                              {order.currency_code.toUpperCase()}{" "}
-                              {(order.subtotal / 100).toFixed(2)}
+                            <td className="px-4 py-3 text-right text-sm font-medium text-gray-900 dark:text-white">
+                              {order.currency_code.toUpperCase()} {order.subtotal?.toFixed(2) || "0.00"}
                             </td>
                           </tr>
                           <tr>
-                            <td
-                              colSpan={3}
-                              className="py-1 border-0 text-end text-muted"
-                            >
+                            <td colSpan={3} className="px-4 py-2 text-right text-sm text-gray-600 dark:text-gray-400">
                               Shipping
                             </td>
-                            <td className="py-1 border-0 text-end pe-4 fw-medium">
-                              {order.currency_code.toUpperCase()}{" "}
-                              {(order.shipping_total / 100).toFixed(2)}
+                            <td className="px-4 py-2 text-right text-sm font-medium text-gray-900 dark:text-white">
+                              {order.currency_code.toUpperCase()} {order.shipping_total?.toFixed(2) || "0.00"}
                             </td>
                           </tr>
-
                           <tr>
-                            <td
-                              colSpan={3}
-                              className="pt-1 pb-3 border-0 text-end fw-bold fs-5"
-                            >
+                            <td colSpan={3} className="px-4 py-3 text-right text-base font-bold text-gray-900 dark:text-white">
                               Total
                             </td>
-                            <td className="pt-1 pb-3 border-0 text-end pe-4 fw-bold fs-5 text-primary">
-                              {order.currency_code.toUpperCase()}{" "}
-                              {(order.total / 100).toFixed(2)}
+                            <td className="px-4 py-3 text-right text-base font-bold text-gray-900 dark:text-white">
+                              {order.currency_code.toUpperCase()} {order.total?.toFixed(2) || "0.00"}
                             </td>
                           </tr>
                         </tfoot>
                       </table>
                     </div>
-                  </Card>
+                  </CardContent>
+                </Card>
 
-                  {/* Payment & Packing */}
-                  <Row className="g-4">
-                    <Col md={6}>
-                      <Card className="border-0 shadow-xs h-100 rounded-4">
-                        <Card.Body>
-                          <div className="mb-3 d-flex justify-content-between align-items-start">
-                            <div className="gap-2 d-flex align-items-center">
-                              <CreditCard size={20} className="text-primary" />
-                              <h6 className="mb-0 fw-bold">Payment Voucher</h6>
-                            </div>
-                            {zgarOrder.payment_voucher_uploaded_at ? (
-                              <CheckCircle size={18} className="text-success" />
-                            ) : (
-                              <AlertCircle size={18} className="text-warning" />
-                            )}
-                          </div>
+                {/* Payment & Packing Cards */}
+                <div className="space-y-6">
+                  {/* Payment Voucher Card */}
+                  <Card>
+                    <CardContent className="p-8">
+                      <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center gap-3">
+                          <CreditCard size={22} className="text-gray-700 dark:text-gray-300" />
+                          <h3 className="text-lg font-bold text-gray-900 dark:text-white whitespace-nowrap">Payment Voucher</h3>
+                        </div>
+                        {zgarOrder.payment_voucher_uploaded_at ? (
+                          <CheckCircle size={20} className="text-green-600 dark:text-green-400" />
+                        ) : (
+                          <AlertCircle size={20} className="text-yellow-600 dark:text-yellow-400" />
+                        )}
+                      </div>
 
-                          {zgarOrder.payment_voucher_uploaded_at ? (
-                            <div className="mb-3">
-                              <p className="mb-2 small text-muted">
-                                Uploaded:{" "}
-                                {new Date(
-                                  zgarOrder.payment_voucher_uploaded_at
-                                ).toLocaleString()}
-                              </p>
-                              <div className="flex-wrap gap-2 d-flex">
-                                {zgarOrder.payment_voucher_url
-                                  ?.split(",")
-                                  .map((url: string, idx: number) => (
-                                    <a
-                                      key={idx}
-                                      href={url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="gap-2 border btn btn-sm btn-outline-light text-dark d-flex align-items-center"
-                                    >
-                                      <FileText size={14} /> Voucher {idx + 1}
-                                    </a>
-                                  ))}
-                              </div>
-                            </div>
-                          ) : (
-                            <p className="mb-3 text-muted small fst-italic">
-                              No payment voucher uploaded yet.
-                            </p>
-                          )}
-
-                          <Button
-                            variant="outline-primary"
-                            size="sm"
-                            className="gap-2 w-100 d-flex align-items-center justify-content-center"
-                            onClick={() => setShowVoucherModal(true)}
-                          >
-                            <Upload size={14} />
-                            {zgarOrder.payment_voucher_uploaded_at
-                              ? "Upload New Voucher"
-                              : "Upload Voucher"}
-                          </Button>
-                        </Card.Body>
-                      </Card>
-                    </Col>
-
-                    <Col md={6}>
-                      <Card className="border-0 shadow-xs h-100 rounded-4">
-                        <Card.Body>
-                          <div className="mb-3 d-flex justify-content-between align-items-start">
-                            <div className="gap-2 d-flex align-items-center">
-                              <Package size={20} className="text-info" />
-                              <h6 className="mb-0 fw-bold">
-                                Packing Requirements
-                              </h6>
-                            </div>
-                            {zgarOrder.packing_requirement_uploaded_at ? (
-                              <CheckCircle size={18} className="text-success" />
-                            ) : (
-                              <AlertCircle
-                                size={18}
-                                className="text-secondary"
-                              />
-                            )}
-                          </div>
-
-                          {zgarOrder.packing_requirement_uploaded_at ? (
-                            <div className="mb-3">
-                              <p className="mb-2 small text-muted">
-                                Uploaded:{" "}
-                                {new Date(
-                                  zgarOrder.packing_requirement_uploaded_at
-                                ).toLocaleString()}
-                              </p>
-                              <div className="flex-wrap gap-2 d-flex">
-                                {zgarOrder.packing_requirement_url
-                                  ?.split(",")
-                                  .map((url: string, idx: number) => (
-                                    <a
-                                      key={idx}
-                                      href={url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="gap-2 border btn btn-sm btn-outline-light text-dark d-flex align-items-center"
-                                    >
-                                      <FileText size={14} /> Requirement{" "}
-                                      {idx + 1}
-                                    </a>
-                                  ))}
-                              </div>
-                            </div>
-                          ) : (
-                            <p className="mb-3 text-muted small fst-italic">
-                              No packing requirements provided.
-                            </p>
-                          )}
-
-                          <Button
-                            variant="outline-secondary"
-                            size="sm"
-                            className="gap-2 w-100 d-flex align-items-center justify-content-center"
-                            onClick={() => setShowPackingModal(true)}
-                          >
-                            <Upload size={14} />
-                            {zgarOrder.packing_requirement_uploaded_at
-                              ? "Update Requirements"
-                              : "Add Requirements"}
-                          </Button>
-                        </Card.Body>
-                      </Card>
-                    </Col>
-                  </Row>
-                </Col>
-
-                {/* Sidebar Info */}
-                <Col lg={4}>
-                  <div className="gap-3 d-flex flex-column">
-                    {/* Order Summary */}
-                    <Card className="border-0 shadow-xs rounded-4">
-                      <Card.Body>
-                        <h6 className="mb-3 fw-bold">Order Summary</h6>
-                        <div className="gap-3 d-flex flex-column">
-                          <div className="gap-3 d-flex align-items-center">
-                            <div className="p-2 bg-light rounded-circle">
-                              <Calendar size={18} className="text-muted" />
-                            </div>
-                            <div>
-                              <div className="small text-muted">Order Date</div>
-                              <div className="fw-medium">
-                                {new Date(order.created_at).toLocaleDateString(
-                                  "en-US",
-                                  {
-                                    year: "numeric",
-                                    month: "short",
-                                    day: "numeric",
-                                  }
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="gap-3 d-flex align-items-center">
-                            <div className="p-2 bg-light rounded-circle">
-                              <CreditCard size={18} className="text-muted" />
-                            </div>
-                            <div>
-                              <div className="small text-muted">Payment</div>
-                              <div className="fw-medium text-capitalize">
-                                {order.payment_status}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="gap-3 d-flex align-items-center">
-                            <div className="p-2 bg-light rounded-circle">
-                              <Package size={18} className="text-muted" />
-                            </div>
-                            <div>
-                              <div className="small text-muted">
-                                Fulfillment
-                              </div>
-                              <div className="fw-medium text-capitalize">
-                                {order.fulfillment_status}
-                              </div>
-                            </div>
+                      {zgarOrder.payment_voucher_uploaded_at ? (
+                        <div className="mb-6">
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                            Uploaded: {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleString()}
+                          </p>
+                          <div className="flex flex-wrap gap-3">
+                            {zgarOrder.payment_voucher_url?.split(",").filter(Boolean).map((url: string, idx: number) => (
+                              <a
+                                key={idx}
+                                href={url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-900 dark:text-white"
+                              >
+                                <FileText size={15} />
+                                Voucher {idx + 1}
+                              </a>
+                            ))}
                           </div>
                         </div>
-                      </Card.Body>
-                    </Card>
+                      ) : (
+                        <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 italic">
+                          No payment voucher uploaded yet.
+                        </p>
+                      )}
 
-                    {/* Shipping Address */}
-                    <Card className="border-0 shadow-xs rounded-4">
-                      <Card.Body>
-                        <h6 className="gap-2 mb-3 fw-bold d-flex align-items-center">
-                          <MapPin size={18} /> Shipping Address
-                        </h6>
-                        <address className="mb-0 fst-normal text-muted small">
-                          <strong className="mb-1 text-dark d-block">
-                            {order.shipping_address?.first_name}{" "}
-                            {order.shipping_address?.last_name}
-                          </strong>
-                          {order.shipping_address?.company && (
-                            <span className="mb-1 d-block">
-                              {order.shipping_address.company}
-                            </span>
-                          )}
-                          <span className="d-block">
-                            {order.shipping_address?.address_1}
-                          </span>
-                          {order.shipping_address?.address_2 && (
-                            <span className="d-block">
-                              {order.shipping_address.address_2}
-                            </span>
-                          )}
-                          <span className="d-block">
-                            {order.shipping_address?.city},{" "}
-                            {order.shipping_address?.province}{" "}
-                            {order.shipping_address?.postal_code}
-                          </span>
-                          <span className="mb-2 d-block">
-                            {order.shipping_address?.country_code?.toUpperCase()}
-                          </span>
-                          {order.shipping_address?.phone && (
-                            <span className="d-block text-dark">
-                              Tel: {order.shipping_address.phone}
-                            </span>
-                          )}
-                        </address>
-                      </Card.Body>
-                    </Card>
-                  </div>
-                </Col>
-              </Row>
+                      <Button
+                        variant="outline"
+                        className="w-full h-12 text-base font-semibold"
+                        onClick={() => setShowVoucherModal(true)}
+                      >
+                        <Upload size={18} className="mr-2" />
+                        {zgarOrder.payment_voucher_uploaded_at ? "Upload New Voucher" : "Upload Voucher"}
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  {/* Packing Requirements Card */}
+                  <Card>
+                    <CardContent className="p-8">
+                      <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center gap-3">
+                          <Package size={22} className="text-blue-600 dark:text-blue-400" />
+                          <h3 className="text-lg font-bold text-gray-900 dark:text-white whitespace-nowrap">Packing Requirements</h3>
+                        </div>
+                        {zgarOrder.packing_requirement_uploaded_at ? (
+                          <CheckCircle size={20} className="text-green-600 dark:text-green-400" />
+                        ) : (
+                          <AlertCircle size={20} className="text-gray-400 dark:text-gray-600" />
+                        )}
+                      </div>
+
+                      {zgarOrder.packing_requirement_uploaded_at ? (
+                        <div className="mb-6">
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                            Uploaded: {new Date(zgarOrder.packing_requirement_uploaded_at).toLocaleString()}
+                          </p>
+                          <div className="flex flex-wrap gap-3">
+                            {zgarOrder.packing_requirement_url?.split(",").filter(Boolean).map((url: string, idx: number) => (
+                              <a
+                                key={idx}
+                                href={url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-900 dark:text-white"
+                              >
+                                <FileText size={15} />
+                                Requirement {idx + 1}
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 italic">
+                          No packing requirements provided.
+                        </p>
+                      )}
+
+                      <Button
+                        variant="outline"
+                        className="w-full h-12 text-base font-semibold"
+                        onClick={() => setShowPackingModal(true)}
+                      >
+                        <Upload size={18} className="mr-2" />
+                        {zgarOrder.packing_requirement_uploaded_at ? "Update Requirements" : "Add Requirements"}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+
+              {/* Right Column - Order Summary & Shipping */}
+              <div className="lg:col-span-1 space-y-6">
+                {/* Order Summary Card */}
+                <Card>
+                  <CardContent className="p-6">
+                    <h3 className="font-bold text-gray-900 dark:text-white mb-4">Order Summary</h3>
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center flex-shrink-0">
+                          <Calendar size={18} className="text-gray-600 dark:text-gray-400" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-xs text-gray-600 dark:text-gray-400 mb-0.5">Order Date</div>
+                          <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                            {new Date(order.created_at).toLocaleDateString("en-US", {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                            })}
+                          </div>
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center flex-shrink-0">
+                          <CreditCard size={18} className="text-gray-600 dark:text-gray-400" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-xs text-gray-600 dark:text-gray-400 mb-0.5">Payment</div>
+                          <div className="text-sm font-medium text-gray-900 dark:text-white capitalize truncate">
+                            {order.payment_status}
+                          </div>
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center flex-shrink-0">
+                          <Package size={18} className="text-gray-600 dark:text-gray-400" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-xs text-gray-600 dark:text-gray-400 mb-0.5">Fulfillment</div>
+                          <div className="text-sm font-medium text-gray-900 dark:text-white capitalize truncate">
+                            {order.fulfillment_status}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Shipping Address Card */}
+                <Card>
+                  <CardContent className="p-6">
+                    <h3 className="flex items-center gap-2 font-bold text-gray-900 dark:text-white mb-4">
+                      <MapPin size={18} />
+                      Shipping Address
+                    </h3>
+                    <address className="not-italic text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                      <div className="font-medium text-gray-900 dark:text-white">
+                        {order.shipping_address?.first_name} {order.shipping_address?.last_name}
+                      </div>
+                      {order.shipping_address?.company && (
+                        <div>{order.shipping_address.company}</div>
+                      )}
+                      <div>{order.shipping_address?.address_1}</div>
+                      {order.shipping_address?.address_2 && (
+                        <div>{order.shipping_address.address_2}</div>
+                      )}
+                      <div>
+                        {order.shipping_address?.city}, {order.shipping_address?.province} {order.shipping_address?.postal_code}
+                      </div>
+                      <div>{order.shipping_address?.country_code?.toUpperCase()}</div>
+                      {order.shipping_address?.phone && (
+                        <div className="text-gray-900 dark:text-white">Tel: {order.shipping_address.phone}</div>
+                      )}
+                    </address>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
+      {/* Modals */}
       <UploadVoucherModal
         show={showVoucherModal}
         onHide={() => {
           setShowVoucherModal(false);
-          refetch();
+          router.refresh();
         }}
         orderId={orderId}
-        initialVouchers={
-          zgarOrder.payment_voucher_url
-            ? zgarOrder.payment_voucher_url.split(",").filter(Boolean)
-            : []
-        }
+        initialVouchers={zgarOrder.payment_voucher_url ? zgarOrder.payment_voucher_url.split(",").filter(Boolean) : []}
       />
 
       <UploadPackingModal
         show={showPackingModal}
         onHide={() => {
           setShowPackingModal(false);
-          refetch();
+          router.refresh();
         }}
         orderId={orderId}
-        initialFiles={
-          zgarOrder.packing_requirement_url
-            ? zgarOrder.packing_requirement_url.split(",").filter(Boolean)
-            : []
-        }
+        initialFiles={zgarOrder.packing_requirement_url ? zgarOrder.packing_requirement_url.split(",").filter(Boolean) : []}
       />
-    </section>
+    </div>
   );
 }

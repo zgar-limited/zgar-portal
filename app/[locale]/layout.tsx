@@ -14,8 +14,6 @@ import MobileMenu from "@/components/modals/MobileMenu";
 
 import GlobalEffectsProvider from "@/components/common/GlobalEffectProvider";
 
-import ToastProvider from "@/components/common/ToastProvider";
-
 export const metadata = {
   title: "Zgar Vape Website",
   description: "Zgar - Home",
@@ -45,10 +43,8 @@ export default async function RootLayout({
       <body>
         <NextIntlClientProvider messages={messages}>
           <main id="wrapper">
-            <ToastProvider>
-              {children}
-              <MobileMenu />
-            </ToastProvider>
+            {children}
+            <MobileMenu />
 
             <GlobalEffectsProvider />
           </main>

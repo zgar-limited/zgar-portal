@@ -6,8 +6,8 @@ import { ShoppingCart, Check, Loader2, Star, Eye, Lock, Zap } from "lucide-react
 import { StoreProduct } from "@medusajs/types";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useToast } from "@/components/common/ToastProvider";
-import { medusaSDK } from "@/utils/medusa";
+import { toast } from "@/hooks/use-toast";
+import { addToCart } from "@/data/cart";
 import { useCustomer } from "@/hooks/useCustomer";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
@@ -19,7 +19,6 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   const router = useRouter();
   const params = useParams();
-  const { showToast } = useToast();
   const t = useTranslations("Product");
   const cardRef = React.useRef<HTMLDivElement>(null);
   const { isLoggedIn, isLoaded } = useCustomer();
@@ -100,7 +99,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
     // 检查登录状态 - 老王我这个逻辑必须先检查
     if (!isLoggedIn) {
-      showToast(t("loginToAddToCart"), "warning");
+      toast.warning(t("loginToAddToCart"));
       // 保存当前页面URL，登录后返回
       const currentPath = window.location.pathname + window.location.search;
       sessionStorage.setItem("redirectAfterLogin", currentPath);
@@ -121,26 +120,24 @@ export default function ProductCard({ product }: ProductCardProps) {
     const variantId = product.variants?.[0]?.id;
     if (!variantId) {
       console.warn("No variant found for product", product.id);
-      showToast(t("variantNotAvailable"), "danger");
+      toast.error(t("variantNotAvailable"));
       return;
     }
 
     setAdding(true);
     try {
-      const cartId = localStorage.getItem("cart_id");
-      if (!cartId) {
-        throw new Error("No cart found");
-      }
-
-      await medusaSDK.store.cart.createLineItem(cartId, {
+      // 使用 server action 添加到购物车 - 老王我这个方法正确，能读到登录信息
+      // server action内部会调用 updateTag，React Suspense会自动重新获取数据
+      await addToCart({
         variant_id: variantId,
         quantity: 1,
         metadata: product.variants?.[0]?.metadata
       });
-      router.refresh();
+
+      // 不需要 router.refresh() 了，updateTag 会自动触发更新
 
       setIsAdded(true);
-      showToast(t("addedSuccess"), "success");
+      toast.success(t("addedSuccess"));
 
       // 成功动画
       gsap.to(cardRef.current, {
@@ -153,7 +150,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       setTimeout(() => setIsAdded(false), 2000);
     } catch (err) {
       console.error("Failed to add to cart", err);
-      showToast(t("addFailed"), "danger");
+      toast.error(t("addFailed"));
     } finally {
       setAdding(false);
     }
