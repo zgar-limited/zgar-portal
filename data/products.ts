@@ -32,7 +32,7 @@ export const fetchProducts = async ({
   const headers = getMedusaHeaders(locale, await getAuthHeaders());
 
   const next = {
-    ...(await getCacheOptions("products1")),
+    ...(await getCacheOptions("products")),
   };
 
   return medusaSDK.client

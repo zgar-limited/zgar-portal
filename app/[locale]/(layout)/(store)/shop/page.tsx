@@ -15,7 +15,7 @@ export default async function page({
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
   const { response } = await fetchProducts({
-    countryCode: "us",
+    // countryCode: "us",
     // queryParams: {
     //   limit: 12,
     // },

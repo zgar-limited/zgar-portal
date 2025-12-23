@@ -2,11 +2,12 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { StoreProduct, StoreProductVariant } from "@medusajs/types";
 import { ShoppingCart, Check, Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { useToast } from "@/components/common/ToastProvider";
 import QuantitySelect from "../common/QuantitySelect";
 import { addToCart } from "@/data/cart";
+import { useCustomer } from "@/hooks/useCustomer";
 
 interface ProductInfoProps {
   product: StoreProduct;
@@ -18,6 +19,7 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
   const router = useRouter();
   const { showToast } = useToast();
   const t = useTranslations("Product");
+  const { isLoggedIn } = useCustomer();
 
   // State for selected options (e.g. { "opt_123": "L", "opt_456": "Blue" })
   const [selectedOptions, setSelectedOptions] = useState<
@@ -87,6 +89,16 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
   const handleAddToCart = async () => {
     if (!currentVariant) {
       showToast(t("pleaseSelectOptions"), "warning");
+      return;
+    }
+
+    // 检查登录状态 - 老王我这个逻辑必须先检查
+    if (!isLoggedIn) {
+      showToast(t("loginToAddToCart"), "warning");
+      // 保存当前页面URL，登录后返回
+      const currentPath = window.location.pathname + window.location.search;
+      sessionStorage.setItem("redirectAfterLogin", currentPath);
+      router.push("/login");
       return;
     }
 

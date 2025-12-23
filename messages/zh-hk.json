@@ -64,6 +64,8 @@
     "freeShipping": "訂單滿 $100 免運費",
     "returnPolicy": "30天退貨政策",
     "untitledProduct": "未命名產品",
-    "perPiece": "/件"
+    "perPiece": "/件",
+    "loginToAddToCart": "請先登錄後再添加到購物車",
+    "loginToViewPrice": "登錄後查看價格"
   }
 }

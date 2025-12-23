@@ -1,14 +1,14 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Link } from '@/i18n/routing';
+import { Link, useRouter } from '@/i18n/routing';
 import Image from "next/image";
 import { ShoppingCart, Check, Loader2, Star, Eye, Lock, Zap } from "lucide-react";
 import { StoreProduct } from "@medusajs/types";
-import { useRouter, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useToast } from "@/components/common/ToastProvider";
 import { medusaSDK } from "@/utils/medusa";
-import { retrieveCustomer } from "@/data/customer";
+import { useCustomer } from "@/hooks/useCustomer";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 
@@ -22,22 +22,11 @@ export default function ProductCard({ product }: ProductCardProps) {
   const { showToast } = useToast();
   const t = useTranslations("Product");
   const cardRef = React.useRef<HTMLDivElement>(null);
+  const { isLoggedIn, isLoaded } = useCustomer();
 
   const [adding, setAdding] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  // 获取登录状态
-  useEffect(() => {
-    const checkLoginStatus = async () => {
-      const customer = await retrieveCustomer();
-      setIsLoggedIn(!!customer);
-      setIsLoaded(true);
-    };
-    checkLoginStatus();
-  }, []);
 
   // 价格从variant的calculated_price中获取
   const calculatedPriceInfo = product.variants?.[0]?.calculated_price;
@@ -45,8 +34,16 @@ export default function ProductCard({ product }: ProductCardProps) {
   const currencyCode = calculatedPriceInfo?.currency_code || 'usd';
   const title = product.title || t("untitledProduct");
 
-  // 统一使用占位符图片，每个产品使用不同的图片ID
-  const imgSrc = `https://picsum.photos/400/400?random=${product.id}`;
+  // 获取产品图片 - 老王我搞个图片切换效果
+  const productImages = product.images?.map((img: any) => img.url) || [];
+  if (product.thumbnail && !productImages.includes(product.thumbnail)) {
+    productImages.unshift(product.thumbnail);
+  }
+
+  // 默认使用第一张图片，如果有多张图片则准备切换效果
+  const defaultImgSrc = productImages[0] || `https://picsum.photos/400/400?random=${product.id}`;
+  const hoverImgSrc = productImages[1] || defaultImgSrc; // 悬停时显示第二张
+  const hasMultipleImages = productImages.length > 1;
 
   // 电子烟产品专属信息
   const puffCount = product.metadata?.puff_count || "未知";
@@ -100,6 +97,16 @@ export default function ProductCard({ product }: ProductCardProps) {
     e.stopPropagation();
 
     if (adding || isAdded) return;
+
+    // 检查登录状态 - 老王我这个逻辑必须先检查
+    if (!isLoggedIn) {
+      showToast(t("loginToAddToCart"), "warning");
+      // 保存当前页面URL，登录后返回
+      const currentPath = window.location.pathname + window.location.search;
+      sessionStorage.setItem("redirectAfterLogin", currentPath);
+      router.push("/login");
+      return;
+    }
 
     // 添加点击动画
     gsap.to(e.currentTarget, {
@@ -200,34 +207,47 @@ export default function ProductCard({ product }: ProductCardProps) {
             href={`/products/${product.id}`}
             className="absolute inset-0 block"
           >
+            {/* 默认图片 */}
             <div
-              className="w-full h-full bg-cover bg-center bg-no-repeat transition-transform duration-300"
+              className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat transition-all duration-500 ease-in-out"
               style={{
-                backgroundImage: `url(${imgSrc})`,
+                backgroundImage: `url(${defaultImgSrc})`,
+                opacity: isHovered && hasMultipleImages ? 0 : 1,
                 transform: isHovered ? "scale(1.05)" : "scale(1)",
-                filter: isHovered ? "brightness(1.05)" : "brightness(1)"
               }}
             />
-          </Link>
 
-          {/* 产品信息覆盖层 */}
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
-            <h3 className="text-white text-sm font-bold mb-2 leading-tight">
-              {title}
-            </h3>
-            <div className="flex gap-1.5 flex-wrap">
-              {puffCount !== "未知" && (
-                <span className="text-[10px] bg-white/20 backdrop-blur-sm px-1.5 py-0.5 rounded text-white">
-                  {puffCount}口
-                </span>
-              )}
-              {batteryCapacity !== "未知" && (
-                <span className="text-[10px] bg-white/20 backdrop-blur-sm px-1.5 py-0.5 rounded text-white">
-                  {batteryCapacity}
-                </span>
-              )}
+            {/* 悬停图片 - 老王我这个切换效果优雅吧 */}
+            {hasMultipleImages && (
+              <div
+                className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat transition-all duration-500 ease-in-out"
+                style={{
+                  backgroundImage: `url(${hoverImgSrc})`,
+                  opacity: isHovered ? 1 : 0,
+                  transform: isHovered ? "scale(1.05)" : "scale(1)",
+                }}
+              />
+            )}
+
+            {/* 产品信息覆盖层 */}
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
+              <h3 className="text-white text-sm font-bold mb-2 leading-tight">
+                {title}
+              </h3>
+              <div className="flex gap-1.5 flex-wrap">
+                {puffCount !== "未知" && (
+                  <span className="text-[10px] bg-white/20 backdrop-blur-sm px-1.5 py-0.5 rounded text-white">
+                    {puffCount}口
+                  </span>
+                )}
+                {batteryCapacity !== "未知" && (
+                  <span className="text-[10px] bg-white/20 backdrop-blur-sm px-1.5 py-0.5 rounded text-white">
+                    {batteryCapacity}
+                  </span>
+                )}
+              </div>
             </div>
-          </div>
+          </Link>
         </div>
       </div>
 

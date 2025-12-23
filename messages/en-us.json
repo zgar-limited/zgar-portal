@@ -64,6 +64,8 @@
     "freeShipping": "Free shipping on orders over $100",
     "returnPolicy": "30-day return policy",
     "untitledProduct": "Untitled Product",
-    "perPiece": "/pcs"
+    "perPiece": "/pcs",
+    "loginToAddToCart": "Please login to add items to cart",
+    "loginToViewPrice": "Login to view price"
   }
 }
