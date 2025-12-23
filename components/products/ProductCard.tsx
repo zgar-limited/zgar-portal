@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ShoppingCart, Check, Loader2, Star, Eye, Lock, Zap } from "lucide-react";
 import { StoreProduct } from "@medusajs/types";
 import { useRouter, useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useToast } from "@/components/common/ToastProvider";
 import { medusaSDK } from "@/utils/medusa";
 import { retrieveCustomer } from "@/data/customer";
@@ -19,6 +20,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   const router = useRouter();
   const params = useParams();
   const { showToast } = useToast();
+  const t = useTranslations("Product");
   const cardRef = React.useRef<HTMLDivElement>(null);
 
   const [adding, setAdding] = useState(false);
@@ -41,7 +43,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   const calculatedPriceInfo = product.variants?.[0]?.calculated_price;
   const price = calculatedPriceInfo?.original_amount || 0;
   const currencyCode = calculatedPriceInfo?.currency_code || 'usd';
-  const title = product.title || "Untitled Product";
+  const title = product.title || t("untitledProduct");
 
   // 统一使用占位符图片，每个产品使用不同的图片ID
   const imgSrc = `https://picsum.photos/400/400?random=${product.id}`;
@@ -112,7 +114,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     const variantId = product.variants?.[0]?.id;
     if (!variantId) {
       console.warn("No variant found for product", product.id);
-      showToast("Product variant not available", "danger");
+      showToast(t("variantNotAvailable"), "danger");
       return;
     }
 
@@ -131,7 +133,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       router.refresh();
 
       setIsAdded(true);
-      showToast("Added to cart successfully", "success");
+      showToast(t("addedSuccess"), "success");
 
       // 成功动画
       gsap.to(cardRef.current, {
@@ -144,7 +146,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       setTimeout(() => setIsAdded(false), 2000);
     } catch (err) {
       console.error("Failed to add to cart", err);
-      showToast("Failed to add to cart. Please try again.", "danger");
+      showToast(t("addFailed"), "danger");
     } finally {
       setAdding(false);
     }

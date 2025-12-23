@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { Link } from '@/i18n/routing';
-import { User } from "lucide-react";
+import { User, LogOut } from "lucide-react";
 import { StoreCustomer } from "@medusajs/types";
 import { signout } from "@/data/customer";
 import { useTranslations } from "next-intl";
@@ -12,49 +12,37 @@ export default function UserIcon({ customer }: { customer: StoreCustomer }) {
 
   return (
     <div
-      className="position-relative d-flex align-items-center"
+      className="relative flex items-center"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <Link
         href={customer ? "/account-page" : "/login"}
-        className="p-0 link text-dark"
+        className="p-0 link text-gray-900 hover:text-gray-600 transition-colors"
       >
-        <User />
+        <User className="h-6 w-6" />
       </Link>
 
       {/* Dropdown Menu */}
       {isHovered && (
-        <div
-          className="py-2 bg-white border shadow-lg position-absolute end-0 rounded-3 dropdown-menu-custom"
-          style={{ width: "200px", zIndex: 1000, top: "25px" }}
-        >
-          {/* Arrow/Triangle */}
-          <div
-            className="bg-white position-absolute border-top border-start"
-            style={{
-              width: "12px",
-              height: "12px",
-              top: "-7px",
-              right: "10px",
-              transform: "rotate(45deg)",
-            }}
-          ></div>
+        <div className="absolute right-0 top-8 w-40 py-1.5 bg-white border border-gray-100 rounded-xl shadow-xl z-50">
+          {/* Arrow */}
+          <div className="absolute -top-2 right-3 w-3 h-3 bg-white border-t border-l border-gray-100 transform rotate-45" />
 
           {customer ? (
             <>
               <Link
                 href="/account-page"
-                className="gap-2 px-3 py-2 dropdown-item d-flex align-items-center hover-bg-light text-dark text-decoration-none small"
+                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
               >
-                <User size={16} />
+                <User size={16} className="text-gray-500" />
                 <span>{t("myAccount")}</span>
               </Link>
               <button
                 onClick={signout}
-                className="gap-2 px-3 py-2 bg-transparent border-0 dropdown-item d-flex align-items-center hover-bg-light text-dark text-decoration-none small w-100 text-start"
+                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors w-full text-left bg-transparent border-0"
               >
-                <User size={16} />
+                <LogOut size={16} className="text-gray-500" />
                 <span>{t("logout")}</span>
               </button>
             </>
@@ -62,38 +50,23 @@ export default function UserIcon({ customer }: { customer: StoreCustomer }) {
             <>
               <Link
                 href="/login"
-                className="gap-2 px-3 py-2 dropdown-item d-flex align-items-center hover-bg-light text-dark text-decoration-none small"
+                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
               >
-                <User size={16} />
+                <User size={16} className="text-gray-500" />
                 <span>{t("login")}</span>
               </Link>
 
               <Link
-                href="/login"
-                className="gap-2 px-3 py-2 dropdown-item d-flex align-items-center hover-bg-light text-dark text-decoration-none small"
+                href="/register"
+                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
               >
-                <User size={16} />
+                <User size={16} className="text-gray-500" />
                 <span>{t("register")}</span>
               </Link>
             </>
           )}
         </div>
       )}
-
-      <style jsx>{`
-        .hover-bg-light:hover {
-          background-color: #f8f9fa;
-        }
-        .dropdown-menu-custom::before {
-          content: "";
-          position: absolute;
-          top: -20px;
-          left: 0;
-          width: 100%;
-          height: 20px;
-          background: transparent;
-        }
-      `}</style>
     </div>
   );
 }

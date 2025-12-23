@@ -2,6 +2,7 @@
 
 import { HttpTypes } from "@medusajs/types";
 import { revalidateTag, updateTag } from "next/cache";
+import { getLocale } from "next-intl/server";
 
 import { redirect } from "next/navigation";
 import {
@@ -13,7 +14,7 @@ import {
   removeCartId,
   setAuthToken,
 } from "@/utils/cookies";
-import { medusaSDK } from "@/utils/medusa";
+import { medusaSDK, getMedusaHeaders } from "@/utils/medusa";
 
 export const retrieveCustomer =
   async (): Promise<HttpTypes.StoreCustomer | null> => {
@@ -21,9 +22,8 @@ export const retrieveCustomer =
 
     if (!authHeaders) return null;
 
-    const headers = {
-      ...authHeaders,
-    };
+    const locale = await getLocale();
+    const headers = getMedusaHeaders(locale, authHeaders);
 
     return await medusaSDK.client
       .fetch<{ customer: HttpTypes.StoreCustomer }>(`/store/customers/me`, {
@@ -42,9 +42,8 @@ export const retrieveCustomerAddresses = async (): Promise<HttpTypes.StoreCustom
 
   if (!authHeaders) return [];
 
-  const headers = {
-    ...authHeaders,
-  };
+  const locale = await getLocale();
+  const headers = getMedusaHeaders(locale, authHeaders);
 
   return await medusaSDK.client
     .fetch<{ addresses: HttpTypes.StoreCustomerAddress[] }>(`/store/customers/me/addresses`, {
@@ -56,9 +55,9 @@ export const retrieveCustomerAddresses = async (): Promise<HttpTypes.StoreCustom
 };
 
 export const updateCustomer = async (body: HttpTypes.StoreUpdateCustomer) => {
-  const headers = {
-    ...(await getAuthHeaders()),
-  };
+  const authHeaders = await getAuthHeaders();
+  const locale = await getLocale();
+  const headers = getMedusaHeaders(locale, authHeaders);
 
   const updateRes = await medusaSDK.store.customer
     .update(body, {}, headers)
@@ -72,6 +71,7 @@ export const updateCustomer = async (body: HttpTypes.StoreUpdateCustomer) => {
 };
 
 export async function signup(_currentState: unknown, formData: FormData) {
+  const locale = await getLocale();
   const password = formData.get("password") as string;
   const customerForm = {
     email: formData.get("email") as string,
@@ -88,9 +88,7 @@ export async function signup(_currentState: unknown, formData: FormData) {
 
     await setAuthToken(token as string);
 
-    const headers = {
-      ...(await getAuthHeaders()),
-    };
+    const headers = getMedusaHeaders(locale, await getAuthHeaders());
 
     await medusaSDK.store.customer.create(customerForm, {}, headers);
 
@@ -248,6 +246,7 @@ export const addCustomerAddress = async (
   currentState: Record<string, unknown>,
   formData: FormData
 ): Promise<any> => {
+  const locale = await getLocale();
   const isDefaultBilling = (currentState.isDefaultBilling as boolean) || false;
   const isDefaultShipping =
     (currentState.isDefaultShipping as boolean) || false;
@@ -267,13 +266,11 @@ export const addCustomerAddress = async (
     is_default_shipping: isDefaultShipping,
   };
 
-  const headers = {
-    ...(await getAuthHeaders()),
-  };
+  const headers = getMedusaHeaders(locale, await getAuthHeaders());
 
   return medusaSDK.store.customer
     .createAddress(address, {}, headers)
-    .then(async ({ customer }) => {
+    .then(async () => {
       const customerCacheTag = await getCacheTag("customers");
       revalidateTag(customerCacheTag, "max");
       return { success: true, error: null };
@@ -286,9 +283,8 @@ export const addCustomerAddress = async (
 export const deleteCustomerAddress = async (
   addressId: string
 ): Promise<void> => {
-  const headers = {
-    ...(await getAuthHeaders()),
-  };
+  const locale = await getLocale();
+  const headers = getMedusaHeaders(locale, await getAuthHeaders());
 
   await medusaSDK.store.customer
     .deleteAddress(addressId, headers)
@@ -306,6 +302,7 @@ export const updateCustomerAddress = async (
   currentState: Record<string, unknown>,
   formData: FormData
 ): Promise<any> => {
+  const locale = await getLocale();
   const addressId =
     (currentState.addressId as string) || (formData.get("addressId") as string);
 
@@ -331,9 +328,7 @@ export const updateCustomerAddress = async (
     address.phone = phone;
   }
 
-  const headers = {
-    ...(await getAuthHeaders()),
-  };
+  const headers = getMedusaHeaders(locale, await getAuthHeaders());
 
   return medusaSDK.store.customer
     .updateAddress(addressId, address, {}, headers)

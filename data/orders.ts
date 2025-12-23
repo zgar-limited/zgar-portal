@@ -2,13 +2,14 @@
 
 import { HttpTypes } from "@medusajs/types";
 import { revalidateTag } from "next/cache";
+import { getLocale } from "next-intl/server";
 
 import {
   getAuthHeaders,
   getCacheOptions,
   getCacheTag
 } from "@/utils/cookies";
-import { medusaSDK } from "@/utils/medusa";
+import { medusaSDK, getMedusaHeaders } from "@/utils/medusa";
 
 export const retrieveOrders = async (
   limit: number = 5,
@@ -18,9 +19,8 @@ export const retrieveOrders = async (
 
   if (!authHeaders) return null;
 
-  const headers = {
-    ...authHeaders,
-  };
+  const locale = await getLocale();
+  const headers = getMedusaHeaders(locale, authHeaders);
 
   try {
     const response = await medusaSDK.store.order.list({
@@ -43,9 +43,8 @@ export const retrieveOrderById = async (
 
   if (!authHeaders) return null;
 
-  const headers = {
-    ...authHeaders,
-  };
+  const locale = await getLocale();
+  const headers = getMedusaHeaders(locale, authHeaders);
 
   try {
     const response = await medusaSDK.store.order.retrieve(

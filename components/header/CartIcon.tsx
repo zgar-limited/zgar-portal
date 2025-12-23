@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Link } from '@/i18n/routing';
 import Image from "next/image";
-import { ShoppingCart, X } from "lucide-react";
+import { ShoppingCart, Package } from "lucide-react";
 import { StoreCart } from "@medusajs/types";
 import { useTranslations } from "next-intl";
 
@@ -39,20 +39,17 @@ export default function CartIcon({ cart }: { cart?: StoreCart }) {
 
   return (
     <div
-      className="position-relative d-flex align-items-center"
+      className="relative flex items-center"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <Link
         href="/view-cart"
-        className="p-0 link position-relative text-dark"
+        className="p-0 link relative text-gray-900 hover:text-gray-600 transition-colors"
       >
-        <ShoppingCart />
+        <ShoppingCart className="h-6 w-6" />
         {itemCount > 0 && (
-          <span
-            className="top-0 position-absolute start-100 translate-middle badge rounded-pill bg-danger"
-            style={{ fontSize: "0.6rem" }}
-          >
+          <span className="absolute -top-1 -right-2 bg-red-500 text-white text-xs rounded-full h-5 min-w-[20px] flex items-center justify-center font-medium">
             {itemCount}
           </span>
         )}
@@ -60,94 +57,67 @@ export default function CartIcon({ cart }: { cart?: StoreCart }) {
 
       {/* Mini Cart Dropdown */}
       {isHovered && (
-        <div
-          className="p-3 bg-white border shadow-lg position-absolute end-0 rounded-3 dropdown-menu-custom"
-          style={{ width: "320px", zIndex: 1000, top: "25px" }}
-        >
-          {/* Arrow/Triangle */}
-          <div
-            className="bg-white position-absolute border-top border-start"
-            style={{
-              width: "12px",
-              height: "12px",
-              top: "-7px",
-              right: "10px",
-              transform: "rotate(45deg)",
-            }}
-          ></div>
+        <div className="absolute right-0 top-8 w-80 p-3 bg-white border border-gray-100 rounded-xl shadow-xl z-50">
+          {/* Arrow */}
+          <div className="absolute -top-2 right-3 w-3 h-3 bg-white border-t border-l border-gray-100 transform rotate-45" />
 
-          <div className="pb-2 mb-3 d-flex justify-content-between align-items-center border-bottom">
-            <h6 className="mb-0 fw-bold">{t("shoppingCart")} ({itemCount})</h6>
-            <span className="text-muted small">${totalPrice.toFixed(2)}</span>
+          <div className="flex items-center justify-between pb-2 mb-3 border-b border-gray-100">
+            <h6 className="m-0 text-sm font-bold text-gray-900">
+              {t("shoppingCart")} ({itemCount})
+            </h6>
+            <span className="text-sm text-gray-500 font-medium">
+              ${totalPrice.toFixed(2)}
+            </span>
           </div>
 
           {cartProducts.length === 0 ? (
-            <p className="py-3 text-center text-muted small">
+            <div className="py-8 text-center text-gray-500 text-sm">
+              <Package className="h-12 w-12 mx-auto mb-3 text-gray-300" />
               {t("emptyCart")}
-            </p>
+            </div>
           ) : (
-            <div
-              className="gap-3 mb-3 d-flex flex-column"
-              style={{ maxHeight: "300px", overflowY: "auto" }}
-            >
+            <div className="flex flex-col gap-2 mb-3 max-h-[300px] overflow-y-auto">
               {cartProducts.slice(0, 3).map((item) => (
-                <div key={item.id} className="gap-2 d-flex">
-                  <div
-                    className="overflow-hidden rounded-sm shrink-0 position-relative bg-light"
-                    style={{ width: "60px", height: "60px" }}
-                  >
+                <div key={item.id} className="flex gap-2">
+                  <div className="relative overflow-hidden rounded-lg bg-gray-100 shrink-0" style={{ width: "60px", height: "60px" }}>
                     <Image
                       src={item.imgSrc || "https://placehold.co/100x100"}
                       alt={item.title}
                       fill
-                      className="object-fit-cover"
+                      className="object-cover"
                     />
                   </div>
-                  <div className="overflow-hidden grow">
-                    <p className="mb-0 small fw-bold text-truncate">
+                  <div className="overflow-hidden flex-1">
+                    <p className="m-0 text-sm font-semibold text-gray-900 truncate">
                       {item.title}
                     </p>
-                    <p className="mb-0 x-small text-muted text-truncate">
+                    <p className="m-0 text-xs text-gray-500 truncate">
                       {item.variantTitle}
                     </p>
-                    <p className="mb-0 small text-primary">
+                    <p className="m-0 text-sm text-gray-900 font-medium mt-1">
                       {item.quantity} x ${item.price.toFixed(2)}
                     </p>
                   </div>
                 </div>
               ))}
               {cartProducts.length > 3 && (
-                <p className="mb-0 text-center x-small text-muted">
+                <p className="m-0 text-center text-xs text-gray-500">
                   {t("moreItems", { count: cartProducts.length - 3 })}
                 </p>
               )}
             </div>
           )}
 
-          <div className="gap-2 d-grid">
+          <div className="grid gap-2">
             <Link
               href="/view-cart"
-              className="btn btn-dark btn-sm rounded-pill"
+              className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-full hover:bg-gray-800 transition-colors"
             >
               {t("viewCart")}
             </Link>
-            {/* <Link href="/checkout" className="btn btn-outline-dark btn-sm rounded-pill">
-                    Checkout
-                </Link> */}
           </div>
         </div>
       )}
-      <style jsx>{`
-        .dropdown-menu-custom::before {
-          content: "";
-          position: absolute;
-          top: -20px;
-          left: 0;
-          width: 100%;
-          height: 20px;
-          background: transparent;
-        }
-      `}</style>
     </div>
   );
 }

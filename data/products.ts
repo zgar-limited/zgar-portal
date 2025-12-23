@@ -1,8 +1,9 @@
 "use server";
 
 import { getAuthHeaders, getCacheOptions } from "@/utils/cookies";
-import { medusaSDK } from "@/utils/medusa";
+import { medusaSDK, getMedusaHeaders } from "@/utils/medusa";
 import { HttpTypes, StoreProduct } from "@medusajs/types";
+import { getLocale } from "next-intl/server";
 
 export const fetchProducts = async ({
   pageParam = 1,
@@ -23,16 +24,15 @@ export const fetchProducts = async ({
   //   throw new Error("Country code or region ID is required");
   // }
 
-  const limit = queryParams?.limit || 12;
+  const locale = await getLocale();
+  const limit = queryParams?.limit || 20;
   const _pageParam = Math.max(pageParam, 1);
   const offset = _pageParam === 1 ? 0 : (_pageParam - 1) * limit;
 
-  const headers = {
-    ...(await getAuthHeaders()),
-  };
+  const headers = getMedusaHeaders(locale, await getAuthHeaders());
 
   const next = {
-    ...(await getCacheOptions("products")),
+    ...(await getCacheOptions("products1")),
   };
 
   return medusaSDK.client
@@ -68,9 +68,8 @@ export const fetchProducts = async ({
 };
 
 export const fetchProduct = async (id: string) => {
-  const headers = {
-    ...(await getAuthHeaders()),
-  };
+  const locale = await getLocale();
+  const headers = getMedusaHeaders(locale, await getAuthHeaders());
 
   const next = {
     ...(await getCacheOptions(`product-${id}`)),

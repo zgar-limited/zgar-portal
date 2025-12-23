@@ -2,6 +2,7 @@
 
 import { HttpTypes } from "@medusajs/types";
 import { revalidateTag } from "next/cache";
+import { getLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
 import {
   getAuthHeaders,
@@ -11,7 +12,7 @@ import {
   removeCartId,
   setCartId,
 } from "@/utils/cookies";
-import { medusaSDK } from "@/utils/medusa";
+import { medusaSDK, getMedusaHeaders } from "@/utils/medusa";
 import medusaError from "@/utils/medusa-error";
 
 /**
@@ -28,9 +29,8 @@ export async function retrieveCart(cartId?: string, fields?: string) {
     return null;
   }
 
-  const headers = {
-    ...(await getAuthHeaders()),
-  };
+  const locale = await getLocale();
+  const headers = getMedusaHeaders(locale, await getAuthHeaders());
 
   const next = {
     ...(await getCacheOptions("carts")),
@@ -53,9 +53,8 @@ export async function retrieveCart(cartId?: string, fields?: string) {
 export async function getOrSetCart() {
   let cart = await retrieveCart(undefined, "id");
 
-  const headers = {
-    ...(await getAuthHeaders()),
-  };
+  const locale = await getLocale();
+  const headers = getMedusaHeaders(locale, await getAuthHeaders());
 
   if (!cart) {
     const cartResp = await medusaSDK.store.cart.create({}, {}, headers);
@@ -79,9 +78,8 @@ export async function updateCart(data: HttpTypes.StoreUpdateCart) {
     );
   }
 
-  const headers = {
-    ...(await getAuthHeaders()),
-  };
+  const locale = await getLocale();
+  const headers = getMedusaHeaders(locale, await getAuthHeaders());
 
   return medusaSDK.store.cart
     .update(cartId, data, {}, headers)

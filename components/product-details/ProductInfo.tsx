@@ -3,6 +3,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { StoreProduct, StoreProductVariant } from "@medusajs/types";
 import { ShoppingCart, Check, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useToast } from "@/components/common/ToastProvider";
 import QuantitySelect from "../common/QuantitySelect";
 import { addToCart } from "@/data/cart";
@@ -16,6 +17,7 @@ interface ProductInfoProps {
 export default function ProductInfo({ product, selectedVariant, onVariantSelect }: ProductInfoProps) {
   const router = useRouter();
   const { showToast } = useToast();
+  const t = useTranslations("Product");
 
   // State for selected options (e.g. { "opt_123": "L", "opt_456": "Blue" })
   const [selectedOptions, setSelectedOptions] = useState<
@@ -84,7 +86,7 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
 
   const handleAddToCart = async () => {
     if (!currentVariant) {
-      showToast("Please select options", "warning");
+      showToast(t("pleaseSelectOptions"), "warning");
       return;
     }
 
@@ -96,13 +98,13 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
         metadata: currentVariant.metadata,
       });
       setIsAdded(true);
-      showToast("Added to cart successfully", "success");
+      showToast(t("addedSuccess"), "success");
 
       // Reset added state
       setTimeout(() => setIsAdded(false), 2000);
     } catch (e) {
       console.error(e);
-      showToast("Failed to add to cart. Please try again.", "danger");
+      showToast(t("addFailed"), "danger");
     } finally {
       setIsAdding(false);
     }
@@ -150,7 +152,7 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
           <span className="text-3xl lg:text-4xl font-bold text-black">
             ${price.toFixed(2)}
           </span>
-          <span className="text-lg text-gray-500">/pcs</span>
+          <span className="text-lg text-gray-500">{t("perPiece")}</span>
         </div>
       </div>
 
@@ -201,7 +203,7 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
       <div className="flex flex-col gap-4">
         {/* Quantity */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">Quantity</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">{t("quantity")}</label>
           <QuantitySelect
             quantity={quantity}
             setQuantity={setQuantity}
@@ -230,12 +232,12 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
           )}
           <span>
             {isAdding
-              ? "Adding..."
+              ? t("adding")
               : isAdded
-              ? "Added to Cart"
+              ? t("addedToCart")
               : !currentVariant
-              ? "Select Options"
-              : "Add to Cart"}
+              ? t("selectOptions")
+              : t("addToCart")}
           </span>
         </button>
       </div>
@@ -246,13 +248,13 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
           <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
             <Check size={16} className="text-green-600" />
           </div>
-          <span className="text-base">Free shipping on orders over $100</span>
+          <span className="text-base">{t("freeShipping")}</span>
         </div>
         <div className="flex items-center gap-3 text-gray-600">
           <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
             <Check size={16} className="text-green-600" />
           </div>
-          <span className="text-base">30-day return policy</span>
+          <span className="text-base">{t("returnPolicy")}</span>
         </div>
       </div>
     </div>

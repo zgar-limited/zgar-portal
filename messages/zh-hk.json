@@ -50,5 +50,20 @@
     "description": "您必須年滿 21 歲才能瀏覽 ZGAR.com 上的產品。",
     "confirm": "我已年滿 21 歲",
     "reject": "離開並關閉"
+  },
+  "Product": {
+    "quantity": "數量",
+    "addToCart": "加入購物車",
+    "adding": "添加中...",
+    "addedToCart": "已添加",
+    "selectOptions": "選擇選項",
+    "pleaseSelectOptions": "請選擇選項",
+    "addedSuccess": "成功加入購物車",
+    "addFailed": "添加失敗，請重試。",
+    "variantNotAvailable": "產品變體不可用",
+    "freeShipping": "訂單滿 $100 免運費",
+    "returnPolicy": "30天退貨政策",
+    "untitledProduct": "未命名產品",
+    "perPiece": "/件"
   }
 }

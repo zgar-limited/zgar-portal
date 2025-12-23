@@ -50,5 +50,20 @@
     "description": "You must be at least 21 years old to view products on ZGAR.com.",
     "confirm": "I AM OLDER THAN 21",
     "reject": "LEAVE AND CLOSE"
+  },
+  "Product": {
+    "quantity": "Quantity",
+    "addToCart": "Add to Cart",
+    "adding": "Adding...",
+    "addedToCart": "Added to Cart",
+    "selectOptions": "Select Options",
+    "pleaseSelectOptions": "Please select options",
+    "addedSuccess": "Added to cart successfully",
+    "addFailed": "Failed to add to cart. Please try again.",
+    "variantNotAvailable": "Product variant not available",
+    "freeShipping": "Free shipping on orders over $100",
+    "returnPolicy": "30-day return policy",
+    "untitledProduct": "Untitled Product",
+    "perPiece": "/pcs"
   }
 }
