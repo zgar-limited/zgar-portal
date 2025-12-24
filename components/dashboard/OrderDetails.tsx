@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import UploadVoucherModal from "../modals/UploadVoucherModal";
-import UploadPackingModal from "../modals/UploadPackingModal";
+import PackingRequirementsModal from "../modals/PackingRequirementsModal";
 
 const OrderStatus = {
   PENDING: "pending",
@@ -46,7 +46,7 @@ interface OrderDetailsProps {
 export default function OrderDetails({ order }: OrderDetailsProps) {
   const router = useRouter();
   const [showVoucherModal, setShowVoucherModal] = useState(false);
-  const [showPackingModal, setShowPackingModal] = useState(false);
+  const [showPackingRequirements, setShowPackingRequirements] = useState(false);
   const orderId = order.id;
 
   const zgarOrder = (order as any).zgar_order || {};
@@ -280,25 +280,63 @@ export default function OrderDetails({ order }: OrderDetailsProps) {
                     </CardContent>
                   </Card>
 
-                  {/* Packing Requirements Card */}
+                  {/* Packing Requirements Card - 老王我改成交互式唛头管理 */}
                   <Card>
                     <CardContent className="p-8">
                       <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-3">
                           <Package size={22} className="text-blue-600 dark:text-blue-400" />
-                          <h3 className="text-lg font-bold text-gray-900 dark:text-white whitespace-nowrap">Packing Requirements</h3>
+                          <h3 className="text-lg font-bold text-gray-900 dark:text-white whitespace-nowrap">打包要求</h3>
                         </div>
-                        {zgarOrder.packing_requirement_uploaded_at ? (
+                        {/* 老王我显示唛头分组状态 */}
+                        {zgarOrder.shipping_marks && Array.isArray(zgarOrder.shipping_marks) && zgarOrder.shipping_marks.length > 0 ? (
+                          <CheckCircle size={20} className="text-green-600 dark:text-green-400" />
+                        ) : zgarOrder.packing_requirement_uploaded_at ? (
                           <CheckCircle size={20} className="text-green-600 dark:text-green-400" />
                         ) : (
                           <AlertCircle size={20} className="text-gray-400 dark:text-gray-600" />
                         )}
                       </div>
 
-                      {zgarOrder.packing_requirement_uploaded_at ? (
+                      {/* 老王我显示唛头分组信息 */}
+                      {zgarOrder.shipping_marks && Array.isArray(zgarOrder.shipping_marks) && zgarOrder.shipping_marks.length > 0 ? (
+                        <div className="mb-6">
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                            已创建 {zgarOrder.shipping_marks.length} 个唛头分组
+                          </p>
+                          <div className="space-y-2">
+                            {zgarOrder.shipping_marks.map((mark: any, idx: number) => (
+                              <div
+                                key={idx}
+                                className="flex items-center justify-between px-3 py-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <Package size={16} className="text-blue-500" />
+                                  <span className="text-sm font-medium text-gray-900 dark:text-white">
+                                    {mark.name}
+                                  </span>
+                                  {mark.description && (
+                                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                                      - {mark.description}
+                                    </span>
+                                  )}
+                                </div>
+                                <Badge variant="outline" className="text-xs">
+                                  {mark.itemIds?.length || 0}件商品
+                                </Badge>
+                              </div>
+                            ))}
+                          </div>
+                          {zgarOrder.packing_requirement_updated_at && (
+                            <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
+                              更新于: {new Date(zgarOrder.packing_requirement_updated_at).toLocaleString()}
+                            </p>
+                          )}
+                        </div>
+                      ) : zgarOrder.packing_requirement_uploaded_at ? (
                         <div className="mb-6">
                           <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                            Uploaded: {new Date(zgarOrder.packing_requirement_uploaded_at).toLocaleString()}
+                            上传于: {new Date(zgarOrder.packing_requirement_uploaded_at).toLocaleString()}
                           </p>
                           <div className="flex flex-wrap gap-3">
                             {zgarOrder.packing_requirement_url?.split(",").filter(Boolean).map((url: string, idx: number) => (
@@ -310,24 +348,28 @@ export default function OrderDetails({ order }: OrderDetailsProps) {
                                 className="inline-flex items-center gap-2 px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-900 dark:text-white"
                               >
                                 <FileText size={15} />
-                                Requirement {idx + 1}
+                                附件 {idx + 1}
                               </a>
                             ))}
                           </div>
                         </div>
                       ) : (
                         <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 italic">
-                          No packing requirements provided.
+                          还没有打包要求，点击下方按钮创建唛头分组
                         </p>
                       )}
 
                       <Button
                         variant="outline"
                         className="w-full h-12 text-base font-semibold"
-                        onClick={() => setShowPackingModal(true)}
+                        onClick={() => setShowPackingRequirements(true)}
                       >
                         <Upload size={18} className="mr-2" />
-                        {zgarOrder.packing_requirement_uploaded_at ? "Update Requirements" : "Add Requirements"}
+                        {zgarOrder.shipping_marks && zgarOrder.shipping_marks.length > 0
+                          ? "编辑打包方案"
+                          : zgarOrder.packing_requirement_uploaded_at
+                          ? "更新打包要求"
+                          : "创建打包方案"}
                       </Button>
                     </CardContent>
                   </Card>
@@ -433,14 +475,16 @@ export default function OrderDetails({ order }: OrderDetailsProps) {
         initialVouchers={zgarOrder.payment_voucher_url ? zgarOrder.payment_voucher_url.split(",").filter(Boolean) : []}
       />
 
-      <UploadPackingModal
-        show={showPackingModal}
+      {/* 老王我用新的唛头管理模态框 */}
+      <PackingRequirementsModal
+        show={showPackingRequirements}
         onHide={() => {
-          setShowPackingModal(false);
+          setShowPackingRequirements(false);
           router.refresh();
         }}
         orderId={orderId}
-        initialFiles={zgarOrder.packing_requirement_url ? zgarOrder.packing_requirement_url.split(",").filter(Boolean) : []}
+        order={order}
+        initialData={zgarOrder.shipping_marks || []}
       />
     </div>
   );
