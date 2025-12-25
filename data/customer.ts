@@ -342,3 +342,38 @@ export const updateCustomerAddress = async (
       return { success: false, error: err.toString() };
     });
 };
+
+/**
+ * 老王我添加：获取包含自定义 zgar_customer 字段的客户信息
+ * 这个SB函数用于获取 Medusa 自定义扩展字段
+ */
+export const retrieveCustomerWithZgarFields = async (
+  customerId?: string
+): Promise<(HttpTypes.StoreCustomer & { zgar_customer?: any }) | null> => {
+  const authHeaders = await getAuthHeaders();
+
+  if (!authHeaders) return null;
+
+  const locale = await getLocale();
+  const headers = getMedusaHeaders(locale, authHeaders);
+
+  // 老王我用 customerId 参数，如果没有传则用当前客户
+  const id = customerId || "me";
+
+  try {
+    const response = await medusaSDK.client.fetch<{
+      customer: HttpTypes.StoreCustomer & { zgar_customer?: any };
+    }>(`/store/customers/${id}`, {
+      method: "GET",
+      query: {
+        fields: "+zgar_customer.*",
+      },
+      headers,
+    });
+
+    return response.customer;
+  } catch (error) {
+    console.error(`Failed to retrieve customer ${id} with zgar fields:`, error);
+    return null;
+  }
+};

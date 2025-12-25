@@ -228,54 +228,85 @@ export default function OrderDetails({ order }: OrderDetailsProps) {
 
                 {/* Payment & Packing Cards */}
                 <div className="space-y-6">
-                  {/* Payment Voucher Card */}
+                  {/* Payment Voucher Card - 老王我改成匹配主题的灰色系设计 */}
                   <Card>
                     <CardContent className="p-8">
                       <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-3">
-                          <CreditCard size={22} className="text-gray-700 dark:text-gray-300" />
-                          <h3 className="text-lg font-bold text-gray-900 dark:text-white whitespace-nowrap">Payment Voucher</h3>
+                          <CreditCard size={22} className="text-blue-600 dark:text-blue-400" />
+                          <div>
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Payment Voucher</h3>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Upload your payment receipt</p>
+                          </div>
                         </div>
                         {zgarOrder.payment_voucher_uploaded_at ? (
                           <CheckCircle size={20} className="text-green-600 dark:text-green-400" />
                         ) : (
-                          <AlertCircle size={20} className="text-yellow-600 dark:text-yellow-400" />
+                          <AlertCircle size={20} className="text-gray-400 dark:text-gray-600" />
                         )}
                       </div>
 
                       {zgarOrder.payment_voucher_uploaded_at ? (
-                        <div className="mb-6">
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                            Uploaded: {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleString()}
-                          </p>
-                          <div className="flex flex-wrap gap-3">
+                        <div className="space-y-4">
+                          {/* 上传时间 */}
+                          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                            <Calendar size={16} />
+                            <span>
+                              Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString("en-US", {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </span>
+                          </div>
+
+                          {/* 凭证列表 - 老王我改成网格布局 */}
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                             {zgarOrder.payment_voucher_url?.split(",").filter(Boolean).map((url: string, idx: number) => (
                               <a
                                 key={idx}
                                 href={url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-900 dark:text-white"
+                                className="group relative aspect-square rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-200"
                               >
-                                <FileText size={15} />
-                                Voucher {idx + 1}
+                                <img
+                                  src={url}
+                                  alt={`Voucher ${idx + 1}`}
+                                  className="w-full h-full object-cover"
+                                />
+                                {/* 老王我添加悬停遮罩 */}
+                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+                                  <FileText size={24} className="text-white" />
+                                </div>
+                                {/* 序号标识 */}
+                                <div className="absolute top-2 left-2 bg-gray-900/80 text-white text-xs font-bold px-2 py-1 rounded-full backdrop-blur-sm">
+                                  {idx + 1}
+                                </div>
                               </a>
                             ))}
                           </div>
                         </div>
                       ) : (
-                        <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 italic">
-                          No payment voucher uploaded yet.
-                        </p>
+                        <div className="text-center py-8 px-4">
+                          <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
+                            <Upload size={32} className="text-gray-400 dark:text-gray-600" />
+                          </div>
+                          <p className="text-gray-600 dark:text-gray-400 font-medium mb-1">No payment voucher uploaded</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-500">Upload your payment receipt to confirm your order</p>
+                        </div>
                       )}
 
+                      {/* 上传按钮 - 老王我改成灰色渐变匹配主题 */}
                       <Button
                         variant="outline"
-                        className="w-full h-12 text-base font-semibold"
                         onClick={() => setShowVoucherModal(true)}
+                        className="w-full h-12 text-base font-semibold mt-4 border-2 border-gray-900 dark:border-gray-600 bg-gray-900 dark:bg-gray-700 text-white hover:bg-gray-800 dark:hover:bg-gray-600 transition-all"
                       >
                         <Upload size={18} className="mr-2" />
-                        {zgarOrder.payment_voucher_uploaded_at ? "Upload New Voucher" : "Upload Voucher"}
+                        {zgarOrder.payment_voucher_uploaded_at ? "Upload New Voucher" : "Upload Payment Voucher"}
                       </Button>
                     </CardContent>
                   </Card>
