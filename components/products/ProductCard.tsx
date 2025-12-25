@@ -254,7 +254,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         {isLoggedIn && (
           <div className="mb-3">
             <span className="text-base font-bold text-black block">
-              {currencyCode === 'cny' ? '¥' : '$'}{price.toFixed(2)}/pcs
+              ${price.toFixed(2)}/pcs
             </span>
           </div>
         )}

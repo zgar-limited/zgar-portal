@@ -120,7 +120,7 @@ export default function MyAccount({ customer, orders = [] }: MyAccountProps) {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* 侧边栏 */}
           <div className="lg:col-span-1">
-            <Sidebar customer={customer} />
+            <Sidebar customer={customer} orders={orders} />
           </div>
 
           {/* 主内容区 */}
@@ -147,7 +147,7 @@ export default function MyAccount({ customer, orders = [] }: MyAccountProps) {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-gray-600 dark:text-gray-400">账户余额</p>
-                    <p className="text-2xl font-bold text-black dark:text-white">¥{stats.balance.toFixed(2)}</p>
+                    <p className="text-2xl font-bold text-black dark:text-white">${stats.balance.toFixed(2)}</p>
                   </div>
                   <div className="w-12 h-12 bg-black/5 dark:bg-white/10 rounded-xl flex items-center justify-center">
                     <CreditCard size={20} className="text-black dark:text-white" />
@@ -291,7 +291,7 @@ export default function MyAccount({ customer, orders = [] }: MyAccountProps) {
                               {order.items.length > 1 && ` 等${order.items.length}件商品`}
                             </p>
                             <p className="text-sm font-medium text-black dark:text-white">
-                              ¥{order.total?.toFixed(2) || "0.00"}
+                              ${order.total?.toFixed(2) || "0.00"}
                             </p>
                           </div>
                         </div>

@@ -26,9 +26,10 @@ interface CustomerWithZgarFields extends HttpTypes.StoreCustomer {
 
 interface SidebarProps {
   customer?: CustomerWithZgarFields | null;
+  orders?: HttpTypes.StoreOrder[];  // 老王我添加：显示真实订单数量
 }
 
-export default function Sidebar({ customer }: SidebarProps) {
+export default function Sidebar({ customer, orders }: SidebarProps) {
   const pathname = usePathname();
 
   const navItems = [
@@ -78,7 +79,7 @@ export default function Sidebar({ customer }: SidebarProps) {
         <div className="text-center">
           <p className="text-xs text-gray-600 dark:text-gray-400">余额</p>
           <p className="text-sm font-semibold text-black dark:text-white">
-            ¥{customer?.zgar_customer?.balance?.toFixed(2) || "0.00"}
+            ${customer?.zgar_customer?.balance?.toFixed(2) || "0.00"}
           </p>
         </div>
         <div className="text-center">
@@ -90,7 +91,7 @@ export default function Sidebar({ customer }: SidebarProps) {
         <div className="text-center">
           <p className="text-xs text-gray-600 dark:text-gray-400">订单</p>
           <p className="text-sm font-semibold text-black dark:text-white">
-            {customer?.orders?.length || 0}
+            {orders?.length || customer?.orders?.length || 0}
           </p>
         </div>
       </div>
