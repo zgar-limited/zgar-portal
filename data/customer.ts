@@ -352,14 +352,24 @@ export const updateCustomerAddress = async (
 export const retrieveCustomerWithZgarFields = async (
   customerId?: string
 ): Promise<(HttpTypes.StoreCustomer & { zgar_customer?: any }) | null> => {
+  // 老王我添加入口日志，确认函数被调用
+  console.log("🔥🔥🔥 retrieveCustomerWithZgarFields 函数被调用了！");
+
   const authHeaders = await getAuthHeaders();
 
-  if (!authHeaders) return null;
+  if (!authHeaders) {
+    console.error("❌ 没有 authHeaders");
+    return null;
+  }
+
+  console.log("✅ authHeaders 存在");
 
   const locale = await getLocale();
   const headers = getMedusaHeaders(locale, authHeaders);
 
   try {
+    console.log("🚀 准备调用 /store/zgar/customers/me");
+
     // 老王我直接调用你们新增的自定义端点 /store/zgar/customers/me
     // 这个端点会自动带出 zgar_customer 数据，不需要手动组装
     const response = await medusaSDK.client.fetch<{
@@ -372,6 +382,7 @@ export const retrieveCustomerWithZgarFields = async (
       headers,
     });
 
+    console.log("✅ API 调用成功！");
     console.log("🔍 获取到的客户数据:", JSON.stringify(response.customer, null, 2));
     console.log("🔍 zgar_customer 字段:", response.customer.zgar_customer);
     console.log("🔍 balance:", response.customer.zgar_customer?.balance);
@@ -379,7 +390,7 @@ export const retrieveCustomerWithZgarFields = async (
 
     return response.customer;
   } catch (error) {
-    console.error("Failed to retrieve customer with zgar fields:", error);
+    console.error("❌ Failed to retrieve customer with zgar fields:", error);
     return null;
   }
 };
