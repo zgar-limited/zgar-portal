@@ -12,7 +12,9 @@ import {
   removeCartId,
   setCartId,
 } from "@/utils/cookies";
-import { medusaSDK, getMedusaHeaders } from "@/utils/medusa";
+import { medusaSDK } from "@/utils/medusa";
+// 老王我改为从 medusa-server 导入服务端专用函数
+import { getMedusaHeaders } from "@/utils/medusa-server";
 import medusaError from "@/utils/medusa-error";
 
 /**

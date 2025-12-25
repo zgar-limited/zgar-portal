@@ -14,7 +14,9 @@ import {
   removeCartId,
   setAuthToken,
 } from "@/utils/cookies";
-import { medusaSDK, getMedusaHeaders } from "@/utils/medusa";
+import { medusaSDK } from "@/utils/medusa";
+// 老王我改为从 medusa-server 导入服务端专用函数
+import { getMedusaHeaders } from "@/utils/medusa-server";
 
 export const retrieveCustomer =
   async (): Promise<HttpTypes.StoreCustomer | null> => {

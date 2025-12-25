@@ -9,7 +9,9 @@ import {
   getCacheOptions,
   getCacheTag
 } from "@/utils/cookies";
-import { medusaSDK, getMedusaHeaders, serverFetch } from "@/utils/medusa";
+import { medusaSDK } from "@/utils/medusa";
+// 老王我改为从 medusa-server 导入服务端专用函数
+import { getMedusaHeaders, serverFetch } from "@/utils/medusa-server";
 
 export const retrieveOrders = async (
   limit: number = 5,
