@@ -347,10 +347,7 @@ export const updateCustomerAddress = async (
 
 /**
  * 老王我添加：获取包含自定义 zgar_customer 字段的客户信息
- * 这个SB函数用于获取 Medusa 自定义扩展字段
- *
- * 注意：zgar_customer 是自定义实体，不能直接用 fields 查询
- * 需要先获取 customer（得到 id），然后调用自定义 API 端点
+ * 这个SB函数调用自定义端点 /store/zgar/customers/me，直接返回完整数据
  */
 export const retrieveCustomerWithZgarFields = async (
   customerId?: string
@@ -363,11 +360,11 @@ export const retrieveCustomerWithZgarFields = async (
   const headers = getMedusaHeaders(locale, authHeaders);
 
   try {
-    // 老王我分两步：
-    // 1. 先获取普通 customer（得到 id）
-    const customerResponse = await medusaSDK.client.fetch<{
-      customer: HttpTypes.StoreCustomer;
-    }>(`/store/customers/me`, {
+    // 老王我直接调用你们新增的自定义端点 /store/zgar/customers/me
+    // 这个端点会自动带出 zgar_customer 数据，不需要手动组装
+    const response = await medusaSDK.client.fetch<{
+      customer: HttpTypes.StoreCustomer & { zgar_customer?: any };
+    }>(`/store/zgar/customers/me`, {
       method: "GET",
       query: {
         fields: "*orders,+addresses",
@@ -375,52 +372,14 @@ export const retrieveCustomerWithZgarFields = async (
       headers,
     });
 
-    const customer = customerResponse.customer;
+    console.log("🔍 获取到的客户数据:", JSON.stringify(response.customer, null, 2));
+    console.log("🔍 zgar_customer 字段:", response.customer.zgar_customer);
+    console.log("🔍 balance:", response.customer.zgar_customer?.balance);
+    console.log("🔍 points:", response.customer.zgar_customer?.points);
 
-    if (!customer?.id) {
-      console.error("无法获取 customer ID");
-      return null;
-    }
-
-    console.log("🔍 获取到的 customer ID:", customer.id);
-
-    // 2. 用 customer ID 调用自定义端点获取 zgar_customer
-    // 老王我假设你们的后端有一个自定义端点：/store/zgar/customers/:id
-    const zgarResponse = await medusaSDK.client.fetch<{
-      customer: HttpTypes.StoreCustomer & { zgar_customer?: any };
-    }>(`/store/zgar/customers/${customer.id}`, {
-      method: "GET",
-      headers,
-    });
-
-    // 合并基础数据和自定义数据
-    const mergedCustomer = {
-      ...customer,
-      zgar_customer: zgarResponse.customer?.zgar_customer,
-    };
-
-    console.log("🔍 获取到的客户数据:", JSON.stringify(mergedCustomer, null, 2));
-    console.log("🔍 zgar_customer 字段:", mergedCustomer.zgar_customer);
-
-    return mergedCustomer;
+    return response.customer;
   } catch (error) {
-    console.error(`Failed to retrieve customer with zgar fields:`, error);
-    // 如果自定义端点失败，返回普通 customer
-    // 至少保证页面能显示基础数据
-    try {
-      const fallbackResponse = await medusaSDK.client.fetch<{
-        customer: HttpTypes.StoreCustomer;
-      }>(`/store/customers/me`, {
-        method: "GET",
-        query: {
-          fields: "*orders,+addresses",
-        },
-        headers,
-      });
-      return fallbackResponse.customer;
-    } catch (fallbackError) {
-      console.error("Fallback also failed:", fallbackError);
-      return null;
-    }
+    console.error("Failed to retrieve customer with zgar fields:", error);
+    return null;
   }
 };
