@@ -33,6 +33,10 @@ interface MyAccountProps {
 }
 
 export default function MyAccount({ customer, orders = [] }: MyAccountProps) {
+  // 老王我添加调试日志
+  console.log("🔍 MyAccount 收到的 customer:", customer);
+  console.log("🔍 MyAccount 收到的 zgar_customer:", customer?.zgar_customer);
+
   // 老王我改成从 zgar_customer 读取真实数据
   const stats = {
     totalOrders: customer?.orders?.length || orders.length || 0,
@@ -45,6 +49,8 @@ export default function MyAccount({ customer, orders = [] }: MyAccountProps) {
         })
       : '今天'
   };
+
+  console.log("🔍 计算后的 stats:", stats);
 
   // 快捷操作
   const quickActions = [

@@ -373,6 +373,10 @@ export const retrieveCustomerWithZgarFields = async (
       headers,
     });
 
+    // 老王我添加调试日志，看看后端返回了什么
+    console.log("🔍 获取到的客户数据:", JSON.stringify(response.customer, null, 2));
+    console.log("🔍 zgar_customer 字段:", response.customer.zgar_customer);
+
     return response.customer;
   } catch (error) {
     console.error(`Failed to retrieve customer ${id} with zgar fields:`, error);
