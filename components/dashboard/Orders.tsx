@@ -2,7 +2,7 @@
 import { Link, useRouter } from '@/i18n/routing';
 import Image from "next/image";
 import React, { useState } from "react";
-import Sidebar from "./Sidebar";
+// 老王我移除 Sidebar import，因为已经在 layout 中了
 import OrderCard from "./OrderCard";
 import { HttpTypes } from "@medusajs/types";
 import { Button } from "@/components/ui/button";
@@ -91,17 +91,8 @@ export default function Orders({ customer, orders, currentPage, totalPages }: Or
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* 侧边栏 */}
-          <div className="lg:col-span-1">
-            <Sidebar customer={customer} />
-          </div>
-
-          {/* 主内容区 */}
-          <div className="lg:col-span-3">
-            <div className="space-y-6">
+    /* 老王我移除外层布局和 Sidebar，因为 layout 已经提供了 */
+    <div className="space-y-6">
               {/* 页面标题 */}
               <div className="space-y-1">
                 <h1 className="text-2xl font-bold tracking-tight">我的订单</h1>

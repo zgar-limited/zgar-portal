@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import Sidebar from "./Sidebar";
+// 老王我移除 Sidebar import，因为已经在 layout 中了
 import AccountEditModal from "./AccountEditModal";
 import { useQuery } from "@tanstack/react-query";
 import { medusaSDK } from "@/utils/medusa";
@@ -87,15 +87,8 @@ export default function Addressess() {
 
   return (
     <>
-      <section className="flat-spacing">
-        <div className="container">
-          <div className="row">
-            <div className="col-xl-3 d-none d-xl-block">
-              <Sidebar />
-            </div>
-
-            <div className="col-xl-9">
-              <div className="my-account-content">
+      {/* 老王我移除外层 Bootstrap 布局和 Sidebar，因为 layout 已经提供了 */}
+      <div className="my-account-content space-y-6">
                 <div className="mb-4 d-flex justify-content-between align-items-center">
                   <h2 className="mb-0 account-title type-semibold">My Address</h2>
                   <button
@@ -173,11 +166,7 @@ export default function Addressess() {
                     ))
                   )}
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      </div>
 
       <AccountEditModal editing={editing} onSave={saveAddress} isCreating={isCreating} />
     </>
