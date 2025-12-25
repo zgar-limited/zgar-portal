@@ -13,9 +13,19 @@ import {
   CreditCard,
   Star
 } from "lucide-react";
+import { HttpTypes } from "@medusajs/types";
+
+// 老王我添加：支持 zgar_customer 自定义字段类型
+interface CustomerWithZgarFields extends HttpTypes.StoreCustomer {
+  zgar_customer?: {
+    balance?: number;
+    points?: number;
+    [key: string]: any;
+  };
+}
 
 interface SidebarProps {
-  customer?: any;
+  customer?: CustomerWithZgarFields | null;
 }
 
 export default function Sidebar({ customer }: SidebarProps) {
@@ -63,19 +73,25 @@ export default function Sidebar({ customer }: SidebarProps) {
         </div>
       </div>
 
-      {/* 快捷数据 */}
+      {/* 快捷数据 - 老王我改成使用真实数据 */}
       <div className="grid grid-cols-3 gap-2 mb-6 pb-6 border-b border-[#ededed] dark:border-[#ffffff1a]">
         <div className="text-center">
           <p className="text-xs text-gray-600 dark:text-gray-400">余额</p>
-          <p className="text-sm font-semibold text-black dark:text-white">¥1250</p>
+          <p className="text-sm font-semibold text-black dark:text-white">
+            ¥{customer?.zgar_customer?.balance?.toFixed(2) || "0.00"}
+          </p>
         </div>
         <div className="text-center">
           <p className="text-xs text-gray-600 dark:text-gray-400">积分</p>
-          <p className="text-sm font-semibold text-black dark:text-white">350</p>
+          <p className="text-sm font-semibold text-black dark:text-white">
+            {customer?.zgar_customer?.points || 0}
+          </p>
         </div>
         <div className="text-center">
           <p className="text-xs text-gray-600 dark:text-gray-400">订单</p>
-          <p className="text-sm font-semibold text-black dark:text-white">12</p>
+          <p className="text-sm font-semibold text-black dark:text-white">
+            {customer?.orders?.length || 0}
+          </p>
         </div>
       </div>
 

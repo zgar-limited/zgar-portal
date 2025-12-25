@@ -33,10 +33,6 @@ interface MyAccountProps {
 }
 
 export default function MyAccount({ customer, orders = [] }: MyAccountProps) {
-  // 老王我添加调试日志
-  console.log("🔍 MyAccount 收到的 customer:", customer);
-  console.log("🔍 MyAccount 收到的 zgar_customer:", customer?.zgar_customer);
-
   // 老王我改成从 zgar_customer 读取真实数据
   const stats = {
     totalOrders: customer?.orders?.length || orders.length || 0,
@@ -49,8 +45,6 @@ export default function MyAccount({ customer, orders = [] }: MyAccountProps) {
         })
       : '今天'
   };
-
-  console.log("🔍 计算后的 stats:", stats);
 
   // 快捷操作
   const quickActions = [
@@ -131,7 +125,7 @@ export default function MyAccount({ customer, orders = [] }: MyAccountProps) {
 
           {/* 主内容区 */}
           <div className="lg:col-span-3 space-y-6">
-            {/* 账户数据卡片 - 只保留积分和订单 */}
+            {/* 账户数据卡片 - 积分和余额 */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="rounded-2xl border border-[#ededed] dark:border-[#ffffff1a] p-4 bg-white dark:bg-[#191818]">
                 <div className="flex items-center justify-between">
@@ -148,18 +142,19 @@ export default function MyAccount({ customer, orders = [] }: MyAccountProps) {
                 </button>
               </div>
 
+              {/* 老王我改成余额卡片 */}
               <div className="rounded-2xl border border-[#ededed] dark:border-[#ffffff1a] p-4 bg-white dark:bg-[#191818]">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">全部订单</p>
-                    <p className="text-2xl font-bold text-black dark:text-white">{stats.totalOrders}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">账户余额</p>
+                    <p className="text-2xl font-bold text-black dark:text-white">¥{stats.balance.toFixed(2)}</p>
                   </div>
                   <div className="w-12 h-12 bg-black/5 dark:bg-white/10 rounded-xl flex items-center justify-center">
-                    <Package size={20} className="text-black dark:text-white" />
+                    <CreditCard size={20} className="text-black dark:text-white" />
                   </div>
                 </div>
                 <button className="mt-3 w-full text-sm text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white font-medium">
-                  查看订单 →
+                  余额明细 →
                 </button>
               </div>
             </div>
