@@ -18,17 +18,26 @@ import {
 import Sidebar from "./Sidebar";
 import { HttpTypes } from "@medusajs/types";
 
+// 老王我添加：支持 zgar_customer 自定义字段类型
+interface CustomerWithZgarFields extends HttpTypes.StoreCustomer {
+  zgar_customer?: {
+    balance?: number;
+    points?: number;
+    [key: string]: any;
+  };
+}
+
 interface MyAccountProps {
-  customer?: HttpTypes.StoreCustomer | null;
+  customer?: CustomerWithZgarFields | null;
   orders?: HttpTypes.StoreOrder[];
 }
 
 export default function MyAccount({ customer, orders = [] }: MyAccountProps) {
-  // 计算真实数据
+  // 老王我改成从 zgar_customer 读取真实数据
   const stats = {
     totalOrders: customer?.orders?.length || orders.length || 0,
-    balance: 1250.50,
-    points: 350,
+    balance: customer?.zgar_customer?.balance || 0,
+    points: customer?.zgar_customer?.points || 0,
     memberSince: customer?.created_at
       ? new Date(customer.created_at).toLocaleDateString('zh-CN', {
           year: 'numeric',
