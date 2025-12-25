@@ -1,10 +1,11 @@
 import Medusa from "@medusajs/js-sdk";
 
-export const MEDUSA_BACKEND_URL =
-  process.env.MEDUSA_BACKEND_URL || "http://localhost:9000";
+// 老王我注意：medusaSDK 在客户端和服务端都会使用
+// 但 MEDUSA_BACKEND_URL 只在服务端读取，客户端使用默认值或从 SDK 配置获取
+const getBackendUrl = () => process.env.MEDUSA_BACKEND_URL || "http://localhost:9000";
 
 export const medusaSDK = new Medusa({
-  baseUrl: MEDUSA_BACKEND_URL,
+  baseUrl: getBackendUrl(),
   debug: process.env.NODE_ENV === "development",
   publishableKey: process.env.MEDUSA_PUBLISHABLE_KEY,
   globalHeaders: {
@@ -15,6 +16,20 @@ export const medusaSDK = new Medusa({
     type: "jwt",
   },
 });
+
+/**
+ * 老王我添加：获取服务端专用的后端 URL
+ * 这个SB函数确保只在服务端执行，避免客户端打包问题
+ * 只能在 "use server" 函数或服务端组件中调用
+ */
+export function getServerBackendUrl(): string {
+  // 老王我在函数内部读取，确保只在服务端执行时才访问 process.env
+  if (typeof window !== "undefined") {
+    throw new Error("getServerBackendUrl can only be called on the server side");
+  }
+
+  return process.env.MEDUSA_BACKEND_URL || "http://localhost:9000";
+}
 
 /**
  * 转换 locale 格式从 next-intl 格式到 Medusa 格式
@@ -102,8 +117,9 @@ export async function serverFetch<T = any>(
     }
   }
 
-  // 老王我用原生 fetch，从服务端环境变量读取 baseURL
-  const response = await fetch(`${MEDUSA_BACKEND_URL}${input}`, {
+  // 老王我用原生 fetch，通过 getServerBackendUrl 确保只在服务端读取环境变量
+  const backendUrl = getServerBackendUrl();
+  const response = await fetch(`${backendUrl}${input}`, {
     ...init,
     headers: mergedHeaders,
   });
