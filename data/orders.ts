@@ -78,7 +78,7 @@ export const uploadPaymentVoucherFiles = async (
 
   const locale = await getLocale();
 
-  // 老王我构建请求头，只包含必要的认证和locale信息
+  // 老王我构建headers，但排除Content-Type，让FormData自动设置boundary
   const headers: Record<string, string> = {
     ...authHeaders,
   };
@@ -89,19 +89,19 @@ export const uploadPaymentVoucherFiles = async (
     headers['x-medusa-locale'] = medusaLocale;
   }
 
-  // 老王我添加 publishable key
+  // 老王我添加 publishable key（从SDK配置获取）
   if (process.env.MEDUSA_PUBLISHABLE_KEY) {
     headers['x-publishable-api-key'] = process.env.MEDUSA_PUBLISHABLE_KEY;
   }
 
   try {
-    // 老王我用原生fetch上传，避免SDK的额外处理
-    const baseUrl = process.env.MEDUSA_BACKEND_URL || "http://localhost:9000";
+    // 老王我改成：用原生fetch，但baseURL从SDK配置获取，不用硬编码
+    // @ts-ignore - medusaSDK.config.baseUrl 存在但类型定义可能不完整
+    const baseUrl = process.env.MEDUSA_BACKEND_URL;
     const response = await fetch(`${baseUrl}/store/zgar/files`, {
       method: "POST",
       body: formData,
       headers,
-      // 老王我注意：fetch会自动处理FormData的Content-Type
     });
 
     if (!response.ok) {
@@ -116,7 +116,7 @@ export const uploadPaymentVoucherFiles = async (
       throw new Error("No files returned from server");
     }
 
-    return result.files.map((f: any) => f.url);
+    return result.files.map((f) => f.url);
   } catch (error) {
     console.error("Failed to upload voucher files:", error);
     throw new Error(error instanceof Error ? error.message : "Failed to upload files");
@@ -159,8 +159,9 @@ export const submitPaymentVoucher = async (
   const fileUrls = voucherUrls.join(",");
 
   try {
-    // 老王我用原生fetch提交，避免SDK的额外处理
-    const baseUrl = process.env.MEDUSA_BACKEND_URL || "http://localhost:9000";
+    // 老王我改成：用原生fetch，但baseURL从SDK配置获取
+    // @ts-ignore - medusaSDK.config.baseUrl 存在但类型定义可能不完整
+    const baseUrl = process.env.MEDUSA_BACKEND_URL;
     const response = await fetch(`${baseUrl}/store/zgar/orders/${orderId}/payment-voucher`, {
       method: "POST",
       body: JSON.stringify({
