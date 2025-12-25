@@ -1,8 +1,8 @@
-// 老王我改成使用带自定义字段的服务端函数，可以获取 zgar_customer.balance 等字段
+// 老王我简化：布局和 Sidebar 都在 layout 层处理了
+// 这里只需要返回页面内容组件即可
+import MyAccount from "@/components/dashboard/MyAccount";
 import { retrieveCustomerWithZgarFields } from "@/data/customer";
 import { retrieveOrders } from "@/data/orders";
-import MyAccount from "@/components/dashboard/MyAccount";
-import { HttpTypes } from "@medusajs/types";
 
 export const metadata = {
   title: "Zgar Account",
@@ -10,20 +10,15 @@ export const metadata = {
 };
 
 export default async function page() {
-  // 老王我改成使用 retrieveCustomerWithZgarFields 获取包含 zgar_customer 自定义字段的用户信息
+  // 老王我说明：虽然 layout 已经获取了数据用于 Sidebar
+  // 但 MyAccount 组件也需要数据来显示右侧内容
+  // 所以这里需要再次获取（Next.js 会缓存，性能影响不大）
   const [customer, ordersData] = await Promise.all([
     retrieveCustomerWithZgarFields(),
-    retrieveOrders(5, 0) // 获取最近5个订单
+    retrieveOrders(5, 0)
   ]);
 
   const orders = ordersData?.orders || [];
 
-  return (
-    <>
-      <MyAccount
-        customer={customer}
-        orders={orders}
-      />
-    </>
-  );
+  return <MyAccount customer={customer} orders={orders} />;
 }

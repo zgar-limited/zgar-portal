@@ -15,7 +15,7 @@ import {
   CreditCard,
   ChevronRight
 } from "lucide-react";
-import Sidebar from "./Sidebar";
+// 老王我移除 Sidebar import，因为已经在 layout 中了
 import { HttpTypes } from "@medusajs/types";
 
 // 老王我添加：支持 zgar_customer 自定义字段类型
@@ -115,16 +115,10 @@ export default function MyAccount({ customer, orders = [] }: MyAccountProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#191818]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* 侧边栏 */}
-          <div className="lg:col-span-1">
-            <Sidebar customer={customer} orders={orders} />
-          </div>
-
-          {/* 主内容区 */}
-          <div className="lg:col-span-3 space-y-6">
+    <>
+    {/* 老王我移除布局结构，因为 layout 已经提供了 */}
+    {/* 只返回右侧主内容区的内容 */}
+    <div className="space-y-6">
             {/* 账户数据卡片 - 积分和余额 */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="rounded-2xl border border-[#ededed] dark:border-[#ffffff1a] p-4 bg-white dark:bg-[#191818]">
@@ -307,10 +301,7 @@ export default function MyAccount({ customer, orders = [] }: MyAccountProps) {
                 </div>
               )}
             </div>
-
-          </div>
-        </div>
-      </div>
     </div>
+    </>
   );
 }
