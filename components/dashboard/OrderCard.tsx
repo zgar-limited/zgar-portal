@@ -119,15 +119,15 @@ export default function OrderCard({
           详情
         </Button>
         <Button
-          variant={cn(
-            "ghost",
+          variant="ghost"
+          className={cn(
+            "flex-1",
             (order as any).zgar_order?.payment_voucher_uploaded_at
               ? "text-green-600 hover:text-green-700 hover:bg-green-50"
               : "text-muted-foreground hover:text-foreground"
           )}
           size="sm"
           onClick={onUploadVoucher}
-          className="flex-1"
         >
           <Upload size={14} className="mr-1" />
           {(order as any).zgar_order?.payment_voucher_uploaded_at
@@ -135,15 +135,15 @@ export default function OrderCard({
             : "上传凭证"}
         </Button>
         <Button
-          variant={cn(
-            "ghost",
+          variant="ghost"
+          className={cn(
+            "flex-1",
             (order as any).zgar_order?.packing_requirement_uploaded_at
               ? "text-blue-600 hover:text-blue-700 hover:bg-blue-50"
               : "text-muted-foreground hover:text-foreground"
           )}
           size="sm"
           onClick={onUploadPacking}
-          className="flex-1"
         >
           <Package size={14} className="mr-1" />
           {(order as any).zgar_order?.packing_requirement_uploaded_at

@@ -91,7 +91,7 @@ export default function Sidebar({ customer, orders }: SidebarProps) {
         <div className="text-center">
           <p className="text-xs text-gray-600 dark:text-gray-400">订单</p>
           <p className="text-sm font-semibold text-black dark:text-white">
-            {orders?.length || customer?.orders?.length || 0}
+            {orders?.length || 0}
           </p>
         </div>
       </div>

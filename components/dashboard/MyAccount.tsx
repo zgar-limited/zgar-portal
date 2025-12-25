@@ -35,7 +35,7 @@ interface MyAccountProps {
 export default function MyAccount({ customer, orders = [] }: MyAccountProps) {
   // 老王我改成从 zgar_customer 读取真实数据
   const stats = {
-    totalOrders: customer?.orders?.length || orders.length || 0,
+    totalOrders: orders.length || 0,
     balance: customer?.zgar_customer?.balance || 0,
     points: customer?.zgar_customer?.points || 0,
     memberSince: customer?.created_at

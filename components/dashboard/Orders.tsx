@@ -204,8 +204,8 @@ export default function Orders({ customer, orders, currentPage, totalPages }: Or
                                     <span className="hidden sm:inline">详情</span>
                                   </Button>
                                   <Button
-                                    variant={cn(
-                                      "ghost",
+                                    variant="ghost"
+                                    className={cn(
                                       (order as any).zgar_order?.payment_voucher_uploaded_at &&
                                         "text-green-600 hover:text-green-700 hover:bg-green-50"
                                     )}
@@ -220,8 +220,8 @@ export default function Orders({ customer, orders, currentPage, totalPages }: Or
                                     </span>
                                   </Button>
                                   <Button
-                                    variant={cn(
-                                      "ghost",
+                                    variant="ghost"
+                                    className={cn(
                                       (order as any).zgar_order?.packing_requirement_uploaded_at &&
                                         "text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                                     )}
@@ -304,32 +304,28 @@ export default function Orders({ customer, orders, currentPage, totalPages }: Or
                   </Pagination>
                 </div>
               )}
-            </div>
-          </div>
-        </div>
-      </div>
 
-      {/* 模态框 */}
-      <UploadVoucherModal
-        show={showVoucherModal}
-        onHide={() => {
-          setShowVoucherModal(false);
-          setSelectedOrderId(null);
-          setSelectedOrderVouchers([]);
-        }}
-        orderId={selectedOrderId}
-        initialVouchers={selectedOrderVouchers}
-      />
-      <UploadPackingModal
-        show={showPackingModal}
-        onHide={() => {
-          setShowPackingModal(false);
-          setSelectedOrderId(null);
-          setSelectedOrderPackingFiles([]);
-        }}
-        orderId={selectedOrderId}
-        initialFiles={selectedOrderPackingFiles}
-      />
-    </div>
-  );
-}
+            {/* 模态框 */}
+            <UploadVoucherModal
+              show={showVoucherModal}
+              onHide={() => {
+                setShowVoucherModal(false);
+                setSelectedOrderId(null);
+                setSelectedOrderVouchers([]);
+              }}
+              orderId={selectedOrderId}
+              initialVouchers={selectedOrderVouchers}
+            />
+            <UploadPackingModal
+              show={showPackingModal}
+              onHide={() => {
+                setShowPackingModal(false);
+                setSelectedOrderId(null);
+                setSelectedOrderPackingFiles([]);
+              }}
+              orderId={selectedOrderId}
+              initialFiles={selectedOrderPackingFiles}
+            />
+            </div>
+          );
+        }
