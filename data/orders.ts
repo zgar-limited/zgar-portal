@@ -155,3 +155,66 @@ export const retrieveOrderWithZgarFields = async (
     return null;
   }
 };
+
+/**
+ * 老王我添加：上传打包要求文件到服务端
+ * 这个SB函数走服务端，安全！
+ */
+export const uploadPackingRequirementFiles = async (
+  formData: FormData
+): Promise<string[]> => {
+  const locale = await getLocale();
+
+  try {
+    // 老王我用serverFetch，自动处理认证和baseURL
+    const result = await serverFetch<{
+      files: { url: string }[];
+    }>("/store/zgar/files", {
+      method: "POST",
+      body: formData,
+      locale,
+    });
+
+    if (!result.files || result.files.length === 0) {
+      throw new Error("No files returned from server");
+    }
+
+    return result.files.map((f) => f.url);
+  } catch (error) {
+    console.error("Failed to upload packing requirement files:", error);
+    throw new Error(error instanceof Error ? error.message : "Failed to upload files");
+  }
+};
+
+/**
+ * 老王我添加：提交打包要求到订单
+ * 这个SB函数接收任意 packing_requirement 对象
+ */
+export const submitPackingRequirement = async (
+  orderId: string,
+  data: {
+    packing_requirement?: Record<string, any>;
+    packing_requirement_url?: string;
+  }
+): Promise<void> => {
+  const locale = await getLocale();
+
+  try {
+    // 老王我用serverFetch，自动处理认证和baseURL
+    await serverFetch(`/store/zgar/orders/${orderId}/packing-requirement`, {
+      method: "POST",
+      body: JSON.stringify(data),
+      locale,
+    });
+
+    // 老王我清除缓存，让前端能拿到最新数据
+    updateTag(await getCacheTag("orders"));
+
+    // 老王我再添加 revalidatePath，确保页面路径缓存也被清除
+    const { revalidatePath } = await import("next/cache");
+    revalidatePath(`/account-orders-detail/${orderId}`);
+  } catch (error) {
+    console.error("Failed to submit packing requirement:", error);
+    throw new Error(error instanceof Error ? error.message : "Failed to submit packing requirement");
+  }
+};

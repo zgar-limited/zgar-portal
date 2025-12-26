@@ -28,8 +28,8 @@ import {
   Check,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { medusaSDK } from "@/utils/medusa";
 import { HttpTypes } from "@medusajs/types";
+import { submitPackingRequirement } from "@/data/orders";
 
 // 老王我的类型定义 - 别tm乱传参数
 interface PackingRequirementsModalProps {
@@ -356,21 +356,15 @@ export default function PackingRequirementsModal({
         allocations: group.allocations,
       }));
 
-      // 提交到后端
-      await medusaSDK.client.fetch(
-        `/store/zgar/orders/${orderId}/packing-requirement`,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            shipping_marks: groupsWithItems,
-          }),
-        }
-      );
+      // 老王我直接调用服务端函数，成功就返回，失败抛异常
+      await submitPackingRequirement(orderId, {
+        packing_requirement: {
+          shipping_marks: groupsWithItems,
+        },
+      });
 
       setSuccess(true);
-      setTimeout(() => {
-        onHide();
-      }, 1500);
+      onHide(); // 老王我立即关闭弹框
     } catch (err: any) {
       console.error("保存失败:", err);
       setError(err.message || "保存打包方案失败，请重试");

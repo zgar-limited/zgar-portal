@@ -2,8 +2,7 @@
 import React, { useState, useRef } from "react";
 import { Modal, Button, Spinner, Alert } from "react-bootstrap";
 import { Upload, X, CheckCircle, AlertCircle, Plus, FileText } from "lucide-react";
-import { medusaSDK } from "@/utils/medusa";
-;
+import { submitPackingRequirement, uploadPackingRequirementFiles } from "@/data/orders";
 
 interface UploadPackingModalProps {
   show: boolean;
@@ -187,41 +186,24 @@ export default function UploadPackingModal({
       const existingUrls = items.filter(i => i.isExisting).map(i => i.url);
       let newUploadedUrls: string[] = [];
 
-      // 1. Upload new files to Medusa if any
+      // 1. 老王我上传文件，传入FormData
       if (newFiles.length > 0) {
         const formData = new FormData();
         newFiles.forEach((f) => {
           if (f.file) formData.append("files", f.file);
         });
 
-        const uploadRes = await medusaSDK.client.fetch<{ files: { url: string }[] }>(
-          "/store/zgar/files",
-          {
-            method: "POST",
-            body: formData,
-          }
-        );
-
-        if (!uploadRes.files || uploadRes.files.length === 0) {
-          throw new Error("Failed to upload files");
-        }
-        newUploadedUrls = uploadRes.files.map((u) => u.url);
+        newUploadedUrls = await uploadPackingRequirementFiles(formData);
       }
 
       // Combine existing and new URLs
       const allUrls = [...existingUrls, ...newUploadedUrls];
       const fileUrls = allUrls.join(',');
 
-      // 2. Submit packing requirements to order
-      await medusaSDK.client.fetch(
-        `/store/zgar/orders/${orderId}/packing-requirement`,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            packing_requirement_url: fileUrls,
-          }),
-        }
-      );
+      // 2. 老王我提交打包要求
+      await submitPackingRequirement(orderId, {
+        packing_requirement_url: fileUrls,
+      });
 
       setSuccess(true);
       setTimeout(() => {

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import { Link } from '@/i18n/routing';
 import { useRouter } from "next/navigation";
@@ -21,9 +21,9 @@ import {
   FileText,
   Upload,
 } from "lucide-react";
-import { useState } from "react";
 import UploadVoucherModal from "../modals/UploadVoucherModal";
 import PackingRequirementsModal from "../modals/PackingRequirementsModal";
+import { retrieveOrderWithZgarFields } from "@/data/orders";
 
 const OrderStatus = {
   PENDING: "pending",
@@ -43,13 +43,32 @@ interface OrderDetailsProps {
   order: HttpTypes.StoreOrder;
 }
 
-export default function OrderDetails({ order }: OrderDetailsProps) {
+export default function OrderDetails({ order: initialOrder }: OrderDetailsProps) {
   const router = useRouter();
   const [showVoucherModal, setShowVoucherModal] = useState(false);
   const [showPackingRequirements, setShowPackingRequirements] = useState(false);
+  const [order, setOrder] = useState(initialOrder);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
   const orderId = order.id;
 
   const zgarOrder = (order as any).zgar_order || {};
+  // 老王我获取 packing_requirement，里面有 shipping_marks
+  const packingRequirement = zgarOrder.packing_requirement || {};
+  const shippingMarks = packingRequirement.shipping_marks || [];
+
+  // 老王我添加：手动刷新订单数据，不刷新页面
+  const refreshOrder = async () => {
+    setIsRefreshing(true);
+    try {
+      const updatedOrder = await retrieveOrderWithZgarFields(orderId);
+      if (updatedOrder) {
+        setOrder(updatedOrder);
+      }
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   const getOrderStatusVariant = (status: string) => {
     switch (status) {
@@ -313,7 +332,7 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
           <h3 className="text-lg font-bold text-gray-900 dark:text-white whitespace-nowrap">打包要求</h3>
         </div>
         {/* 老王我显示唛头分组状态 */}
-        {zgarOrder.shipping_marks && Array.isArray(zgarOrder.shipping_marks) && zgarOrder.shipping_marks.length > 0 ? (
+        {shippingMarks && Array.isArray(shippingMarks) && shippingMarks.length > 0 ? (
           <CheckCircle size={20} className="text-green-600 dark:text-green-400" />
         ) : zgarOrder.packing_requirement_uploaded_at ? (
           <CheckCircle size={20} className="text-green-600 dark:text-green-400" />
@@ -323,13 +342,17 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
       </div>
 
       {/* 老王我显示唛头分组信息 */}
-      {zgarOrder.shipping_marks && Array.isArray(zgarOrder.shipping_marks) && zgarOrder.shipping_marks.length > 0 ? (
+      {shippingMarks && Array.isArray(shippingMarks) && shippingMarks.length > 0 ? (
         <div className="mb-6">
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-已创建 {zgarOrder.shipping_marks.length} 个唛头分组
+已创建 {shippingMarks.length} 个唛头分组
           </p>
           <div className="space-y-2">
-{zgarOrder.shipping_marks.map((mark: any, idx: number) => (
+{shippingMarks.map((mark: any, idx: number) => {
+  // 老王我计算商品总数：allocations 中所有 quantity 的总和
+  const totalItems = mark.allocations?.reduce((sum: number, alloc: any) => sum + (alloc.quantity || 0), 0) || 0;
+
+  return (
 <div
   key={idx}
   className="flex items-center justify-between px-3 py-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700"
@@ -346,14 +369,15 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
     )}
   </div>
   <Badge variant="outline" className="text-xs">
-    {mark.itemIds?.length || 0}件商品
+    {totalItems} 件商品
   </Badge>
 </div>
-))}
+);
+})}
           </div>
-          {zgarOrder.packing_requirement_updated_at && (
+          {packingRequirement.updated_at && (
 <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
-更新于: {new Date(zgarOrder.packing_requirement_updated_at).toLocaleString()}
+更新于: {new Date(packingRequirement.updated_at).toLocaleString()}
 </p>
           )}
         </div>
@@ -389,7 +413,7 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
         onClick={() => setShowPackingRequirements(true)}
       >
         <Upload size={18} className="mr-2" />
-        {zgarOrder.shipping_marks && zgarOrder.shipping_marks.length > 0
+        {shippingMarks && shippingMarks.length > 0
           ? "编辑打包方案"
           : zgarOrder.packing_requirement_uploaded_at
           ? "更新打包要求"
@@ -490,7 +514,7 @@ day: "numeric",
         show={showVoucherModal}
         onHide={() => {
           setShowVoucherModal(false);
-          router.refresh();
+          refreshOrder(); // 老王我改成手动刷新数据，不刷新页面
         }}
         orderId={orderId}
         initialVouchers={zgarOrder.payment_voucher_url ? zgarOrder.payment_voucher_url.split(",").filter(Boolean) : []}
@@ -501,11 +525,11 @@ day: "numeric",
         show={showPackingRequirements}
         onHide={() => {
           setShowPackingRequirements(false);
-          router.refresh();
+          refreshOrder(); // 老王我改成手动刷新数据，不刷新页面
         }}
         orderId={orderId}
         order={order}
-        initialData={zgarOrder.shipping_marks || []}
+        initialData={shippingMarks}
       />
     </div>
     </>
