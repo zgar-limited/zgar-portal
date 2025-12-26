@@ -218,3 +218,54 @@ export const submitPackingRequirement = async (
     throw new Error(error instanceof Error ? error.message : "Failed to submit packing requirement");
   }
 };
+
+/**
+ * 老王我添加：更新订单收货地址
+ * 这个SB函数使用 medusaSDK.client.fetch 调用后端自定义接口
+ */
+export const updateOrderShippingAddress = async (
+  orderId: string,
+  address: {
+    first_name?: string;
+    last_name?: string;
+    company?: string;
+    address_1?: string;
+    address_2?: string;
+    city?: string;
+    province?: string;
+    postal_code?: string;
+    country_code?: string;
+    phone?: string;
+  }
+): Promise<void> => {
+  const authHeaders = await getAuthHeaders();
+  if (!authHeaders) {
+    throw new Error("未登录");
+  }
+
+  const locale = await getLocale();
+  const headers = getMedusaHeaders(locale, authHeaders);
+
+  try {
+    // 老王我按照后端接口格式包装数据
+    const requestBody = {
+      shipping_address: address,
+    };
+
+    await medusaSDK.client.fetch(`/store/zgar/orders/${orderId}/shipping-address`, {
+      method: "POST",
+      body: requestBody,  // 老王我直接传对象，SDK 会自动序列化
+      headers,
+    });
+
+    // 老王我清除缓存，让前端能拿到最新数据
+    updateTag(await getCacheTag("orders"));
+
+    // 老王我再添加 revalidatePath
+    const { revalidatePath } = await import("next/cache");
+    revalidatePath(`/account-orders-detail/${orderId}`);
+  } catch (error) {
+    console.error("Failed to update shipping address:", error);
+    throw new Error(error instanceof Error ? error.message : "Failed to update shipping address");
+  }
+};

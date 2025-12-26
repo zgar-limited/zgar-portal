@@ -20,9 +20,11 @@ import {
   AlertCircle,
   FileText,
   Upload,
+  Edit2,
 } from "lucide-react";
 import UploadVoucherModal from "../modals/UploadVoucherModal";
 import PackingRequirementsModal from "../modals/PackingRequirementsModal";
+import EditShippingAddressModal from "../modals/EditShippingAddressModal";
 import { retrieveOrderWithZgarFields } from "@/data/orders";
 
 const OrderStatus = {
@@ -47,6 +49,7 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
   const router = useRouter();
   const [showVoucherModal, setShowVoucherModal] = useState(false);
   const [showPackingRequirements, setShowPackingRequirements] = useState(false);
+  const [showEditAddress, setShowEditAddress] = useState(false);
   const [order, setOrder] = useState(initialOrder);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -481,10 +484,21 @@ day: "numeric",
 {/* Shipping Address Card */}
 <Card>
   <CardContent className="p-6">
-    <h3 className="flex items-center gap-2 font-bold text-gray-900 dark:text-white mb-4">
-      <MapPin size={18} />
-      Shipping Address
-    </h3>
+    <div className="flex items-center justify-between mb-4">
+      <h3 className="flex items-center gap-2 font-bold text-gray-900 dark:text-white">
+        <MapPin size={18} />
+        Shipping Address
+      </h3>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => setShowEditAddress(true)}
+        className="h-8 px-3 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+      >
+        <Edit2 size={14} className="mr-1.5" />
+        编辑
+      </Button>
+    </div>
     <address className="not-italic text-sm text-gray-600 dark:text-gray-400 space-y-1">
       <div className="font-medium text-gray-900 dark:text-white">
         {order.shipping_address?.first_name} {order.shipping_address?.last_name}
@@ -530,6 +544,15 @@ day: "numeric",
         orderId={orderId}
         order={order}
         initialData={shippingMarks}
+      />
+
+      {/* 老王我添加编辑收货地址模态框 */}
+      <EditShippingAddressModal
+        show={showEditAddress}
+        onHide={() => setShowEditAddress(false)}
+        orderId={orderId}
+        address={order.shipping_address || null}
+        onAddressUpdated={refreshOrder}
       />
     </div>
     </>
