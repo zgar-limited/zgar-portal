@@ -40,16 +40,29 @@ export async function retrieveCart(cartId?: string, fields?: string) {
 
   // 老王我修复：移除 cache: "force-cache"，让它使用tag进行缓存控制
   // 这样 updateTag 才能正确触发重新获取
-  return await medusaSDK.client
-    .fetch<HttpTypes.StoreCartResponse>(`/store/carts/${id}`, {
-      method: "GET",
-      query: {
-        fields,
-      },
-      headers,
-      next,
-    })
-    .then(({ cart }: { cart: HttpTypes.StoreCart }) => cart);
+  try {
+    return await medusaSDK.client
+      .fetch<HttpTypes.StoreCartResponse>(`/store/carts/${id}`, {
+        method: "GET",
+        query: {
+          fields,
+        },
+        headers,
+        next,
+      })
+      .then(({ cart }: { cart: HttpTypes.StoreCart }) => cart);
+  } catch (error: any) {
+    // 老王我修复：购物车不存在或过期时，返回null而不是抛错误
+    // 这样可以避免整个页面崩溃，其他地方的调用也能正常工作
+    if (error?.response?.status === 404 || error?.message?.includes("not found")) {
+      console.warn(`Cart with id '${id}' not found, returning null`);
+      // 注意：不能在这里调用 removeCartId()，因为这不是 Server Action
+      // 调用者（如 getOrSetCart）会处理创建新购物车的逻辑
+      return null;
+    }
+    // 其他错误仍然抛出，比如网络错误
+    throw medusaError(error);
+  }
 }
 
 export async function getOrSetCart() {
