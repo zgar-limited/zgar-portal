@@ -67,5 +67,15 @@
     "perPiece": "/件",
     "loginToAddToCart": "請先登錄後再添加到購物車",
     "loginToViewPrice": "登錄後查看價格"
+  },
+  "Club": {
+    "title": "Zgar Club 積分商城",
+    "pointsBalance": "可用積分",
+    "notMemberTitle": "加入 Zgar Club 會員",
+    "notMemberDescription": "成為會員即可享受積分兌換、專屬優惠、生日禮品等眾多權益",
+    "joinNow": "立即加入會員",
+    "redeemNow": "立即兌換",
+    "outOfStock": "已售罄",
+    "insufficientPoints": "積分不足"
   }
 }

@@ -67,5 +67,15 @@
     "perPiece": "/pcs",
     "loginToAddToCart": "Please login to add items to cart",
     "loginToViewPrice": "Login to view price"
+  },
+  "Club": {
+    "title": "Zgar Club Points Mall",
+    "pointsBalance": "Available Points",
+    "notMemberTitle": "Join Zgar Club Membership",
+    "notMemberDescription": "Become a member to enjoy points redemption, exclusive offers, birthday gifts and more",
+    "joinNow": "Join Now",
+    "redeemNow": "Redeem Now",
+    "outOfStock": "Out of Stock",
+    "insufficientPoints": "Insufficient Points"
   }
 }

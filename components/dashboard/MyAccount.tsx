@@ -1,8 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { Link } from '@/i18n/routing';
 import Image from "next/image";
-import React from "react";
 import {
   Package,
   MapPin,
@@ -13,10 +13,13 @@ import {
   User,
   Eye,
   CreditCard,
-  ChevronRight
+  ChevronRight,
+  Trophy
 } from "lucide-react";
 // 老王我移除 Sidebar import，因为已经在 layout 中了
 import { HttpTypes } from "@medusajs/types";
+import Tasks from "./Tasks";
+import type { Task } from "@/data/tasks";
 
 // 老王我添加：支持 zgar_customer 自定义字段类型
 interface CustomerWithZgarFields extends HttpTypes.StoreCustomer {
@@ -30,20 +33,31 @@ interface CustomerWithZgarFields extends HttpTypes.StoreCustomer {
 interface MyAccountProps {
   customer?: CustomerWithZgarFields | null;
   orders?: HttpTypes.StoreOrder[];
+  tasks?: Task[]; // 老王我添加：任务列表数据
 }
 
-export default function MyAccount({ customer, orders = [] }: MyAccountProps) {
+export default function MyAccount({ customer, orders = [], tasks = [] }: MyAccountProps) {
+  // 老王我添加：积分更新状态
+  const [currentPoints, setCurrentPoints] = useState(
+    customer?.zgar_customer?.points || 0
+  );
+
   // 老王我改成从 zgar_customer 读取真实数据
   const stats = {
     totalOrders: orders.length || 0,
     balance: customer?.zgar_customer?.balance || 0,
-    points: customer?.zgar_customer?.points || 0,
+    points: currentPoints, // 老王我用状态值
     memberSince: customer?.created_at
       ? new Date(customer.created_at).toLocaleDateString('zh-CN', {
           year: 'numeric',
           month: 'long'
         })
       : '今天'
+  };
+
+  // 老王我添加：处理积分更新
+  const handlePointsUpdate = (pointsEarned: number) => {
+    setCurrentPoints((prev) => prev + pointsEarned);
   };
 
   // 快捷操作
@@ -58,7 +72,7 @@ export default function MyAccount({ customer, orders = [] }: MyAccountProps) {
     {
       icon: MapPin,
       title: "地址管理",
-      count: 3,
+      count: customer?.addresses?.length || 0,
       link: "/account-addresses",
       color: "primary"
     },
@@ -75,42 +89,6 @@ export default function MyAccount({ customer, orders = [] }: MyAccountProps) {
       count: null,
       link: "/account-setting",
       color: "primary"
-    }
-  ];
-
-  // 积分任务
-  const pointTasks = [
-    {
-      icon: Package,
-      title: "完成首次下单",
-      description: "新用户专享",
-      points: "+100",
-      status: stats.totalOrders > 0 ? "completed" : "pending",
-      progress: stats.totalOrders > 0 ? 100 : 0
-    },
-    {
-      icon: User,
-      title: "完善个人资料",
-      description: "填写完整信息",
-      points: "+50",
-      status: customer?.first_name && customer?.last_name ? "completed" : "pending",
-      progress: customer?.first_name && customer?.last_name ? 100 : 60
-    },
-    {
-      icon: Star,
-      title: "每日签到",
-      description: "连续签到奖励",
-      points: "+10",
-      status: "pending",
-      progress: 0
-    },
-    {
-      icon: Package,
-      title: "评价已购商品",
-      description: "分享使用体验",
-      points: "+20",
-      status: "pending",
-      progress: 30
     }
   ];
 
@@ -172,57 +150,8 @@ export default function MyAccount({ customer, orders = [] }: MyAccountProps) {
               ))}
             </div>
 
-            {/* 积分任务 */}
-            <div className="rounded-2xl border border-[#ededed] dark:border-[#ffffff1a] bg-white dark:bg-[#191818]">
-              <div className="p-6 border-b border-[#ededed] dark:border-[#ffffff1a]">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-bold text-black dark:text-white">积分任务</h2>
-                  <span className="text-sm text-black dark:text-white font-medium">
-                    当前积分: {stats.points}
-                  </span>
-                </div>
-              </div>
-              <div className="divide-y divide-[#ededed] dark:divide-[#ffffff1a]">
-                {pointTasks.map((task, index) => (
-                  <div key={index} className="p-4 hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-3">
-                        <div className={`
-                          w-10 h-10 rounded-xl flex items-center justify-center
-                          ${task.status === 'completed' ? 'bg-black dark:bg-white' : 'bg-black/5 dark:bg-white/10'}
-                        `}>
-                          <task.icon size={18} className={task.status === 'completed' ? 'text-white dark:text-black' : 'text-black dark:text-white'} />
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-black dark:text-white text-sm">{task.title}</h4>
-                          <p className="text-xs text-gray-500 dark:text-gray-500">{task.description}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-sm font-bold text-black dark:text-white">{task.points}</span>
-                        {task.status === 'completed' && (
-                          <span className="ml-2 text-xs text-green-600 dark:text-green-400 font-medium">✓ 已完成</span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="w-full bg-black/10 dark:bg-white/10 rounded-full h-1.5">
-                      <div
-                        className={`
-                          h-1.5 rounded-full transition-all duration-500
-                          ${task.status === 'completed' ? 'bg-green-600 dark:bg-green-400' : 'bg-black dark:bg-white'}
-                        `}
-                        style={{ width: `${task.progress}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="p-4 bg-black/5 dark:bg-white/5 border-t border-[#ededed] dark:border-[#ffffff1a]">
-                <p className="text-sm text-black/60 dark:text-white/60 text-center">
-                  完成任务获取积分，可在积分商城兑换商品
-                </p>
-              </div>
-            </div>
+            {/* 老王我替换成真实的任务系统 */}
+            <Tasks initialTasks={tasks} onPointsUpdate={handlePointsUpdate} />
 
             {/* 最近订单 */}
             <div className="rounded-2xl border border-[#ededed] dark:border-[#ffffff1a] bg-white dark:bg-[#191818]">

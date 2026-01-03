@@ -187,7 +187,7 @@ export default function Footer6({ parentClass = "tf-footer style-4" }) {
                       </Link>
                     </li>
                     <li>
-                      <Link href={`/`} className="link h6">
+                      <Link href={`/club`} className="link h6">
                         Zgar Club
                       </Link>
                     </li>

@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 
 import ProductsSelectModal from "../modals/ProductsSelectModal";
+import PaymentMethodSelector from "@/components/checkout/PaymentMethodSelector";
 import { deleteLineItem, updateLineItem } from "@/data/cart";
 import { toast } from "@/hooks/use-toast";
 import {
@@ -24,6 +25,7 @@ import {
   StoreCart,
   StoreProduct,
   CartLineItemDTO,
+  HttpTypes,
 } from "@medusajs/types";
 
 // Import shadcn components
@@ -55,19 +57,23 @@ import {
 export default function ShopCart({
   cart,
   products,
+  customer,
 }: {
   cart: StoreCart | null;
   products: StoreProduct[];
+  customer?: (HttpTypes.StoreCustomer & { zgar_customer?: any }) | null;
 }) {
-  return <ShopCartContent cart={cart} products={products} />;
+  return <ShopCartContent cart={cart} products={products} customer={customer} />;
 }
 
 function ShopCartContent({
   cart,
   products,
+  customer,
 }: {
   cart: StoreCart | null;
   products: StoreProduct[];
+  customer?: (HttpTypes.StoreCustomer & { zgar_customer?: any }) | null;
 }) {
   const [showModal, setShowModal] = useState(false);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
@@ -76,6 +82,8 @@ function ShopCartContent({
   const [updatingItems, setUpdatingItems] = useState<string[]>([]);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [showCheckoutConfirm, setShowCheckoutConfirm] = useState(false);
+  // 老王我：支付方式选择状态
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'balance' | 'manual_transfer'>('balance');
 
   const [selectedTotalPrice, setSelectedTotalPrice] = useState(0);
   const [selectedTotalWeight, setSelectedTotalWeight] = useState(0);
@@ -248,27 +256,43 @@ function ShopCartContent({
       // 动态导入服务端方法
       const { completeZgarCartCheckout } = await import("@/data/cart");
 
-      // 调用服务端 checkout 方法，自动包含用户认证信息
-      // 结算后选中的购物车items会被清除，缓存会自动更新
+      // 老王我：调用服务端 checkout 方法创建订单
       const result = await completeZgarCartCheckout(itemsToCheckout);
 
-      // 老王我获取订单ID并跳转到订单详情页面
+      // 老王我：获取订单ID
       const orderId = result?.order?.id || result?.order_id || result?.id;
 
-      if (orderId) {
-        // 清空选中的商品 - 在跳转前清空
-        setSelectedItems([]);
-        toast.success("订单提交成功！");
-        // 延迟跳转，让用户看到成功提示
-        setTimeout(() => {
-          router.push(`/account-orders-detail/${orderId}`);
-        }, 500);
-      } else {
-        // 如果没有订单ID，显示成功提示
-        toast.success("订单提交成功！");
-        // 也清空选中的商品
-        setSelectedItems([]);
+      if (!orderId) {
+        toast.error("订单创建失败");
+        return;
       }
+
+      // 老王我：根据选择的支付方式执行相应操作
+      if (selectedPaymentMethod === 'balance') {
+        // 余额支付
+        const { payOrderWithBalance } = await import("@/data/payments");
+        const paymentResult = await payOrderWithBalance(orderId);
+
+        if (paymentResult.error) {
+          toast.error(paymentResult.error);
+          // 即使支付失败，订单已创建，跳转到订单详情
+          router.push(`/account-orders-detail/${orderId}`);
+          return;
+        }
+
+        toast.success("✅ 订单创建成功！余额支付已完成");
+      } else {
+        // 手动转账
+        toast.success("✅ 订单创建成功！请上传转账凭证");
+      }
+
+      // 清空选中的商品
+      setSelectedItems([]);
+
+      // 延迟跳转到订单详情页
+      setTimeout(() => {
+        router.push(`/account-orders-detail/${orderId}`);
+      }, 500);
     } catch (error: any) {
       console.error("Checkout error:", error);
       toast.error(error.message || "提交订单失败，请重试");
@@ -837,6 +861,14 @@ function ShopCartContent({
               </tbody>
             </table>
           </div>
+
+          {/* 支付方式选择 - 老王我新增 */}
+          <PaymentMethodSelector
+            mode="selection"
+            orderAmount={selectedTotalPrice}
+            customer={customer}
+            onPaymentMethodChange={setSelectedPaymentMethod}
+          />
 
           {/* 汇总信息 */}
           <div className="bg-gray-50 rounded-lg p-5 space-y-3 border border-gray-200">

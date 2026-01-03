@@ -3,6 +3,7 @@ import { retrieveCustomer } from "@/data/customer";
 import HomeFooter from "@/widgets/HomeFooter";
 import HomeHeader from "@/widgets/HomeHeader";
 import HomeTips from "@/widgets/HomeTips";
+import GlobalEffectsProvider from "@/components/common/GlobalEffectProvider"; // 老王我添加：全局效果Provider
 import { Toaster } from "sonner";
 
 export default async function RootLayout({ children }) {
@@ -12,6 +13,7 @@ export default async function RootLayout({ children }) {
 
   return (
     <>
+      <GlobalEffectsProvider customer={customer} /> {/* 老王我添加：全局效果Provider */}
       <HomeTips></HomeTips>
       <HomeHeader cart={cart} customer={customer}></HomeHeader>
       {children}

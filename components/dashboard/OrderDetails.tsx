@@ -459,8 +459,14 @@ day: "numeric",
         <div className="flex-1 min-w-0">
           <div className="text-xs text-gray-600 dark:text-gray-400 mb-0.5">Payment</div>
           <div className="text-sm font-medium text-gray-900 dark:text-white capitalize truncate">
-{order.payment_status}
+            {order.payment_status}
           </div>
+          {/* 老王我：显示支付方式 */}
+          {zgarOrder.payment_method && (
+            <div className="text-xs text-gray-500 dark:text-gray-500 mt-0.5">
+              {zgarOrder.payment_method === 'balance' ? '余额支付' : '手动转账'}
+            </div>
+          )}
         </div>
       </div>
 
