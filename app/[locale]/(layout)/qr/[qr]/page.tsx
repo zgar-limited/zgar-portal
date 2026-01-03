@@ -1,0 +1,33 @@
+import { notFound } from "next/navigation";
+import QrRedeem from "@/components/points/QrRedeem";
+
+export const metadata = {
+  title: "G-Points Redemption || Zgar",
+  description: "Scan QR code to earn G-Points",
+};
+
+// 老王我：生成静态参数以支持动态路由
+export function generateStaticParams() {
+  return [{ qr: "redeem" }];
+}
+
+export default async function QrRedeemPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string; qr: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const { locale, qr } = await params;
+  const params_server = await searchParams;
+
+  // 老王我：验证路由参数
+  if (qr !== "redeem") {
+    notFound();
+  }
+
+  // 老王我：从 query 参数获取积分兑换码
+  const redeemCode = params_server.code as string || null;
+
+  return <QrRedeem locale={locale} redeemCode={redeemCode} />;
+}

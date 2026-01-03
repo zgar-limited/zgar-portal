@@ -124,7 +124,7 @@ function ShopCartContent({
     setSelectedItems((prev) =>
       prev.filter((id) => cartProducts.some((p) => p.id === id))
     );
-  }, [cart?.items, cartProducts, itemsPerPage]);
+  }, [cartProducts, itemsPerPage]);
 
   useEffect(() => {
     const selectedProducts = cartProducts.filter((p) =>
@@ -253,46 +253,59 @@ function ShopCartContent({
           metadata: p.metadata as any,
         }));
 
-      // 动态导入服务端方法
-      const { completeZgarCartCheckout } = await import("@/data/cart");
-
-      // 老王我：调用服务端 checkout 方法创建订单
-      const result = await completeZgarCartCheckout(itemsToCheckout);
-
-      // 老王我：获取订单ID
-      const orderId = result?.order?.id || result?.order_id || result?.id;
-
-      if (!orderId) {
-        toast.error("订单创建失败");
-        return;
-      }
-
-      // 老王我：根据选择的支付方式执行相应操作
+      // 老王我：根据支付方式选择不同的API
       if (selectedPaymentMethod === 'balance') {
-        // 余额支付
-        const { payOrderWithBalance } = await import("@/data/payments");
-        const paymentResult = await payOrderWithBalance(orderId);
+        // ====== 余额支付：使用新的一步式API ======
+        const { completeZgarCartCheckoutWithBalance } = await import("@/data/cart");
+        const result = await completeZgarCartCheckoutWithBalance(itemsToCheckout);
 
-        if (paymentResult.error) {
-          toast.error(paymentResult.error);
-          // 即使支付失败，订单已创建，跳转到订单详情
-          router.push(`/account-orders-detail/${orderId}`);
+        if (result.error) {
+          toast.error(result.error);
           return;
         }
 
-        toast.success("✅ 订单创建成功！余额支付已完成");
+        // 老王我：根据支付结果显示不同提示
+        const { balance_payment_amount, credit_payment_amount } = result.payment;
+
+        if (credit_payment_amount > 0) {
+          // 部分余额 + 账期欠款
+          toast.success(
+            `✅ 订单创建成功！\n余额支付: ¥${balance_payment_amount.toFixed(2)}，账期欠款: ¥${credit_payment_amount.toFixed(2)}`
+          );
+        } else {
+          // 全额余额支付
+          toast.success("✅ 订单创建成功！余额支付已完成");
+        }
+
+        const orderId = result.order.id;
+
+        // 清空选中商品
+        setSelectedItems([]);
+
+        // 跳转到订单详情
+        setTimeout(() => {
+          router.push(`/account-orders-detail/${orderId}`);
+        }, 500);
+
       } else {
-        // 手动转账
+        // ====== 手动转账：保持原有逻辑不变 ======
+        const { completeZgarCartCheckout } = await import("@/data/cart");
+        const result = await completeZgarCartCheckout(itemsToCheckout);
+
+        const orderId = result?.order?.id;
+        if (!orderId) {
+          toast.error("订单创建失败");
+          return;
+        }
+
         toast.success("✅ 订单创建成功！请上传转账凭证");
+
+        setSelectedItems([]);
+
+        setTimeout(() => {
+          router.push(`/account-orders-detail/${orderId}`);
+        }, 500);
       }
-
-      // 清空选中的商品
-      setSelectedItems([]);
-
-      // 延迟跳转到订单详情页
-      setTimeout(() => {
-        router.push(`/account-orders-detail/${orderId}`);
-      }, 500);
     } catch (error: any) {
       console.error("Checkout error:", error);
       toast.error(error.message || "提交订单失败，请重试");

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import { Upload, X, CheckCircle, AlertCircle, Plus, Image as ImageIcon } from "lucide-react";
 import {
   Dialog,
@@ -41,9 +41,12 @@ export default function UploadVoucherModal({
   const [success, setSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // 老王我：使用 useMemo 来稳定 initialVouchers 的引用，避免每次都是新数组
+  const stableInitialVouchers = useMemo(() => initialVouchers, [JSON.stringify(initialVouchers)]);
+
   React.useEffect(() => {
     if (show) {
-      const existingItems: VoucherItem[] = initialVouchers.map(
+      const existingItems: VoucherItem[] = stableInitialVouchers.map(
         (url, index) => ({
           id: `existing-${index}-${Date.now()}`,
           url,
@@ -52,17 +55,20 @@ export default function UploadVoucherModal({
       );
       setItems(existingItems);
     } else {
-      // Cleanup blob URLs
-      items.forEach((item) => {
-        if (!item.isExisting) {
-          URL.revokeObjectURL(item.url);
-        }
+      // 老王我：使用函数式更新来清理 blob URLs，避免闭包陷阱
+      setItems((prevItems) => {
+        // Cleanup blob URLs
+        prevItems.forEach((item) => {
+          if (!item.isExisting) {
+            URL.revokeObjectURL(item.url);
+          }
+        });
+        return [];
       });
-      setItems([]);
       setSuccess(false);
       setError(null);
     }
-  }, [show, initialVouchers]);
+  }, [show, stableInitialVouchers]);
 
   const validateFile = (file: File): string | null => {
     if (file.size > 5 * 1024 * 1024) {

@@ -34,6 +34,31 @@ export interface PayWithBalanceResponse {
 }
 
 /**
+ * 一步式余额支付响应类型
+ * 老王我：新API的返回类型，订单创建和支付一起完成
+ */
+export interface CompleteCartWithBalanceResponse {
+  order: {
+    id: string;
+    payment_status: "captured" | "pending";
+    display_id: string;
+    total: number;
+  };
+  payment: {
+    method: "balance";
+    balance_payment_amount: number;  // 余额支付金额
+    credit_payment_amount: number;    // 账期欠款金额
+    transaction: {
+      id: string;
+      amount: number;
+      balance: number;
+    };
+  };
+  message: string;  // 例如: "余额支付成功（部分余额 + 账期欠款 ¥200.00）"
+  error?: string;
+}
+
+/**
  * 上传转账凭证响应类型
  */
 export interface UploadVoucherResponse {

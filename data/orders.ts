@@ -52,7 +52,7 @@ export const retrieveOrderById = async (
     const response = await medusaSDK.store.order.retrieve(
       id,
       {
-        fields: "*items,+items.unit_price,+items.total,+items.subtotal,+items.tax_total,*shipping_address,*billing_address",
+        fields: "*items,+items.unit_price,+items.total,+items.subtotal,+items.tax_total,*shipping_address,*billing_address,*items.variant,*items.variant.options",
       },
       headers
     );
@@ -144,7 +144,7 @@ export const retrieveOrderWithZgarFields = async (
     }>(`/store/orders/${orderId}`, {
       method: "GET",
       query: {
-        fields: "*items,+items.unit_price,+items.total,+items.subtotal,+items.tax_total,*shipping_address,*billing_address,+zgar_order.*",
+        fields: "*items,+items.unit_price,+items.total,+items.subtotal,+items.tax_total,*shipping_address,*billing_address,+zgar_order.*, *items.variant, *items.variant.options",
       },
       headers,
     });

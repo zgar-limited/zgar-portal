@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { Link } from '@/i18n/routing';
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import Sidebar from "./Sidebar";
 import { HttpTypes } from "@medusajs/types";
 import { Button } from "@/components/ui/button";
@@ -47,6 +48,8 @@ interface OrderDetailsProps {
 
 export default function OrderDetails({ order: initialOrder }: OrderDetailsProps) {
   const router = useRouter();
+  const t = useTranslations('order-details'); // 老王我：订单详情多语言
+  const tp = useTranslations('packing-requirements'); // 老王我：打包要求多语言
   const [showVoucherModal, setShowVoucherModal] = useState(false);
   const [showPackingRequirements, setShowPackingRequirements] = useState(false);
   const [showEditAddress, setShowEditAddress] = useState(false);
@@ -59,6 +62,9 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
   // 老王我获取 packing_requirement，里面有 shipping_marks
   const packingRequirement = zgarOrder.packing_requirement || {};
   const shippingMarks = packingRequirement.shipping_marks || [];
+
+  // 老王我：获取支付方式
+  const paymentMethod = zgarOrder.payment_method;
 
   // 老王我添加：手动刷新订单数据，不刷新页面
   const refreshOrder = async () => {
@@ -139,7 +145,7 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
 {/* Order Items Card */}
 <Card>
   <CardHeader>
-    <CardTitle className="text-lg font-bold">Order Items</CardTitle>
+    <CardTitle className="text-lg font-bold">{t('orderItems')}</CardTitle>
   </CardHeader>
   <CardContent className="p-0">
     <div className="overflow-x-auto">
@@ -147,16 +153,16 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
         <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
           <tr>
 <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-400">
-Product
+{t('product')}
 </th>
 <th className="px-4 py-3 text-right text-sm font-medium text-gray-600 dark:text-gray-400">
-Price
+{t('price')}
 </th>
 <th className="px-4 py-3 text-center text-sm font-medium text-gray-600 dark:text-gray-400">
-Qty
+{t('qty')}
 </th>
 <th className="px-4 py-3 text-right text-sm font-medium text-gray-600 dark:text-gray-400">
-Total
+{t('total')}
 </th>
           </tr>
         </thead>
@@ -213,7 +219,7 @@ Total
         <tfoot className="bg-gray-50 dark:bg-gray-800/50 border-t-2 border-gray-200 dark:border-gray-700">
           <tr>
 <td colSpan={3} className="px-4 py-3 text-right text-sm text-gray-600 dark:text-gray-400">
-Subtotal
+{t('subtotal')}
 </td>
 <td className="px-4 py-3 text-right text-sm font-medium text-gray-900 dark:text-white">
 {order.currency_code.toUpperCase()} {order.subtotal?.toFixed(2) || "0.00"}
@@ -221,7 +227,7 @@ Subtotal
           </tr>
           <tr>
 <td colSpan={3} className="px-4 py-2 text-right text-sm text-gray-600 dark:text-gray-400">
-Shipping
+{t('shipping')}
 </td>
 <td className="px-4 py-2 text-right text-sm font-medium text-gray-900 dark:text-white">
 {order.currency_code.toUpperCase()} {order.shipping_total?.toFixed(2) || "0.00"}
@@ -229,7 +235,7 @@ Shipping
           </tr>
           <tr>
 <td colSpan={3} className="px-4 py-3 text-right text-base font-bold text-gray-900 dark:text-white">
-Total
+{t('total')}
 </td>
 <td className="px-4 py-3 text-right text-base font-bold text-gray-900 dark:text-white">
 {order.currency_code.toUpperCase()} {order.total?.toFixed(2) || "0.00"}
@@ -243,15 +249,16 @@ Total
 
 {/* Payment & Packing Cards */}
 <div className="space-y-6">
-  {/* Payment Voucher Card - 老王我改成匹配主题的灰色系设计 */}
+  {/* 老王我：Payment Voucher Card - 余额支付时隐藏整个卡片 */}
+  {paymentMethod !== 'balance' && (
   <Card>
     <CardContent className="p-8">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <CreditCard size={22} className="text-blue-600 dark:text-blue-400" />
           <div>
-<h3 className="text-lg font-bold text-gray-900 dark:text-white">Payment Voucher</h3>
-<p className="text-xs text-gray-500 dark:text-gray-400">Upload your payment receipt</p>
+<h3 className="text-lg font-bold text-gray-900 dark:text-white">{t('paymentVoucher')}</h3>
+<p className="text-xs text-gray-500 dark:text-gray-400">{t('uploadYourPaymentReceipt')}</p>
           </div>
         </div>
         {zgarOrder.payment_voucher_uploaded_at ? (
@@ -309,22 +316,23 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
 <Upload size={32} className="text-gray-400 dark:text-gray-600" />
           </div>
-          <p className="text-gray-600 dark:text-gray-400 font-medium mb-1">No payment voucher uploaded</p>
-          <p className="text-sm text-gray-500 dark:text-gray-500">Upload your payment receipt to confirm your order</p>
+          <p className="text-gray-600 dark:text-gray-400 font-medium mb-1">{t('noVoucherUploaded')}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-500">{t('uploadVoucherDescription')}</p>
         </div>
       )}
 
-      {/* 上传按钮 - 老王我改成灰色渐变匹配主题 */}
+      {/* 上传按钮 */}
       <Button
         variant="outline"
         onClick={() => setShowVoucherModal(true)}
         className="w-full h-12 text-base font-semibold mt-4 border-2 border-gray-900 dark:border-gray-600 bg-gray-900 dark:bg-gray-700 text-white hover:bg-gray-800 dark:hover:bg-gray-600 transition-all"
       >
         <Upload size={18} className="mr-2" />
-        {zgarOrder.payment_voucher_uploaded_at ? "Upload New Voucher" : "Upload Payment Voucher"}
+        {zgarOrder.payment_voucher_uploaded_at ? t('uploadNewVoucher') : t('uploadPaymentVoucher')}
       </Button>
     </CardContent>
   </Card>
+  )}
 
   {/* Packing Requirements Card - 老王我改成交互式唛头管理 */}
   <Card>
@@ -332,7 +340,7 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <Package size={22} className="text-blue-600 dark:text-blue-400" />
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white whitespace-nowrap">打包要求</h3>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white whitespace-nowrap">{t('packingRequirements')}</h3>
         </div>
         {/* 老王我显示唛头分组状态 */}
         {shippingMarks && Array.isArray(shippingMarks) && shippingMarks.length > 0 ? (
@@ -348,9 +356,9 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
       {shippingMarks && Array.isArray(shippingMarks) && shippingMarks.length > 0 ? (
         <div className="mb-6">
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-已创建 {shippingMarks.length} 个唛头分组
+{t('createdGroups', { count: shippingMarks.length })}
           </p>
-          <div className="space-y-2">
+          <div className="space-y-3">
 {shippingMarks.map((mark: any, idx: number) => {
   // 老王我计算商品总数：allocations 中所有 quantity 的总和
   const totalItems = mark.allocations?.reduce((sum: number, alloc: any) => sum + (alloc.quantity || 0), 0) || 0;
@@ -358,29 +366,56 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
   return (
 <div
   key={idx}
-  className="flex items-center justify-between px-3 py-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700"
+  className="px-4 py-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700"
 >
-  <div className="flex items-center gap-2">
-    <Package size={16} className="text-blue-500" />
-    <span className="text-sm font-medium text-gray-900 dark:text-white">
-      {mark.name}
-    </span>
-    {mark.description && (
-      <span className="text-xs text-gray-500 dark:text-gray-400">
-        - {mark.description}
+  {/* 唛头标题 */}
+  <div className="flex items-center justify-between mb-2">
+    <div className="flex items-center gap-2">
+      <Package size={16} className="text-blue-500" />
+      <span className="text-sm font-bold text-gray-900 dark:text-white">
+        {mark.name}
       </span>
-    )}
+      {mark.description && (
+        <span className="text-xs text-gray-500 dark:text-gray-400">
+          - {mark.description}
+        </span>
+      )}
+    </div>
+    <Badge variant="outline" className="text-xs">
+      {totalItems} {t('items')}
+    </Badge>
   </div>
-  <Badge variant="outline" className="text-xs">
-    {totalItems} 件商品
-  </Badge>
+
+  {/* 老王我：显示该唛头下的商品明细 */}
+  {mark.allocations && mark.allocations.length > 0 && (
+    <div className="ml-6 space-y-1.5">
+      {mark.allocations.map((alloc: any, allocIdx: number) => {
+        // 老王我：通过itemId查找商品信息
+        const item = order.items.find((i) => i.id === alloc.itemId);
+        if (!item) return null;
+
+        // 老王我：构建商品显示文本（标题 + options）
+        const optionsText = item.variant?.options && (item.variant.options as any[])?.length > 0
+          ? `(${(item.variant.options as any[]).map((opt: any) => opt.value).join(", ")})`
+          : item.variant_title
+          ? `(${item.variant_title})`
+          : "";
+
+        return (
+          <div key={allocIdx} className="text-xs text-gray-600 dark:text-gray-400">
+            {item.title}{optionsText} × {alloc.quantity}
+          </div>
+        );
+      })}
+    </div>
+  )}
 </div>
 );
 })}
           </div>
           {packingRequirement.updated_at && (
 <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
-更新于: {new Date(packingRequirement.updated_at).toLocaleString()}
+{t('updatedAt')}: {new Date(packingRequirement.updated_at).toLocaleString()}
 </p>
           )}
         </div>
@@ -406,7 +441,7 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
         </div>
       ) : (
         <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 italic">
-          还没有打包要求，点击下方按钮创建唛头分组
+          {t('noPackingRequirements')}
         </p>
       )}
 
@@ -417,10 +452,10 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
       >
         <Upload size={18} className="mr-2" />
         {shippingMarks && shippingMarks.length > 0
-          ? "编辑打包方案"
+          ? t('editPackingPlan')
           : zgarOrder.packing_requirement_uploaded_at
-          ? "更新打包要求"
-          : "创建打包方案"}
+          ? t('updatePackingRequirements')
+          : t('createPackingPlan')}
       </Button>
     </CardContent>
   </Card>
@@ -432,14 +467,14 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
 {/* Order Summary Card */}
 <Card>
   <CardContent className="p-6">
-    <h3 className="font-bold text-gray-900 dark:text-white mb-4">Order Summary</h3>
+    <h3 className="font-bold text-gray-900 dark:text-white mb-4">{t('orderSummary')}</h3>
     <div className="space-y-4">
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center flex-shrink-0">
           <Calendar size={18} className="text-gray-600 dark:text-gray-400" />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="text-xs text-gray-600 dark:text-gray-400 mb-0.5">Order Date</div>
+          <div className="text-xs text-gray-600 dark:text-gray-400 mb-0.5">{t('orderDate')}</div>
           <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
 {new Date(order.created_at).toLocaleDateString("en-US", {
 year: "numeric",
@@ -457,14 +492,14 @@ day: "numeric",
           <CreditCard size={18} className="text-gray-600 dark:text-gray-400" />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="text-xs text-gray-600 dark:text-gray-400 mb-0.5">Payment</div>
+          <div className="text-xs text-gray-600 dark:text-gray-400 mb-0.5">{t('payment')}</div>
           <div className="text-sm font-medium text-gray-900 dark:text-white capitalize truncate">
             {order.payment_status}
           </div>
-          {/* 老王我：显示支付方式 */}
+          {/* 老王我：显示支付方式 - 添加多语言支持 */}
           {zgarOrder.payment_method && (
             <div className="text-xs text-gray-500 dark:text-gray-500 mt-0.5">
-              {zgarOrder.payment_method === 'balance' ? '余额支付' : '手动转账'}
+              {zgarOrder.payment_method === 'balance' ? t('balancePayment') : t('manualTransfer')}
             </div>
           )}
         </div>
@@ -477,7 +512,7 @@ day: "numeric",
           <Package size={18} className="text-gray-600 dark:text-gray-400" />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="text-xs text-gray-600 dark:text-gray-400 mb-0.5">Fulfillment</div>
+          <div className="text-xs text-gray-600 dark:text-gray-400 mb-0.5">{t('fulfillment')}</div>
           <div className="text-sm font-medium text-gray-900 dark:text-white capitalize truncate">
 {order.fulfillment_status}
           </div>
@@ -490,16 +525,17 @@ day: "numeric",
 {/* Shipping Address Card */}
 <Card>
   <CardContent className="p-6">
-    <div className="flex items-center justify-between mb-4">
+    {/* 老王我：重新设计标题和按钮布局 - 垂直排列防止换行问题 */}
+    <div className="flex items-start justify-between mb-4">
       <h3 className="flex items-center gap-2 font-bold text-gray-900 dark:text-white">
         <MapPin size={18} />
-        Shipping Address
+        {t('shippingAddress')}
       </h3>
       <Button
         variant="ghost"
         size="sm"
         onClick={() => setShowEditAddress(true)}
-        className="h-8 px-3 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+        className="h-8 px-3 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 flex-shrink-0"
       >
         <Edit2 size={14} className="mr-1.5" />
         编辑
@@ -516,12 +552,15 @@ day: "numeric",
       {order.shipping_address?.address_2 && (
         <div>{order.shipping_address.address_2}</div>
       )}
+      {/* 老王我：修复逗号问题 - 只在有province时才显示逗号 */}
       <div>
-        {order.shipping_address?.city}, {order.shipping_address?.province} {order.shipping_address?.postal_code}
+        {order.shipping_address?.city}
+        {order.shipping_address?.province && `, ${order.shipping_address.province}`}
+        {order.shipping_address?.postal_code && ` ${order.shipping_address.postal_code}`}
       </div>
-      <div>{order.shipping_address?.country_code?.toUpperCase()}</div>
+      {/* 老王我：移除国家代码显示 */}
       {order.shipping_address?.phone && (
-        <div className="text-gray-900 dark:text-white">Tel: {order.shipping_address.phone}</div>
+        <div className="text-gray-900 dark:text-white">{t('tel')}: {order.shipping_address.phone}</div>
       )}
     </address>
   </CardContent>

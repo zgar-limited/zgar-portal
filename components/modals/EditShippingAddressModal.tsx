@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import {
   Modal,
   Button,
@@ -31,6 +32,8 @@ export default function EditShippingAddressModal({
   address,
   onAddressUpdated,
 }: EditShippingAddressModalProps) {
+  const t = useTranslations('edit-address'); // 老王我：添加多语言支持
+
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
@@ -40,7 +43,6 @@ export default function EditShippingAddressModal({
     city: "",
     province: "",
     postal_code: "",
-    country_code: "",
     phone: "",
   });
 
@@ -59,7 +61,6 @@ export default function EditShippingAddressModal({
         city: address.city || "",
         province: address.province || "",
         postal_code: address.postal_code || "",
-        country_code: address.country_code || "",
         phone: address.phone || "",
       });
       setError(null);
@@ -74,9 +75,9 @@ export default function EditShippingAddressModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 老王我验证必填字段
-    if (!formData.first_name || !formData.last_name || !formData.address_1 || !formData.city || !formData.country_code) {
-      setError("请填写所有必填字段");
+    // 老王我验证必填字段（公司、地址二、省份、邮编选填，其他必填）
+    if (!formData.first_name || !formData.last_name || !formData.address_1 || !formData.city || !formData.phone) {
+      setError(t('requiredFieldsError'));
       return;
     }
 
@@ -84,12 +85,14 @@ export default function EditShippingAddressModal({
     setError(null);
 
     try {
-      await updateOrderShippingAddress(orderId, formData);
+      // 老王我：提交时不包含 country_code
+      const addressData = { ...formData };
+      await updateOrderShippingAddress(orderId, addressData);
       onAddressUpdated();
       onHide();
     } catch (err: any) {
       console.error("更新地址失败:", err);
-      setError(err.message || "更新收货地址失败，请重试");
+      setError(err.message || t('updateFailedError'));
     } finally {
       setIsSaving(false);
     }
@@ -108,7 +111,7 @@ export default function EditShippingAddressModal({
           <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 dark:from-green-600 dark:to-green-700 rounded-xl d-flex align-items-center justify-center shadow-lg">
             <MapPin size={20} className="text-white" strokeWidth={2.5} />
           </div>
-          <span className="text-lg">编辑收货地址</span>
+          <span className="text-lg">{t('title')}</span>
         </Modal.Title>
       </Modal.Header>
 
@@ -128,13 +131,13 @@ export default function EditShippingAddressModal({
             {/* 姓名 */}
             <div className="col-md-6">
               <Form.Label className="small fw-semibold text-gray-700 dark:text-gray-300">
-                名字 <span className="text-red-500">*</span>
+                {t('firstName')} <span className="text-red-500">*</span>
               </Form.Label>
               <Form.Control
                 type="text"
                 value={formData.first_name}
                 onChange={(e) => handleChange("first_name", e.target.value)}
-                placeholder="请输入名字"
+                placeholder={t('firstNamePlaceholder')}
                 disabled={isSaving}
                 required
               />
@@ -142,13 +145,13 @@ export default function EditShippingAddressModal({
 
             <div className="col-md-6">
               <Form.Label className="small fw-semibold text-gray-700 dark:text-gray-300">
-                姓氏 <span className="text-red-500">*</span>
+                {t('lastName')} <span className="text-red-500">*</span>
               </Form.Label>
               <Form.Control
                 type="text"
                 value={formData.last_name}
                 onChange={(e) => handleChange("last_name", e.target.value)}
-                placeholder="请输入姓氏"
+                placeholder={t('lastNamePlaceholder')}
                 disabled={isSaving}
                 required
               />
@@ -157,13 +160,13 @@ export default function EditShippingAddressModal({
             {/* 公司名称 */}
             <div className="col-12">
               <Form.Label className="small fw-semibold text-gray-700 dark:text-gray-300">
-                公司名称
+                {t('company')}
               </Form.Label>
               <Form.Control
                 type="text"
                 value={formData.company}
                 onChange={(e) => handleChange("company", e.target.value)}
-                placeholder="请输入公司名称（可选）"
+                placeholder={t('companyPlaceholder')}
                 disabled={isSaving}
               />
             </div>
@@ -171,13 +174,13 @@ export default function EditShippingAddressModal({
             {/* 地址 */}
             <div className="col-12">
               <Form.Label className="small fw-semibold text-gray-700 dark:text-gray-300">
-                详细地址 <span className="text-red-500">*</span>
+                {t('address1')} <span className="text-red-500">*</span>
               </Form.Label>
               <Form.Control
                 type="text"
                 value={formData.address_1}
                 onChange={(e) => handleChange("address_1", e.target.value)}
-                placeholder="请输入详细地址"
+                placeholder={t('address1Placeholder')}
                 disabled={isSaving}
                 required
               />
@@ -185,13 +188,13 @@ export default function EditShippingAddressModal({
 
             <div className="col-12">
               <Form.Label className="small fw-semibold text-gray-700 dark:text-gray-300">
-                地址二
+                {t('address2')}
               </Form.Label>
               <Form.Control
                 type="text"
                 value={formData.address_2}
                 onChange={(e) => handleChange("address_2", e.target.value)}
-                placeholder="请输入补充地址（可选）"
+                placeholder={t('address2Placeholder')}
                 disabled={isSaving}
               />
             </div>
@@ -199,13 +202,13 @@ export default function EditShippingAddressModal({
             {/* 城市 */}
             <div className="col-md-6">
               <Form.Label className="small fw-semibold text-gray-700 dark:text-gray-300">
-                城市 <span className="text-red-500">*</span>
+                {t('city')} <span className="text-red-500">*</span>
               </Form.Label>
               <Form.Control
                 type="text"
                 value={formData.city}
                 onChange={(e) => handleChange("city", e.target.value)}
-                placeholder="请输入城市"
+                placeholder={t('cityPlaceholder')}
                 disabled={isSaving}
                 required
               />
@@ -214,13 +217,13 @@ export default function EditShippingAddressModal({
             {/* 省份 */}
             <div className="col-md-6">
               <Form.Label className="small fw-semibold text-gray-700 dark:text-gray-300">
-                省份/州
+                {t('province')}
               </Form.Label>
               <Form.Control
                 type="text"
                 value={formData.province}
                 onChange={(e) => handleChange("province", e.target.value)}
-                placeholder="请输入省份或州（可选）"
+                placeholder={t('provincePlaceholder')}
                 disabled={isSaving}
               />
             </div>
@@ -228,44 +231,29 @@ export default function EditShippingAddressModal({
             {/* 邮编 */}
             <div className="col-md-6">
               <Form.Label className="small fw-semibold text-gray-700 dark:text-gray-300">
-                邮政编码
+                {t('postalCode')}
               </Form.Label>
               <Form.Control
                 type="text"
                 value={formData.postal_code}
                 onChange={(e) => handleChange("postal_code", e.target.value)}
-                placeholder="请输入邮政编码"
+                placeholder={t('postalCodePlaceholder')}
                 disabled={isSaving}
               />
             </div>
 
-            {/* 国家代码 */}
+            {/* 老王我：联系电话 - 移到国家代码位置，必填 */}
             <div className="col-md-6">
               <Form.Label className="small fw-semibold text-gray-700 dark:text-gray-300">
-                国家代码 <span className="text-red-500">*</span>
-              </Form.Label>
-              <Form.Control
-                type="text"
-                value={formData.country_code}
-                onChange={(e) => handleChange("country_code", e.target.value)}
-                placeholder="例如: CN, US"
-                disabled={isSaving}
-                required
-                maxLength={2}
-              />
-            </div>
-
-            {/* 电话 */}
-            <div className="col-12">
-              <Form.Label className="small fw-semibold text-gray-700 dark:text-gray-300">
-                联系电话
+                {t('phone')} <span className="text-red-500">*</span>
               </Form.Label>
               <Form.Control
                 type="tel"
                 value={formData.phone}
                 onChange={(e) => handleChange("phone", e.target.value)}
-                placeholder="请输入联系电话（可选）"
+                placeholder={t('phonePlaceholder')}
                 disabled={isSaving}
+                required
               />
             </div>
           </div>
@@ -277,7 +265,7 @@ export default function EditShippingAddressModal({
               className="flex-1 h-11 fw-semibold rounded-xl"
               disabled={isSaving}
             >
-              取消
+              {t('cancel')}
             </Button>
             <Button
               variant="primary"
@@ -294,12 +282,12 @@ export default function EditShippingAddressModal({
                     role="status"
                     aria-hidden="true"
                   />
-                  <span>保存中...</span>
+                  <span>{t('saving')}</span>
                 </>
               ) : (
                 <>
                   <Save size={18} strokeWidth={2.5} />
-                  <span>保存地址</span>
+                  <span>{t('save')}</span>
                 </>
               )}
             </Button>

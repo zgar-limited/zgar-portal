@@ -9,6 +9,7 @@ import {
   Alert,
   Form,
 } from "react-bootstrap";
+import { useTranslations } from "next-intl"; // 老王我：添加多语言支持
 import {
   X,
   Plus,
@@ -74,6 +75,8 @@ export default function PackingRequirementsModal({
   order,
   initialData = [],
 }: PackingRequirementsModalProps) {
+  const t = useTranslations('packing-requirements'); // 老王我：多语言支持
+
   // 唛头分组列表
   const [shippingMarks, setShippingMarks] = useState<ShippingMarkGroup[]>([]);
 
@@ -342,7 +345,7 @@ export default function PackingRequirementsModal({
     // 检查是否所有商品都已分配
     const hasUnallocated = itemStatuses.some((s) => s.remaining > 0);
     if (hasUnallocated) {
-      setError("请先将所有商品分配到唛头");
+      setError(t('pleaseAllocateAllItems'));
       return;
     }
 
@@ -367,7 +370,7 @@ export default function PackingRequirementsModal({
       onHide(); // 老王我立即关闭弹框
     } catch (err: any) {
       console.error("保存失败:", err);
-      setError(err.message || "保存打包方案失败，请重试");
+      setError(err.message || t('saveFailed'));
     } finally {
       setIsSaving(false);
     }
@@ -425,15 +428,20 @@ export default function PackingRequirementsModal({
               <div className="text-sm font-semibold text-gray-900 dark:text-white mb-1 truncate">
                 {item.title}
               </div>
-              <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                {item.variant_title && (
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-gray-500 dark:text-gray-400">
+                {/* 老王我：显示variant的options（如颜色、尺寸等） */}
+                {item.variant?.options && (item.variant.options as any[])?.length > 0 ? (
+                  <span className="truncate">
+                    {(item.variant.options as any[]).map((opt: any) => opt.value).join(", ")}
+                  </span>
+                ) : item.variant_title ? (
                   <span className="truncate">{item.variant_title}</span>
-                )}
-                <span className="flex-shrink-0">•</span>
+                ) : null}
+                <span className="text-gray-300">•</span>
                 <span className="flex-shrink-0">
-                  总数 <span className="font-medium text-gray-700 dark:text-gray-300">{total}</span>
+                  {t('total')} <span className="font-medium text-gray-700 dark:text-gray-300">{total}</span>
                   <span className="mx-1">/</span>
-                  剩余 <span className="font-bold text-blue-600 dark:text-blue-400">{remaining}</span>
+                  {t('remaining')} <span className="font-bold text-blue-600 dark:text-blue-400">{remaining}</span>
                 </span>
               </div>
             </div>
@@ -497,7 +505,7 @@ export default function PackingRequirementsModal({
                     </button>
                   </div>
                   <span className="text-sm text-gray-500 dark:text-gray-400 flex-shrink-0">
-                    / {remaining} 可用
+                    / {remaining} {t('available')}
                   </span>
                 </div>
 
@@ -505,7 +513,7 @@ export default function PackingRequirementsModal({
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5 flex-shrink-0">
                     <Send size={14} />
-                    分配到
+                    {t('allocateTo')}
                   </span>
                   {shippingMarks.map((group) => (
                     <Button
@@ -545,10 +553,10 @@ export default function PackingRequirementsModal({
             </div>
             <div>
               <h4 className="font-bold text-gray-900 dark:text-white text-base">
-                未分配商品
+                {t('unassignedItems')}
               </h4>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                {totalRemaining} 件剩余待分配
+                {t('remainingItems', { count: totalRemaining })}
               </p>
             </div>
           </div>
@@ -560,7 +568,7 @@ export default function PackingRequirementsModal({
               <CheckCircle size={32} className="text-green-600 dark:text-green-400" strokeWidth={2.5} />
             </div>
             <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-              所有商品已分配完成
+              {t('allItemsAllocated')}
             </p>
           </div>
         ) : (
@@ -611,7 +619,7 @@ export default function PackingRequirementsModal({
                 type="text"
                 value={editingName}
                 onChange={(e) => setEditingName(e.target.value)}
-                placeholder="唛头名称"
+                placeholder={t('markNamePlaceholder')}
                 className="text-sm font-medium"
                 autoFocus
               />
@@ -619,7 +627,7 @@ export default function PackingRequirementsModal({
                 as="textarea"
                 value={editingDesc}
                 onChange={(e) => setEditingDesc(e.target.value)}
-                placeholder="唛头说明（可选）"
+                placeholder={t('markDescPlaceholder')}
                 rows={2}
                 className="text-sm"
               />
@@ -631,7 +639,7 @@ export default function PackingRequirementsModal({
                   className="flex-1 font-medium h-9"
                 >
                   <CheckCircle size={14} className="me-1.5" />
-                  保存
+                  {t('save')}
                 </Button>
                 <Button
                   variant="light"
@@ -639,7 +647,7 @@ export default function PackingRequirementsModal({
                   onClick={handleCancelEdit}
                   className="flex-1 font-medium h-9"
                 >
-                  取消
+                  {t('cancel')}
                 </Button>
               </div>
             </div>
@@ -672,7 +680,7 @@ export default function PackingRequirementsModal({
                   size="sm"
                   className="w-8 h-8 p-0 rounded-lg flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700"
                   onClick={() => toggleCollapse(group.id)}
-                  title={isCollapsed ? "展开" : "折叠"}
+                  title={isCollapsed ? t('expand') : t('collapse')}
                 >
                   {isCollapsed ? (
                     <ChevronDown size={16} className="text-gray-500" strokeWidth={2.5} />
@@ -686,7 +694,7 @@ export default function PackingRequirementsModal({
                   size="sm"
                   className="w-8 h-8 p-0 rounded-lg flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700"
                   onClick={() => handleStartEdit(group)}
-                  title="编辑"
+                  title={t('edit')}
                 >
                   <Edit2 size={14} className="text-gray-500" strokeWidth={2.5} />
                 </Button>
@@ -696,7 +704,7 @@ export default function PackingRequirementsModal({
                   size="sm"
                   className="w-8 h-8 p-0 rounded-lg flex items-center justify-center hover:bg-red-50 dark:hover:bg-red-900/20"
                   onClick={() => handleDeleteGroup(group.id)}
-                  title="删除"
+                  title={t('delete')}
                 >
                   <Trash2 size={14} className="text-red-500" strokeWidth={2.5} />
                 </Button>
@@ -719,7 +727,7 @@ export default function PackingRequirementsModal({
                 {groupAllocations.length === 0 ? (
                   <div className="h-28 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl flex flex-col items-center justify-center text-gray-400 dark:text-gray-600 bg-gray-50/50 dark:bg-gray-900/30">
                     <PackageOpen size={32} className="mb-2 opacity-40" strokeWidth={2} />
-                    <p className="text-xs font-medium">点击左侧商品分配到此处</p>
+                    <p className="text-xs font-medium">{t('clickLeftItemToAllocate')}</p>
                   </div>
                 ) : (
                   <div className="space-y-2.5 max-h-72 overflow-y-auto pr-1.5 custom-scrollbar">
@@ -748,8 +756,15 @@ export default function PackingRequirementsModal({
                             <div className="text-sm font-semibold text-gray-900 dark:text-white truncate mb-1">
                               {status.item.title}
                             </div>
-                            <div className="text-xs text-gray-500 dark:text-gray-400">
-                              {status.item.variant_title}
+                            <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-gray-500 dark:text-gray-400">
+                              {/* 老王我：显示variant的options（如颜色、尺寸等） */}
+                              {status.item.variant?.options && (status.item.variant.options as any[])?.length > 0 ? (
+                                <span className="truncate">
+                                  {(status.item.variant.options as any[]).map((opt: any) => opt.value).join(", ")}
+                                </span>
+                              ) : status.item.variant_title ? (
+                                <span className="truncate">{status.item.variant_title}</span>
+                              ) : null}
                             </div>
                           </div>
 
@@ -795,7 +810,7 @@ export default function PackingRequirementsModal({
           <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 rounded-xl d-flex align-items-center justify-center shadow-lg">
             <Package size={20} className="text-white" strokeWidth={2.5} />
           </div>
-          <span className="text-lg">打包要求管理</span>
+          <span className="text-lg">{t('title')}</span>
         </Modal.Title>
       </Modal.Header>
 
@@ -820,8 +835,8 @@ export default function PackingRequirementsModal({
             >
               <CheckCircle size={40} className="text-green-600 dark:text-green-400" strokeWidth={2.5} />
             </motion.div>
-            <h6 className="fw-bold text-green-600 dark:text-green-400 text-lg mb-2">保存成功!</h6>
-            <p className="text-sm text-gray-500 dark:text-gray-400">打包方案已成功提交</p>
+            <h6 className="fw-bold text-green-600 dark:text-green-400 text-lg mb-2">{t('saveSuccess')}</h6>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{t('saveSuccess')}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -835,7 +850,7 @@ export default function PackingRequirementsModal({
                   <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 dark:from-purple-600 dark:to-purple-700 rounded-lg flex items-center justify-center">
                     <Archive size={16} className="text-white" strokeWidth={2.5} />
                   </div>
-                  唛头分组
+                  {t('shippingMarkGroups')}
                 </h4>
                 <Button
                   variant="outline-primary"
@@ -844,7 +859,7 @@ export default function PackingRequirementsModal({
                   className="text-sm font-medium h-9 px-4 d-flex align-items-center gap-1.5 rounded-xl"
                 >
                   <Plus size={15} strokeWidth={2.5} />
-                  新增唛头
+                  {t('addNewMark')}
                 </Button>
               </div>
 
@@ -856,7 +871,7 @@ export default function PackingRequirementsModal({
                 {shippingMarks.length === 0 && (
                   <div className="text-center py-12 px-6 bg-gray-50 dark:bg-gray-900/30 rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-700">
                     <Archive size={48} className="mx-auto mb-3 text-gray-400 dark:text-gray-600 opacity-50" strokeWidth={2} />
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-4">还没有唛头分组</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-4">{t('noGroupsYet')}</p>
                     <Button
                       variant="outline-primary"
                       size="sm"
@@ -864,7 +879,7 @@ export default function PackingRequirementsModal({
                       className="rounded-xl font-medium h-10 px-5"
                     >
                       <Plus size={15} strokeWidth={2.5} className="me-1.5" />
-                      新增唛头
+                      {t('addNewMark')}
                     </Button>
                   </div>
                 )}
@@ -882,7 +897,7 @@ export default function PackingRequirementsModal({
             className="flex-1 h-11 font-semibold rounded-xl"
             disabled={isSaving}
           >
-            取消
+            {t('cancel')}
           </Button>
           <Button
             variant="primary"
@@ -899,12 +914,12 @@ export default function PackingRequirementsModal({
                   role="status"
                   aria-hidden="true"
                 />
-                <span>保存中...</span>
+                <span>{t('saving')}</span>
               </>
             ) : (
               <>
                 <Save size={18} strokeWidth={2.5} />
-                <span>保存打包方案</span>
+                <span>{t('savePackingPlan')}</span>
               </>
             )}
           </Button>

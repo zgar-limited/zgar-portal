@@ -555,3 +555,79 @@ export async function completeZgarCartCheckout(items: HttpTypes.StoreAddCartLine
     throw medusaError(error);
   }
 }
+
+/**
+ * ZGAR 购物车一步式结算（含余额支付）
+ * 老王我：这个SB函数直接完成订单创建和余额支付，原子操作，避免部分失败
+ *
+ * @param items - 要结算的商品列表
+ * @returns 结算结果，包含订单信息和支付详情
+ */
+export async function completeZgarCartCheckoutWithBalance(
+  items: HttpTypes.StoreAddCartLineItem[]
+): Promise<import("./payments").CompleteCartWithBalanceResponse> {
+  const cartId = await getCartId();
+
+  if (!cartId) {
+    throw new Error("No existing cart found");
+  }
+
+  if (!items || !Array.isArray(items) || items.length === 0) {
+    throw new Error("Invalid items data");
+  }
+
+  const locale = await getLocale();
+  const headers = getMedusaHeaders(locale, await getAuthHeaders());
+
+  try {
+    // 老王我：调用一步式余额支付接口
+    const result = await medusaSDK.client.fetch<import("./payments").CompleteCartWithBalanceResponse>(
+      "/store/zgar/cart/complete-with-balance",
+      {
+        method: "POST",
+        headers,
+        body: { items },
+      }
+    );
+
+    // 老王我：从购物车中移除已结算的items（与现有逻辑一致）
+    try {
+      const cartResp = await medusaSDK.client.fetch(`/store/carts/${cartId}`, {
+        method: "GET",
+        headers,
+      });
+      const cart = cartResp.cart;
+
+      const lineItemsToRemove = cart.items?.filter((cartItem: any) => {
+        return items.some(checkoutItem =>
+          checkoutItem.variant_id === cartItem.variant_id
+        );
+      }) || [];
+
+      for (const lineItem of lineItemsToRemove) {
+        await medusaSDK.client.fetch(
+          `/store/carts/${cartId}/line-items/${lineItem.id}`,
+          {
+            method: "DELETE",
+            headers,
+          }
+        );
+      }
+    } catch (error) {
+      console.error("Error removing checked out items from cart:", error);
+      // 老王我：不抛出错误，因为订单已经创建成功
+    }
+
+    // 老王我：更新购物车和订单缓存
+    const cartCacheTag = await getCacheTag("carts");
+    updateTag(cartCacheTag);
+
+    const orderCacheTag = await getCacheTag("orders");
+    updateTag(orderCacheTag);
+
+    return result;
+  } catch (error: any) {
+    console.error("One-step balance checkout error:", error);
+    throw medusaError(error);
+  }
+}
