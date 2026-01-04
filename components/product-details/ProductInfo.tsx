@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { StoreProduct, StoreProductVariant } from "@medusajs/types";
 import { ShoppingCart, Check, Loader2 } from "lucide-react";
 import { useRouter } from "@/i18n/routing";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { toast } from "@/hooks/use-toast";
 import QuantitySelect from "../common/QuantitySelect";
 import { addToCart } from "@/data/cart";
@@ -17,6 +17,7 @@ interface ProductInfoProps {
 
 export default function ProductInfo({ product, selectedVariant, onVariantSelect }: ProductInfoProps) {
   const router = useRouter();
+  const locale = useLocale();
   const t = useTranslations("Product");
   const { isLoggedIn } = useCustomer();
 
@@ -176,35 +177,59 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
 
       {/* Options Selector - 增大区域 */}
       <div className="space-y-6">
-        {product.options?.map((option) => (
-          <div key={option.id} className="space-y-3">
-            <div className="flex items-center justify-between">
-              <label className="text-lg font-bold text-gray-800">
-                {option.title}
-              </label>
-              <span className="text-lg font-semibold text-black bg-gray-100 px-3 py-1 rounded-lg">
-                {selectedOptions[option.id]}
-              </span>
+        {product.options?.map((option) => {
+          // 老王我：将locale转为metadata key格式（en-US → en_us，zh-HK → zh_hk）
+          const localeKey = locale.toLowerCase().replace('-', '_');
+
+          // 老王我：获取option标题的多语言翻译
+          const optionTitleKey = `option_title_${localeKey}_opt_${option.id}`;
+          const localizedTitle = (product.metadata as any)?.[optionTitleKey] || option.title;
+
+          return (
+            <div key={option.id} className="space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-lg font-bold text-gray-800">
+                  {localizedTitle}
+                </label>
+                <span className="text-lg font-semibold text-black bg-gray-100 px-3 py-1 rounded-lg">
+                  {(() => {
+                    // 老王我：获取选中值的多语言翻译
+                    const selectedValue = selectedOptions[option.id];
+                    // 找到对应的option value的id
+                    const selectedValueObj = option.values?.find((v: any) => v.value === selectedValue);
+                    if (selectedValueObj?.id) {
+                      // 老王我：val.id已经包含optval_前缀，不需要再加
+                      const optionValueKey = `option_value_${localeKey}_${selectedValueObj.id}`;
+                      return (product.metadata as any)?.[optionValueKey] || selectedValue;
+                    }
+                    return selectedValue;
+                  })()}
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                {option.values?.map((val: any) => {
+                  // 老王我：获取每个选项值的多语言翻译，val.id已经包含optval_前缀，不需要再加
+                  const optionValueKey = `option_value_${localeKey}_${val.id}`;
+                  const localizedValue = (product.metadata as any)?.[optionValueKey] || val.value;
+
+                  return (
+                    <button
+                      key={val.value}
+                      onClick={() => handleOptionSelect(option.id, val.value)}
+                      className={`px-4 py-3 text-base font-semibold rounded-xl border-2 transition-all duration-200 ${
+                        selectedOptions[option.id] === val.value
+                          ? "bg-black text-white border-black shadow-lg"
+                          : "bg-white text-gray-700 border-gray-300 hover:border-gray-400 hover:shadow-md"
+                      } min-w-[80px]`}
+                    >
+                      {localizedValue}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-            <div className="flex flex-wrap gap-3">
-              {option.values?.map((val: any) => {
-                return (
-                  <button
-                    key={val.value}
-                    onClick={() => handleOptionSelect(option.id, val.value)}
-                    className={`px-4 py-3 text-base font-semibold rounded-xl border-2 transition-all duration-200 ${
-                      selectedOptions[option.id] === val.value
-                        ? "bg-black text-white border-black shadow-lg"
-                        : "bg-white text-gray-700 border-gray-300 hover:border-gray-400 hover:shadow-md"
-                    } min-w-[80px]`}
-                  >
-                    {val.value}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       
@@ -253,21 +278,59 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
         </button>
       </div>
 
-      {/* Additional Info / Policies */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-3 text-gray-600">
-          <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-            <Check size={16} className="text-green-600" />
+      {/* 老王我：箱规和重量信息 - 从metadata读取 */}
+      {product?.metadata && (
+        <div className="border-t border-gray-200 pt-4">
+          <div className="bg-gray-50 rounded-xl p-4 space-y-3">
+            <h3 className="text-sm font-bold text-gray-900 mb-3">{t("productSpecs")}</h3>
+
+            {/* 老王我：动态显示所有package_spec_*字段 */}
+            {Object.keys(product.metadata)
+              .filter(key => key.startsWith('package_spec_'))
+              .sort((a, b) => {
+                // 老王我：按优先级排序
+                const order = [
+                  'package_spec_shipment_box_contains',
+                  'package_spec_product_size',
+                  'package_spec_product_weight',
+                  'package_spec_packaging_box_size',
+                  'package_spec_packaging_box_weight',
+                  'package_spec_outer_box_size',
+                  'package_spec_outer_box_weight',
+                  'package_spec_shipment_box_size',
+                  'package_spec_shipment_box_weight'
+                ];
+                const indexA = order.indexOf(a);
+                const indexB = order.indexOf(b);
+                return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
+              })
+              .map(key => {
+                const value = product.metadata[key];
+                if (!value) return null;
+
+                // 老王我：获取多语言标签
+                const labelKey = key.replace('package_spec_', '');
+
+                // 老王我：使用翻译函数获取标签名
+                const labelText = t(`spec_${labelKey}`);
+
+                return (
+                  <div key={key} className="flex items-start gap-3">
+                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs text-gray-500 mb-0.5">{labelText}</p>
+                      <p className="text-sm font-semibold text-gray-900">{value}</p>
+                    </div>
+                  </div>
+                );
+              })}
           </div>
-          <span className="text-base">{t("freeShipping")}</span>
         </div>
-        <div className="flex items-center gap-3 text-gray-600">
-          <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-            <Check size={16} className="text-green-600" />
-          </div>
-          <span className="text-base">{t("returnPolicy")}</span>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

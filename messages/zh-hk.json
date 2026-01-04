@@ -66,7 +66,17 @@
     "untitledProduct": "未命名產品",
     "perPiece": "/件",
     "loginToAddToCart": "請先登錄後再添加到購物車",
-    "loginToViewPrice": "登錄後查看價格"
+    "loginToViewPrice": "登錄後查看價格",
+    "productSpecs": "產品規格",
+    "spec_shipment_box_contains": "裝箱數量",
+    "spec_product_size": "產品尺寸",
+    "spec_product_weight": "產品重量",
+    "spec_packaging_box_size": "包裝盒尺寸",
+    "spec_packaging_box_weight": "包裝盒重量",
+    "spec_outer_box_size": "外箱尺寸",
+    "spec_outer_box_weight": "外箱重量",
+    "spec_shipment_box_size": "裝運箱尺寸",
+    "spec_shipment_box_weight": "裝運箱重量"
   },
   "Club": {
     "title": "Zgar Club 積分商城",

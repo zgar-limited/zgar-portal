@@ -28,8 +28,9 @@ export default function ProductCard({ product }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
 
   // 价格从variant的calculated_price中获取
+  // 老王我：统一使用 calculated_amount，与产品详情保持一致
   const calculatedPriceInfo = product.variants?.[0]?.calculated_price;
-  const price = calculatedPriceInfo?.original_amount || 0;
+  const price = calculatedPriceInfo?.calculated_amount || calculatedPriceInfo?.original_amount || 0;
   const currencyCode = calculatedPriceInfo?.currency_code || 'usd';
   const title = product.title || t("untitledProduct");
 

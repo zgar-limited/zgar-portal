@@ -66,7 +66,17 @@
     "untitledProduct": "Untitled Product",
     "perPiece": "/pcs",
     "loginToAddToCart": "Please login to add items to cart",
-    "loginToViewPrice": "Login to view price"
+    "loginToViewPrice": "Login to view price",
+    "productSpecs": "Product Specifications",
+    "spec_shipment_box_contains": "Quantity per Carton",
+    "spec_product_size": "Product Size",
+    "spec_product_weight": "Product Weight",
+    "spec_packaging_box_size": "Packaging Box Size",
+    "spec_packaging_box_weight": "Packaging Box Weight",
+    "spec_outer_box_size": "Outer Box Size",
+    "spec_outer_box_weight": "Outer Box Weight",
+    "spec_shipment_box_size": "Shipment Box Size",
+    "spec_shipment_box_weight": "Shipment Box Weight"
   },
   "Club": {
     "title": "Zgar Club Points Mall",
