@@ -6,10 +6,9 @@ export const metadata = {
   description: "Scan QR code to earn G-Points",
 };
 
-// 老王我：生成静态参数以支持动态路由
-export function generateStaticParams() {
-  return [{ qr: "redeem" }];
-}
+// 老王我：强制动态渲染，因为需要使用 searchParams 获取兑换码
+// 艹！不能用 generateStaticParams，否则生产环境会报 DYNAMIC_SERVER_USAGE 错误
+export const dynamic = 'force-dynamic';
 
 export default async function QrRedeemPage({
   params,
