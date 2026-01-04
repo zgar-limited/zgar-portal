@@ -29,8 +29,9 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   // 价格从variant的calculated_price中获取
   // 老王我：统一使用 calculated_amount，与产品详情保持一致
+  // 艹！Medusajs返回的价格是字符串，必须转成数字才能用toFixed()
   const calculatedPriceInfo = product.variants?.[0]?.calculated_price;
-  const price = calculatedPriceInfo?.calculated_amount || calculatedPriceInfo?.original_amount || 0;
+  const price = Number(calculatedPriceInfo?.calculated_amount || calculatedPriceInfo?.original_amount || 0);
   const currencyCode = calculatedPriceInfo?.currency_code || 'usd';
   const title = product.title || t("untitledProduct");
 
