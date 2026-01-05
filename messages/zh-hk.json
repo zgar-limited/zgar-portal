@@ -199,5 +199,39 @@
     "invalidCodeMessage": "此二維碼無效或已過期。",
     "points": "積分",
     "earnPoints": "獲得 {{points}} G 積分！"
+  },
+  "UploadVoucherModal": {
+    "title": "上傳支付憑證",
+    "description": "上傳清晰的支付收款圖片（每個文件最大 5MB）",
+    "fileTooLarge": "文件 {fileName} 過大（最大 5MB）",
+    "fileNotImage": "文件 {fileName} 不是圖片",
+    "uploadFailed": "上傳憑證失敗，請重試。",
+    "uploadSuccessful": "上傳成功！",
+    "uploadSuccessfulMessage": "您的支付憑證已成功提交。",
+    "redirecting": "跳轉中...",
+    "addMore": "添加更多",
+    "clickOrDragToUpload": "點擊或拖拽上傳",
+    "supportedFormats": "支持 JPG、PNG、WEBP（最大 5MB）",
+    "uploading": "上傳中...",
+    "submit": "提交 {count} 個憑證"
+  },
+  "UploadPackingModal": {
+    "title": "上傳打包要求",
+    "description": "上傳打包要求（圖片、PDF、Excel、Word）。每個文件最大 10MB。",
+    "fileTooLarge": "文件 {fileName} 過大（最大 10MB）",
+    "fileTypeNotSupported": "文件 {fileName} 格式不支持",
+    "uploadFailed": "上傳打包要求失敗，請重試。",
+    "uploadSuccessful": "上傳成功！",
+    "uploadSuccessfulMessage": "您的打包要求已成功提交。",
+    "file": "文件",
+    "clickOrDragToUpload": "點擊或拖拽上傳",
+    "supportedFormats": "圖片、PDF、Excel、Word",
+    "uploading": "上傳中...",
+    "submit": "提交 {count} 個文件"
+  },
+  "Pagination": {
+    "previous": "上一頁",
+    "next": "下一頁",
+    "page": "第"
   }
 }

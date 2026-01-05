@@ -24,7 +24,7 @@ export default async function page({ searchParams }: OrdersPageProps) {
   // 并行获取用户和订单数据
   const [customer, ordersData] = await Promise.all([
     retrieveCustomer(),
-    retrieveOrders(limit, offset)
+    retrieveOrders(limit, offset, "-created_at") // 老王我添加：显式传入倒序排序参数
   ]);
 
   // 检查用户是否已登录

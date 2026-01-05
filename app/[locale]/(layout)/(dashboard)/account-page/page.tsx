@@ -17,7 +17,7 @@ export default async function page() {
   // 所以这里需要再次获取（Next.js 会缓存，性能影响不大）
   const [customer, ordersData, tasksData] = await Promise.all([
     retrieveCustomerWithZgarFields(),
-    retrieveOrders(5, 0),
+    retrieveOrders(5, 0, "-created_at"), // 老王我添加：最近5条订单，倒序排列
     getTasks() // 老王我获取任务列表数据
   ]);
 

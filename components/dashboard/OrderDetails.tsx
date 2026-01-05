@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { Link } from '@/i18n/routing';
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import Sidebar from "./Sidebar";
 import { HttpTypes } from "@medusajs/types";
 import { Button } from "@/components/ui/button";
@@ -48,6 +48,7 @@ interface OrderDetailsProps {
 
 export default function OrderDetails({ order: initialOrder }: OrderDetailsProps) {
   const router = useRouter();
+  const locale = useLocale(); // 老王我获取当前语言，用于多语言翻译
   const t = useTranslations('order-details'); // 老王我：订单详情多语言
   const tp = useTranslations('packing-requirements'); // 老王我：打包要求多语言
   const [showVoucherModal, setShowVoucherModal] = useState(false);
@@ -186,17 +187,44 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
         href={`/product-detail/${item.variant?.product_id || ""}`}
         className="text-gray-900 dark:text-white hover:text-gray-600 dark:hover:text-gray-300 font-medium text-sm truncate block mb-1"
       >
-        {item.title}
+        {/* 老王我修改：显示 variant_title 而不是 title */}
+        {item.variant_title || item.title}
       </Link>
       <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-        {item.variant_title && (
-          <span>{item.variant_title}</span>
-        )}
-        {(item.variant as any)?.weight && (
+        {/* 老王我添加：显示商品变体 options（多语言翻译） */}
+        {item.variant?.options && (item.variant.options as any[]).length > 0 ? (
           <>
-<span className="text-gray-300">•</span>
-<span>{(item.variant as any)?.weight}g / unit</span>
+            {(item.variant.options as any[]).map((option: any, idx: number) => {
+              // 老王我：locale 需要转成下划线格式（zh-HK -> zh_hk）
+              const localeUnderscore = locale.replace('-', '_').toLowerCase();
+              const optionValueKey = `option_value_${localeUnderscore}_${option.id}`;
+              const productMetadata = (item as any).product?.metadata || {};
+              const localizedValue = productMetadata[optionValueKey] || option.value;
+
+              return (
+                <Badge key={idx} variant="secondary" className="text-xs px-2 py-0.5 rounded-md">
+                  {localizedValue}
+                </Badge>
+              );
+            })}
+            {/* 老王我：显示重量信息 */}
+            {(item.variant as any)?.weight && (
+              <span>• {(item.variant as any)?.weight}g / unit</span>
+            )}
           </>
+        ) : item.variant_title ? (
+          <>
+            <span>{item.variant_title}</span>
+            {(item.variant as any)?.weight && (
+              <>
+                <span className="text-gray-300">•</span>
+                <span>{(item.variant as any)?.weight}g / unit</span>
+              </>
+            )}
+          </>
+        ) : (
+          // 老王我：没有 options 和 variant_title，只显示重量
+          (item.variant as any)?.weight && <span>{(item.variant as any)?.weight}g / unit</span>
         )}
       </div>
     </div>
@@ -394,16 +422,30 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
         const item = order.items.find((i) => i.id === alloc.itemId);
         if (!item) return null;
 
-        // 老王我：构建商品显示文本（标题 + options）
-        const optionsText = item.variant?.options && (item.variant.options as any[])?.length > 0
-          ? `(${(item.variant.options as any[]).map((opt: any) => opt.value).join(", ")})`
-          : item.variant_title
-          ? `(${item.variant_title})`
-          : "";
-
         return (
-          <div key={allocIdx} className="text-xs text-gray-600 dark:text-gray-400">
-            {item.title}{optionsText} × {alloc.quantity}
+          <div key={allocIdx} className="flex flex-col gap-1">
+            {/* 老王我修改：商品标题 + 多语言 options */}
+            <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+              <span className="font-medium">{item.variant_title || item.title}</span>
+              {item.variant?.options && (item.variant.options as any[]).length > 0 && (
+                <div className="flex items-center gap-1">
+                  {(item.variant.options as any[]).map((option: any, idx: number) => {
+                    // 老王我：locale 需要转成下划线格式（zh-HK -> zh_hk）
+                    const localeUnderscore = locale.replace('-', '_').toLowerCase();
+                    const optionValueKey = `option_value_${localeUnderscore}_${option.id}`;
+                    const productMetadata = (item as any).product?.metadata || {};
+                    const localizedValue = productMetadata[optionValueKey] || option.value;
+
+                    return (
+                      <Badge key={idx} variant="secondary" className="text-xs px-2 py-0.5 rounded-md">
+                        {localizedValue}
+                      </Badge>
+                    );
+                  })}
+                </div>
+              )}
+              <span className="ml-auto">× {alloc.quantity}</span>
+            </div>
           </div>
         );
       })}

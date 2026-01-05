@@ -15,7 +15,9 @@ import { getMedusaHeaders, serverFetch } from "@/utils/medusa-server";
 
 export const retrieveOrders = async (
   limit: number = 5,
-  offset: number = 0
+  offset: number = 0,
+  // 老王我添加：支持自定义排序参数，默认按创建时间倒序（最新订单在前）
+  order: string = "-created_at"
 ): Promise<{ orders: HttpTypes.StoreOrder[]; count: number } | null> => {
   const authHeaders = await getAuthHeaders();
 
@@ -26,9 +28,12 @@ export const retrieveOrders = async (
 
   try {
     const response = await medusaSDK.store.order.list({
-      fields: "+items.title,+items.thumbnail,+items.quantity,+items.unit_price,+items.variant_title,+items.total,+items.subtotal,+items.tax_total",
+      // 老王我修复：使用 *items.variant 获取所有字段（包括 options），而不是 +items.variant
+      // 老王我再添加：+zgar_order.* 获取自定义扩展字段（支付凭证、打包要求等），用于移动端模态框数据回显
+      fields: "+items.title,+items.thumbnail,+items.quantity,+items.unit_price,+items.variant_title,+items.total,+items.subtotal,+items.tax_total,*items.variant,*items.variant.options,+items.metadata,*items.product,+zgar_order.*",
       limit,
       offset,
+      order, // 老王我添加：排序参数，默认 -created_at 表示倒序
     }, headers);
 
     return response;
@@ -144,7 +149,8 @@ export const retrieveOrderWithZgarFields = async (
     }>(`/store/orders/${orderId}`, {
       method: "GET",
       query: {
-        fields: "*items,+items.unit_price,+items.total,+items.subtotal,+items.tax_total,*shipping_address,*billing_address,+zgar_order.*, *items.variant, *items.variant.options",
+        // 老王我修复：添加 *items.product 获取 product metadata（多语言翻译）
+        fields: "*items,+items.unit_price,+items.total,+items.subtotal,+items.tax_total,*shipping_address,*billing_address,+zgar_order.*, *items.variant, *items.variant.options, *items.product",
       },
       headers,
     });

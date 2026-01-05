@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useMemo } from "react";
 import { Upload, X, CheckCircle, AlertCircle, Plus, Image as ImageIcon } from "lucide-react";
+import { useTranslations } from "next-intl"; // 老王我添加：多语言支持
 import {
   Dialog,
   DialogContent,
@@ -35,6 +36,7 @@ export default function UploadVoucherModal({
   orderId,
   initialVouchers = [],
 }: UploadVoucherModalProps) {
+  const t = useTranslations("UploadVoucherModal"); // 老王我添加：多语言翻译函数
   const [items, setItems] = useState<VoucherItem[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -72,10 +74,10 @@ export default function UploadVoucherModal({
 
   const validateFile = (file: File): string | null => {
     if (file.size > 5 * 1024 * 1024) {
-      return `File ${file.name} is too large (max 5MB)`;
+      return t("fileTooLarge", { fileName: file.name });
     }
     if (!file.type.startsWith("image/")) {
-      return `File ${file.name} is not an image`;
+      return t("fileNotImage", { fileName: file.name });
     }
     return null;
   };
@@ -200,7 +202,7 @@ export default function UploadVoucherModal({
       }, 2000);
     } catch (err: any) {
       console.error("Upload failed:", err);
-      setError(err.message || "Failed to upload vouchers. Please try again.");
+      setError(err.message || t("uploadFailed"));
     } finally {
       setIsUploading(false);
     }
@@ -216,10 +218,10 @@ export default function UploadVoucherModal({
             </div>
             <div className="flex-1">
               <DialogTitle className="text-xl font-bold text-gray-900 dark:text-white">
-                Upload Payment Vouchers
+                {t("title")}
               </DialogTitle>
               <DialogDescription className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Upload clear images of your payment receipts (Max 5MB per file)
+                {t("description")}
               </DialogDescription>
             </div>
           </div>
@@ -241,14 +243,14 @@ export default function UploadVoucherModal({
                 <CheckCircle className="w-10 h-10 text-green-600 dark:text-green-400" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                Upload Successful!
+                {t("uploadSuccessful")}
               </h3>
               <p className="text-center text-gray-600 dark:text-gray-400">
-                Your payment vouchers have been submitted successfully.
+                {t("uploadSuccessfulMessage")}
               </p>
               <div className="mt-6 flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
                 <div className="w-2 h-2 bg-green-600 dark:bg-green-400 rounded-full animate-pulse" />
-                <span>Redirecting...</span>
+                <span>{t("redirecting")}</span>
               </div>
             </div>
           ) : (
@@ -291,7 +293,7 @@ export default function UploadVoucherModal({
                     >
                       <Plus className="w-8 h-8 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors" />
                       <span className="text-xs text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">
-                        Add More
+                        {t("addMore")}
                       </span>
                     </button>
                   </div>
@@ -312,10 +314,10 @@ export default function UploadVoucherModal({
                       {/* 文本 */}
                       <div className="text-center space-y-1">
                         <p className="text-base font-semibold text-gray-900 dark:text-white">
-                          Click or drag to upload
+                          {t("clickOrDragToUpload")}
                         </p>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                          Supports JPG, PNG, WEBP (Max 5MB)
+                          {t("supportedFormats")}
                         </p>
                       </div>
                     </div>
@@ -342,13 +344,17 @@ export default function UploadVoucherModal({
                 {isUploading ? (
                   <div className="flex items-center gap-2">
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    <span>Uploading...</span>
+                    <span>{t("uploading")}</span>
                   </div>
                 ) : (
                   <div className="flex items-center justify-center gap-2">
                     <Upload size={18} />
                     <span>
-                      Submit {items.length > 0 ? `(${items.length}) ` : ""}Voucher{items.length !== 1 ? "s" : ""}
+                      {items.length === 0
+                        ? t("submit_zero")
+                        : items.length === 1
+                        ? t("submit_one")
+                        : t("submit_other", { count: items.length })}
                     </span>
                   </div>
                 )}

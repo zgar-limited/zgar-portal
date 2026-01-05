@@ -199,5 +199,43 @@
     "invalidCodeMessage": "This QR code is not valid or has expired.",
     "points": "Points",
     "earnPoints": "Earn {{points}} G-Points!"
+  },
+  "UploadVoucherModal": {
+    "title": "Upload Payment Vouchers",
+    "description": "Upload clear images of your payment receipts (Max 5MB per file)",
+    "fileTooLarge": "File {fileName} is too large (max 5MB)",
+    "fileNotImage": "File {fileName} is not an image",
+    "uploadFailed": "Failed to upload vouchers. Please try again.",
+    "uploadSuccessful": "Upload Successful!",
+    "uploadSuccessfulMessage": "Your payment vouchers have been submitted successfully.",
+    "redirecting": "Redirecting...",
+    "addMore": "Add More",
+    "clickOrDragToUpload": "Click or drag to upload",
+    "supportedFormats": "Supports JPG, PNG, WEBP (Max 5MB)",
+    "uploading": "Uploading...",
+    "submit_zero": "Submit Vouchers",
+    "submit_one": "Submit Voucher",
+    "submit_other": "Submit {count} Vouchers"
+  },
+  "UploadPackingModal": {
+    "title": "Upload Packing Requirements",
+    "description": "Upload packing requirements (Images, PDF, Excel, Word). Max 10MB per file.",
+    "fileTooLarge": "File {fileName} is too large (max 10MB)",
+    "fileTypeNotSupported": "File {fileName} type is not supported",
+    "uploadFailed": "Failed to upload packing requirements. Please try again.",
+    "uploadSuccessful": "Upload Successful!",
+    "uploadSuccessfulMessage": "Your packing requirements have been submitted.",
+    "file": "File",
+    "clickOrDragToUpload": "Click or drag to upload",
+    "supportedFormats": "Images, PDF, Excel, Word",
+    "uploading": "Uploading...",
+    "submit_zero": "Submit Files",
+    "submit_one": "Submit File",
+    "submit_other": "Submit {count} Files"
+  },
+  "Pagination": {
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page"
   }
 }
