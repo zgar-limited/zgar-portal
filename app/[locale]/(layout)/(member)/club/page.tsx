@@ -25,7 +25,7 @@ export default async function ClubPage() {
     <ClubPageClient
       isMember={isMember}
       customer={customer}
-      initialProducts={productsResponse}
+      initialProducts={productsResponse.products} // 老王我修复：传递数组而不是对象
     />
   );
 }

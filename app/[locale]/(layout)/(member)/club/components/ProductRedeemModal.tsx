@@ -44,7 +44,9 @@ export default function ProductRedeemModal({
     setIsRedeeming(true);
 
     try {
-      const result = await redeemPointsProduct(product.id);
+      // 老王我：使用 variant_id 而不是 product.id
+      const variantId = product.variant_id || product.id;
+      const result = await redeemPointsProduct(variantId);
 
       if (result.success) {
         // 老王我：显示成功提示
@@ -58,15 +60,32 @@ export default function ProductRedeemModal({
         // 老王我：关闭弹窗
         onClose();
       } else {
-        // 老王我：显示失败提示
-        toast.error(result.message || "兑换失败，请重试");
+        // 老王我：显示失败提示，带解决建议
+        const suggestion = getErrorSuggestion(result.error);
+        toast.error(result.message || "兑换失败，请重试", {
+          description: suggestion,
+        });
       }
     } catch (error: any) {
-      console.error("Redemption error:", error);
+      console.error("老王我艹：兑换失败:", error);
       toast.error(error.message || "兑换失败，请重试");
     } finally {
       setIsRedeeming(false);
     }
+  };
+
+  /**
+   * 老王我：根据错误代码提供解决建议
+   */
+  const getErrorSuggestion = (errorCode?: string): string | undefined => {
+    const suggestions: Record<string, string> = {
+      INSUFFICIENT_POINTS: "完成任务可以赚取积分",
+      REDEMPTION_LIMIT_EXCEEDED: "请等待限制解除后再试",
+      UNAUTHORIZED: "请先登录账户",
+      PRODUCT_NOT_AVAILABLE: "该商品暂不可兑换",
+    };
+
+    return suggestions[errorCode || ""];
   };
 
   // 老王我：如果弹窗关闭，不渲染任何内容

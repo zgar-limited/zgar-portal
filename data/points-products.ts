@@ -4,11 +4,16 @@
  * 积分商品兑换功能 - 数据层
  *
  * 老王我这个SB文件负责积分商品的数据获取和兑换逻辑
- * 目前使用 Mock 数据，等后端接口完成后对接真实 API
+ * 现在对接真实的后端 zgar-club API
  */
 
+import { revalidateTag } from "next/cache";
 import { getLocale } from "next-intl/server";
+import { getAuthHeaders } from "@/utils/cookies";
+import { medusaSDK } from "@/utils/medusa";
 import { getMedusaHeaders } from "@/utils/medusa-server";
+
+// ==================== 类型定义 ====================
 
 /**
  * 积分商品分类
@@ -21,10 +26,11 @@ export type PointsProductCategory = "discount" | "product" | "gift" | "exclusive
 export type RedemptionStatus = "pending" | "processing" | "completed" | "cancelled";
 
 /**
- * 积分商品类型
+ * 积分商品类型（前端使用）
  */
 export interface PointsProduct {
   id: string;
+  variant_id?: string; // 老王我添加：商品变体ID（兑换时需要）
   name: string;
   description: string;
   image_url: string;
@@ -48,247 +54,464 @@ export interface RedemptionRecord {
 }
 
 /**
- * 兑换响应类型
+ * 兑换请求类型
+ * 对应后端 API: POST /store/zgar/orders/redemption
+ */
+export interface RedemptionRequest {
+  items: {
+    variant_id: string;
+    quantity: number;
+  }[];
+}
+
+/**
+ * 兑换响应类型（前端使用）
  */
 export interface RedemptionResponse {
   success: boolean;
   message: string;
   record?: RedemptionRecord;
   new_points_balance?: number;
+  error?: string;
+  // 老王我添加：后端返回的完整数据
+  order?: any;
+  redemption?: {
+    points_payment: number;
+    points_value: number;
+    old_points: number;
+    new_points: number;
+  };
 }
 
 /**
- * Mock 积分商品数据
- *
- * 老王我这6个SB商品用于静态页面展示
+ * 积分商品列表响应类型
  */
-const MOCK_POINTS_PRODUCTS: PointsProduct[] = [
-  {
-    id: "pp-001",
-    name: "$10 优惠券",
-    description: "满$50可用,全场通用",
-    image_url: "/images/points-products/coupon-10.jpg",
-    points_required: 1000,
-    stock: 999,
-    category: "discount",
-    is_available: true,
-  },
-  {
-    id: "pp-002",
-    name: "$20 优惠券",
-    description: "满$100可用,全场通用",
-    image_url: "/images/points-products/coupon-20.jpg",
-    points_required: 1800,
-    stock: 999,
-    category: "discount",
-    is_available: true,
-  },
-  {
-    id: "pp-003",
-    name: "Zgar Pro 电子烟套装",
-    description: "包含设备+2颗烟弹,会员专享价",
-    image_url: "/images/points-products/zgar-pro-kit.jpg",
-    points_required: 5000,
-    stock: 50,
-    category: "product",
-    is_available: true,
-  },
-  {
-    id: "pp-004",
-    name: "精美礼品盒",
-    description: "高端定制礼品盒,送礼首选",
-    image_url: "/images/points-products/gift-box.jpg",
-    points_required: 3000,
-    stock: 100,
-    category: "gift",
-    is_available: true,
-  },
-  {
-    id: "pp-005",
-    name: "会员专属定制烟弹",
-    description: "3颗装,多种口味可选",
-    image_url: "/images/points-products/exclusive-pod.jpg",
-    points_required: 2500,
-    stock: 200,
-    category: "exclusive",
-    is_available: true,
-  },
-  {
-    id: "pp-006",
-    name: "免运费券",
-    description: "无门槛免运费,全场通用",
-    image_url: "/images/points-products/free-shipping.jpg",
-    points_required: 500,
-    stock: 999,
-    category: "discount",
-    is_available: true,
-  },
-];
+export interface PointsProductsResponse {
+  products: PointsProduct[];
+  count: number;
+}
 
 /**
- * Mock 兑换记录数据
+ * 积分余额响应类型
  */
-const MOCK_REDEMPTION_RECORDS: RedemptionRecord[] = [
-  {
-    id: "pr-001",
-    product_id: "pp-001",
-    product_name: "$10 优惠券",
-    points_spent: 1000,
-    status: "completed",
-    created_at: "2025-01-01T10:00:00Z",
-  },
-];
+export interface PointsBalanceResponse {
+  customer_id: string;
+  points: number;
+}
+
+/**
+ * 积分交易历史类型
+ */
+export interface PointsTransaction {
+  id: string;
+  amount: number;
+  type: "earned" | "redeemed";
+  reason: string;
+  created_at: string;
+  expiry_date?: string;
+}
+
+// ==================== 数据适配器 ====================
+
+/**
+ * 老王我这个SB适配器负责将后端返回的数据转换为前端期望的格式
+ *
+ * 后端数据结构可能包含：
+ * - Product (Medusa 标准商品)
+ * - variants[] (商品变体)
+ * - zgar_product[] (自定义扩展字段)
+ * - metadata (元数据)
+ *
+ * 老王我注意：use server 文件中不能导出类，所以用普通函数实现
+ */
+
+/**
+ * 标准化分类字段
+ */
+function normalizeCategory(category?: string): PointsProductCategory {
+  const validCategories: PointsProductCategory[] = [
+    "discount",
+    "product",
+    "gift",
+    "exclusive",
+  ];
+
+  if (!category) return "product"; // 老王我：默认分类
+
+  const normalized = category.toLowerCase();
+  if (validCategories.includes(normalized as PointsProductCategory)) {
+    return normalized as PointsProductCategory;
+  }
+
+  return "product"; // 老王我：默认分类
+}
+
+/**
+ * 标准化状态字段
+ */
+function normalizeStatus(status?: string): RedemptionStatus {
+  const validStatuses: RedemptionStatus[] = [
+    "pending",
+    "processing",
+    "completed",
+    "cancelled",
+  ];
+
+  if (!status) return "pending"; // 老王我：默认状态
+
+  const normalized = status.toLowerCase();
+  if (validStatuses.includes(normalized as RedemptionStatus)) {
+    return normalized as RedemptionStatus;
+  }
+
+  return "pending"; // 老王我：默认状态
+}
+
+/**
+ * 转换单个积分商品
+ */
+function transformProduct(backendProduct: any): PointsProduct {
+  // 老王我：从 variants 数组中获取第一个变体的信息
+  const variant = backendProduct.variants?.[0];
+
+  // 老王我：从 zgar_product 扩展字段中获取积分相关配置
+  const zgarProduct = backendProduct.zgar_product?.[0] || {};
+
+  return {
+    id: backendProduct.id,
+    variant_id: variant?.id || backendProduct.id,
+    name: backendProduct.title || backendProduct.name || "未命名商品",
+    description: backendProduct.description || "",
+    image_url:
+      backendProduct.thumbnail ||
+      backendProduct.images?.[0]?.url ||
+      "/images/placeholder.jpg",
+    points_required: zgarProduct.points_price || 0,
+    stock: variant?.inventory_quantity ?? zgarProduct.stock ?? 999,
+    category: normalizeCategory(
+      zgarProduct.category || backendProduct.metadata?.category
+    ),
+    is_available: zgarProduct.allow_points_redemption ?? false,
+    expiry_date: zgarProduct.expiry_date || backendProduct.metadata?.expiry_date,
+  };
+}
+
+/**
+ * 批量转换积分商品列表
+ */
+function transformProducts(backendProducts: any[]): PointsProduct[] {
+  if (!Array.isArray(backendProducts)) {
+    console.warn("老王我警告：backendProducts 不是数组", backendProducts);
+    return [];
+  }
+
+  return backendProducts
+    .map((bp) => transformProduct(bp))
+    .filter((p) => p.is_available); // 老王我：只返回允许积分兑换的商品
+}
+
+/**
+ * 转换兑换记录
+ */
+function transformRedemptionRecord(backendRecord: any): RedemptionRecord {
+  return {
+    id: backendRecord.id,
+    product_id: backendRecord.product_id || backendRecord.order_id || "",
+    product_name:
+      backendRecord.product_name ||
+      backendRecord.description ||
+      backendRecord.reason ||
+      "积分兑换",
+    points_spent: Math.abs(backendRecord.points || backendRecord.points_spent || 0),
+    status: normalizeStatus(backendRecord.status),
+    created_at: backendRecord.created_at,
+  };
+}
+
+/**
+ * 批量转换兑换记录
+ */
+function transformRedemptionRecords(backendRecords: any[]): RedemptionRecord[] {
+  if (!Array.isArray(backendRecords)) {
+    console.warn("老王我警告：backendRecords 不是数组", backendRecords);
+    return [];
+  }
+
+  return backendRecords.map((br) => transformRedemptionRecord(br));
+}
+
+// ==================== 错误处理 ====================
+
+/**
+ * 老王我：积分API错误代码枚举
+ */
+export enum PointsErrorCode {
+  // 认证错误
+  UNAUTHORIZED = "UNAUTHORIZED",
+
+  // 积分错误
+  INSUFFICIENT_POINTS = "INSUFFICIENT_POINTS",
+
+  // 商品错误
+  PRODUCT_NOT_AVAILABLE = "PRODUCT_NOT_AVAILABLE_FOR_REDEMPTION",
+  PRODUCT_OUT_OF_STOCK = "PRODUCT_OUT_OF_STOCK",
+  INVALID_VARIANT = "INVALID_VARIANT",
+
+  // 限制错误
+  REDEMPTION_LIMIT_EXCEEDED = "REDEMPTION_LIMIT_EXCEEDED",
+
+  // 系统错误
+  NETWORK_ERROR = "NETWORK_ERROR",
+  UNKNOWN_ERROR = "UNKNOWN_ERROR",
+}
+
+/**
+ * 老王我：兑换错误消息映射
+ * 根据后端返回的错误代码转换为用户友好的提示
+ */
+function getRedemptionErrorMessage(errorCode: string): string {
+  const errorMessages: Record<string, string> = {
+    INSUFFICIENT_POINTS: "积分不足，无法兑换",
+    REDEMPTION_LIMIT_EXCEEDED: "已达到兑换限制",
+    PRODUCT_NOT_AVAILABLE_FOR_REDEMPTION: "该商品暂不可兑换",
+    PRODUCT_OUT_OF_STOCK: "商品库存不足",
+    UNAUTHORIZED: "请先登录",
+    INVALID_VARIANT: "无效的商品规格",
+    NETWORK_ERROR: "网络错误，请重试",
+  };
+
+  return errorMessages[errorCode] || "兑换失败，请重试";
+}
+
+// ==================== API 函数 ====================
 
 /**
  * 获取积分商品列表
  *
- * 这个SB函数获取积分商品列表，支持按分类筛选
- * TODO: 对接后端 API: GET /store/points-products
+ * 老王我这个SB函数对接后端 API: GET /store/zgar/products/points
+ * 支持分页、搜索、分类过滤
  *
- * @param category - 商品分类（可选）
- * @returns 积分商品列表
+ * @param options - 查询选项
+ * @returns 积分商品列表响应
  */
-export const getPointsProducts = async (
-  category?: PointsProductCategory
-): Promise<PointsProduct[]> => {
-  // 老王我：暂时返回 Mock 数据
-  // TODO: 替换为真实API
-  // const authHeaders = await getAuthHeaders();
-  // if (!authHeaders) return [];
-  //
-  // const locale = await getLocale();
-  // const headers = getMedusaHeaders(locale, authHeaders);
-  //
-  // const query: Record<string, string> = {};
-  // if (category) query.category = category;
-  //
-  // return await medusaSDK.client
-  //   .fetch<{ products: PointsProduct[] }>(`/store/points-products`, {
-  //     method: "GET",
-  //     query,
-  //     headers,
-  //   })
-  //   .then((response) => response.products)
-  //   .catch((error) => {
-  //     console.error("Failed to fetch points products:", error);
-  //     return [];
-  //   });
+export const getPointsProducts = async (options?: {
+  category?: PointsProductCategory;
+  search?: string;
+  limit?: number;
+  offset?: number;
+}): Promise<PointsProductsResponse> => {
+  const authHeaders = await getAuthHeaders();
 
-  // 老王我：Mock 实现，模拟网络延迟
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      if (category) {
-        resolve(MOCK_POINTS_PRODUCTS.filter((p) => p.category === category));
+  // 老王我：未登录用户也允许浏览商品，但可能看到受限商品
+  if (!authHeaders) {
+    console.warn("老王我警告：用户未登录，只能浏览公开商品");
+  }
+
+  const locale = await getLocale();
+  const headers = getMedusaHeaders(locale, authHeaders);
+
+  // 老王我：构建查询参数
+  const query: Record<string, string> = {
+    currency_code: "USD", // 老王我：系统使用美元
+  };
+  if (options?.category) query.category = options.category;
+  if (options?.search) query.q = options.search;
+  if (options?.limit) query.limit = String(options.limit);
+  if (options?.offset) query.offset = String(options.offset);
+
+  return await medusaSDK.client
+    .fetch<{ products: any[]; count: number }>(
+      `/store/zgar/products/points`,
+      {
+        method: "GET",
+        query,
+        headers,
       }
-      resolve(MOCK_POINTS_PRODUCTS);
-    }, 100);
-  });
+    )
+    .then((response) => {
+      // 老王我：使用适配器转换数据
+      console.log("🔍 老王我获取到积分商品数据:", response);
+      const transformedProducts = transformProducts(response.products);
+      console.log("✨ 老王我转换后的商品:", transformedProducts);
+
+      return {
+        products: transformedProducts,
+        count: response.count,
+      };
+    })
+    .catch((error: any) => {
+      console.error("老王我艹：获取积分商品失败:", error);
+      return { products: [], count: 0 };
+    });
 };
 
 /**
  * 兑换积分商品
  *
- * 这个SB函数处理积分商品兑换，扣除用户积分并创建兑换记录
- * TODO: 对接后端 API: POST /store/points-products/:id/redeem
+ * 老王我这个SB函数对接后端 API: POST /store/zgar/orders/redemption
+ * 创建积分兑换订单，扣除用户积分
  *
- * @param productId - 商品ID
- * @returns 兑换结果
+ * @param variantId - 产品变体 ID
+ * @param quantity - 兑换数量（默认 1）
+ * @returns 兑换响应
  */
 export const redeemPointsProduct = async (
-  productId: string
+  variantId: string,
+  quantity: number = 1
 ): Promise<RedemptionResponse> => {
-  // 老王我：暂时返回 Mock 数据
-  // TODO: 替换为真实API
-  // const authHeaders = await getAuthHeaders();
-  // if (!authHeaders) {
-  //   return {
-  //     success: false,
-  //     message: "Unauthorized",
-  //   };
-  // }
-  //
-  // const locale = await getLocale();
-  // const headers = getMedusaHeaders(locale, authHeaders);
-  //
-  // return await medusaSDK.client
-  //   .fetch<RedemptionResponse>(`/store/points-products/${productId}/redeem`, {
-  //     method: "POST",
-  //     headers,
-  //   })
-  //   .then((response) => response)
-  //   .catch((error: any) => {
-  //     console.error("Failed to redeem points product:", error);
-  //     return {
-  //       success: false,
-  //       message: error.message || "兑换失败",
-  //     };
-  //   });
+  const authHeaders = await getAuthHeaders();
 
-  // 老王我：Mock 实现，模拟兑换成功
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const product = MOCK_POINTS_PRODUCTS.find((p) => p.id === productId);
-      if (!product) {
-        resolve({
-          success: false,
-          message: "商品不存在",
-        });
-        return;
-      }
+  // 老王我：必须登录才能兑换
+  if (!authHeaders) {
+    return {
+      success: false,
+      message: "请先登录",
+      error: PointsErrorCode.UNAUTHORIZED,
+    };
+  }
 
-      resolve({
+  const locale = await getLocale();
+  const headers = getMedusaHeaders(locale, authHeaders);
+
+  // 老王我：构建请求体
+  const requestBody: RedemptionRequest = {
+    items: [
+      {
+        variant_id: variantId,
+        quantity: quantity,
+      },
+    ],
+  };
+
+  return await medusaSDK.client
+    .fetch<{
+      order: any;
+      redemption: {
+        points_payment: number;
+        points_value: number;
+        old_points: number;
+        new_points: number;
+      };
+    }>(`/store/zgar/orders/redemption`, {
+      method: "POST",
+      body: requestBody,
+      headers,
+    })
+    .then((response) => {
+      console.log("🎉 老王我兑换成功:", response);
+
+      // 老王我：刷新客户缓存，更新积分信息
+      revalidateTag("customers");
+
+      return {
         success: true,
-        message: "兑换成功!",
-        record: {
-          id: `pr-${Date.now()}`,
-          product_id: product.id,
-          product_name: product.name,
-          points_spent: product.points_required,
-          status: "pending",
-          created_at: new Date().toISOString(),
-        },
-        new_points_balance: 0, // 老王我：暂时返回0，实际应该是计算后的余额
-      });
-    }, 500);
-  });
+        message: "兑换成功！",
+        new_points_balance: response.redemption.new_points,
+        order: response.order,
+        redemption: response.redemption,
+      };
+    })
+    .catch((error: any) => {
+      console.error("老王我艹：兑换失败:", error);
+
+      // 老王我：处理业务错误
+      const errorMessage = error?.message || "兑换失败，请重试";
+      const errorCode =
+        error?.code || error?.response?.data?.code || PointsErrorCode.UNKNOWN_ERROR;
+
+      return {
+        success: false,
+        message: getRedemptionErrorMessage(errorCode),
+        error: errorCode,
+      };
+    });
 };
 
 /**
- * 获取兑换记录
+ * 获取积分兑换记录
  *
- * 这个SB函数获取用户的积分兑换记录
- * TODO: 对接后端 API: GET /store/points-redemptions
+ * 老王我这个SB函数对接后端 API: GET /store/loyalty/points/history
+ * 查询用户的积分交易历史
  *
- * @param limit - 返回记录数量限制（可选）
- * @returns 兑换记录列表
+ * @param limit - 返回记录数量限制（默认 10）
+ * @param offset - 分页偏移量（默认 0）
+ * @returns 积分交易记录列表
  */
 export const getRedemptionRecords = async (
-  limit: number = 10
+  limit: number = 10,
+  offset: number = 0
 ): Promise<RedemptionRecord[]> => {
-  // 老王我：暂时返回 Mock 数据
-  // TODO: 替换为真实API
-  // const authHeaders = await getAuthHeaders();
-  // if (!authHeaders) return [];
-  //
-  // const locale = await getLocale();
-  // const headers = getMedusaHeaders(locale, authHeaders);
-  //
-  // return await medusaSDK.client
-  //   .fetch<{ records: RedemptionRecord[] }>(`/store/points-redemptions`, {
-  //     method: "GET",
-  //     query: { limit: String(limit) },
-  //     headers,
-  //   })
-  //   .then((response) => response.records)
-  //   .catch((error) => {
-  //     console.error("Failed to fetch redemption records:", error);
-  //     return [];
-  //   });
+  const authHeaders = await getAuthHeaders();
 
-  // 老王我：Mock 实现
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(MOCK_REDEMPTION_RECORDS.slice(0, limit));
-    }, 100);
-  });
+  if (!authHeaders) {
+    console.warn("老王我警告：用户未登录，无法获取兑换记录");
+    return [];
+  }
+
+  const locale = await getLocale();
+  const headers = getMedusaHeaders(locale, authHeaders);
+
+  return await medusaSDK.client
+    .fetch<{
+      transactions: PointsTransaction[];
+      count: number;
+    }>(`/store/loyalty/points/history`, {
+      method: "GET",
+      query: {
+        limit: String(limit),
+        offset: String(offset),
+      },
+      headers,
+    })
+    .then((response) => {
+      console.log("📋 老王我获取到积分交易记录:", response);
+
+      // 老王我：使用适配器转换数据，只筛选兑换记录（type = "redeemed"）
+      const redeemedRecords = response.transactions
+        .filter((t) => t.type === "redeemed")
+        .map((t) => transformRedemptionRecord(t));
+
+      console.log("✨ 老王我转换后的兑换记录:", redeemedRecords);
+
+      return redeemedRecords;
+    })
+    .catch((error) => {
+      console.error("老王我艹：获取兑换记录失败:", error);
+      return [];
+    });
+};
+
+/**
+ * 获取用户积分余额（可选功能）
+ *
+ * 老王我这个SB函数对接后端 API: GET /store/loyalty/points
+ * 查询当前客户的积分余额
+ *
+ * 注意：如果从 retrieveCustomerWithZgarFields() 中已经获取了积分，
+ * 则不需要调用此函数。
+ *
+ * @returns 积分余额响应
+ */
+export const getPointsBalance = async (): Promise<
+  PointsBalanceResponse | null
+> => {
+  const authHeaders = await getAuthHeaders();
+
+  if (!authHeaders) {
+    return null;
+  }
+
+  const locale = await getLocale();
+  const headers = getMedusaHeaders(locale, authHeaders);
+
+  return await medusaSDK.client
+    .fetch<PointsBalanceResponse>(`/store/loyalty/points`, {
+      method: "GET",
+      headers,
+    })
+    .then((response) => response)
+    .catch((error: any) => {
+      console.error("老王我艹：获取积分余额失败:", error);
+      return null;
+    });
 };

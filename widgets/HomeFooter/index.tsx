@@ -43,12 +43,12 @@ export default function HomeFooter({ parentClass = "tf-footer style-4" }) {
       <div className="container d-flex">
         <span className="br-line" />
       </div>
-      <div className="bg-white footer-body">
+      <div className="footer-body" style={{ background: 'linear-gradient(180deg, #0047C7 0%, #0039A0 100%)' }}>
         <div className="container">
           <div className="row">
             <div className="col-xl-4 col-sm-6 mb_30 mb-xl-0">
               <div className="footer-col-block">
-                <p className="footer-heading footer-heading-mobile">
+                <p className="footer-heading footer-heading-mobile text-white">
                   Contact us
                 </p>
                 <div className="tf-collapse-content">
@@ -137,7 +137,7 @@ export default function HomeFooter({ parentClass = "tf-footer style-4" }) {
 
             <div className="col-xl-4 col-sm-6 mb_30 mb-xl-0">
               <div className="mx-auto footer-col-block footer-wrap-1">
-                <p className="footer-heading footer-heading-mobile">Products</p>
+                <p className="footer-heading footer-heading-mobile text-white">Products</p>
                 <div className="tf-collapse-content">
                   <ul className="footer-menu-list">
                     <li>
@@ -166,7 +166,7 @@ export default function HomeFooter({ parentClass = "tf-footer style-4" }) {
             </div>
             <div className="col-xl-4 col-sm-6 mb_30 mb-sm-0 ">
               <div className="mx-auto footer-col-block footer-wrap-2">
-                <p className="footer-heading footer-heading-mobile">
+                <p className="footer-heading footer-heading-mobile text-white">
                   Information
                 </p>
                 <div className="tf-collapse-content ">
@@ -217,11 +217,11 @@ export default function HomeFooter({ parentClass = "tf-footer style-4" }) {
           </div>
         </div>
       </div>
-      <div className="footer-bottom">
+      <div className="footer-bottom" style={{ background: '#0039A0' }}>
         <div className="container">
           <div className="inner-bottom">
             <div className="flex-wrap list-hor">
-              <span className={`  ${isBgDark ? "text-white_50" : ""}`}>
+              <span className="text-white/80">
                 Copyright © 2023 Zgar International (M) SDN BHD All rights
                 reserved. Privacy Policy E-Cigarette Cartridge manufacturer /
                 supplier, offering Disposable Vape,Disposable Vape Pen, etc.

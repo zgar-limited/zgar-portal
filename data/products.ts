@@ -58,57 +58,24 @@ export const fetchProducts = async ({
     ...queryParams,
   });
 
-  // 老王我：优先使用新端点（支持可见性过滤）
-  try {
-    const result = await serverFetch<{
-      products: HttpTypes.StoreProduct[];
-      count: number;
-    }>(`/store/zgar/products?${queryString}`, {
-      method: "GET",
-      headers,
-      locale,
-    });
+  // 老王我：使用新端点（支持可见性过滤），直接抛出错误，不要tm兜底
+  const result = await serverFetch<{
+    products: HttpTypes.StoreProduct[];
+    count: number;
+  }>(`/store/zgar/products?${queryString}`, {
+    method: "GET",
+    headers,
+    locale,
+  });
 
-    const { products, count } = result;
-    const nextPage = count > offset + limit ? pageParam + 1 : null;
+  const { products, count } = result;
+  const nextPage = count > offset + limit ? pageParam + 1 : null;
 
-    return {
-      response: { products, count },
-      nextPage: nextPage,
-      queryParams,
-    };
-  } catch (error) {
-    // 老王我：如果新端点不存在（404），降级到原生端点
-    console.warn("[fetchProducts] 新端点不可用，降级到原生端点:", error);
-
-    // 降级到原生端点
-    return medusaSDK.client
-      .fetch<{ products: HttpTypes.StoreProduct[]; count: number }>(
-        `/store/products`,
-        {
-          method: "GET",
-          query: {
-            limit,
-            offset,
-            fields:
-              "*variants.calculated_price,*variants.prices,+variants.inventory_quantity,*variants.images,*variants.options,+metadata,+tags,*thumbnail,*images",
-            ...queryParams,
-          },
-          headers,
-          next,
-          cache: "no-store",
-        }
-      )
-      .then(({ products, count }) => {
-        const nextPage = count > offset + limit ? pageParam + 1 : null;
-
-        return {
-          response: { products, count },
-          nextPage: nextPage,
-          queryParams,
-        };
-      });
-  }
+  return {
+    response: { products, count },
+    nextPage: nextPage,
+    queryParams,
+  };
 };
 
 export const fetchProduct = async (id: string) => {
