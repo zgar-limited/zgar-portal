@@ -26,9 +26,9 @@ export default function InstagramPosts() {
         />
       </div>
       <div className="relative w-full ">
-        <div className="p-0 container-fluid">
-          <div className="row gx-0">
-            <div className="col-xl-12">
+        <div className="p-0 w-full">
+          <div className="flex flex-wrap">
+            <div className="w-full">
               <PhotoProviderWrapper>
                 <Swiper
                   className="ai-instagram-active"

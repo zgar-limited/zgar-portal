@@ -40,13 +40,13 @@ export default function HomeFooter({ parentClass = "tf-footer style-4" }) {
   }, []);
   return (
     <footer ref={footerRef} className={parentClass}>
-      <div className="container d-flex">
+      <div className="container mx-auto flex">
         <span className="br-line" />
       </div>
       <div className="footer-body" style={{ background: 'linear-gradient(180deg, #0047C7 0%, #0039A0 100%)' }}>
-        <div className="container">
-          <div className="row">
-            <div className="col-xl-4 col-sm-6 mb_30 mb-xl-0">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-wrap">
+            <div className="w-full xl:w-1/3 sm:w-1/2 mb-8 xl:mb-0 px-4">
               <div className="footer-col-block">
                 <p className="footer-heading footer-heading-mobile text-white">
                   Contact us
@@ -135,7 +135,7 @@ export default function HomeFooter({ parentClass = "tf-footer style-4" }) {
               </div>
             </div>
 
-            <div className="col-xl-4 col-sm-6 mb_30 mb-xl-0">
+            <div className="w-full xl:w-1/3 sm:w-1/2 mb-8 xl:mb-0 px-4">
               <div className="mx-auto footer-col-block footer-wrap-1">
                 <p className="footer-heading footer-heading-mobile text-white">Products</p>
                 <div className="tf-collapse-content">
@@ -164,7 +164,7 @@ export default function HomeFooter({ parentClass = "tf-footer style-4" }) {
                 </div>
               </div>
             </div>
-            <div className="col-xl-4 col-sm-6 mb_30 mb-sm-0 ">
+            <div className="w-full xl:w-1/3 sm:w-1/2 mb-8 sm:mb-0 px-4">
               <div className="mx-auto footer-col-block footer-wrap-2">
                 <p className="footer-heading footer-heading-mobile text-white">
                   Information
@@ -218,7 +218,7 @@ export default function HomeFooter({ parentClass = "tf-footer style-4" }) {
         </div>
       </div>
       <div className="footer-bottom" style={{ background: '#0039A0' }}>
-        <div className="container">
+        <div className="container mx-auto px-4">
           <div className="inner-bottom">
             <div className="flex-wrap list-hor">
               <span className="text-white/80">

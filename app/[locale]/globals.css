@@ -1,0 +1,129 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ========== 核心颜色定义 ========== */
+:root {
+  /* 蓝色系 */
+  --color-blue-50: #f0f7ff;
+  --color-blue-100: #e0eeff;
+  --color-blue-200: #b9dcff;
+  --color-blue-300: #7cc4ff;
+  --color-blue-400: #369eff;
+  --color-blue-500: #0047c7;  /* 主蓝色 */
+  --color-blue-600: #0039a0;
+  --color-blue-700: #002b77;
+  --color-blue-800: #001d4e;
+  --color-blue-900: #000f26;
+
+  /* 粉色系 */
+  --color-rose-50: #fff1f7;
+  --color-rose-100: #ffe4ef;
+  --color-rose-200: #ffc9db;
+  --color-rose-300: #ffa4c7;
+  --color-rose-400: #ff7aa8;
+  --color-rose-500: #f496d3;  /* 主粉色 */
+  --color-rose-600: #e67dc2;
+  --color-rose-700: #c455a4;
+  --color-rose-800: #9c4483;
+  --color-rose-900: #7a3966;
+
+  /* 中性色 */
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #4b5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1f2937;
+  --color-gray-900: #111827;
+
+  /* 语义化颜色 */
+  --color-primary: var(--color-blue-500);
+  --color-accent: var(--color-rose-500);
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: var(--color-blue-400);
+
+  /* 文字颜色 */
+  --color-text-primary: var(--color-gray-900);
+  --color-text-secondary: var(--color-gray-600);
+  --color-text-tertiary: var(--color-gray-500);
+
+  /* 背景颜色 */
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: var(--color-gray-50);
+  --color-bg-tertiary: var(--color-blue-50);
+  --color-bg-accent: var(--color-rose-50);
+
+  /* 边框颜色 */
+  --color-border-light: var(--color-gray-200);
+  --color-border-medium: var(--color-gray-300);
+
+  /* 渐变 */
+  --gradient-brand: linear-gradient(90deg, rgba(0, 71, 199, 1) 15%, rgba(244, 150, 211, 1) 85%);
+  --gradient-blue: linear-gradient(135deg, var(--color-blue-300) 0%, var(--color-blue-500) 100%);
+  --gradient-rose: linear-gradient(135deg, var(--color-rose-300) 0%, var(--color-rose-500) 100%);
+  --gradient-blue-vertical: linear-gradient(180deg, var(--color-blue-500) 0%, var(--color-blue-600) 100%);
+}
+
+/* ========== 工具类 ========== */
+@layer components {
+  .text-gradient-brand {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--gradient-brand);
+  }
+
+  .bg-gradient-brand {
+    background: var(--gradient-brand);
+  }
+
+  .text-primary {
+    color: var(--color-primary);
+  }
+
+  .text-accent {
+    color: var(--color-accent);
+  }
+
+  .bg-primary {
+    background-color: var(--color-primary);
+  }
+
+  .bg-accent {
+    background-color: var(--color-accent);
+  }
+
+  .border-primary {
+    border-color: var(--color-primary);
+  }
+
+  .border-accent {
+    border-color: var(--color-accent);
+  }
+}
+
+/* ========== 基础样式覆盖 ========== */
+@layer base {
+  * {
+    border-color: var(--color-border-light);
+  }
+
+  body {
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* 确保文字在深色背景上可见 */
+  .text-on-dark {
+    color: #ffffff;
+  }
+
+  .text-on-light {
+    color: var(--color-text-primary);
+  }
+}

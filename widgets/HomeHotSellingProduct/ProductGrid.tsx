@@ -25,7 +25,7 @@ const PortfolioMasonryGrid = () => {
       image: "/images/slider/zgar/2.jpg",
       title: "Olivia Rivers",
       categories: ["Website", "Services"],
-      colClass: "col-lg-6",
+      colClass: "w-full lg:w-1/2",
       link: "/portfolio-details-gallery-light",
     },
     {
@@ -33,7 +33,7 @@ const PortfolioMasonryGrid = () => {
       image: "/images/slider/zgar/3.jpg",
       title: "Isla Monroe",
       categories: ["Website", "Services"],
-      colClass: "col-lg-6",
+      colClass: "w-full lg:w-1/2",
       link: "/portfolio-details-gallery-light",
     },
     {
@@ -41,7 +41,7 @@ const PortfolioMasonryGrid = () => {
       image: "/images/slider/zgar/4.jpg",
       title: "Ella Whitmore",
       categories: ["Website", "Services"],
-      colClass: "col-lg-12 mt-8",
+      colClass: "w-full mt-8",
       link: "/portfolio-details-gallery-light",
     },
   ].map((item) => (
@@ -70,7 +70,7 @@ const PortfolioMasonryGrid = () => {
             </div>
           </Link>
         </div>
-        <div className="tp-portfolio-masonry-grid-content d-flex align-items-center justify-content-between">
+        <div className="tp-portfolio-masonry-grid-content flex items-center justify-between">
           <div className="tp-portfolio-masonry-grid-left">
             <h4 className="tp-portfolio-masonry-grid-title">
               <Link className="tp-line-white" href={item.link}>
@@ -88,8 +88,8 @@ const PortfolioMasonryGrid = () => {
     </div>
   ));
   return (
-    <div className="container-full ">
-      <div className="row">{RenderedItems}</div>
+    <div className="w-full">
+      <div className="flex flex-wrap">{RenderedItems}</div>
     </div>
   );
 };

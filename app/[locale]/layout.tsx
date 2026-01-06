@@ -5,6 +5,7 @@ import { routing } from "@/i18n/routing";
 
 
 
+import "./globals.css";
 // import "../../public/css/tailwind.css";
 import "../../public/scss/main.scss";
 import "../../public/css/harmonyos_sans.css";

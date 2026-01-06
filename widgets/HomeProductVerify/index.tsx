@@ -7,7 +7,7 @@ import { Link } from '@/i18n/routing';
 const index = () => {
   return (
     <div
-      className={`${scope.background} d-flex flex-column align-items-center pb-[70px] mt-[50px]`}
+      className={`${scope.background} flex flex-col items-center pb-[70px] mt-[50px]`}
     >
       <div className="mt-[88px]  h1  title font-bold text-black">
         SCAN TO VERIFY

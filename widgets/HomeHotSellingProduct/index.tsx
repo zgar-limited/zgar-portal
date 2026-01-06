@@ -7,7 +7,7 @@ const tabItems = ["new arrivals", "best seller", "on sale"];
 
 export default function Products1() {
   const [activeTab, setActiveTab] = useState("new arrivals");
-  
+
   return (
     <section className="">
       <a className="w-full mx-auto my-32 text-center text-black h1">
@@ -18,7 +18,7 @@ export default function Products1() {
         ></TrueFocus>
       </a>
       <ProductGrid />
-      
+
     </section>
   );
 }

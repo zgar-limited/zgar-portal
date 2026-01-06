@@ -16,8 +16,8 @@ type Props = {};
 const HomeAboutUs = (props: Props) => {
   return (
     <div className="relative  aspect-5/2 mt-16  max-w-[1920px] mx-auto ">
-      <div className="container row">
-        <div className="col-lg-6">
+      <div className="container mx-auto px-4 flex flex-wrap">
+        <div className="w-full lg:w-1/2">
           <div className="relative dgm-about-thumb-wrap">
             <Image
               className="tp_fade_anim"
@@ -39,7 +39,7 @@ const HomeAboutUs = (props: Props) => {
             />
           </div>
         </div>
-        <div className="flex flex-col justify-center gap-30 col-lg-6">
+        <div className="flex flex-col justify-center gap-30 w-full lg:w-1/2">
           <a className="font-semibold h1 ">ABOUT US</a>
           <p className="font-light h4">
             We provide digital experience services to start up and small
