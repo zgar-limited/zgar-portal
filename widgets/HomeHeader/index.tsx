@@ -6,8 +6,8 @@ import Nav from "./Nav";
 import LanguageSelect from "@/components/common/LanguageSelect";
 import CartIcon from "@/components/header/CartIcon";
 import UserIcon from "@/components/header/UserIcon";
+import MobileMenu from "@/components/modals/MobileMenu";
 import { StoreCart, StoreCustomer } from "@medusajs/types";
-import { Menu } from "lucide-react";
 
 export default function HomeHeader({
   containerFull = true,
@@ -45,31 +45,26 @@ export default function HomeHeader({
 
   return (
     <header
-      className={`${parentClass} ${
-        lastScrollY > 200 && isScrollingUp ? "header-sticky" : ""
-      } ${lastScrollY > 100 ? "will-sticky" : ""}`}
+      className={`${parentClass} transition-all duration-300 relative bg-white border-b border-gray-200 ${
+        lastScrollY > 100 ? "shadow-md" : "shadow-sm"
+      }`}
     >
-      <div className="px-[6%]">
-        <div className="flex items-center gap-4">
-          {/* Mobile Menu Button */}
-          <div className="xl:hidden flex-shrink-0">
-            <a
-              href="#mobileMenu"
-              data-bs-toggle="offcanvas"
-              className="btn-mobile-menu"
-            >
-              <span />
-            </a>
+      <div className="relative px-[6%]">
+        <div className="flex items-center gap-4 py-4">
+          {/* Mobile Menu */}
+          <div className="xl:hidden">
+            <MobileMenu />
           </div>
 
           {/* Logo */}
           <div className="flex-shrink-0">
-            <Link href="/" className="py-2 logo-site inline-block">
+            <Link href="/" className="logo-site inline-block hover:scale-105 transition-transform duration-300">
               <Image
                 alt="Logo"
                 src="/images/logo/logo-zgar.png"
                 width={133}
                 height={53}
+                className="drop-shadow-lg"
               />
             </Link>
           </div>
@@ -77,7 +72,7 @@ export default function HomeHeader({
           {/* Navigation Menu */}
           <div className="hidden xl:block flex-1 ml-8">
             <nav className="box-navigation">
-              <ul className="box-nav-menu flex items-center gap-6">
+              <ul className="box-nav-menu flex items-center gap-2">
                 <Nav />
               </ul>
             </nav>

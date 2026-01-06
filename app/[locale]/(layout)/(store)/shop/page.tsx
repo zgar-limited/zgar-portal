@@ -1,6 +1,5 @@
 import ProductGrid from "@/components/products/ProductGrid";
-import ShopBanner from "@/widgets/ShopBanner";
-import Categories from "@/components/products/Categories";
+import FilterSidebarNew from "@/components/products/FilterSidebarNew";
 
 import { fetchProducts } from "@/data/products";
 
@@ -22,10 +21,22 @@ export default async function page({
   });
 
   return (
-    <>
-      <ShopBanner />
-      <Categories />
-      <ProductGrid initialProducts={response.products} />
-    </>
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      {/* 主内容区 - 侧边栏布局 */}
+      <div className="container mx-auto px-4 py-12">
+        <div className="flex gap-8">
+          {/* 左侧筛选边栏 - 固定 */}
+          <aside className="hidden lg:block w-64 flex-shrink-0">
+            <FilterSidebarNew />
+          </aside>
+
+          {/* 右侧主内容 */}
+          <main className="flex-1 min-w-0">
+            {/* 产品网格 */}
+            <ProductGrid initialProducts={response.products} />
+          </main>
+        </div>
+      </div>
+    </div>
   );
 }

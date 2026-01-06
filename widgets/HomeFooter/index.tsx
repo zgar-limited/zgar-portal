@@ -1,7 +1,6 @@
 "use client";
 import { Link } from '@/i18n/routing';
 import Image from "next/image";
-
 import { useEffect, useRef } from "react";
 
 export default function HomeFooter({ parentClass = "tf-footer style-4" }) {
@@ -38,96 +37,65 @@ export default function HomeFooter({ parentClass = "tf-footer style-4" }) {
       );
     };
   }, []);
+
   return (
     <footer ref={footerRef} className={parentClass}>
-      <div className="container mx-auto flex">
-        <span className="br-line" />
-      </div>
-      <div className="footer-body" style={{ background: 'linear-gradient(180deg, #0047C7 0%, #0039A0 100%)' }}>
-        <div className="container mx-auto px-4">
+      <div className="footer-body bg-white border-t border-gray-200">
+        <div className="container mx-auto px-4 py-16">
           <div className="flex flex-wrap">
             <div className="w-full xl:w-1/3 sm:w-1/2 mb-8 xl:mb-0 px-4">
               <div className="footer-col-block">
-                <p className="footer-heading footer-heading-mobile text-white">
+                <p className="footer-heading footer-heading-mobile text-gray-900 font-semibold text-base mb-6">
                   Contact us
                 </p>
                 <div className="tf-collapse-content">
-                  <ul className="footer-contact">
-                    {/* <li>
-                      <i className="icon icon-map-pin" />
-                      <span className="br-line" />
-                      <a
-                        href="https://www.google.com/maps?q=8500+Lorem+Street+Chicago,+IL+55030+Dolor+sit+amet"
-                        target="_blank"
-                        className="h6 link"
-                      >
-                        8500 Lorem Street Chicago, IL 55030
-                        <br className="d-none d-lg-block" />
-                        Dolor sit amet
-                      </a>
-                    </li> */}
-                    {/* <li>
-                      <i className="icon icon-phone" />
-                      <span className="br-line" />
-                      <a href="tel:+88001234567" className="h6 link">
-                        +8(800) 123 4567
-                      </a>
-                    </li> */}
-                    <li>
-                      <i className="icon icon-envelope-simple" />
-                      <span className="br-line" />
+                  <ul className="footer-contact space-y-3">
+                    <li className="flex items-center gap-3">
+                      <span className="text-gray-400">✉</span>
                       <a
                         href="mailto:themesflat@support.com"
-                        className="h6 link"
+                        className="text-gray-600 hover:text-brand-pink transition-colors text-sm"
                       >
                         Mail: support@zgar.com
                       </a>
                     </li>
                   </ul>
 
-                  <ul className={`tf-social-icon ${isBgDark ? "style-2" : ""}`}>
+                  <ul className="tf-social-icon flex items-center gap-3 mt-6">
                     <li>
-                        <a
-                          href="https://www.facebook.com/"
-                          target="_blank"
-                          className="social-facebook"
-                        >
-                          <span className="icon">
-                            <i className="icon-fb" />
-                          </span>
-                        </a>
-                      </li>
+                      <a
+                        href="https://www.facebook.com/"
+                        target="_blank"
+                        className="text-gray-400 hover:text-brand-pink transition-colors text-sm"
+                      >
+                        Facebook
+                      </a>
+                    </li>
                     <li>
                       <a
                         href="https://www.instagram.com/zgarofficial/"
                         target="_blank"
-                        className="social-instagram"
+                        className="text-gray-400 hover:text-brand-pink transition-colors text-sm"
                       >
-                        <span className="icon">
-                          <i className="icon-instagram-logo" />
-                        </span>
+                        Instagram
                       </a>
                     </li>
                     <li>
                       <a
                         href="https://x.com/"
                         target="_blank"
-                        className="social-x"
+                        className="text-gray-400 hover:text-brand-pink transition-colors text-sm"
                       >
-                        <span className="icon">
-                          <i className="icon-x" />
-                        </span>
+                        X (Twitter)
                       </a>
                     </li>
                     <li>
                       <a
                         href="https://www.tiktok.com/"
                         target="_blank"
-                        className="social-tiktok"
+                        className="text-gray-400 hover:text-brand-pink transition-colors text-sm"
                       >
-                        <span className="icon">
-                          <i className="icon-tiktok" />
-                        </span>
+                        TikTok
                       </a>
                     </li>
                   </ul>
@@ -137,26 +105,26 @@ export default function HomeFooter({ parentClass = "tf-footer style-4" }) {
 
             <div className="w-full xl:w-1/3 sm:w-1/2 mb-8 xl:mb-0 px-4">
               <div className="mx-auto footer-col-block footer-wrap-1">
-                <p className="footer-heading footer-heading-mobile text-white">Products</p>
+                <p className="footer-heading footer-heading-mobile text-gray-900 font-semibold text-base mb-6">Products</p>
                 <div className="tf-collapse-content">
-                  <ul className="footer-menu-list">
+                  <ul className="footer-menu-list space-y-3">
                     <li>
-                      <Link href={`/`} className="link h6">
+                      <Link href="/" className="text-gray-600 hover:text-brand-pink transition-colors text-sm">
                         产品系列一
                       </Link>
                     </li>
                     <li>
-                      <Link href={`/`} className="link h6">
+                      <Link href="/" className="text-gray-600 hover:text-brand-pink transition-colors text-sm">
                         产品系列二
                       </Link>
                     </li>
                     <li>
-                      <Link href={`/`} className="link h6">
+                      <Link href="/" className="text-gray-600 hover:text-brand-pink transition-colors text-sm">
                         产品系列三
                       </Link>
                     </li>
                     <li>
-                      <Link href={`/`} className="link h6">
+                      <Link href="/" className="text-gray-600 hover:text-brand-pink transition-colors text-sm">
                         产品系列四
                       </Link>
                     </li>
@@ -164,30 +132,31 @@ export default function HomeFooter({ parentClass = "tf-footer style-4" }) {
                 </div>
               </div>
             </div>
+
             <div className="w-full xl:w-1/3 sm:w-1/2 mb-8 sm:mb-0 px-4">
               <div className="mx-auto footer-col-block footer-wrap-2">
-                <p className="footer-heading footer-heading-mobile text-white">
+                <p className="footer-heading footer-heading-mobile text-gray-900 font-semibold text-base mb-6">
                   Information
                 </p>
-                <div className="tf-collapse-content ">
-                  <ul className="footer-menu-list">
+                <div className="tf-collapse-content">
+                  <ul className="footer-menu-list space-y-3">
                     <li>
-                      <Link href={`/`} className="link h6">
+                      <Link href="/" className="text-gray-600 hover:text-brand-pink transition-colors text-sm">
                         About Zgar
                       </Link>
                     </li>
                     <li>
-                      <Link href={`/`} className="link h6">
+                      <Link href="/" className="text-gray-600 hover:text-brand-pink transition-colors text-sm">
                         Care
                       </Link>
                     </li>
                     <li>
-                      <Link href={`/`} className="link h6">
+                      <Link href="/" className="text-gray-600 hover:text-brand-pink transition-colors text-sm">
                         Blogs
                       </Link>
                     </li>
                     <li>
-                      <Link href={`/club`} className="link h6">
+                      <Link href="/club" className="text-gray-600 hover:text-brand-pink transition-colors text-sm">
                         Zgar Club
                       </Link>
                     </li>
@@ -195,44 +164,19 @@ export default function HomeFooter({ parentClass = "tf-footer style-4" }) {
                 </div>
               </div>
             </div>
-            
-            {/* <div className=" col-xl-8 col-sm-6">
-              <div className="footer-col-block">
-                <p className="footer-heading footer-heading-mobile">
-                  Let’s keep in touch
-                </p>
-                <div className="tf-collapse-content">
-                  <div className="footer-newsletter">
-                    <p
-                      className={`h6 caption  ${isBgDark ? "text-main-5" : ""}`}
-                    >
-                      Enter your email below to be the first to know about new
-                      collections and product launches.
-                    </p>
-                    <NewsLetterForm isBgDark={isBgDark} />
-                  </div>
-                </div>
-              </div>
-            </div> */}
           </div>
         </div>
       </div>
-      <div className="footer-bottom" style={{ background: '#0039A0' }}>
+      <div className="footer-bottom bg-gray-900 border-t border-gray-800">
         <div className="container mx-auto px-4">
-          <div className="inner-bottom">
-            <div className="flex-wrap list-hor">
-              <span className="text-white/80">
-                Copyright © 2023 Zgar International (M) SDN BHD All rights
-                reserved. Privacy Policy E-Cigarette Cartridge manufacturer /
-                supplier, offering Disposable Vape,Disposable Vape Pen, etc.
+          <div className="inner-bottom py-6">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <span className="text-gray-400 text-sm text-center sm:text-left">
+                Copyright © 2023 Zgar International (M) SDN BHD All rights reserved.
               </span>
-
-              <Image
-                alt="Copyright"
-                src="/images/copyright/footer.svg"
-                width={200}
-                height={128}
-              />
+              <span className="text-gray-500 text-xs text-center sm:text-right">
+                Privacy Policy | E-Cigarette Cartridge manufacturer / supplier
+              </span>
             </div>
           </div>
         </div>

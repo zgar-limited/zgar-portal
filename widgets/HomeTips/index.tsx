@@ -7,15 +7,9 @@ type Props = {};
 const HomeTips = (props: Props) => {
   const t = useTranslations("HomeTips");
   return (
-    <section
-      style={{
-        background: "#0039A0",
-      }}
-
-      className=" w-full  text-white  p-2 flex items-center overflow-hidden"
-    >
+    <section className="w-full bg-gray-900 text-white p-2.5 flex items-center overflow-hidden border-b border-gray-800">
       <ScrollVelocity
-        className=" me-[80px]"
+        className="me-[80px]"
         texts={[
           t("warning"),
         ]}

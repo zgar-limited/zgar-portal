@@ -41,54 +41,54 @@ export default function UserIcon({ customer }: { customer: StoreCustomer }) {
     >
       <Link
         href={customer ? "/account-page" : "/login"}
-        className="p-0 link text-gray-900 hover:text-gray-600 transition-colors"
+        className="p-2.5 -m-2.5 link text-gray-600 hover:text-brand-pink transition-colors rounded-xl hover:bg-gray-100 group/icon"
       >
-        <User className="h-6 w-6" />
+        <User className="h-5 w-5 transition-transform group-hover/icon:scale-110" />
       </Link>
 
-      {/* Dropdown Menu */}
+      {/* Dropdown Menu - 简约白色 */}
       {isOpen && (
         <div
-          className="absolute right-0 top-8 w-40 py-1.5 bg-white border border-gray-100 rounded-xl shadow-xl z-50"
+          className="absolute right-0 top-10 w-48 py-2 bg-white rounded-xl shadow-lg z-50 border border-gray-200"
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
         >
           {/* Arrow */}
-          <div className="absolute -top-2 right-3 w-3 h-3 bg-white border-t border-l border-gray-100 transform rotate-45" />
+          <div className="absolute -top-1.5 right-4 w-3 h-3 bg-white border-l border-t border-gray-200 transform rotate-45" />
 
           {customer ? (
             <>
               <Link
                 href="/account-page"
-                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition-all duration-200 rounded-lg mx-1 group/item"
               >
-                <User size={16} className="text-gray-500" />
-                <span>{t("myAccount")}</span>
+                <User size={18} className="text-gray-500 group-hover/item:text-brand-pink transition-colors" />
+                <span className="font-medium">{t("myAccount")}</span>
               </Link>
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors w-full text-left bg-transparent border-0"
+                className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition-all duration-200 w-full text-left bg-transparent border-0 rounded-lg mx-1 group/item"
               >
-                <LogOut size={16} className="text-gray-500" />
-                <span>{t("logout")}</span>
+                <LogOut size={18} className="text-gray-500 group-hover/item:text-brand-pink transition-colors" />
+                <span className="font-medium">{t("logout")}</span>
               </button>
             </>
           ) : (
             <>
               <Link
                 href="/login"
-                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition-all duration-200 rounded-lg mx-1 group/item"
               >
-                <User size={16} className="text-gray-500" />
-                <span>{t("login")}</span>
+                <User size={18} className="text-gray-500 group-hover/item:text-brand-pink transition-colors" />
+                <span className="font-medium">{t("login")}</span>
               </Link>
 
               <Link
                 href="/register"
-                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition-all duration-200 rounded-lg mx-1 group/item"
               >
-                <User size={16} className="text-gray-500" />
-                <span>{t("register")}</span>
+                <User size={18} className="text-gray-500 group-hover/item:text-brand-pink transition-colors" />
+                <span className="font-medium">{t("register")}</span>
               </Link>
             </>
           )}
