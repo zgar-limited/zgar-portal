@@ -360,9 +360,15 @@ function ShopCartContent({
                 <ShoppingCart className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Your cart is empty</h3>
                 <p className="text-gray-600 mb-6">Add some products to get started!</p>
-                <Button asChild className="w-full sm:w-auto">
-                  <Link href="/shop">Continue Shopping</Link>
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Button onClick={() => setShowModal(true)} className="w-full sm:w-auto">
+                    <PackagePlus className="h-4 w-4 mr-2" />
+                    Add Items
+                  </Button>
+                  <Button asChild variant="outline" className="w-full sm:w-auto">
+                    <Link href="/shop">Continue Shopping</Link>
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ) : (
@@ -583,9 +589,15 @@ function ShopCartContent({
                 <ShoppingCart className="mx-auto h-16 w-16 text-gray-400 mb-6" />
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">Your cart is empty</h3>
                 <p className="text-gray-600 mb-8">Add some products to get started!</p>
-                <Button asChild size="lg">
-                  <Link href="/shop">Continue Shopping</Link>
-                </Button>
+                <div className="flex items-center justify-center gap-3">
+                  <Button onClick={() => setShowModal(true)} size="lg">
+                    <PackagePlus className="h-4 w-4 mr-2" />
+                    Add Products
+                  </Button>
+                  <Button asChild variant="outline" size="lg">
+                    <Link href="/shop">Continue Shopping</Link>
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ) : (
