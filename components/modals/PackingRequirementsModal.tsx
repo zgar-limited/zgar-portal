@@ -2,13 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import {
-  Modal,
-  Button,
-  Spinner,
-  Alert,
-  Form,
-} from "react-bootstrap";
 import { useTranslations } from "next-intl"; // 老王我：添加多语言支持
 import {
   X,
@@ -27,10 +20,28 @@ import {
   Archive,
   Inbox,
   Check,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { HttpTypes } from "@medusajs/types";
 import { submitPackingRequirement } from "@/data/orders";
+
+// 老王我：使用 shadcn/ui 组件替代 Bootstrap
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 
 // 老王我的类型定义 - 别tm乱传参数
 interface PackingRequirementsModalProps {
@@ -633,7 +644,7 @@ export default function PackingRequirementsModal({
               />
               <div className="flex gap-2">
                 <Button
-                  variant="primary"
+                  variant="default"
                   size="sm"
                   onClick={() => handleSaveEdit(group.id)}
                   className="flex-1 font-medium h-9"
@@ -642,7 +653,7 @@ export default function PackingRequirementsModal({
                   {t('save')}
                 </Button>
                 <Button
-                  variant="light"
+                  variant="outline"
                   size="sm"
                   onClick={handleCancelEdit}
                   className="flex-1 font-medium h-9"
@@ -676,7 +687,7 @@ export default function PackingRequirementsModal({
 
               <div className="flex items-center gap-1 flex-shrink-0">
                 <Button
-                  variant="light"
+                  variant="outline"
                   size="sm"
                   className="w-8 h-8 p-0 rounded-lg flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700"
                   onClick={() => toggleCollapse(group.id)}
@@ -690,7 +701,7 @@ export default function PackingRequirementsModal({
                 </Button>
 
                 <Button
-                  variant="light"
+                  variant="outline"
                   size="sm"
                   className="w-8 h-8 p-0 rounded-lg flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700"
                   onClick={() => handleStartEdit(group)}
@@ -700,7 +711,7 @@ export default function PackingRequirementsModal({
                 </Button>
 
                 <Button
-                  variant="light"
+                  variant="outline"
                   size="sm"
                   className="w-8 h-8 p-0 rounded-lg flex items-center justify-center hover:bg-red-50 dark:hover:bg-red-900/20"
                   onClick={() => handleDeleteGroup(group.id)}
@@ -775,7 +786,7 @@ export default function PackingRequirementsModal({
                               </span>
                             </div>
                             <Button
-                              variant="light"
+                              variant="outline"
                               size="sm"
                               className="w-7 h-7 p-0 rounded-lg flex items-center justify-center hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                               onClick={() => removeAllocation(status.item.id, group.id)}
@@ -798,44 +809,36 @@ export default function PackingRequirementsModal({
   };
 
   return (
-    <Modal
-      show={show}
-      onHide={onHide}
-      centered
-      contentClassName="border-0 shadow-2xl rounded-3xl overflow-hidden"
-      size="xl"
-    >
-      <Modal.Header closeButton className="pb-4 border-bottom-0 px-6 pt-6">
-        <Modal.Title className="h5 fw-bold d-flex align-items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 rounded-xl d-flex align-items-center justify-center shadow-lg">
-            <Package size={20} className="text-white" strokeWidth={2.5} />
-          </div>
-          <span className="text-lg">{t('title')}</span>
-        </Modal.Title>
-      </Modal.Header>
+    <Dialog open={show} onOpenChange={(open) => !open && onHide()}>
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogHeader className="pb-4 border-b px-6 pt-6">
+          <DialogTitle className="flex items-center gap-3 text-xl font-bold">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+              <Package size={20} className="text-white" strokeWidth={2.5} />
+            </div>
+            <span>{t('title')}</span>
+          </DialogTitle>
+        </DialogHeader>
 
-      <Modal.Body className="p-6">
-        {error && (
-          <Alert
-            variant="danger"
-            className="gap-2 py-3 d-flex align-items-center small mb-4 rounded-xl border-0"
-          >
-            <X size={18} strokeWidth={2.5} />
-            <span className="font-medium">{error}</span>
-          </Alert>
-        )}
+        <div className="flex-1 overflow-y-auto p-6">
+          {error && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
-        {success ? (
-          <div className="py-12 text-center">
-            <motion.div
-              initial={{ scale: 0, rotate: -180 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-              className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full d-flex align-items-center justify-center mx-auto mb-4"
-            >
-              <CheckCircle size={40} className="text-green-600 dark:text-green-400" strokeWidth={2.5} />
-            </motion.div>
-            <h6 className="fw-bold text-green-600 dark:text-green-400 text-lg mb-2">{t('saveSuccess')}</h6>
+          {success ? (
+            <div className="py-12 text-center">
+              <motion.div
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4"
+              >
+                <CheckCircle size={40} className="text-green-600" strokeWidth={2.5} />
+              </motion.div>
+              <h6 className="font-bold text-green-600 text-lg mb-2">{t('saveSuccess')}</h6>
             <p className="text-sm text-gray-500 dark:text-gray-400">{t('saveSuccess')}</p>
           </div>
         ) : (
@@ -853,7 +856,7 @@ export default function PackingRequirementsModal({
                   {t('shippingMarkGroups')}
                 </h4>
                 <Button
-                  variant="outline-primary"
+                  variant="outline"
                   size="sm"
                   onClick={handleAddGroup}
                   className="text-sm font-medium h-9 px-4 d-flex align-items-center gap-1.5 rounded-xl"
@@ -873,7 +876,7 @@ export default function PackingRequirementsModal({
                     <Archive size={48} className="mx-auto mb-3 text-gray-400 dark:text-gray-600 opacity-50" strokeWidth={2} />
                     <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-4">{t('noGroupsYet')}</p>
                     <Button
-                      variant="outline-primary"
+                      variant="outline"
                       size="sm"
                       onClick={handleAddGroup}
                       className="rounded-xl font-medium h-10 px-5"
@@ -892,7 +895,7 @@ export default function PackingRequirementsModal({
       <Modal.Footer className="border-top-0 pt-0 px-6 pb-6">
         <div className="flex gap-3 w-full">
           <Button
-            variant="light"
+            variant="outline"
             onClick={onHide}
             className="flex-1 h-11 font-semibold rounded-xl"
             disabled={isSaving}
@@ -900,20 +903,13 @@ export default function PackingRequirementsModal({
             {t('cancel')}
           </Button>
           <Button
-            variant="primary"
             onClick={handleSubmit}
             className="flex-1 h-11 font-semibold rounded-xl flex items-center justify-center gap-2"
             disabled={isSaving || itemStatuses.some((s) => s.remaining > 0)}
           >
             {isSaving ? (
               <>
-                <Spinner
-                  as="span"
-                  animation="border"
-                  size="sm"
-                  role="status"
-                  aria-hidden="true"
-                />
+                <Loader2 className="h-4 w-4 animate-spin" />
                 <span>{t('saving')}</span>
               </>
             ) : (
@@ -924,29 +920,8 @@ export default function PackingRequirementsModal({
             )}
           </Button>
         </div>
-      </Modal.Footer>
-
-      <style jsx global>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(156, 163, 175, 0.5);
-          border-radius: 3px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(156, 163, 175, 0.7);
-        }
-        .custom-scrollbar.dark::-webkit-scrollbar-thumb {
-          background: rgba(75, 85, 99, 0.5);
-        }
-        .custom-scrollbar.dark::-webkit-scrollbar-thumb:hover {
-          background: rgba(75, 85, 99, 0.7);
-        }
-      `}</style>
-    </Modal>
+      </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
