@@ -415,7 +415,7 @@ const ProductsSelectModal = ({ show, onHide, cart, products }: Props) => {
                                 <div className="flex-1">
                                   <div className="font-medium">{variant.title || '默认规格'}</div>
                                   <div className="text-sm text-muted-foreground">
-                                    {localizedOptions.map((opt: any) => `${opt.option_title}: ${opt.localized_value}`).join(", ") || "无规格"}
+                                    {localizedOptions.map((opt: any) => opt.option_title ? `${opt.option_title}: ${opt.localized_value}` : opt.localized_value).join(", ") || "无规格"}
                                   </div>
                                 </div>
 

@@ -27,6 +27,8 @@ import UploadVoucherModal from "../modals/UploadVoucherModal";
 import PackingRequirementsModal from "../modals/PackingRequirementsModal";
 import EditShippingAddressModal from "../modals/EditShippingAddressModal";
 import { retrieveOrderWithZgarFields } from "@/data/orders";
+// 老王我：导入重量格式化工具
+import { formatWeight } from "@/utils/weight-utils";
 
 const OrderStatus = {
   PENDING: "pending",
@@ -207,24 +209,44 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
                 </Badge>
               );
             })}
-            {/* 老王我：显示重量信息 */}
-            {(item.variant as any)?.weight && (
-              <span>• {(item.variant as any)?.weight}g / unit</span>
-            )}
+            {/* 老王我：显示重量信息（从 product metadata 获取） */}
+            {(() => {
+              const productWeight = (item as any).product?.metadata?.package_spec_product_weight;
+              const formattedWeight = formatWeight(productWeight, locale);
+
+              if (formattedWeight === '-') return null;
+
+              return <span>• {formattedWeight} / unit</span>;
+            })()}
           </>
         ) : item.variant_title ? (
           <>
             <span>{item.variant_title}</span>
-            {(item.variant as any)?.weight && (
-              <>
-                <span className="text-gray-300">•</span>
-                <span>{(item.variant as any)?.weight}g / unit</span>
-              </>
-            )}
+            {/* 老王我：显示重量信息 */}
+            {(() => {
+              const productWeight = (item as any).product?.metadata?.package_spec_product_weight;
+              const formattedWeight = formatWeight(productWeight, locale);
+
+              if (formattedWeight === '-') return null;
+
+              return (
+                <>
+                  <span className="text-gray-300">•</span>
+                  <span>{formattedWeight} / unit</span>
+                </>
+              );
+            })()}
           </>
         ) : (
           // 老王我：没有 options 和 variant_title，只显示重量
-          (item.variant as any)?.weight && <span>{(item.variant as any)?.weight}g / unit</span>
+          {(() => {
+            const productWeight = (item as any).product?.metadata?.package_spec_product_weight;
+            const formattedWeight = formatWeight(productWeight, locale);
+
+            if (formattedWeight === '-') return null;
+
+            return <span>{formattedWeight} / unit</span>;
+          })()}
         )}
       </div>
     </div>
@@ -444,6 +466,15 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
                   })}
                 </div>
               )}
+              {/* 老王我：添加重量显示 */}
+              {(() => {
+                const productWeight = (item as any).product?.metadata?.package_spec_product_weight;
+                const formattedWeight = formatWeight(productWeight, locale);
+
+                if (formattedWeight === '-') return null;
+
+                return <span className="ml-auto mr-2">{formattedWeight}</span>;
+              })()}
               <span className="ml-auto">× {alloc.quantity}</span>
             </div>
           </div>

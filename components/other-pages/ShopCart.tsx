@@ -32,6 +32,8 @@ import {
 
 // 老王我：导入多语言翻译工具
 import { getLocalizedVariantOptions } from "@/utils/product-localization";
+// 老王我：导入重量格式化工具
+import { formatWeight, formatTotalWeight } from "@/utils/weight-utils";
 import { PaymentProvider } from "@/types/payment";
 import { medusaSDK } from "@/utils/medusa";
 
@@ -110,6 +112,17 @@ function ShopCartContent({
       // 老王我：获取产品对象用于翻译
       const product = products.find((p) => p.id === item.product_id);
 
+      // 老王我：从 product.variants 中找到完整的 variant（包含 options）
+      const fullVariant = product?.variants?.find((v: any) => v.id === item.variant_id);
+
+      // 老王我：使用完整的 variant（包含 options）进行翻译
+      const variantToUse = fullVariant || item.variant;
+      const localizedOptions = getLocalizedVariantOptions(product, variantToUse, locale);
+
+      // 老王我：从 product metadata 获取重量（kg 单位）
+      const productWeight = product?.metadata?.package_spec_product_weight;
+      const weightInKg = productWeight ? parseFloat(productWeight) : 0;
+
       return {
         id: item.id,
         variantId: item.variant_id,
@@ -123,10 +136,12 @@ function ShopCartContent({
                  item.product?.images?.[0]?.url ||
                  `https://picsum.photos/100/100?random=${item.id}`,
         // 老王我：使用翻译后的 options
-        localizedOptions: getLocalizedVariantOptions(product, item.variant, locale),
-        options: item.variant?.options || [], // 保留原始 options 用于调试
+        localizedOptions: localizedOptions,
+        options: variantToUse?.options || [],
         metadata: item.metadata || {},
-        weight: item.variant?.weight || 0,
+        // 老王我：存储 kg 和格式化后的重量
+        weight: weightInKg,  // 存储为 kg（不是g）
+        formattedWeight: formatWeight(productWeight, locale),  // 格式化显示
       };
     });
   }, [cart, products, locale]);
@@ -440,8 +455,11 @@ function ShopCartContent({
                             )}
                             <div className="flex flex-wrap gap-1 mt-2">
                               {product.localizedOptions.map((option: any) => (
-                                <Badge key={option.option_id} variant="secondary" className="text-xs">
-                                  {option.option_title}: {option.localized_value}
+                                <Badge
+                                  key={option.option_id}
+                                  className="text-[10px] px-1.5 py-0.5 bg-gradient-to-r from-brand-pink to-brand-blue text-white border-0 font-normal leading-tight inline-flex items-center overflow-hidden max-w-[120px]"
+                                >
+                                  <span className="truncate">{option.option_title ? `${option.option_title}: ${option.localized_value}` : option.localized_value}</span>
                                 </Badge>
                               ))}
                             </div>
@@ -521,7 +539,7 @@ function ShopCartContent({
                   </div>
                   <div className="flex justify-between">
                     <span className="font-medium">Total Weight</span>
-                    <span>{selectedTotalWeight} g</span>
+                    <span>{formatTotalWeight(selectedTotalWeight, locale)}</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between text-lg">
@@ -675,8 +693,11 @@ function ShopCartContent({
                                   )}
                                   <div className="flex flex-wrap gap-1 mt-1">
                                     {product.localizedOptions.map((option: any) => (
-                                      <Badge key={option.option_id} variant="secondary" className="text-xs">
-                                        {option.option_title}: {option.localized_value}
+                                      <Badge
+                                        key={option.option_id}
+                                        className="text-[10px] px-1.5 py-0.5 bg-gradient-to-r from-brand-pink to-brand-blue text-white border-0 font-normal leading-tight inline-flex items-center overflow-hidden max-w-[150px]"
+                                      >
+                                        <span className="truncate">{option.option_title ? `${option.option_title}: ${option.localized_value}` : option.localized_value}</span>
                                       </Badge>
                                     ))}
                                   </div>
@@ -687,7 +708,7 @@ function ShopCartContent({
                               <div className="font-medium">${product.price.toFixed(2)}</div>
                             </TableCell>
                             <TableCell className="text-right">
-                              <div className="text-sm">{product.weight} g</div>
+                              <div className="text-sm">{product.formattedWeight}</div>
                             </TableCell>
                             <TableCell className="text-right">
                               <div className={updatingItems.includes(product.id) ? "pointer-events-none opacity-50" : ""}>
@@ -811,7 +832,7 @@ function ShopCartContent({
                     </div>
                     <div className="flex justify-between">
                       <span className="font-medium">Total Weight</span>
-                      <span>{selectedTotalWeight} g</span>
+                      <span>{formatTotalWeight(selectedTotalWeight, locale)}</span>
                     </div>
                     <Separator />
                     <div className="flex justify-between text-lg">
@@ -937,7 +958,7 @@ function ShopCartContent({
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-gray-600 font-medium">总重量</span>
-              <span className="font-semibold text-gray-900">{selectedTotalWeight.toFixed(2)} g</span>
+              <span className="font-semibold text-gray-900">{formatTotalWeight(selectedTotalWeight, locale)}</span>
             </div>
             <Separator className="bg-gray-200" />
             <div className="flex justify-between text-xl font-bold pt-1">

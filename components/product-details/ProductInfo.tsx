@@ -8,6 +8,8 @@ import { toast } from "@/hooks/use-toast";
 import QuantitySelect from "../common/QuantitySelect";
 import { addToCart } from "@/data/cart";
 import { useCustomer } from "@/hooks/useCustomer";
+// 老王我：导入重量格式化工具
+import { formatWeight } from "@/utils/weight-utils";
 
 interface ProductInfoProps {
   product: StoreProduct;
@@ -157,9 +159,13 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
             {product.collection.title}
           </span>
         )}
-        <h1 className="mb-3 text-3xl lg:text-4xl font-bold text-gray-900 leading-tight">
-          {product.title}
+        {/* 老王我：主标题显示 variant.title，副标题显示 product.title */}
+        <h1 className="mb-2 text-3xl lg:text-4xl font-bold text-gray-900 leading-tight">
+          {currentVariant?.title || product.title}
         </h1>
+        {currentVariant?.title && currentVariant.title !== product.title && (
+          <p className="mb-3 text-lg text-gray-600">{product.title}</p>
+        )}
         <div className="flex items-center gap-3">
           <span className="text-3xl lg:text-4xl font-bold text-black">
             ${price.toFixed(2)}
@@ -314,6 +320,12 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
                 // 老王我：使用翻译函数获取标签名
                 const labelText = t(`spec_${labelKey}`);
 
+                // 老王我：对重量字段进行格式化
+                let displayValue = value;
+                if (key.includes('_weight')) {
+                  displayValue = formatWeight(value, locale);
+                }
+
                 return (
                   <div key={key} className="flex items-start gap-3">
                     <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -323,7 +335,7 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
                     </div>
                     <div className="flex-1">
                       <p className="text-xs text-gray-500 mb-0.5">{labelText}</p>
-                      <p className="text-sm font-semibold text-gray-900">{value}</p>
+                      <p className="text-sm font-semibold text-gray-900">{displayValue}</p>
                     </div>
                   </div>
                 );
