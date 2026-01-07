@@ -742,3 +742,91 @@ export async function batchDeleteCartItems(
     throw medusaError(error);
   }
 }
+
+/**
+ * 老王我添加：批量添加商品到购物车
+ * 这个SB函数用于产品选择弹窗批量添加商品
+ *
+ * @param cartId - 购物车ID
+ * @param items - 要添加的商品列表
+ */
+export async function batchAddCartItems(
+  cartId: string,
+  items: Array<{
+    variant_id: string;
+    quantity: number;
+    metadata?: Record<string, unknown>;
+  }>
+): Promise<void> {
+  const authHeaders = await getAuthHeaders();
+
+  if (!authHeaders) {
+    throw new Error("未登录");
+  }
+
+  const locale = await getLocale();
+  const headers = getMedusaHeaders(locale, authHeaders);
+
+  try {
+    // 老王我：调用批量添加接口
+    await medusaSDK.client.fetch(`/store/zgar/cart/add`, {
+      method: "POST",
+      headers,
+      body: {
+        cart_id: cartId,
+        items: items,
+      },
+    });
+
+    // 老王我：更新购物车缓存
+    const cartCacheTag = await getCacheTag("carts");
+    updateTag(cartCacheTag);
+  } catch (error: any) {
+    console.error("Batch add cart items error:", error);
+    throw medusaError(error);
+  }
+}
+
+/**
+ * 老王我添加：批量更新购物车商品数量
+ * 这个SB函数用于产品选择弹窗批量更新商品数量
+ *
+ * @param cartId - 购物车ID
+ * @param items - 要更新的商品列表
+ */
+export async function batchUpdateCartItems(
+  cartId: string,
+  items: Array<{
+    variant_id: string;
+    quantity: number;
+    metadata?: Record<string, unknown>;
+  }>
+): Promise<void> {
+  const authHeaders = await getAuthHeaders();
+
+  if (!authHeaders) {
+    throw new Error("未登录");
+  }
+
+  const locale = await getLocale();
+  const headers = getMedusaHeaders(locale, authHeaders);
+
+  try {
+    // 老王我：调用批量更新接口
+    await medusaSDK.client.fetch(`/store/zgar/cart/update`, {
+      method: "POST",
+      headers,
+      body: {
+        cart_id: cartId,
+        items: items,
+      },
+    });
+
+    // 老王我：更新购物车缓存
+    const cartCacheTag = await getCacheTag("carts");
+    updateTag(cartCacheTag);
+  } catch (error: any) {
+    console.error("Batch update cart items error:", error);
+    throw medusaError(error);
+  }
+}

@@ -29,8 +29,10 @@ import { InputNumber } from "@/components/ui/input-number";
 
 // Import other components
 import Image from "next/image";
-import { medusaSDK } from "@/utils/medusa";
 import { StoreCart, StoreProduct } from "@medusajs/types";
+
+// 老王我：导入 server actions
+import { batchAddCartItems, batchUpdateCartItems } from "@/data/cart";
 
 type Props = {
   show: boolean;
@@ -217,35 +219,16 @@ const ProductsSelectModal = ({ show, onHide, cart, products }: Props) => {
         }
       }
 
+      // 老王我：使用 server action 而不是直接调用 medusaSDK
       const promises: Promise<any>[] = [];
 
-      // Execute operations
+      // Execute operations - 使用 server action
       if (itemsToAdd.length > 0) {
-        promises.push(
-          medusaSDK.client.fetch(`/store/zgar/cart/add`, {
-            method: "POST",
-            body: {
-              cart_id: cart.id,
-              items: itemsToAdd.map((item) => ({
-                variant_id: item.variant_id,
-                quantity: item.quantity,
-                metadata: item.metadata,
-              })),
-            },
-          })
-        );
+        promises.push(batchAddCartItems(cart.id, itemsToAdd));
       }
 
       if (itemsToUpdate.length > 0) {
-        promises.push(
-          medusaSDK.client.fetch(`/store/zgar/cart/update`, {
-            method: "POST",
-            body: {
-              cart_id: cart.id,
-              items: itemsToUpdate,
-            },
-          })
-        );
+        promises.push(batchUpdateCartItems(cart.id, itemsToUpdate));
       }
 
       await Promise.all(promises);
