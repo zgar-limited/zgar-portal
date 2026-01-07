@@ -3,6 +3,7 @@ import Image from "next/image";
 import React, { useState, useEffect } from "react";
 import { useContextElement } from "@/context/Context";
 import { Link, useRouter } from '@/i18n/routing';
+import { useLocale, useTranslations } from "next-intl";
 import {
   PackagePlus,
   ShoppingCart,
@@ -28,6 +29,9 @@ import {
   CartLineItemDTO,
   HttpTypes,
 } from "@medusajs/types";
+
+// 老王我：导入多语言翻译工具
+import { getLocalizedVariantOptions } from "@/utils/product-localization";
 import { PaymentProvider } from "@/types/payment";
 import { medusaSDK } from "@/utils/medusa";
 
@@ -78,6 +82,7 @@ function ShopCartContent({
   products: StoreProduct[];
   customer?: (HttpTypes.StoreCustomer & { zgar_customer?: any }) | null;
 }) {
+  const locale = useLocale(); // 老王我：获取当前语言
   const [showModal, setShowModal] = useState(false);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -101,23 +106,30 @@ function ShopCartContent({
       return [];
     }
 
-    return cart.items.map((item: any, index: number) => ({
-      id: item.id,
-      variantId: item.variant_id,
-      productId: item.product_id,
-      title: item.title || item.product?.title || item.product_title || `Product ${index + 1}`,
-      variantTitle: item.variant?.title || item.variant_title || "",
-      price: item.unit_price || item.price || item.total || 0,
-      quantity: item.quantity || 1,
-      imgSrc: item.thumbnail ||
-               item.product?.thumbnail ||
-               item.product?.images?.[0]?.url ||
-               `https://picsum.photos/100/100?random=${item.id}`,
-      options: item.variant?.options || [],
-      metadata: item.metadata || {},
-      weight: item.variant?.weight || 0,
-    }));
-  }, [cart]);
+    return cart.items.map((item: any, index: number) => {
+      // 老王我：获取产品对象用于翻译
+      const product = products.find((p) => p.id === item.product_id);
+
+      return {
+        id: item.id,
+        variantId: item.variant_id,
+        productId: item.product_id,
+        title: item.variant?.title || item.product?.title || item.product_title || `Product ${index + 1}`, // 老王我：优先显示 variant title
+        variantTitle: item.product?.title || item.product_title || "", // 老王我：显示产品标题作为副标题
+        price: item.unit_price || item.price || item.total || 0,
+        quantity: item.quantity || 1,
+        imgSrc: item.thumbnail ||
+                 item.product?.thumbnail ||
+                 item.product?.images?.[0]?.url ||
+                 `https://picsum.photos/100/100?random=${item.id}`,
+        // 老王我：使用翻译后的 options
+        localizedOptions: getLocalizedVariantOptions(product, item.variant, locale),
+        options: item.variant?.options || [], // 保留原始 options 用于调试
+        metadata: item.metadata || {},
+        weight: item.variant?.weight || 0,
+      };
+    });
+  }, [cart, products, locale]);
 
   useEffect(() => {
     const maxPage = Math.ceil(cartProducts.length / itemsPerPage);
@@ -427,9 +439,9 @@ function ShopCartContent({
                               <p className="text-sm text-gray-600 mt-1">{product.variantTitle}</p>
                             )}
                             <div className="flex flex-wrap gap-1 mt-2">
-                              {product.options.map((option: any) => (
+                              {product.localizedOptions.map((option: any) => (
                                 <Badge key={option.option_id} variant="secondary" className="text-xs">
-                                  {option.value}
+                                  {option.option_title}: {option.localized_value}
                                 </Badge>
                               ))}
                             </div>
@@ -662,9 +674,9 @@ function ShopCartContent({
                                     <div className="text-sm text-gray-600 mt-1">{product.variantTitle}</div>
                                   )}
                                   <div className="flex flex-wrap gap-1 mt-1">
-                                    {product.options.map((option: any) => (
+                                    {product.localizedOptions.map((option: any) => (
                                       <Badge key={option.option_id} variant="secondary" className="text-xs">
-                                        {option.value}
+                                        {option.option_title}: {option.localized_value}
                                       </Badge>
                                     ))}
                                   </div>

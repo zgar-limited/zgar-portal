@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl"; // 老王我：添加 locale
 import {
   Search,
   Package,
@@ -34,6 +35,9 @@ import { StoreCart, StoreProduct } from "@medusajs/types";
 // 老王我：导入 server actions
 import { batchAddCartItems, batchUpdateCartItems } from "@/data/cart";
 
+// 老王我：导入多语言翻译工具
+import { getLocalizedVariantOptions } from "@/utils/product-localization";
+
 type Props = {
   show: boolean;
   onHide: () => void;
@@ -43,6 +47,7 @@ type Props = {
 
 const ProductsSelectModal = ({ show, onHide, cart, products }: Props) => {
   const router = useRouter();
+  const locale = useLocale(); // 老王我：获取当前语言
 
   // State management
   const [expandedProductIds, setExpandedProductIds] = useState<string[]>([]);
@@ -397,6 +402,9 @@ const ProductsSelectModal = ({ show, onHide, cart, products }: Props) => {
                             const quantity = quantities[variant.id] || 50;
                             const price = variant.calculated_price?.calculated_amount || 0;
 
+                            // 老王我：获取翻译后的 options
+                            const localizedOptions = getLocalizedVariantOptions(product, variant, locale);
+
                             return (
                               <div key={variant.id} className="flex items-center gap-4 p-4 border rounded-lg hover:bg-muted/50">
                                 <Checkbox
@@ -407,7 +415,7 @@ const ProductsSelectModal = ({ show, onHide, cart, products }: Props) => {
                                 <div className="flex-1">
                                   <div className="font-medium">{variant.title || '默认规格'}</div>
                                   <div className="text-sm text-muted-foreground">
-                                    {variant.options?.map((opt: any) => opt.value).join(", ") || "无规格"}
+                                    {localizedOptions.map((opt: any) => `${opt.option_title}: ${opt.localized_value}`).join(", ") || "无规格"}
                                   </div>
                                 </div>
 
