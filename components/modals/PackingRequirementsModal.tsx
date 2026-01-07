@@ -649,7 +649,7 @@ export default function PackingRequirementsModal({
                   onClick={() => handleSaveEdit(group.id)}
                   className="flex-1 font-medium h-9"
                 >
-                  <CheckCircle size={14} className="me-1.5" />
+                  <CheckCircle size={14} className="mr-1.5" />
                   {t('save')}
                 </Button>
                 <Button
@@ -881,7 +881,7 @@ export default function PackingRequirementsModal({
                       onClick={handleAddGroup}
                       className="rounded-xl font-medium h-10 px-5"
                     >
-                      <Plus size={15} strokeWidth={2.5} className="me-1.5" />
+                      <Plus size={15} strokeWidth={2.5} className="mr-1.5" />
                       {t('addNewMark')}
                     </Button>
                   </div>
@@ -890,9 +890,9 @@ export default function PackingRequirementsModal({
             </div>
           </div>
         )}
-      </Modal.Body>
+      </div>
 
-      <Modal.Footer className="border-top-0 pt-0 px-6 pb-6">
+      <DialogFooter className="border-t pt-0 px-6 pb-6">
         <div className="flex gap-3 w-full">
           <Button
             variant="outline"
