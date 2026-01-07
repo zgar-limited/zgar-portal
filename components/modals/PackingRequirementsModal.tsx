@@ -39,7 +39,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 
@@ -634,12 +633,12 @@ export default function PackingRequirementsModal({
                 className="text-sm font-medium"
                 autoFocus
               />
-              <Textarea
+              <textarea
                 value={editingDesc}
                 onChange={(e) => setEditingDesc(e.target.value)}
                 placeholder={t('markDescPlaceholder')}
                 rows={2}
-                className="text-sm"
+                className="text-sm flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               />
               <div className="flex gap-2">
                 <Button
