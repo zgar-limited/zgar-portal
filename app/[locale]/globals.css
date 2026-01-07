@@ -40,6 +40,30 @@
   --color-gray-800: #1f2937;
   --color-gray-900: #111827;
 
+  /* 老王我：黑色系统 */
+  --color-black-50: #0a0a0a;
+  --color-black-100: #1a1a1a;
+  --color-black-200: #2d2d2d;
+  --color-black-300: #404040;
+  --color-black-400: #525252;
+  --color-black-500: #666666;
+  --color-black-600: #808080;
+  --color-black-700: #999999;
+  --color-black-800: #b3b3b3;
+  --color-black-900: #cccccc;
+
+  /* 老王我：白色系统 */
+  --color-white-50: #fafafa;
+  --color-white-100: #f5f5f5;
+  --color-white-200: #eaeaea;
+  --color-white-300: #dedede;
+  --color-white-400: #d2d2d2;
+  --color-white-500: #c6c6c6;
+  --color-white-600: #bababa;
+  --color-white-700: #aeaeae;
+  --color-white-800: #a2a2a2;
+  --color-white-900: #969696;
+
   /* 语义化颜色 */
   --color-primary: var(--color-blue-500);
   --color-accent: var(--color-rose-500);
@@ -65,9 +89,25 @@
 
   /* 渐变 */
   --gradient-brand: linear-gradient(90deg, rgba(0, 71, 199, 1) 15%, rgba(244, 150, 211, 1) 85%);
+  --gradient-brand-reverse: linear-gradient(90deg, rgba(244, 150, 211, 1) 15%, rgba(0, 71, 199, 1) 85%);
+  --gradient-brand-vertical: linear-gradient(180deg, rgba(0, 71, 199, 1) 0%, rgba(244, 150, 211, 1) 100%);
+  --gradient-brand-hover: linear-gradient(90deg, rgba(0, 71, 199, 0.9) 15%, rgba(244, 150, 211, 0.9) 85%);
   --gradient-blue: linear-gradient(135deg, var(--color-blue-300) 0%, var(--color-blue-500) 100%);
   --gradient-rose: linear-gradient(135deg, var(--color-rose-300) 0%, var(--color-rose-500) 100%);
   --gradient-blue-vertical: linear-gradient(180deg, var(--color-blue-500) 0%, var(--color-blue-600) 100%);
+}
+
+/* ========== 动画定义 ========== */
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 /* ========== 工具类 ========== */
@@ -79,6 +119,11 @@
 
   .bg-gradient-brand {
     background: var(--gradient-brand);
+  }
+
+  .animate-gradient-shift {
+    background-size: 200% 200%;
+    animation: gradient-shift 8s ease infinite;
   }
 
   .text-primary {
@@ -125,5 +170,45 @@
 
   .text-on-light {
     color: var(--color-text-primary);
+  }
+
+  /* 隐藏滚动条但保留功能 */
+  .scrollbar-hide {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+  }
+
+  /* 老王我：浮动动画 */
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  /* 老王我：渐入滑动动画 */
+  @keyframes fade-slide-in {
+    0% {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-slide-in {
+    animation: fade-slide-in 0.6s ease-out both;
   }
 }
