@@ -529,7 +529,7 @@ export default function PackingRequirementsModal({
                   {shippingMarks.map((group) => (
                     <Button
                       key={group.id}
-                      variant={inputQuantity > 0 && inputQuantity <= remaining ? "primary" : "outline-secondary"}
+                      variant={inputQuantity > 0 && inputQuantity <= remaining ? "default" : "outline"}
                       size="sm"
                       className="h-9 px-4 font-medium"
                       onClick={(e) => {
@@ -626,7 +626,7 @@ export default function PackingRequirementsModal({
         <div className="p-4 border-b border-gray-100 dark:border-gray-700">
           {isEditing ? (
             <div className="space-y-3">
-              <Form.Control
+              <Input
                 type="text"
                 value={editingName}
                 onChange={(e) => setEditingName(e.target.value)}
@@ -634,8 +634,7 @@ export default function PackingRequirementsModal({
                 className="text-sm font-medium"
                 autoFocus
               />
-              <Form.Control
-                as="textarea"
+              <Textarea
                 value={editingDesc}
                 onChange={(e) => setEditingDesc(e.target.value)}
                 placeholder={t('markDescPlaceholder')}
@@ -859,7 +858,7 @@ export default function PackingRequirementsModal({
                   variant="outline"
                   size="sm"
                   onClick={handleAddGroup}
-                  className="text-sm font-medium h-9 px-4 d-flex align-items-center gap-1.5 rounded-xl"
+                  className="text-sm font-medium h-9 px-4 flex items-center gap-1.5 rounded-xl"
                 >
                   <Plus size={15} strokeWidth={2.5} />
                   {t('addNewMark')}
