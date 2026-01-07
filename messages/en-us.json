@@ -86,7 +86,10 @@
     "joinNow": "Join Now",
     "redeemNow": "Redeem Now",
     "outOfStock": "Out of Stock",
-    "insufficientPoints": "Insufficient Points"
+    "insufficientPoints": "Insufficient Points",
+    "notLoggedInTitle": "Login to View Points Rewards",
+    "notLoggedInDescription": "Login to view and redeem exclusive points rewards, enjoy more member benefits!",
+    "loginNow": "Login Now"
   },
   "order-details": {
     "balancePayment": "Balance Payment",
@@ -232,6 +235,16 @@
     "submit_zero": "Submit Files",
     "submit_one": "Submit File",
     "submit_other": "Submit {count} Files"
+  },
+  "PaymentMethods": {
+    "zgar_balance": "Balance Payment",
+    "zgar_balance_description": "Pay orders directly using your account balance",
+    "zgar_points": "Points Payment",
+    "zgar_points_description": "Redeem products using points (payment amount is 0)",
+    "zgar_credit": "Credit Payment",
+    "zgar_credit_description": "Pay using credit limit for authorized customers",
+    "zgar_manual": "Bank Transfer",
+    "zgar_manual_description": "Pay via bank transfer and upload payment voucher"
   },
   "Pagination": {
     "previous": "Previous",

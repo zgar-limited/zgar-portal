@@ -557,6 +557,80 @@ export async function completeZgarCartCheckout(items: HttpTypes.StoreAddCartLine
 }
 
 /**
+ * 统一下单接口 - 支持多种支付方式
+ * 老王我：这个SB函数调用新的统一下单API，支持provider_id参数
+ *
+ * POST /store/zgar/orders/complete
+ *
+ * @param items - 购物车项目列表
+ * @param provider_id - 支付提供商ID（可选，默认手动支付）
+ * @returns 订单创建结果
+ */
+export async function submitOrder(
+  items: HttpTypes.StoreAddCartLineItem[],
+  provider_id?: string  // 新格式：pp_zgar_balance_payment_zgar
+): Promise<{ order: HttpTypes.StoreOrder; message?: string }> {
+  const cartId = await getCartId();
+  const locale = await getLocale();
+  const headers = getMedusaHeaders(locale, await getAuthHeaders());
+
+  try {
+    // 调用新的统一下单接口
+    const result = await medusaSDK.client.fetch<{ order: HttpTypes.StoreOrder; message: string }>(
+      "/store/zgar/orders/complete",
+      {
+        method: "POST",
+        headers,
+        body: {
+          items,
+          provider_id,  // 可选，不传则默认使用手动支付
+        },
+      }
+    );
+
+    // 老王我：从购物车中移除已结算的items（与 completeZgarCartCheckout 逻辑一致）
+    if (cartId) {
+      try {
+        // 获取当前购物车 - 需要headers
+        const cartResp = await medusaSDK.client.fetch(`/store/carts/${cartId}`, {
+          method: "GET",
+          headers,
+        });
+        const cart = cartResp.cart;
+
+        // 找出需要移除的 line item IDs
+        const lineItemsToRemove = cart.items?.filter((cartItem: any) => {
+          return items.some(checkoutItem => checkoutItem.variant_id === cartItem.variant_id);
+        }) || [];
+
+        // 逐个删除已结算的 line items
+        for (const lineItem of lineItemsToRemove) {
+          await medusaSDK.client.fetch(`/store/carts/${cartId}/line-items/${lineItem.id}`, {
+            method: "DELETE",
+            headers,
+          });
+        }
+      } catch (error) {
+        console.error("Error removing checked out items from cart:", error);
+        // 老王我：不抛出错误，因为订单已经创建成功
+      }
+
+      // 老王我：更新购物车缓存，React Suspense会自动重新获取数据
+      const cartCacheTag = await getCacheTag("carts");
+      updateTag(cartCacheTag);
+
+      const orderCacheTag = await getCacheTag("orders");
+      updateTag(orderCacheTag);
+    }
+
+    return result;
+  } catch (error: any) {
+    console.error("统一下单失败:", error);
+    throw error;
+  }
+}
+
+/**
  * ZGAR 购物车一步式结算（含余额支付）
  * 老王我：这个SB函数直接完成订单创建和余额支付，原子操作，避免部分失败
  *
@@ -628,6 +702,43 @@ export async function completeZgarCartCheckoutWithBalance(
     return result;
   } catch (error: any) {
     console.error("One-step balance checkout error:", error);
+    throw medusaError(error);
+  }
+}
+
+/**
+ * 老王我添加：批量删除购物车商品
+ * 这个SB函数用于购物车页面批量删除选中商品
+ */
+export async function batchDeleteCartItems(
+  cartId: string,
+  itemIds: string[]
+): Promise<void> {
+  const authHeaders = await getAuthHeaders();
+
+  if (!authHeaders) {
+    throw new Error("未登录");
+  }
+
+  const locale = await getLocale();
+  const headers = getMedusaHeaders(locale, authHeaders);
+
+  try {
+    // 老王我：调用批量删除接口
+    await medusaSDK.client.fetch(`/store/zgar/cart/delete`, {
+      method: "POST",
+      headers,
+      body: {
+        cart_id: cartId,
+        items: itemIds,
+      },
+    });
+
+    // 老王我：更新购物车缓存
+    const cartCacheTag = await getCacheTag("carts");
+    updateTag(cartCacheTag);
+  } catch (error: any) {
+    console.error("Batch delete cart items error:", error);
     throw medusaError(error);
   }
 }

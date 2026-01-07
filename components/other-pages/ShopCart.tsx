@@ -17,7 +17,8 @@ import {
 
 import ProductsSelectModal from "../modals/ProductsSelectModal";
 import PaymentMethodSelector from "@/components/checkout/PaymentMethodSelector";
-import { deleteLineItem, updateLineItem } from "@/data/cart";
+import { deleteLineItem, updateLineItem, batchDeleteCartItems } from "@/data/cart";
+import { getPaymentProviders } from "@/data/payments";
 import { toast } from "@/hooks/use-toast";
 import {
   StoreCartResponse,
@@ -27,6 +28,8 @@ import {
   CartLineItemDTO,
   HttpTypes,
 } from "@medusajs/types";
+import { PaymentProvider } from "@/types/payment";
+import { medusaSDK } from "@/utils/medusa";
 
 // Import shadcn components
 import { Button } from "@/components/ui/button";
@@ -82,8 +85,11 @@ function ShopCartContent({
   const [updatingItems, setUpdatingItems] = useState<string[]>([]);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [showCheckoutConfirm, setShowCheckoutConfirm] = useState(false);
-  // 老王我：支付方式选择状态
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'balance' | 'manual_transfer'>('balance');
+
+  // 老王我：支付方式相关状态
+  const [paymentProviders, setPaymentProviders] = useState<PaymentProvider[]>([]);
+  const [selectedPaymentProvider, setSelectedPaymentProvider] = useState<string>("");  // 改为 provider_id
+  const [loadingPaymentProviders, setLoadingPaymentProviders] = useState(false);
 
   const [selectedTotalPrice, setSelectedTotalPrice] = useState(0);
   const [selectedTotalWeight, setSelectedTotalWeight] = useState(0);
@@ -144,6 +150,48 @@ function ShopCartContent({
     setSelectedTotalWeight(newTotalWeight);
   }, [selectedItems, cartProducts]);
 
+  // 老王我：获取支付提供商列表（购物车结算使用 normal 类型）
+  useEffect(() => {
+    const fetchPaymentProviders = async () => {
+      setLoadingPaymentProviders(true);
+      try {
+        // 老王我：传递 type=normal 参数获取普通订单的支付方式
+        const providers = await getPaymentProviders("normal");
+        setPaymentProviders(providers);
+
+        // 选择默认支付方式（优先选择余额支付，新格式：pp_zgar_balance_payment_zgar）
+        const defaultProvider = providers.find((p) => p.id.includes("zgar_balance")) || providers[0];
+        if (defaultProvider) {
+          setSelectedPaymentProvider(defaultProvider.id);
+        }
+      } catch (error) {
+        console.error("获取支付方式列表失败:", error);
+        // 降级：使用硬编码的支付方式（新格式）
+        setPaymentProviders([
+          {
+            id: "pp_zgar_balance_payment_zgar",
+            name: "余额支付",
+            description: "使用账户余额直接支付订单",
+            icon: "💰",
+            supported_order_types: ["normal"],
+          },
+          {
+            id: "pp_zgar_manual_payment_zgar",
+            name: "线下转账",
+            description: "通过银行转账支付，完成后上传转账凭证",
+            icon: "🏦",
+            supported_order_types: ["normal"],
+          },
+        ]);
+        setSelectedPaymentProvider("pp_zgar_balance_payment_zgar");
+      } finally {
+        setLoadingPaymentProviders(false);
+      }
+    };
+
+    fetchPaymentProviders();
+  }, []);
+
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
       setSelectedItems(cartProducts.map((p) => p.id));
@@ -194,17 +242,15 @@ function ShopCartContent({
 
     setIsDeleting(true);
     try {
-      await medusaSDK.client.fetch(`/store/zgar/cart/delete`, {
-        method: "POST",
-        body: {
-          cart_id: cart.id,
-          items: selectedItems,
-        },
-      });
-      router.refresh();
+      // 老王我：调用 server action 进行批量删除
+      await batchDeleteCartItems(cart.id, selectedItems);
+
+      // 老王我：清空选中项并刷新页面
       setSelectedItems([]);
+      router.refresh();
     } catch (error) {
       console.error("Error deleting items:", error);
+      // 可以在这里添加 toast 错误提示
     } finally {
       setIsDeleting(false);
     }
@@ -253,59 +299,32 @@ function ShopCartContent({
           metadata: p.metadata as any,
         }));
 
-      // 老王我：根据支付方式选择不同的API
-      if (selectedPaymentMethod === 'balance') {
-        // ====== 余额支付：使用新的一步式API ======
-        const { completeZgarCartCheckoutWithBalance } = await import("@/data/cart");
-        const result = await completeZgarCartCheckoutWithBalance(itemsToCheckout);
+      // 老王我：使用新的统一下单接口
+      // POST /store/zgar/orders/complete
+      const { submitOrder } = await import("@/data/cart");
 
-        if (result.error) {
-          toast.error(result.error);
-          return;
-        }
+      // 调用统一下单接口，传递选中的支付方式
+      const result = await submitOrder(itemsToCheckout, selectedPaymentProvider);
 
-        // 老王我：根据支付结果显示不同提示
-        const { balance_payment_amount, credit_payment_amount } = result.payment;
+      const orderId = result.order.id;
 
-        if (credit_payment_amount > 0) {
-          // 部分余额 + 账期欠款
-          toast.success(
-            `✅ 订单创建成功！\n余额支付: ¥${balance_payment_amount.toFixed(2)}，账期欠款: ¥${credit_payment_amount.toFixed(2)}`
-          );
-        } else {
-          // 全额余额支付
-          toast.success("✅ 订单创建成功！余额支付已完成");
-        }
+      // 清空选中商品
+      setSelectedItems([]);
 
-        const orderId = result.order.id;
-
-        // 清空选中商品
-        setSelectedItems([]);
-
-        // 跳转到订单详情
-        setTimeout(() => {
-          router.push(`/account-orders-detail/${orderId}`);
-        }, 500);
-
-      } else {
-        // ====== 手动转账：保持原有逻辑不变 ======
-        const { completeZgarCartCheckout } = await import("@/data/cart");
-        const result = await completeZgarCartCheckout(itemsToCheckout);
-
-        const orderId = result?.order?.id;
-        if (!orderId) {
-          toast.error("订单创建失败");
-          return;
-        }
-
+      // 根据支付方式显示不同提示
+      if (selectedPaymentProvider === "pp_zgar_balance_payment_zgar") {
+        toast.success("✅ 订单创建成功！余额支付已完成");
+      } else if (selectedPaymentProvider === "pp_zgar_manual_payment_zgar") {
         toast.success("✅ 订单创建成功！请上传转账凭证");
-
-        setSelectedItems([]);
-
-        setTimeout(() => {
-          router.push(`/account-orders-detail/${orderId}`);
-        }, 500);
+      } else {
+        toast.success("✅ 订单创建成功！");
       }
+
+      // 跳转到订单详情
+      setTimeout(() => {
+        router.push(`/account-orders-detail/${orderId}`);
+      }, 500);
+
     } catch (error: any) {
       console.error("Checkout error:", error);
       toast.error(error.message || "提交订单失败，请重试");
@@ -877,10 +896,11 @@ function ShopCartContent({
 
           {/* 支付方式选择 - 老王我新增 */}
           <PaymentMethodSelector
+            paymentProviders={paymentProviders}
             mode="selection"
             orderAmount={selectedTotalPrice}
             customer={customer}
-            onPaymentMethodChange={setSelectedPaymentMethod}
+            onPaymentMethodChange={setSelectedPaymentProvider}
           />
 
           {/* 汇总信息 */}

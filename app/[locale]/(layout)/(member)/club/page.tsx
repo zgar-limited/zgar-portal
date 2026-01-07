@@ -18,11 +18,15 @@ export default async function ClubPage() {
     getPointsProducts(),
   ]);
 
+  // 老王我：判断是否登录（customer 存在就是已登录）
+  const isLoggedIn = !!customer;
+
   // 老王我：判断是否是会员（有 zgar_customer 数据就是会员）
   const isMember = !!customer?.zgar_customer;
 
   return (
     <ClubPageClient
+      isLoggedIn={isLoggedIn}
       isMember={isMember}
       customer={customer}
       initialProducts={productsResponse.products} // 老王我修复：传递数组而不是对象

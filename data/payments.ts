@@ -11,6 +11,7 @@ import { getLocale } from "next-intl/server";
 import { getAuthHeaders } from "@/utils/cookies";
 import { getMedusaHeaders } from "@/utils/medusa-server";
 import { medusaSDK } from "@/utils/medusa";
+import { PaymentProvider, PaymentProvidersResponse } from "@/types/payment";
 
 /**
  * 余额支付响应类型
@@ -69,6 +70,60 @@ export interface UploadVoucherResponse {
   };
   error?: string;
 }
+
+/**
+ * 获取支付提供商列表
+ *
+ * 老王我这个SB函数获取所有可用的支付方式
+ * 包括余额支付、积分支付、账期支付、手动转账等
+ *
+ * @param type - 订单类型（normal | redemption），默认为 normal
+ * @returns 支付提供商列表
+ */
+export const getPaymentProviders = async (
+  type: "normal" | "redemption" = "normal"
+): Promise<PaymentProvider[]> => {
+  try {
+    const locale = await getLocale();
+
+    // 老王我：直接调用 zgar-club 后端 API
+    // medusaSDK.client.fetch 会自动从 cookie 获取 JWT token
+    const queryParams = `?type=${type}`;
+    const response = await medusaSDK.client.fetch<PaymentProvidersResponse>(
+      `/store/zgar/payment-providers${queryParams}`,
+      {
+        method: "GET",
+        headers: {
+          "x-medusa-locale": locale.replace("-", "-"), // zh-hk → zh-HK
+        },
+      }
+    );
+
+    return response.payment_providers;
+  } catch (error: any) {
+    console.error("获取支付提供商列表失败:", error);
+
+    // 老王我：返回降级列表，确保基本功能可用
+    const fallbackProviders: PaymentProvider[] = [
+      {
+        id: "pp_payment_zgar_zgar_balance",
+        name: "余额支付",
+        description: "使用账户余额直接支付订单",
+        icon: "💰",
+        supported_order_types: ["normal"],
+      },
+      {
+        id: "pp_payment_zgar_zgar_manual",
+        name: "线下转账",
+        description: "通过银行转账支付，完成后上传转账凭证",
+        icon: "🏦",
+        supported_order_types: ["normal"],
+      },
+    ];
+
+    return fallbackProviders;
+  }
+};
 
 /**
  * 使用余额支付订单

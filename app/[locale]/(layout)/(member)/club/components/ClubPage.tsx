@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Star, Crown } from "lucide-react";
+import { Link } from "@/i18n/routing";
 import type { HttpTypes } from "@medusajs/types";
 import type { PointsProduct } from "@/data/points-products";
 import ClubBanner from "./ClubBanner";
@@ -24,12 +25,14 @@ import ProductRedeemModal from "./ProductRedeemModal";
  */
 
 interface ClubPageProps {
+  isLoggedIn: boolean;
   isMember: boolean;
   customer?: (HttpTypes.StoreCustomer & { zgar_customer?: any }) | null;
   initialProducts: PointsProduct[];
 }
 
 export default function ClubPage({
+  isLoggedIn,
   isMember,
   customer,
   initialProducts,
@@ -61,7 +64,62 @@ export default function ClubPage({
     setUserPoints(newPoints);
   };
 
-  // 老王我：非会员提示
+  // 老王我：未登录提示 - 显示登录引导
+  if (!isLoggedIn) {
+    return (
+      <div className="space-y-6">
+        {/* 未登录提示 Banner */}
+        <div
+          className="
+            rounded-2xl overflow-hidden
+            bg-gradient-to-br from-brand-pink via-brand-pink/90 to-brand-blue
+            dark:from-brand-pink/90 dark:via-brand-pink/80 dark:to-brand-blue/90
+            relative
+            shadow-2xl
+          "
+        >
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-brand-blue/20 rounded-full blur-3xl" />
+          </div>
+
+          <div className="relative z-10 p-8 md:p-12 text-center">
+            <div className="mb-6">
+              <Star size={64} className="text-white mx-auto" fill="white" />
+            </div>
+            <h2
+              className="
+                text-4xl font-bold mb-4
+                text-white
+              "
+            >
+              {t("notLoggedInTitle")}
+            </h2>
+            <p className="text-white/90 text-lg mb-8 max-w-2xl mx-auto">
+              {t("notLoggedInDescription")}
+            </p>
+            <Link
+              href="/login"
+              className="
+                inline-block px-8 py-3 rounded-xl
+                bg-white text-brand-pink font-medium
+                hover:bg-gray-50
+                transition-all
+                shadow-lg hover:shadow-xl
+              "
+            >
+              {t("loginNow")}
+            </Link>
+          </div>
+        </div>
+
+        {/* 非会员权益预览 */}
+        <MemberBenefits />
+      </div>
+    );
+  }
+
+  // 老王我：已登录但非会员提示 - 显示加入会员引导
   if (!isMember) {
     return (
       <div className="space-y-6">

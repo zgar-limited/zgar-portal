@@ -86,7 +86,10 @@
     "joinNow": "立即加入會員",
     "redeemNow": "立即兌換",
     "outOfStock": "已售罄",
-    "insufficientPoints": "積分不足"
+    "insufficientPoints": "積分不足",
+    "notLoggedInTitle": "登錄後可查看積分禮品",
+    "notLoggedInDescription": "登錄即可查看和兌換專屬積分禮品，享受更多會員權益！",
+    "loginNow": "立即登錄"
   },
   "order-details": {
     "balancePayment": "餘額支付",
@@ -228,6 +231,16 @@
     "supportedFormats": "圖片、PDF、Excel、Word",
     "uploading": "上傳中...",
     "submit": "提交 {count} 個文件"
+  },
+  "PaymentMethods": {
+    "zgar_balance": "餘額支付",
+    "zgar_balance_description": "使用賬戶餘額直接支付訂單",
+    "zgar_points": "積分支付",
+    "zgar_points_description": "使用積分兌換商品（積分支付金額為0）",
+    "zgar_credit": "賬期支付",
+    "zgar_credit_description": "使用賬期額度支付，適用於授權客戶",
+    "zgar_manual": "線下轉賬",
+    "zgar_manual_description": "通過銀行轉賬支付，完成後上傳轉賬憑證"
   },
   "Pagination": {
     "previous": "上一頁",
