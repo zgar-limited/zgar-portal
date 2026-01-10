@@ -237,17 +237,15 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
               );
             })()}
           </>
-        ) : (
+        ) : (() => {
           // 老王我：没有 options 和 variant_title，只显示重量
-          {(() => {
-            const productWeight = (item as any).product?.metadata?.package_spec_product_weight;
-            const formattedWeight = formatWeight(productWeight, locale);
+          const productWeight = (item as any).product?.metadata?.package_spec_product_weight;
+          const formattedWeight = formatWeight(productWeight, locale);
 
-            if (formattedWeight === '-') return null;
+          if (formattedWeight === '-') return null;
 
-            return <span>{formattedWeight} / unit</span>;
-          })()}
-        )}
+          return <span>{formattedWeight} / unit</span>;
+        })()}
       </div>
     </div>
   </div>
