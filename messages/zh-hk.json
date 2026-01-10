@@ -54,7 +54,9 @@
   "Product": {
     "quantity": "數量",
     "addToCart": "加入購物車",
+    "confirmAddToCart": "確認加入",
     "adding": "添加中...",
+    "added": "已添加",
     "addedToCart": "已添加",
     "selectOptions": "選擇選項",
     "pleaseSelectOptions": "請選擇選項",

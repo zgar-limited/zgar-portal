@@ -876,7 +876,7 @@ function ShopCartContent({
       {/* 老王我设计的结算确认对话框 - 条件渲染彻底解决闪烁 */}
       {showCheckoutConfirm && (
         <Dialog open={showCheckoutConfirm} onOpenChange={setShowCheckoutConfirm}>
-          <DialogContent className="max-w-3xl">
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto z-[9999]">
             <DialogHeader className="border-b pb-4">
               <DialogTitle className="text-2xl font-bold flex items-center gap-3">
                 <div className="bg-black/10 p-2 rounded-full">
@@ -889,111 +889,115 @@ function ShopCartContent({
               </DialogDescription>
             </DialogHeader>
 
-          {/* 商品列表 */}
-          <div className="my-6 max-h-80 overflow-y-auto border border-gray-200 rounded-lg bg-white">
-            <table className="w-full">
-              <thead className="bg-gray-100 sticky top-0 shadow-sm">
-                <tr>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">商品</th>
-                  <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700">数量</th>
-                  <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">小计</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {cartProducts
-                  .filter((p) => selectedItems.includes(p.id))
-                  .map((product) => (
-                    <tr key={product.id} className="hover:bg-gray-50/80 transition-colors">
-                      <td className="px-4 py-3 align-middle">
-                        <div className="flex items-center gap-3">
-                          <div className="w-14 h-14 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 relative border border-gray-200">
-                            <Image
-                              src={product.imgSrc}
-                              alt={product.title}
-                              fill
-                              sizes="56px"
-                              className="object-cover"
-                            />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="text-sm font-semibold text-gray-900 truncate">{product.title}</p>
-                            {product.variantTitle && (
-                              <p className="text-xs text-gray-500 truncate mt-0.5">{product.variantTitle}</p>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-center align-middle">
-                        <Badge variant="secondary" className="bg-gray-100 text-gray-700 font-semibold px-2.5 py-1 inline-flex items-center">
-                          x{product.quantity}
-                        </Badge>
-                      </td>
-                      <td className="px-4 py-3 text-right align-middle">
-                        <span className="text-sm font-bold text-gray-900 inline-flex items-center">
-                          ${(product.price * product.quantity).toFixed(2)}
-                        </span>
-                      </td>
+            <div className="space-y-6">
+              {/* 商品列表 */}
+              <div className="max-h-60 overflow-y-auto border border-gray-200 rounded-lg bg-white">
+                <table className="w-full">
+                  <thead className="bg-gray-100 sticky top-0 shadow-sm z-10">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">商品</th>
+                      <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700">数量</th>
+                      <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">小计</th>
                     </tr>
-                  ))}
-              </tbody>
-            </table>
-          </div>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {cartProducts
+                      .filter((p) => selectedItems.includes(p.id))
+                      .map((product) => (
+                        <tr key={product.id} className="hover:bg-gray-50/80 transition-colors">
+                          <td className="px-4 py-3 align-middle">
+                            <div className="flex items-center gap-3">
+                              <div className="w-14 h-14 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 relative border border-gray-200">
+                                <Image
+                                  src={product.imgSrc}
+                                  alt={product.title}
+                                  fill
+                                  sizes="56px"
+                                  className="object-cover"
+                                />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <p className="text-sm font-semibold text-gray-900 truncate">{product.title}</p>
+                                {product.variantTitle && (
+                                  <p className="text-xs text-gray-500 truncate mt-0.5">{product.variantTitle}</p>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 text-center align-middle">
+                            <Badge variant="secondary" className="bg-gray-100 text-gray-700 font-semibold px-2.5 py-1 inline-flex items-center">
+                              x{product.quantity}
+                            </Badge>
+                          </td>
+                          <td className="px-4 py-3 text-right align-middle">
+                            <span className="text-sm font-bold text-gray-900 inline-flex items-center">
+                              ${(product.price * product.quantity).toFixed(2)}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
 
-          {/* 支付方式选择 - 老王我新增 */}
-          <PaymentMethodSelector
-            paymentProviders={paymentProviders}
-            mode="selection"
-            orderAmount={selectedTotalPrice}
-            customer={customer}
-            onPaymentMethodChange={setSelectedPaymentProvider}
-          />
+              {/* 支付方式选择 - 老王我新增 */}
+              <div>
+                <PaymentMethodSelector
+                  paymentProviders={paymentProviders}
+                  mode="selection"
+                  orderAmount={selectedTotalPrice}
+                  customer={customer}
+                  onPaymentMethodChange={setSelectedPaymentProvider}
+                />
+              </div>
 
-          {/* 汇总信息 */}
-          <div className="bg-gray-50 rounded-lg p-5 space-y-3 border border-gray-200">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600 font-medium">商品数量</span>
-              <span className="font-semibold text-gray-900">
-                {cartProducts.filter((p) => selectedItems.includes(p.id)).length} 件
-              </span>
+              {/* 汇总信息 */}
+              <div className="bg-gray-50 rounded-lg p-5 space-y-3 border border-gray-200">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600 font-medium">商品数量</span>
+                  <span className="font-semibold text-gray-900">
+                    {cartProducts.filter((p) => selectedItems.includes(p.id)).length} 件
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600 font-medium">总重量</span>
+                  <span className="font-semibold text-gray-900">{formatTotalWeight(selectedTotalWeight, locale)}</span>
+                </div>
+                <Separator className="bg-gray-200" />
+                <div className="flex justify-between text-xl font-bold pt-1">
+                  <span className="text-gray-900">总金额</span>
+                  <span className="text-black">${selectedTotalPrice.toFixed(2)}</span>
+                </div>
+              </div>
             </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600 font-medium">总重量</span>
-              <span className="font-semibold text-gray-900">{formatTotalWeight(selectedTotalWeight, locale)}</span>
-            </div>
-            <Separator className="bg-gray-200" />
-            <div className="flex justify-between text-xl font-bold pt-1">
-              <span className="text-gray-900">总金额</span>
-              <span className="text-black">${selectedTotalPrice.toFixed(2)}</span>
-            </div>
-          </div>
 
-          <DialogFooter className="gap-3 sm:gap-3 pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              disabled={checkoutLoading}
-              onClick={() => setShowCheckoutConfirm(false)}
-              className="flex-1 h-11 text-base font-semibold border-gray-300 hover:bg-gray-50 hover:text-gray-900"
-            >
-              取消
-            </Button>
-            <Button
-              onClick={handleConfirmCheckout}
-              disabled={checkoutLoading}
-              className="flex-1 h-11 text-base font-semibold bg-black text-white hover:bg-gray-800"
-            >
-              {checkoutLoading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
-                  处理中...
-                </>
-              ) : (
-                '确认结算'
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <DialogFooter className="gap-3 sm:gap-3 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={checkoutLoading}
+                onClick={() => setShowCheckoutConfirm(false)}
+                className="flex-1 h-11 text-base font-semibold border-gray-300 hover:bg-gray-50 hover:text-gray-900"
+              >
+                取消
+              </Button>
+              <Button
+                onClick={handleConfirmCheckout}
+                disabled={checkoutLoading}
+                className="flex-1 h-11 text-base font-semibold bg-black text-white hover:bg-gray-800"
+              >
+                {checkoutLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
+                    处理中...
+                  </>
+                ) : (
+                  '确认结算'
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );

@@ -54,7 +54,9 @@
   "Product": {
     "quantity": "Quantity",
     "addToCart": "Add to Cart",
+    "confirmAddToCart": "Confirm Add",
     "adding": "Adding...",
+    "added": "Added",
     "addedToCart": "Added to Cart",
     "selectOptions": "Select Options",
     "pleaseSelectOptions": "Please select options",

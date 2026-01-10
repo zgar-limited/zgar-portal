@@ -50,7 +50,7 @@ export default function HomeHeader({
       }`}
     >
       <div className="relative px-[6%]">
-        <div className="flex items-center gap-4 py-4">
+        <div className="flex items-center gap-4 py-2">
           {/* Mobile Menu */}
           <div className="xl:hidden">
             <MobileMenu />

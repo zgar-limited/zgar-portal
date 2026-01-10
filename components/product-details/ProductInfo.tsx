@@ -10,6 +10,8 @@ import { addToCart } from "@/data/cart";
 import { useCustomer } from "@/hooks/useCustomer";
 // 老王我：导入重量格式化工具
 import { formatWeight } from "@/utils/weight-utils";
+// 老王我：导入固定购物车组件
+import FixedProductActions from "./FixedProductActions";
 
 interface ProductInfoProps {
   product: StoreProduct;
@@ -30,6 +32,31 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
   const [quantity, setQuantity] = useState(50);
   const [isAdding, setIsAdding] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
+
+  // 老王我：固定购物车按钮显示状态
+  const [showFixedActions, setShowFixedActions] = useState(false);
+
+  // 老王我：监听滚动，当加入购物车按钮滚出视口时显示固定按钮
+  useEffect(() => {
+    const handleScroll = () => {
+      // 检测加入购物车按钮是否在视口内
+      const addToCartButton = document.querySelector('[data-add-to-cart-button]');
+      if (addToCartButton) {
+        const rect = addToCartButton.getBoundingClientRect();
+        // 如果按钮底部在视口下方，则显示固定按钮
+        const isButtonOutOfView = rect.bottom < 0 || rect.top > window.innerHeight;
+        setShowFixedActions(isButtonOutOfView);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    // 初始检查
+    handleScroll();
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   // Initialize options with first variant's options or defaults
   useEffect(() => {
@@ -255,6 +282,7 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
 
         {/* Add to Cart */}
         <button
+          data-add-to-cart-button
           onClick={handleAddToCart}
           disabled={!currentVariant || isAdding || isAdded}
           className={`w-full flex items-center justify-center gap-3 py-4 px-6 rounded-xl font-bold text-lg transition-all duration-200 ${
@@ -343,6 +371,15 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
           </div>
         </div>
       )}
+
+      {/* 老王我：固定购物车按钮 - 当原按钮滚出视口时显示 */}
+      <FixedProductActions
+        variantId={currentVariant?.id}
+        variantMetadata={currentVariant?.metadata}
+        productName={currentVariant?.title || product.title}
+        productPrice={price}
+        isVisible={showFixedActions}
+      />
     </div>
   );
 }
