@@ -1,6 +1,6 @@
 "use client";
-import { Link } from '@/i18n/routing';
-import React, { useState, useActionState, useTransition } from "react";
+import { Link, useRouter, useSearchParams } from '@/i18n/routing';
+import React, { useState, useActionState, useTransition, useEffect } from "react";
 import CountryCodeSelect from "../common/CountryCodeSelect";
 import { login, signup } from "@/data/customer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,6 +12,10 @@ import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function Login() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnUrl = searchParams.get('returnUrl');
+
   const [isLogin, setIsLogin] = useState(true);
   const [showLoginPass, setShowLoginPass] = useState(false);
   const [showRegPass1, setShowRegPass1] = useState(false);
@@ -22,9 +26,50 @@ export default function Login() {
   const [loginState, loginAction] = useActionState(login, null);
   const [registerState, registerAction] = useActionState(signup, null);
 
+  // 老王我：登录成功后跳转到 returnUrl
+  useEffect(() => {
+    if (loginState && !loginState.error && returnUrl) {
+      // 安全验证：确保 returnUrl 是内部 URL
+      try {
+        const url = new URL(returnUrl, window.location.origin);
+        if (url.origin === window.location.origin) {
+          router.push(returnUrl);
+        } else {
+          // 如果是外部 URL，跳转到首页
+          router.push('/');
+        }
+      } catch {
+        // URL 解析失败，跳转到首页
+        router.push('/');
+      }
+    }
+  }, [loginState, returnUrl, router]);
+
+  // 老王我：注册成功后也跳转到 returnUrl
+  useEffect(() => {
+    if (registerState && !registerState.error && returnUrl) {
+      try {
+        const url = new URL(returnUrl, window.location.origin);
+        if (url.origin === window.location.origin) {
+          router.push(returnUrl);
+        } else {
+          router.push('/');
+        }
+      } catch {
+        router.push('/');
+      }
+    }
+  }, [registerState, returnUrl, router]);
+
   const handleLoginSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
+
+    // 老王我：添加 returnUrl 到 formData
+    if (returnUrl) {
+      formData.append('returnUrl', returnUrl);
+    }
+
     startTransition(() => {
       loginAction(formData);
     });

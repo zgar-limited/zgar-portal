@@ -115,6 +115,8 @@ export async function signup(_currentState: unknown, formData: FormData) {
 export async function login(_currentState: unknown, formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
+  // 老王我：获取 returnUrl 参数
+  const returnUrl = formData.get("returnUrl") as string | null;
 
   try {
     await medusaSDK.auth
@@ -134,6 +136,10 @@ export async function login(_currentState: unknown, formData: FormData) {
   //   return error.toString();
   // }
 
+  // 老王我：如果有 returnUrl，重定向到原始页面
+  if (returnUrl) {
+    redirect(returnUrl);
+  }
   redirect("/");
 }
 
