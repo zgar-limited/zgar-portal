@@ -1,5 +1,6 @@
 "use client";
-import { Link, useRouter, useSearchParams } from '@/i18n/routing';
+import { Link, useRouter } from '@/i18n/routing';
+import { useSearchParams } from 'next/navigation';
 import React, { useState, useActionState, useTransition, useEffect } from "react";
 import CountryCodeSelect from "../common/CountryCodeSelect";
 import { login, signup } from "@/data/customer";
@@ -114,6 +115,7 @@ export default function Login() {
               value={isLogin ? "login" : "register"}
               onValueChange={(value) => setIsLogin(value === "login")}
               className="w-full"
+              suppressHydrationWarning
             >
               <TabsList className="grid w-full grid-cols-2 h-11 p-1 bg-gray-100/80">
                 <TabsTrigger

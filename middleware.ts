@@ -99,7 +99,13 @@ export default function middleware(request: NextRequest) {
     pathname.startsWith('/_static') ||
     pathname.includes('.') // 静态资源文件
   ) {
-    return intlMiddleware(request);
+    const response = intlMiddleware(request);
+    // 老王我：为响应添加当前路径的 header
+    if (response instanceof NextResponse) {
+      response.headers.set('x-current-path', pathname);
+      response.headers.set('x-url', request.url);
+    }
+    return response;
   }
 
   // 2. 移除 locale 前缀，获取实际路径
@@ -110,6 +116,18 @@ export default function middleware(request: NextRequest) {
   const isPublic = isPublicRoute(pathnameWithoutLocale);
   const token = getAuthToken(request);
   const isAuthenticated = !!token;
+
+  // 老王我：开发环境调试日志
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🔒 Middleware:', {
+      pathname,
+      pathnameWithoutLocale,
+      isProtected,
+      isPublic,
+      hasToken: isAuthenticated,
+      protectedRoutes: PROTECTED_ROUTES,
+    });
+  }
 
   // 4. 处理受保护路由
   if (isProtected && !isAuthenticated) {
@@ -128,22 +146,27 @@ export default function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // 5. 处理已登录用户访问登录/注册页面
-  if (isPublic && isAuthenticated) {
-    // 已登录用户访问登录页 → 重定向到账户页
-    const url = request.nextUrl.clone();
-
-    // 保留当前 locale
-    const currentLocale = getLocaleFromPathname(pathname, routing.locales);
-
-    // 重定向到账户页面
-    url.pathname = `/${currentLocale}/account-page`;
-
-    return NextResponse.redirect(url);
-  }
+  // 5. 老王我注释掉：已登录用户访问登录页不再自动重定向
+  // 原因：Middleware 无法判断 token 是否过期，只知道 cookie 存在
+  // 如果 token 过期，这个重定向会导致无限循环
+  // 让登录页自己判断是否需要重定向
+  // if (isPublic && isAuthenticated) {
+  //   const url = request.nextUrl.clone();
+  //   const currentLocale = getLocaleFromPathname(pathname, routing.locales);
+  //   url.pathname = `/${currentLocale}/account-page`;
+  //   return NextResponse.redirect(url);
+  // }
 
   // 6. 其他情况交给 next-intl middleware 处理
-  return intlMiddleware(request);
+  const response = intlMiddleware(request);
+
+  // 老王我：为响应添加当前路径的 header
+  if (response instanceof NextResponse) {
+    response.headers.set('x-current-path', pathname);
+    response.headers.set('x-url', request.url);
+  }
+
+  return response;
 }
 
 // ============================================================================
