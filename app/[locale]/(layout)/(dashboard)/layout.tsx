@@ -12,8 +12,8 @@ import HomeTips from "@/widgets/HomeTips";
 import React from "react";
 
 export default async function DashboardLayout({ children, params }) {
-  // 老王我：获取当前 locale
-  const locale = params?.locale || "en-us";
+  // 老王我：await params（Next.js 15+ params 是 Promise）
+  const { locale } = await params;
 
   // 老王我：获取当前页面路径（用于登录后返回）
   const headersList = await headers();

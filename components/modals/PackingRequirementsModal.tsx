@@ -64,6 +64,14 @@ export interface ShippingMarkGroup {
   allocations: Allocation[];  // 分配记录列表
 }
 
+// 老王我：包装类型的预设配置
+const PACKAGING_PRESETS = [
+  { id: "sack", label: "麻袋", description: "麻袋" },
+  { id: "carton", label: "纸箱", description: "纸箱" },
+  { id: "original", label: "原箱", description: "原箱" },
+  { id: "sack-or-carton", label: "麻袋或纸箱", description: "麻袋或纸箱" },
+];
+
 // 商品分配状态
 interface ItemAllocationStatus {
   item: HttpTypes.StoreOrder["items"][number];
@@ -225,6 +233,16 @@ export default function PackingRequirementsModal({
     setEditingGroupId(null);
     setEditingName("");
     setEditingDesc("");
+  };
+
+  // 老王我：应用包装预设，批量更新所有唛头的备注
+  const handleApplyPreset = (description: string) => {
+    setShippingMarks((prev) =>
+      prev.map((group) => ({
+        ...group,
+        description,
+      }))
+    );
   };
 
   // 切换折叠状态
@@ -862,6 +880,26 @@ export default function PackingRequirementsModal({
                   <Plus size={15} strokeWidth={2.5} />
                   {t('addNewMark')}
                 </Button>
+              </div>
+
+              {/* 老王我：包装类型预设按钮 */}
+              <div className="bg-gray-50 dark:bg-gray-900/30 rounded-xl p-3 border border-gray-200 dark:border-gray-700">
+                <div className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2 px-1">
+                  快速预设（批量填写唛头备注）
+                </div>
+                <div className="grid grid-cols-4 gap-2">
+                  {PACKAGING_PRESETS.map((preset) => (
+                    <Button
+                      key={preset.id}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleApplyPreset(preset.description)}
+                      className="h-9 px-2 text-xs font-medium rounded-lg hover:bg-white dark:hover:bg-gray-800 hover:border-purple-300 dark:hover:border-purple-600 transition-colors"
+                    >
+                      {preset.label}
+                    </Button>
+                  ))}
+                </div>
               </div>
 
               <div className="space-y-3 max-h-[540px] overflow-y-auto pr-1.5 custom-scrollbar">

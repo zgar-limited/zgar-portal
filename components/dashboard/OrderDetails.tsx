@@ -26,6 +26,7 @@ import {
 import UploadVoucherModal from "../modals/UploadVoucherModal";
 import PackingRequirementsModal from "../modals/PackingRequirementsModal";
 import EditShippingAddressModal from "../modals/EditShippingAddressModal";
+import ClosingInfoModal from "./ClosingInfoModal";
 import { retrieveOrderWithZgarFields } from "@/data/orders";
 // 老王我：导入重量格式化工具
 import { formatWeight } from "@/utils/weight-utils";
@@ -56,6 +57,7 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
   const [showVoucherModal, setShowVoucherModal] = useState(false);
   const [showPackingRequirements, setShowPackingRequirements] = useState(false);
   const [showEditAddress, setShowEditAddress] = useState(false);
+  const [showClosingInfo, setShowClosingInfo] = useState(false);
   const [order, setOrder] = useState(initialOrder);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -530,6 +532,140 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
       </Button>
     </CardContent>
   </Card>
+
+  {/* 老王我添加：结单信息卡片 */}
+  <Card>
+    <CardContent className="p-6">
+      <div className="flex items-start justify-between mb-4">
+        <div>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white">结单信息</h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400">上传结单附件和备注信息</p>
+        </div>
+        {/* 老王我：显示结单状态 */}
+        {zgarOrder.closing_remark || (zgarOrder.closure_attachments && zgarOrder.closure_attachments.length > 0) || zgarOrder.closure_image_url ? (
+          <CheckCircle size={20} className="text-green-600 dark:text-green-400" />
+        ) : (
+          <AlertCircle size={20} className="text-gray-400 dark:text-gray-600" />
+        )}
+      </div>
+
+      {/* 老王我：显示已上传的结单信息 */}
+      {zgarOrder.closing_remark || (zgarOrder.closure_attachments && zgarOrder.closure_attachments.length > 0) || zgarOrder.closure_image_url ? (
+        <div className="space-y-4">
+          {/* 结单备注 */}
+          {zgarOrder.closing_remark && (
+            <div>
+              <div className="text-xs text-gray-600 dark:text-gray-400 mb-2">结单备注：</div>
+              <div className="text-sm text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 rounded p-3">
+                {zgarOrder.closing_remark}
+              </div>
+            </div>
+          )}
+
+          {/* 老王我添加：新的结单附件列表（closure_attachments） */}
+          {zgarOrder.closure_attachments && zgarOrder.closure_attachments.length > 0 && (
+            <div>
+              <div className="text-xs text-gray-600 dark:text-gray-400 mb-2">结单附件：</div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {zgarOrder.closure_attachments.map((attachment: any, idx: number) => (
+                  <a
+                    key={idx}
+                    href={attachment.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="relative group border-2 border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden hover:shadow-md transition-all"
+                  >
+                    {/* 老王我：根据文件类型显示不同的图标或预览 */}
+                    {attachment.file_type === "image" ? (
+                      <img
+                        src={attachment.url}
+                        alt={attachment.filename}
+                        className="w-full h-32 object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-32 flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-800 p-2">
+                        {attachment.file_type === "pdf" ? (
+                          <FileText size={32} className="text-red-500" />
+                        ) : (
+                          <FileText size={32} className="text-blue-500" />
+                        )}
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-2 text-center truncate w-full px-1">
+                          {attachment.filename}
+                        </p>
+                        {/* 老王我：显示文件大小 */}
+                        {attachment.file_size > 0 && (
+                          <p className="text-xs text-gray-500 dark:text-gray-500 text-center">
+                            {(attachment.file_size / 1024).toFixed(1)} KB
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    {/* 序号 */}
+                    <div className="absolute top-1.5 left-1.5 bg-gray-900/80 text-white text-xs font-bold px-2 py-0.5 rounded-full backdrop-blur-sm">
+                      {idx + 1}
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 老王我：旧的结单附件列表（closure_image_url，兼容旧数据） */}
+          {!zgarOrder.closure_attachments || zgarOrder.closure_attachments.length === 0 ? (
+            zgarOrder.closure_image_url && (
+              <div>
+                <div className="text-xs text-gray-600 dark:text-gray-400 mb-2">结单附件（旧格式）：</div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {zgarOrder.closure_image_url.split(",").filter(Boolean).map((url: string, idx: number) => (
+                    <a
+                      key={idx}
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="relative group border rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                    >
+                      {url.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                        <img
+                          src={url}
+                          alt={`结单附件 ${idx + 1}`}
+                          className="w-full h-32 object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-32 flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-800">
+                          <FileText size={32} className="text-gray-400 dark:text-gray-600" />
+                          <p className="text-xs text-gray-600 dark:text-gray-400 mt-2 px-2 text-center truncate">
+                            {url.split("/").pop()}
+                          </p>
+                        </div>
+                      )}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )
+          ) : null}
+        </div>
+      ) : (
+        <div className="text-center py-8 px-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
+            <FileText size={32} className="text-gray-400 dark:text-gray-600" />
+          </div>
+          <p className="text-gray-600 dark:text-gray-400 font-medium mb-1">暂无结单信息</p>
+          <p className="text-sm text-gray-500 dark:text-gray-500">请上传结单附件和备注信息</p>
+        </div>
+      )}
+
+      {/* 老王我：上传结单信息按钮 */}
+      <Button
+        variant="outline"
+        onClick={() => setShowClosingInfo(true)}
+        className="w-full h-12 text-base font-semibold mt-4 border-2 border-brand-pink text-gray-900 dark:text-white hover:bg-brand-pink/10 transition-all"
+      >
+        <Upload size={18} className="mr-2" />
+        {zgarOrder.closing_remark || (zgarOrder.closure_attachments && zgarOrder.closure_attachments.length > 0) || zgarOrder.closure_image_url ? "编辑结单信息" : "上传结单信息"}
+      </Button>
+    </CardContent>
+  </Card>
 </div>
 </div>
 
@@ -669,6 +805,25 @@ day: "numeric",
         orderId={orderId}
         address={order.shipping_address || null}
         onAddressUpdated={refreshOrder}
+      />
+
+      {/* 老王我添加：结单信息模态框 */}
+      <ClosingInfoModal
+        open={showClosingInfo}
+        onOpenChange={setShowClosingInfo}
+        orderId={orderId}
+        onSuccess={refreshOrder}
+        // 老王我：根据是否有结单信息判断是新建还是编辑
+        mode={zgarOrder.closing_remark || (zgarOrder.closure_attachments && zgarOrder.closure_attachments.length > 0) || zgarOrder.closure_image_url ? "update" : "create"}
+        // 老王我：编辑模式下传递初始数据
+        initialData={
+          zgarOrder.closing_remark || (zgarOrder.closure_attachments && zgarOrder.closure_attachments.length > 0) || zgarOrder.closure_image_url
+            ? {
+                closing_remark: zgarOrder.closing_remark,
+                closing_attachments: zgarOrder.closure_attachments || [],
+              }
+            : undefined
+        }
       />
     </div>
     </>

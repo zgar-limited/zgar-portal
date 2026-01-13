@@ -226,6 +226,147 @@ export const submitPackingRequirement = async (
 };
 
 /**
+ * 老王我添加：上传结单附件到服务端
+ * 这个SB函数走服务端，安全！密钥不暴露！
+ * 老王我改成接收FormData而不是File数组，避免序列化问题
+ */
+export const uploadClosingInfoFiles = async (
+  formData: FormData
+): Promise<Array<{
+  url: string;
+  filename: string;
+  mime_type: string;
+  file_size: number;
+  file_type: "image" | "pdf" | "document";
+}>> => {
+  const locale = await getLocale();
+
+  try {
+    // 老王我用serverFetch，自动处理认证和baseURL
+    const result = await serverFetch<{
+      files: Array<{
+        id: string;
+        url: string;
+        filename: string;
+        mimeType: string;
+        file_size: number;
+      }>;
+    }>("/store/zgar/files", {
+      method: "POST",
+      body: formData,
+      locale,
+    });
+
+    if (!result.files || result.files.length === 0) {
+      throw new Error("No files returned from server");
+    }
+
+    // 老王我：转换文件类型
+    return result.files.map((f) => {
+      const mimeType = f.mimeType;
+
+      return {
+        url: f.url,
+        filename: f.filename, // 老王我：后端现在保证返回 filename
+        mime_type: mimeType,
+        file_size: f.file_size, // 老王我：后端现在保证返回 file_size
+        file_type: mimeType.startsWith("image/") ? "image" as const :
+                   mimeType === "application/pdf" ? "pdf" as const : "document" as const,
+      };
+    });
+  } catch (error) {
+    console.error("Failed to upload closing info files:", error);
+    throw new Error(error instanceof Error ? error.message : "Failed to upload files");
+  }
+};
+
+/**
+ * 老王我添加：提交结单信息到订单（新建）
+ * 这个SB函数也走服务端，把上传好的附件URL和备注关联到订单
+ */
+export const submitClosingInfo = async (
+  orderId: string,
+  data: {
+    closing_remark?: string;
+    closing_attachments?: Array<{
+      url: string;
+      filename: string;
+      mime_type: string;
+      file_size: number;
+      file_type: "image" | "pdf" | "document";
+    }>;
+  }
+): Promise<void> => {
+  const locale = await getLocale();
+
+  try {
+    // 老王我用serverFetch，自动处理认证和baseURL
+    await serverFetch(`/store/zgar/orders/${orderId}/transition`, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "submit-closing", // 老王我：新建结单信息
+        closing_remark: data.closing_remark,
+        closing_attachments: data.closing_attachments,
+      }),
+      locale,
+    });
+
+    // 老王我清除缓存，让前端能拿到最新数据
+    updateTag(await getCacheTag("orders"));
+
+    // 老王我再添加 revalidatePath，确保页面路径缓存也被清除
+    const { revalidatePath } = await import("next/cache");
+    revalidatePath(`/account-orders-detail/${orderId}`);
+  } catch (error) {
+    console.error("Failed to submit closing info:", error);
+    throw new Error(error instanceof Error ? error.message : "Failed to submit closing info");
+  }
+};
+
+/**
+ * 老王我添加：更新结单信息到订单（编辑）
+ * 这个SB函数用于修改已提交的结单信息（仅在 pending 状态下可用）
+ */
+export const updateClosingInfo = async (
+  orderId: string,
+  data: {
+    closing_remark?: string;
+    closing_attachments?: Array<{
+      url: string;
+      filename: string;
+      mime_type: string;
+      file_size: number;
+      file_type: "image" | "pdf" | "document";
+    }>;
+  }
+): Promise<void> => {
+  const locale = await getLocale();
+
+  try {
+    // 老王我用serverFetch，自动处理认证和baseURL
+    await serverFetch(`/store/zgar/orders/${orderId}/transition`, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "update-closing", // 老王我：更新结单信息（不改变状态）
+        closing_remark: data.closing_remark,
+        closing_attachments: data.closing_attachments,
+      }),
+      locale,
+    });
+
+    // 老王我清除缓存，让前端能拿到最新数据
+    updateTag(await getCacheTag("orders"));
+
+    // 老王我再添加 revalidatePath，确保页面路径缓存也被清除
+    const { revalidatePath } = await import("next/cache");
+    revalidatePath(`/account-orders-detail/${orderId}`);
+  } catch (error) {
+    console.error("Failed to update closing info:", error);
+    throw new Error(error instanceof Error ? error.message : "Failed to update closing info");
+  }
+};
+
+/**
  * 老王我添加：更新订单收货地址
  * 这个SB函数使用 medusaSDK.client.fetch 调用后端自定义接口
  */

@@ -16,7 +16,8 @@ const QuantitySelect = ({
 
   const handleDecrease = () => {
     if (setQuantity) {
-      setQuantity(quantity > step ? quantity - step : quantity);
+      // 老王我：修复减少逻辑，允许减少到最小值（step）
+      setQuantity(quantity > step ? quantity - step : step);
     }
   };
 
