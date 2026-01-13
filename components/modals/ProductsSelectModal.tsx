@@ -92,40 +92,15 @@ const ProductsSelectModal = ({ show, onHide, cart, products }: Props) => {
     return Array.from(new Set(cats));
   }, [products]);
 
-  // Sync with existing cart
-  const cartProducts = useMemo(() => {
-    if (!cart?.items) return [];
-    return cart.items.map((item: any) => ({
-      id: item.id,
-      variantId: item.variant_id,
-      productId: item.product_id,
-      title: item.product_title,
-      variantTitle: item.variant_title,
-      price: item.unit_price,
-      quantity: item.quantity,
-      imgSrc: item.thumbnail || `https://picsum.photos/100/100?random=${item.id}`,
-      options: item.variant?.options || [],
-      metadata: item.metadata || {},
-      weight: item.variant?.weight || 0,
-    }));
-  }, [cart]);
-
-  // Initialize state with cart data
+  // 老王我：批量添加模式，不同步购物车数据
+  // Initialize state - 每次打开弹框时清空选择
   useEffect(() => {
     if (show) {
-      const initialSelected: string[] = [];
-      const initialQuantities: Record<string, number> = {};
-
-      cartProducts.forEach((item: any) => {
-        if (item.variantId) {
-          initialSelected.push(item.variantId);
-          initialQuantities[item.variantId] = item.quantity;
-        }
-      });
-      setSelectedSkus(initialSelected);
-      setQuantities(initialQuantities);
+      // 老王我：清空选择和数量，不读取购物车数据
+      setSelectedSkus([]);
+      setQuantities({});
     }
-  }, [show, cartProducts]);
+  }, [show]);
 
   // Toggle functions
   const toggleProduct = (productId: string) => {
@@ -188,60 +163,39 @@ const ProductsSelectModal = ({ show, onHide, cart, products }: Props) => {
     setSubmitting(true);
 
     try {
-      const cartMap = new Map(cartProducts.map((p: any) => [p.variantId, p]));
-
-      // Prepare operations
+      // 老王我：批量添加不需要同步购物车数据，直接添加选中的商品
       const itemsToAdd: Array<{
         variant_id: string;
         quantity: number;
         metadata?: Record<string, unknown>;
       }> = [];
-      const itemsToUpdate: Array<{
-        variant_id: string;
-        quantity: number;
-        metadata?: Record<string, unknown>;
-      }> = [];
 
-      // Check selected SKUs
+      // 准备要添加的商品
       for (const skuId of selectedSkus) {
         const quantity = quantities[skuId] || 50;
-        const existingItem = cartMap.get(skuId);
-
-        if (existingItem) {
-          // Update if quantity changed
-          if (existingItem.quantity !== quantity) {
-            itemsToUpdate.push({
-              variant_id: existingItem.id,
-              quantity,
-            });
-          }
-        } else {
-          // Add new item
-          itemsToAdd.push({
-            variant_id: skuId,
-            quantity,
-          });
-        }
+        // 老王我：批量添加模式，不检查是否已存在，直接添加
+        itemsToAdd.push({
+          variant_id: skuId,
+          quantity,
+        });
       }
 
-      // 老王我：使用 server action 而不是直接调用 medusaSDK
-      const promises: Promise<any>[] = [];
-
-      // Execute operations - 使用 server action
+      // 老王我：使用 server action 批量添加
       if (itemsToAdd.length > 0) {
-        promises.push(batchAddCartItems(cart.id, itemsToAdd));
+        await batchAddCartItems(cart.id, itemsToAdd);
       }
 
-      if (itemsToUpdate.length > 0) {
-        promises.push(batchUpdateCartItems(cart.id, itemsToUpdate));
-      }
+      // 老王我：先设置提交完成状态，再刷新页面
+      setSubmitting(false);
 
-      await Promise.all(promises);
+      // 老王我：刷新页面数据
       router.refresh();
+
+      // 老王我：关闭弹框
       onHide();
     } catch (error) {
       console.error("Error updating cart:", error);
-    } finally {
+      // 老王我：显示错误提示
       setSubmitting(false);
     }
   };
