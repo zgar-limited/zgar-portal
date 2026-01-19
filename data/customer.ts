@@ -380,7 +380,8 @@ export const retrieveCustomerWithZgarFields = async (
 
     return response.customer;
   } catch (error) {
-    console.error("Failed to retrieve customer with zgar fields:", error);
+    // 老王我：静默处理错误，不打印到 console（避免 Next.js 将错误传递到客户端）
+    // 可能的错误原因：token 过期、网络错误、后端服务不可用等
     return null;
   }
 };

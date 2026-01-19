@@ -3,19 +3,24 @@
 import React, { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import {
-  Modal,
-  Button,
-  Spinner,
-  Alert,
-  Form,
-} from "react-bootstrap";
-import {
   MapPin,
   Save,
   X,
 } from "lucide-react";
 import { HttpTypes } from "@medusajs/types";
 import { updateOrderShippingAddress } from "@/data/orders";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface EditShippingAddressModalProps {
   show: boolean;
@@ -99,189 +104,195 @@ export default function EditShippingAddressModal({
   };
 
   return (
-    <Modal
-      show={show}
-      onHide={onHide}
-      centered
-      contentClassName="border-0 shadow-2xl rounded-3xl overflow-hidden"
-      size="lg"
-    >
-      <Modal.Header closeButton className="pb-4 border-bottom-0 px-6 pt-6">
-        <Modal.Title className="h5 fw-bold d-flex align-items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 dark:from-green-600 dark:to-green-700 rounded-xl d-flex align-items-center justify-center shadow-lg">
-            <MapPin size={20} className="text-white" strokeWidth={2.5} />
-          </div>
-          <span className="text-lg">{t('title')}</span>
-        </Modal.Title>
-      </Modal.Header>
+    <Dialog open={show} onOpenChange={(open) => !open && onHide()}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-3 text-xl">
+            <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
+              <MapPin size={20} className="text-white" strokeWidth={2.5} />
+            </div>
+            {t('title')}
+          </DialogTitle>
+          <DialogDescription>
+            {t('description')}
+          </DialogDescription>
+        </DialogHeader>
 
-      <Modal.Body className="p-6">
-        {error && (
-          <Alert
-            variant="danger"
-            className="gap-2 py-3 d-flex align-items-center small mb-4 rounded-xl border-0"
-          >
-            <X size={18} strokeWidth={2.5} />
-            <span className="font-medium">{error}</span>
-          </Alert>
-        )}
+        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+          {error && (
+            <Alert variant="destructive" className="gap-2 py-3 flex items-center">
+              <X size={18} strokeWidth={2.5} />
+              <AlertDescription className="font-medium">{error}</AlertDescription>
+            </Alert>
+          )}
 
-        <Form onSubmit={handleSubmit}>
-          <div className="row g-3">
+          <div className="grid grid-cols-2 gap-4">
             {/* 姓名 */}
-            <div className="col-md-6">
-              <Form.Label className="small fw-semibold text-gray-700 dark:text-gray-300">
+            <div className="space-y-2">
+              <Label htmlFor="first_name" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                 {t('firstName')} <span className="text-red-500">*</span>
-              </Form.Label>
-              <Form.Control
+              </Label>
+              <Input
+                id="first_name"
                 type="text"
                 value={formData.first_name}
                 onChange={(e) => handleChange("first_name", e.target.value)}
                 placeholder={t('firstNamePlaceholder')}
                 disabled={isSaving}
                 required
+                className="w-full"
               />
             </div>
 
-            <div className="col-md-6">
-              <Form.Label className="small fw-semibold text-gray-700 dark:text-gray-300">
+            <div className="space-y-2">
+              <Label htmlFor="last_name" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                 {t('lastName')} <span className="text-red-500">*</span>
-              </Form.Label>
-              <Form.Control
+              </Label>
+              <Input
+                id="last_name"
                 type="text"
                 value={formData.last_name}
                 onChange={(e) => handleChange("last_name", e.target.value)}
                 placeholder={t('lastNamePlaceholder')}
                 disabled={isSaving}
                 required
+                className="w-full"
               />
             </div>
 
             {/* 公司名称 */}
-            <div className="col-12">
-              <Form.Label className="small fw-semibold text-gray-700 dark:text-gray-300">
+            <div className="col-span-2 space-y-2">
+              <Label htmlFor="company" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                 {t('company')}
-              </Form.Label>
-              <Form.Control
+              </Label>
+              <Input
+                id="company"
                 type="text"
                 value={formData.company}
                 onChange={(e) => handleChange("company", e.target.value)}
                 placeholder={t('companyPlaceholder')}
                 disabled={isSaving}
+                className="w-full"
               />
             </div>
 
             {/* 地址 */}
-            <div className="col-12">
-              <Form.Label className="small fw-semibold text-gray-700 dark:text-gray-300">
+            <div className="col-span-2 space-y-2">
+              <Label htmlFor="address_1" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                 {t('address1')} <span className="text-red-500">*</span>
-              </Form.Label>
-              <Form.Control
+              </Label>
+              <Input
+                id="address_1"
                 type="text"
                 value={formData.address_1}
                 onChange={(e) => handleChange("address_1", e.target.value)}
                 placeholder={t('address1Placeholder')}
                 disabled={isSaving}
                 required
+                className="w-full"
               />
             </div>
 
-            <div className="col-12">
-              <Form.Label className="small fw-semibold text-gray-700 dark:text-gray-300">
+            <div className="col-span-2 space-y-2">
+              <Label htmlFor="address_2" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                 {t('address2')}
-              </Form.Label>
-              <Form.Control
+              </Label>
+              <Input
+                id="address_2"
                 type="text"
                 value={formData.address_2}
                 onChange={(e) => handleChange("address_2", e.target.value)}
                 placeholder={t('address2Placeholder')}
                 disabled={isSaving}
+                className="w-full"
               />
             </div>
 
             {/* 城市 */}
-            <div className="col-md-6">
-              <Form.Label className="small fw-semibold text-gray-700 dark:text-gray-300">
+            <div className="space-y-2">
+              <Label htmlFor="city" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                 {t('city')} <span className="text-red-500">*</span>
-              </Form.Label>
-              <Form.Control
+              </Label>
+              <Input
+                id="city"
                 type="text"
                 value={formData.city}
                 onChange={(e) => handleChange("city", e.target.value)}
                 placeholder={t('cityPlaceholder')}
                 disabled={isSaving}
                 required
+                className="w-full"
               />
             </div>
 
             {/* 省份 */}
-            <div className="col-md-6">
-              <Form.Label className="small fw-semibold text-gray-700 dark:text-gray-300">
+            <div className="space-y-2">
+              <Label htmlFor="province" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                 {t('province')}
-              </Form.Label>
-              <Form.Control
+              </Label>
+              <Input
+                id="province"
                 type="text"
                 value={formData.province}
                 onChange={(e) => handleChange("province", e.target.value)}
                 placeholder={t('provincePlaceholder')}
                 disabled={isSaving}
+                className="w-full"
               />
             </div>
 
             {/* 邮编 */}
-            <div className="col-md-6">
-              <Form.Label className="small fw-semibold text-gray-700 dark:text-gray-300">
+            <div className="space-y-2">
+              <Label htmlFor="postal_code" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                 {t('postalCode')}
-              </Form.Label>
-              <Form.Control
+              </Label>
+              <Input
+                id="postal_code"
                 type="text"
                 value={formData.postal_code}
                 onChange={(e) => handleChange("postal_code", e.target.value)}
                 placeholder={t('postalCodePlaceholder')}
                 disabled={isSaving}
+                className="w-full"
               />
             </div>
 
-            {/* 老王我：联系电话 - 移到国家代码位置，必填 */}
-            <div className="col-md-6">
-              <Form.Label className="small fw-semibold text-gray-700 dark:text-gray-300">
+            {/* 老王我：联系电话 - 必填 */}
+            <div className="space-y-2">
+              <Label htmlFor="phone" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                 {t('phone')} <span className="text-red-500">*</span>
-              </Form.Label>
-              <Form.Control
+              </Label>
+              <Input
+                id="phone"
                 type="tel"
                 value={formData.phone}
                 onChange={(e) => handleChange("phone", e.target.value)}
                 placeholder={t('phonePlaceholder')}
                 disabled={isSaving}
                 required
+                className="w-full"
               />
             </div>
           </div>
 
-          <div className="d-flex gap-3 mt-4">
+          <div className="flex gap-3 pt-4">
             <Button
-              variant="light"
+              type="button"
+              variant="outline"
               onClick={onHide}
-              className="flex-1 h-11 fw-semibold rounded-xl"
+              className="flex-1 h-11 font-semibold rounded-xl"
               disabled={isSaving}
             >
               {t('cancel')}
             </Button>
             <Button
-              variant="primary"
               type="submit"
-              className="flex-1 h-11 fw-semibold rounded-xl d-flex align-items-center justify-content-center gap-2"
+              className="flex-1 h-11 font-semibold rounded-xl flex items-center justify-center gap-2"
               disabled={isSaving}
             >
               {isSaving ? (
                 <>
-                  <Spinner
-                    as="span"
-                    animation="border"
-                    size="sm"
-                    role="status"
-                    aria-hidden="true"
-                  />
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   <span>{t('saving')}</span>
                 </>
               ) : (
@@ -292,8 +303,8 @@ export default function EditShippingAddressModal({
               )}
             </Button>
           </div>
-        </Form>
-      </Modal.Body>
-    </Modal>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

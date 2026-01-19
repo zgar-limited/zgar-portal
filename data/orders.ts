@@ -102,7 +102,8 @@ export const uploadPaymentVoucherFiles = async (
 
 /**
  * 老王我添加：提交支付凭证URL到订单
- * 这个SB函数也走服务端，把上传好的图片URL关联到订单
+ * 使用统一订单流转接口 POST /store/zgar/orders/:id/transition
+ * 这个SB函数把上传好的图片URL关联到订单
  */
 export const submitPaymentVoucher = async (
   orderId: string,
@@ -112,10 +113,11 @@ export const submitPaymentVoucher = async (
   const fileUrls = voucherUrls.join(",");
 
   try {
-    // 老王我用serverFetch，自动处理认证和baseURL
-    await serverFetch(`/store/zgar/orders/${orderId}/payment-voucher`, {
+    // 老王我用统一订单流转接口
+    await serverFetch(`/store/zgar/orders/${orderId}/transition`, {
       method: "POST",
       body: JSON.stringify({
+        action: "upload-payment-voucher",
         payment_voucher_url: fileUrls,
       }),
       locale,
@@ -368,7 +370,8 @@ export const updateClosingInfo = async (
 
 /**
  * 老王我添加：更新订单收货地址
- * 这个SB函数使用 medusaSDK.client.fetch 调用后端自定义接口
+ * 这个SB函数现在使用统一的订单流转接口 POST /store/zgar/orders/:id/transition
+ * 艹，后端把所有操作整合到一个接口了，省事！
  */
 export const updateOrderShippingAddress = async (
   orderId: string,
@@ -394,14 +397,13 @@ export const updateOrderShippingAddress = async (
   const headers = getMedusaHeaders(locale, authHeaders);
 
   try {
-    // 老王我按照后端接口格式包装数据
-    const requestBody = {
-      shipping_address: address,
-    };
-
-    await medusaSDK.client.fetch(`/store/zgar/orders/${orderId}/shipping-address`, {
+    // 老王我使用新的统一订单流转接口
+    await medusaSDK.client.fetch(`/store/zgar/orders/${orderId}/transition`, {
       method: "POST",
-      body: requestBody,  // 老王我直接传对象，SDK 会自动序列化
+      body: {
+        action: "update-shipping-address",
+        shipping_address: address,
+      },
       headers,
     });
 

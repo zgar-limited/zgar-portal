@@ -1,8 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import { Metadata } from 'next';
-import { retrieveCustomer } from '@/data/customer';
 import { retrieveCustomerAddresses } from '@/data/customer';
-import { notFound } from 'next/navigation';
+import { requireAuth } from '@/data/auth';
 import AddressesClient from './AddressesClient';
 
 export const metadata: Metadata = {
@@ -11,14 +10,11 @@ export const metadata: Metadata = {
 };
 
 export default async function AddressesPage() {
-  const [customer, addresses] = await Promise.all([
-    retrieveCustomer(),
-    retrieveCustomerAddresses().catch(() => []),
-  ]);
+  // 老王我：统一认证检查（处理未登录和 token 过期）
+  const customer = await requireAuth();
 
-  if (!customer) {
-    notFound();
-  }
+  // 获取地址列表
+  const addresses = await retrieveCustomerAddresses().catch(() => []);
 
   const t = await getTranslations('Account');
 

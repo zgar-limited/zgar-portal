@@ -1,14 +1,17 @@
 import { Link } from '@/i18n/routing';
 import { ChevronRight } from "lucide-react";
 import AccountSettings from "@/components/dashboard/AccountSettings";
-import React from "react";
+import { requireAuth } from "@/data/auth";
 
 export const metadata = {
   title: "账户设置 || Zgar Portal - 专业电子烟电商平台",
   description: "Zgar Portal - 专业的电子烟电商平台，提供账户设置功能",
 };
 
-export default function AccountSettingPage() {
+export default async function AccountSettingPage() {
+  // 老王我：统一认证检查（处理未登录和 token 过期）
+  await requireAuth();
+
   return (
     <div className="min-h-screen bg-background">
       {/* 面包屑导航 */}

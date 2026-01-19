@@ -12,6 +12,8 @@ const PROTECTED_ROUTES = [
   '/account-orders-detail',
   '/account-addresses',
   '/account-setting',
+  // 老王我：购物车页面也需要登录
+  '/view-cart',
 ];
 
 // 公开路由（即使已登录也可以访问）
@@ -90,6 +92,9 @@ const intlMiddleware = createMiddleware(routing);
 // 主 Middleware 函数
 // ============================================================================
 export default function middleware(request: NextRequest) {
+  console.log('═══════════════════════════════════════');
+  console.log('🚀 MIDDLEWARE EXECUTED!!!');
+  console.log('═══════════════════════════════════════');
   const { pathname } = request.nextUrl;
 
   // 1. 跳过静态文件和 API 路由
@@ -126,6 +131,7 @@ export default function middleware(request: NextRequest) {
       isPublic,
       hasToken: isAuthenticated,
       protectedRoutes: PROTECTED_ROUTES,
+      willRedirect: isProtected && !isAuthenticated,
     });
   }
 
