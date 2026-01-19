@@ -111,6 +111,19 @@
     "editPackingPlan": "編輯打包方案",
     "updatePackingRequirements": "更新打包要求",
     "createPackingPlan": "創建打包方案",
+    "closingInfoTitle": "結單信息",
+    "closingInfoDescription": "上傳結單附件和備註信息",
+    "closingRemark": "結單備註",
+    "closingAttachments": "結單附件",
+    "closingAttachmentsLegacy": "結單附件（舊格式）",
+    "closingAttachmentAlt": "結單附件 {idx}",
+    "noClosingInfo": "暫無結單信息",
+    "uploadClosingInfoDescription": "請上傳結單附件和備註信息",
+    "editClosingInfo": "編輯結單信息",
+    "uploadClosingInfo": "上傳結單信息",
+    "uploadedAtColon": "上傳於:",
+    "attachmentNumber": "附件 {idx}",
+    "edit": "編輯",
     "orderItems": "訂單商品",
     "product": "產品",
     "price": "價格",
@@ -121,9 +134,29 @@
     "orderSummary": "訂單摘要",
     "orderDate": "訂單日期",
     "payment": "支付",
+    "paymentMethod": "支付方式",
     "fulfillment": "履行",
     "shippingAddress": "收貨地址",
-    "tel": "電話"
+    "tel": "電話",
+    "auditStatus": "審核狀態",
+    "paymentAuditStatus": "支付審核狀態",
+    "closingAuditStatus": "結單審核狀態",
+    "rejectionReason": "拒絕理由"
+  },
+  "pendingAction": {
+    "title": {
+      "payment": "上傳支付憑證",
+      "packing": "填寫打包要求",
+      "closing": "填寫結單信息"
+    },
+    "description": {
+      "payment": "請上傳您的支付收款以確認訂單",
+      "packing": "請創建嘜頭分組以便安排發貨",
+      "closing": "請上傳結單附件和備註信息"
+    },
+    "completeNow": "立即完成",
+    "close": "關閉",
+    "goto": "前往"
   },
   "packing-requirements": {
     "title": "打包要求管理",
@@ -156,6 +189,7 @@
   },
   "edit-address": {
     "title": "編輯收貨地址",
+    "description": "更新此訂單的收貨地址信息",
     "firstName": "名字",
     "firstNamePlaceholder": "請輸入名字",
     "lastName": "姓氏",

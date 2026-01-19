@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { Link } from '@/i18n/routing';
 import { useRouter } from "next/navigation";
@@ -9,7 +9,6 @@ import Sidebar from "./Sidebar";
 import { HttpTypes } from "@medusajs/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
   ChevronLeft,
@@ -39,12 +38,6 @@ const OrderStatus = {
   REQUIRES_ACTION: "requires_action",
 };
 
-const AuditStatus = {
-  PENDING: "pending",
-  APPROVED: "approved",
-  REJECTED: "rejected",
-};
-
 interface OrderDetailsProps {
   order: HttpTypes.StoreOrder;
 }
@@ -54,6 +47,7 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
   const locale = useLocale(); // 老王我获取当前语言，用于多语言翻译
   const t = useTranslations('order-details'); // 老王我：订单详情多语言
   const tp = useTranslations('packing-requirements'); // 老王我：打包要求多语言
+  const tpa = useTranslations('pendingAction'); // 老王我：待办操作多语言
   const [showVoucherModal, setShowVoucherModal] = useState(false);
   const [showPackingRequirements, setShowPackingRequirements] = useState(false);
   const [showEditAddress, setShowEditAddress] = useState(false);
@@ -71,6 +65,10 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
   // 老王我：获取支付方式
   const paymentMethod = zgarOrder.payment_method;
 
+  // 老王我：获取审核相关的 metadata
+  const auditMetadata = zgarOrder.metadata || {};
+  const auditReason = auditMetadata.audit_reason;
+
   // 老王我添加：手动刷新订单数据，不刷新页面
   const refreshOrder = async () => {
     setIsRefreshing(true);
@@ -84,29 +82,24 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
     }
   };
 
-  const getOrderStatusVariant = (status: string) => {
+  // 老王我：判断订单是否已完成或已取消（已完成或已取消的订单只读）
+  const isCompleted = order.status === OrderStatus.COMPLETED || order.status === OrderStatus.CANCELED;
+
+  // 老王我：美化的状态 Badge 样式函数（使用品牌色）
+  const getStatusBadgeStyle = (status: string) => {
     switch (status) {
       case OrderStatus.COMPLETED:
-        return "default";
+        return "bg-brand-pink text-white border-0 shadow-lg";
       case OrderStatus.PENDING:
-        return "secondary";
+        return "bg-brand-blue text-white border-0 shadow-lg";
       case OrderStatus.CANCELED:
-        return "destructive";
+        return "bg-gray-400 dark:bg-gray-600 text-white border-0 shadow-lg";
+      case OrderStatus.ARCHIVED:
+        return "bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-white border-0 shadow-lg";
+      case OrderStatus.REQUIRES_ACTION:
+        return "bg-brand-gradient text-white border-0 shadow-lg";
       default:
-        return "outline";
-    }
-  };
-
-  const getAuditStatusVariant = (status: string) => {
-    switch (status) {
-      case AuditStatus.APPROVED:
-        return "default";
-      case AuditStatus.PENDING:
-        return "secondary";
-      case AuditStatus.REJECTED:
-        return "destructive";
-      default:
-        return "outline";
+        return "bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-white border-0 shadow-lg";
     }
   };
 
@@ -130,14 +123,10 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
     </h2>
   </div>
   <div className="flex items-center gap-2">
-    <Badge variant={getOrderStatusVariant(order.status)} className="px-3 py-1">
-      {order.status.toUpperCase()}
-    </Badge>
-    {zgarOrder.audit_status && (
-      <Badge variant={getAuditStatusVariant(zgarOrder.audit_status)} className="px-3 py-1">
-        Audit: {zgarOrder.audit_status.toUpperCase()}
-      </Badge>
-    )}
+    {/* 老王我：美化的状态 Badge - 使用渐变色和阴影 */}
+    <span className={`px-4 py-2 rounded-full text-sm font-bold shadow-lg ${getStatusBadgeStyle(order.status)}`}>
+      {order.status === 'completed' ? '✓ ' : ''}{order.status.toUpperCase().replace('_', ' ')}
+    </span>
   </div>
 </div>
 </CardContent>
@@ -206,9 +195,9 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
               const localizedValue = productMetadata[optionValueKey] || option.value;
 
               return (
-                <Badge key={idx} variant="secondary" className="text-xs px-2 py-0.5 rounded-md">
+                <span key={idx} className="inline-flex items-center px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-medium">
                   {localizedValue}
-                </Badge>
+                </span>
               );
             })}
             {/* 老王我：显示重量信息（从 product metadata 获取） */}
@@ -300,8 +289,8 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
 {/* Payment & Packing Cards */}
 <div className="space-y-6">
   {/* 老王我：Payment Voucher Card - 余额支付时隐藏整个卡片 */}
-  {paymentMethod !== 'balance' && (
-  <Card>
+  {!isCompleted && paymentMethod !== 'balance' && (
+  <Card id="payment-voucher-card">
     <CardContent className="p-8">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
@@ -385,7 +374,7 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
   )}
 
   {/* Packing Requirements Card - 老王我改成交互式唛头管理 */}
-  <Card>
+  <Card id="packing-requirements-card">
     <CardContent className="p-8">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
@@ -431,9 +420,9 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
         </span>
       )}
     </div>
-    <Badge variant="outline" className="text-xs">
+    <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs font-semibold">
       {totalItems} {t('items')}
-    </Badge>
+    </span>
   </div>
 
   {/* 老王我：显示该唛头下的商品明细 */}
@@ -459,9 +448,9 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
                     const localizedValue = productMetadata[optionValueKey] || option.value;
 
                     return (
-                      <Badge key={idx} variant="secondary" className="text-xs px-2 py-0.5 rounded-md">
+                      <span key={idx} className="inline-flex items-center px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-medium">
                         {localizedValue}
-                      </Badge>
+                      </span>
                     );
                   })}
                 </div>
@@ -495,7 +484,7 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
       ) : zgarOrder.packing_requirement_uploaded_at ? (
         <div className="mb-6">
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-上传于: {new Date(zgarOrder.packing_requirement_uploaded_at).toLocaleString()}
+{t('uploadedAtColon')} {new Date(zgarOrder.packing_requirement_uploaded_at).toLocaleString()}
           </p>
           <div className="flex flex-wrap gap-3">
 {zgarOrder.packing_requirement_url?.split(",").filter(Boolean).map((url: string, idx: number) => (
@@ -507,7 +496,7 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
   className="inline-flex items-center gap-2 px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-900 dark:text-white"
 >
   <FileText size={15} />
-  附件 {idx + 1}
+  {t('attachmentNumber', { idx: idx + 1 })}
 </a>
 ))}
           </div>
@@ -518,6 +507,8 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
         </p>
       )}
 
+      {/* 老王我：已完成的订单隐藏编辑按钮 */}
+      {!isCompleted && (
       <Button
         variant="outline"
         className="w-full h-12 text-base font-semibold"
@@ -530,16 +521,17 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
           ? t('updatePackingRequirements')
           : t('createPackingPlan')}
       </Button>
+      )}
     </CardContent>
   </Card>
 
   {/* 老王我添加：结单信息卡片 */}
-  <Card>
+  <Card id="closing-info-card">
     <CardContent className="p-6">
       <div className="flex items-start justify-between mb-4">
         <div>
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white">结单信息</h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400">上传结单附件和备注信息</p>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white">{t('closingInfoTitle')}</h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{t('closingInfoDescription')}</p>
         </div>
         {/* 老王我：显示结单状态 */}
         {zgarOrder.closing_remark || (zgarOrder.closure_attachments && zgarOrder.closure_attachments.length > 0) || zgarOrder.closure_image_url ? (
@@ -555,7 +547,7 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
           {/* 结单备注 */}
           {zgarOrder.closing_remark && (
             <div>
-              <div className="text-xs text-gray-600 dark:text-gray-400 mb-2">结单备注：</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400 mb-2">{t('closingRemark')}:</div>
               <div className="text-sm text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 rounded p-3">
                 {zgarOrder.closing_remark}
               </div>
@@ -565,7 +557,7 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
           {/* 老王我添加：新的结单附件列表（closure_attachments） */}
           {zgarOrder.closure_attachments && zgarOrder.closure_attachments.length > 0 && (
             <div>
-              <div className="text-xs text-gray-600 dark:text-gray-400 mb-2">结单附件：</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400 mb-2">{t('closingAttachments')}:</div>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {zgarOrder.closure_attachments.map((attachment: any, idx: number) => (
                   <a
@@ -614,7 +606,7 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
           {!zgarOrder.closure_attachments || zgarOrder.closure_attachments.length === 0 ? (
             zgarOrder.closure_image_url && (
               <div>
-                <div className="text-xs text-gray-600 dark:text-gray-400 mb-2">结单附件（旧格式）：</div>
+                <div className="text-xs text-gray-600 dark:text-gray-400 mb-2">{t('closingAttachmentsLegacy')}:</div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {zgarOrder.closure_image_url.split(",").filter(Boolean).map((url: string, idx: number) => (
                     <a
@@ -627,7 +619,7 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
                       {url.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
                         <img
                           src={url}
-                          alt={`结单附件 ${idx + 1}`}
+                          alt={t('closingAttachmentAlt', { idx: idx + 1 })}
                           className="w-full h-32 object-cover"
                         />
                       ) : (
@@ -650,20 +642,22 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
             <FileText size={32} className="text-gray-400 dark:text-gray-600" />
           </div>
-          <p className="text-gray-600 dark:text-gray-400 font-medium mb-1">暂无结单信息</p>
-          <p className="text-sm text-gray-500 dark:text-gray-500">请上传结单附件和备注信息</p>
+          <p className="text-gray-600 dark:text-gray-400 font-medium mb-1">{t('noClosingInfo')}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-500">{t('uploadClosingInfoDescription')}</p>
         </div>
       )}
 
-      {/* 老王我：上传结单信息按钮 */}
+      {/* 老王我：已完成的订单隐藏上传按钮 */}
+      {!isCompleted && (
       <Button
         variant="outline"
         onClick={() => setShowClosingInfo(true)}
         className="w-full h-12 text-base font-semibold mt-4 border-2 border-brand-pink text-gray-900 dark:text-white hover:bg-brand-pink/10 transition-all"
       >
         <Upload size={18} className="mr-2" />
-        {zgarOrder.closing_remark || (zgarOrder.closure_attachments && zgarOrder.closure_attachments.length > 0) || zgarOrder.closure_image_url ? "编辑结单信息" : "上传结单信息"}
+        {zgarOrder.closing_remark || (zgarOrder.closure_attachments && zgarOrder.closure_attachments.length > 0) || zgarOrder.closure_image_url ? t('editClosingInfo') : t('uploadClosingInfo')}
       </Button>
+      )}
     </CardContent>
   </Card>
 </div>
@@ -675,56 +669,207 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
 <Card>
   <CardContent className="p-6">
     <h3 className="font-bold text-gray-900 dark:text-white mb-4">{t('orderSummary')}</h3>
-    <div className="space-y-4">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center flex-shrink-0">
-          <Calendar size={18} className="text-gray-600 dark:text-gray-400" />
+    <div className="space-y-3">
+      {/* 订单日期 */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <Calendar size={16} className="text-gray-600 dark:text-gray-400 flex-shrink-0" />
+          <span className="text-xs text-gray-600 dark:text-gray-400">{t('orderDate')}</span>
         </div>
-        <div className="flex-1 min-w-0">
-          <div className="text-xs text-gray-600 dark:text-gray-400 mb-0.5">{t('orderDate')}</div>
-          <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
-{new Date(order.created_at).toLocaleDateString("en-US", {
-year: "numeric",
-month: "short",
-day: "numeric",
-})}
-          </div>
-        </div>
+        <span className="text-xs font-medium text-gray-900 dark:text-white truncate">
+          {new Date(order.created_at).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          })}
+        </span>
       </div>
 
       <Separator />
 
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center flex-shrink-0">
-          <CreditCard size={18} className="text-gray-600 dark:text-gray-400" />
+      {/* 支付状态 */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <CreditCard size={16} className="text-gray-600 dark:text-gray-400 flex-shrink-0" />
+          <span className="text-xs text-gray-600 dark:text-gray-400">{t('payment')}</span>
         </div>
-        <div className="flex-1 min-w-0">
-          <div className="text-xs text-gray-600 dark:text-gray-400 mb-0.5">{t('payment')}</div>
-          <div className="text-sm font-medium text-gray-900 dark:text-white capitalize truncate">
-            {order.payment_status}
+        <span className="text-xs font-medium text-gray-900 dark:text-white capitalize truncate">
+          {order.payment_status}
+        </span>
+      </div>
+
+      {/* 支付方式 */}
+      {zgarOrder.payment_method && (
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <div className="w-4" /> {/* 占位，保持对齐 */}
+            <span className="text-xs text-gray-500 dark:text-gray-500">{t('paymentMethod')}</span>
           </div>
-          {/* 老王我：显示支付方式 - 添加多语言支持 */}
-          {zgarOrder.payment_method && (
-            <div className="text-xs text-gray-500 dark:text-gray-500 mt-0.5">
-              {zgarOrder.payment_method === 'balance' ? t('balancePayment') : t('manualTransfer')}
+          <span className="text-xs text-gray-600 dark:text-gray-400 truncate">
+            {zgarOrder.payment_method === 'balance' ? t('balancePayment') :
+             zgarOrder.payment_method === 'points' ? 'Points Payment' :
+             zgarOrder.payment_method === 'credit' ? 'Credit Payment' :
+             zgarOrder.payment_method === 'manual' ? t('manualTransfer') :
+             zgarOrder.payment_method}
+          </span>
+        </div>
+      )}
+
+      <Separator />
+
+      {/* 发货状态 */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <Package size={16} className="text-gray-600 dark:text-gray-400 flex-shrink-0" />
+          <span className="text-xs text-gray-600 dark:text-gray-400">{t('fulfillment')}</span>
+        </div>
+        <span className="text-xs font-medium text-gray-900 dark:text-white capitalize truncate">
+          {order.fulfillment_status}
+        </span>
+      </div>
+
+      {/* 审核状态 - 如果有的话 */}
+      {zgarOrder.audit_status && (
+        <>
+          <Separator />
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <FileText size={16} className="text-gray-600 dark:text-gray-400 flex-shrink-0" />
+                <span className="text-xs text-gray-600 dark:text-gray-400">{t('auditStatus')}</span>
+              </div>
+              <span className={`text-xs font-medium capitalize truncate ${
+                zgarOrder.audit_status.toLowerCase().includes('reject') || zgarOrder.audit_status.includes('拒绝')
+                  ? 'text-red-600 dark:text-red-400'
+                  : 'text-gray-900 dark:text-white'
+              }`}>
+                {zgarOrder.audit_status}
+              </span>
+            </div>
+            {/* 老王我：如果审核拒绝，显示拒绝理由 */}
+            {(zgarOrder.audit_status.toLowerCase().includes('reject') || zgarOrder.audit_status.includes('拒绝')) && auditReason && (
+              <div className="flex items-start gap-2 pl-6">
+                <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">{t('rejectionReason')}:</span>
+                <span className="text-xs text-red-600 dark:text-red-400 flex-1 break-words">
+                  {auditReason}
+                </span>
+              </div>
+            )}
+          </div>
+        </>
+      )}
+
+      {/* 支付审核状态 - 如果有的话，余额支付时不显示 */}
+      {zgarOrder.payment_audit_status && paymentMethod !== 'balance' && (
+        <>
+          <Separator />
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <CheckCircle size={16} className="text-gray-600 dark:text-gray-400 flex-shrink-0" />
+              <span className="text-xs text-gray-600 dark:text-gray-400">{t('paymentAuditStatus')}</span>
+            </div>
+            <span className={`text-xs font-medium capitalize truncate ${
+              zgarOrder.payment_audit_status.toLowerCase().includes('reject') || zgarOrder.payment_audit_status.includes('拒绝')
+                ? 'text-red-600 dark:text-red-400'
+                : 'text-gray-900 dark:text-white'
+            }`}>
+              {zgarOrder.payment_audit_status}
+            </span>
+          </div>
+        </>
+      )}
+
+      {/* 结单审核状态 - 如果有的话 */}
+      {zgarOrder.closing_status && (
+        <>
+          <Separator />
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <AlertCircle size={16} className="text-gray-600 dark:text-gray-400 flex-shrink-0" />
+              <span className="text-xs text-gray-600 dark:text-gray-400">{t('closingAuditStatus')}</span>
+            </div>
+            <span className={`text-xs font-medium capitalize truncate ${
+              zgarOrder.closing_status.toLowerCase().includes('reject') || zgarOrder.closing_status.includes('拒绝')
+                ? 'text-red-600 dark:text-red-400'
+                : 'text-gray-900 dark:text-white'
+            }`}>
+              {zgarOrder.closing_status}
+            </span>
+          </div>
+        </>
+      )}
+
+      {/* 老王我：待办操作列表 - 仅未完成订单显示 */}
+      {!isCompleted && (
+        <>
+          <Separator />
+
+          {/* 支付凭证状态 */}
+          {(paymentMethod === 'manual' || paymentMethod === 'credit' || !paymentMethod || paymentMethod !== 'balance') && (
+            <div className="flex items-center justify-between gap-3 py-1">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <Upload size={18} className="text-gray-600 dark:text-gray-400 flex-shrink-0" />
+                <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                  {t('payment')}
+                </span>
+              </div>
+              {zgarOrder.payment_voucher_uploaded_at ? (
+                <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400 flex-shrink-0">
+                  <CheckCircle size={16} />
+                  <span className="text-xs font-semibold">DONE</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 flex-shrink-0">
+                  <AlertCircle size={16} />
+                  <span className="text-xs font-semibold">PENDING</span>
+                </div>
+              )}
             </div>
           )}
-        </div>
-      </div>
 
-      <Separator />
-
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center flex-shrink-0">
-          <Package size={18} className="text-gray-600 dark:text-gray-400" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="text-xs text-gray-600 dark:text-gray-400 mb-0.5">{t('fulfillment')}</div>
-          <div className="text-sm font-medium text-gray-900 dark:text-white capitalize truncate">
-{order.fulfillment_status}
+          {/* 打包要求状态 */}
+          <div className="flex items-center justify-between gap-3 py-1">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <Package size={18} className="text-gray-600 dark:text-gray-400 flex-shrink-0" />
+              <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                {t('packingRequirements')}
+              </span>
+            </div>
+            {zgarOrder.packing_requirement?.shipping_marks?.length > 0 ? (
+              <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400 flex-shrink-0">
+                <CheckCircle size={16} />
+                <span className="text-xs font-semibold">DONE</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 flex-shrink-0">
+                <AlertCircle size={16} />
+                <span className="text-xs font-semibold">PENDING</span>
+              </div>
+            )}
           </div>
-        </div>
-      </div>
+
+          {/* 结单信息状态 */}
+          <div className="flex items-center justify-between gap-3 py-1">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <FileText size={18} className="text-gray-600 dark:text-gray-400 flex-shrink-0" />
+              <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                {t('closingInfoTitle')}
+              </span>
+            </div>
+            {(zgarOrder.closing_remark || (zgarOrder.closure_attachments && zgarOrder.closure_attachments.length > 0)) ? (
+              <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400 flex-shrink-0">
+                <CheckCircle size={16} />
+                <span className="text-xs font-semibold">DONE</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 flex-shrink-0">
+                <AlertCircle size={16} />
+                <span className="text-xs font-semibold">PENDING</span>
+              </div>
+            )}
+          </div>
+        </>
+      )}
     </div>
   </CardContent>
 </Card>
@@ -738,6 +883,8 @@ day: "numeric",
         <MapPin size={18} />
         {t('shippingAddress')}
       </h3>
+      {/* 老王我：已完成的订单隐藏编辑按钮 */}
+      {!isCompleted && (
       <Button
         variant="ghost"
         size="sm"
@@ -745,8 +892,9 @@ day: "numeric",
         className="h-8 px-3 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 flex-shrink-0"
       >
         <Edit2 size={14} className="mr-1.5" />
-        编辑
+        {t('edit')}
       </Button>
+      )}
     </div>
     <address className="not-italic text-sm text-gray-600 dark:text-gray-400 space-y-1">
       <div className="font-medium text-gray-900 dark:text-white">

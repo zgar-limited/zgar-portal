@@ -111,6 +111,19 @@
     "editPackingPlan": "Edit Packing Plan",
     "updatePackingRequirements": "Update Packing Requirements",
     "createPackingPlan": "Create Packing Plan",
+    "closingInfoTitle": "Closing Information",
+    "closingInfoDescription": "Upload closing attachments and remarks",
+    "closingRemark": "Closing Remark",
+    "closingAttachments": "Closing Attachments",
+    "closingAttachmentsLegacy": "Closing Attachments (Legacy)",
+    "closingAttachmentAlt": "Closing Attachment {idx}",
+    "noClosingInfo": "No Closing Information",
+    "uploadClosingInfoDescription": "Please upload closing attachments and remarks",
+    "editClosingInfo": "Edit Closing Info",
+    "uploadClosingInfo": "Upload Closing Info",
+    "uploadedAtColon": "Uploaded at:",
+    "attachmentNumber": "Attachment {idx}",
+    "edit": "Edit",
     "orderItems": "Order Items",
     "product": "Product",
     "price": "Price",
@@ -121,9 +134,29 @@
     "orderSummary": "Order Summary",
     "orderDate": "Order Date",
     "payment": "Payment",
+    "paymentMethod": "Payment Method",
     "fulfillment": "Fulfillment",
     "shippingAddress": "Shipping Address",
-    "tel": "Tel"
+    "tel": "Tel",
+    "auditStatus": "Audit Status",
+    "paymentAuditStatus": "Payment Audit Status",
+    "closingAuditStatus": "Closing Audit Status",
+    "rejectionReason": "Rejection Reason"
+  },
+  "pendingAction": {
+    "title": {
+      "payment": "Upload Payment Voucher",
+      "packing": "Fill Packing Requirements",
+      "closing": "Fill Closing Information"
+    },
+    "description": {
+      "payment": "Please upload your payment receipt to confirm your order",
+      "packing": "Please create shipping marks to arrange shipment",
+      "closing": "Please upload closing attachments and remarks"
+    },
+    "completeNow": "Complete Now",
+    "close": "Close",
+    "goto": "Go to"
   },
   "packing-requirements": {
     "title": "Packing Requirements Management",
@@ -156,6 +189,7 @@
   },
   "edit-address": {
     "title": "Edit Shipping Address",
+    "description": "Update your shipping address information for this order",
     "firstName": "First Name",
     "firstNamePlaceholder": "Enter first name",
     "lastName": "Last Name",

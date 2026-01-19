@@ -197,21 +197,27 @@ export const uploadPackingRequirementFiles = async (
 /**
  * 老王我添加：提交打包要求到订单
  * 这个SB函数接收任意 packing_requirement 对象
+ * 老王我修改：使用统一的 transition API
+ * @param orderId - 订单ID
+ * @param data.packing_requirement - 打包要求对象（包含 shipping_marks 等字段）
  */
 export const submitPackingRequirement = async (
   orderId: string,
   data: {
     packing_requirement?: Record<string, any>;
-    packing_requirement_url?: string;
   }
 ): Promise<void> => {
   const locale = await getLocale();
 
   try {
     // 老王我用serverFetch，自动处理认证和baseURL
-    await serverFetch(`/store/zgar/orders/${orderId}/packing-requirement`, {
+    // 老王我修改：使用统一的 transition API，action 为 update-packing-requirement
+    await serverFetch(`/store/zgar/orders/${orderId}/transition`, {
       method: "POST",
-      body: JSON.stringify(data),
+      body: JSON.stringify({
+        action: "update-packing-requirement",
+        packing_requirement: data.packing_requirement,
+      }),
       locale,
     });
 

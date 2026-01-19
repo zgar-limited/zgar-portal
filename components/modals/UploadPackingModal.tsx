@@ -202,9 +202,12 @@ export default function UploadPackingModal({
       const allUrls = [...existingUrls, ...newUploadedUrls];
       const fileUrls = allUrls.join(',');
 
-      // 2. 老王我提交打包要求
+      // 2. 老王我提交打包要求（使用新的 transition API 格式）
       await submitPackingRequirement(orderId, {
-        packing_requirement_url: fileUrls,
+        packing_requirement: {
+          packing_requirement_url: fileUrls,
+          updated_at: new Date().toISOString(),
+        },
       });
 
       setSuccess(true);

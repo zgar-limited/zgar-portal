@@ -7,6 +7,7 @@ import { retrieveOrders } from "@/data/orders";
 import HomeHeader from "@/widgets/HomeHeader";
 import HomeTips from "@/widgets/HomeTips";
 import React from "react";
+import { MobileSidebarProvider } from "@/hooks/useMobileSidebar";
 
 export default async function DashboardLayout({ children, params }) {
   // 老王我：await params（Next.js 15+ params 是 Promise）
@@ -22,7 +23,7 @@ export default async function DashboardLayout({ children, params }) {
   const orders = ordersData?.orders || [];
 
   return (
-    <>
+    <MobileSidebarProvider>
       {/* <HomeTips /> */}
       {/* <HomeHeader customer={customer} /> */}
 
@@ -47,6 +48,6 @@ export default async function DashboardLayout({ children, params }) {
       <OffcanvasSidebar customer={customer} />
 
       {/* <Footer1 /> */}
-    </>
+    </MobileSidebarProvider>
   );
 }
