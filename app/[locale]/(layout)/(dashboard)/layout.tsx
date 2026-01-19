@@ -44,7 +44,7 @@ export default async function DashboardLayout({ children, params }) {
       </div>
 
       <SidebarToggler />
-      <OffcanvasSidebar />
+      <OffcanvasSidebar customer={customer} />
 
       {/* <Footer1 /> */}
     </>
