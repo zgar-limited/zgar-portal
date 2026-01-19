@@ -10,8 +10,7 @@ import {
   Settings,
   User,
   LogOut,
-  CreditCard,
-  Star
+  CreditCard
 } from "lucide-react";
 import { HttpTypes } from "@medusajs/types";
 
@@ -119,15 +118,6 @@ export default function Sidebar({ customer, orders }: SidebarProps) {
           );
         })}
       </nav>
-
-      {/* 积分快捷入口 */}
-      <Link
-        href="/account-points"
-        className="w-full flex items-center justify-center gap-2 mb-6 px-3 py-2 bg-black dark:bg-white text-white dark:text-black rounded-lg text-sm font-medium hover:opacity-80 transition-opacity"
-      >
-        <Star size={16} />
-        积分任务
-      </Link>
 
       {/* 退出登录 */}
       <div className="pt-4 border-t border-[#ededed] dark:border-[#ffffff1a]">
