@@ -5,7 +5,7 @@
 
 // 老王我：移除Bootstrap依赖，全面使用Tailwind CSS
 // @include meta.load-css("bootstrap/scss/bootstrap");
-@include meta.load-css("swiper/css");
+@include meta.load-css("swiper/swiper-bundle.css");
 @include meta.load-css("app.scss");
 .infiniteSlider {
   display: flex;

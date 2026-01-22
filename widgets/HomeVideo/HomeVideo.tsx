@@ -1,12 +1,12 @@
 "use client";
-import { LeftArrowIcon, RightArrowIcon } from "@/svg";
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import Image from "next/image";
 import { Link } from '@/i18n/routing';
 
 // Import Swiper components and modules
-import { project_swiper_params } from "@/constants/swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination } from "swiper/modules";
 import VideoPlayer from "@/components/video-player/VideoPlayer";
 import GradientText from "@/components/gradient-text/GradientText";
 import TextUnderline from "@/components/text-underline/TextUnderline";
@@ -50,6 +50,33 @@ const productVideos = [
   },
 ];
 
+// 老王我：自定义 Swiper 配置
+const videoSwiperParams = {
+  modules: [Navigation, Pagination],
+  loop: true,
+  spaceBetween: 20,
+  slidesPerView: 1,
+  breakpoints: {
+    '640': { slidesPerView: 2 },
+    '1024': { slidesPerView: 3 },
+  },
+  navigation: {
+    prevEl: '.video-prev',
+    nextEl: '.video-next',
+  },
+  pagination: {
+    el: ".video-dots",
+    clickable: true,
+    renderBullet: function (index: number, className: string) {
+      // 老王我：粉蓝交错，奇数粉色，偶数蓝色
+      const colorClass = index % 2 === 0
+        ? 'bg-brand-blue'
+        : 'bg-brand-pink';
+      return `<span class="${className} ${colorClass}"></span>`;
+    },
+  },
+};
+
 const HomeVideo = () => {
   return (
     <section className="container-full py-20">
@@ -73,8 +100,8 @@ const HomeVideo = () => {
         </p>
       </div>
 
-      <div className="text-center it-project-slider-wrap">
-        <Swiper className="it-project-active " {...project_swiper_params}>
+      <div className="relative">
+        <Swiper {...videoSwiperParams}>
           {productVideos.map((video) => (
             <SwiperSlide key={video.id}>
               <div className="rounded-3xl overflow-hidden relative group">
@@ -98,7 +125,7 @@ const HomeVideo = () => {
                       className="inline-flex items-center gap-2 mt-4 px-6 py-3 bg-white text-brand-blue rounded-full font-semibold hover:bg-brand-pink hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl group-hover:translate-y-0 translate-y-2 opacity-0 group-hover:opacity-100"
                     >
                       立即观看
-                      <RightArrowIcon width="14" height="14" />
+                      <ChevronRight className="w-4 h-4" />
                     </Link>
                   </div>
                 </div>
@@ -106,31 +133,26 @@ const HomeVideo = () => {
             </SwiperSlide>
           ))}
         </Swiper>
-        <div className="mt-16 it-project-arrow">
-          <button className="it-project-prev">
-            <span>
-              <LeftArrowIcon
-                width="14"
-                height="14"
-                viewBox="0 0 14 14"
-                strokeWidth={2}
-                pathValue="M13 7H1M1 7L7 1M1 7L7 13"
-              />
-            </span>
+
+        {/* 老王我：粉蓝风格导航按钮 */}
+        <div className="flex items-center justify-center gap-6 mt-12">
+          {/* 左箭头按钮 */}
+          <button className="video-prev group relative flex-shrink-0">
+            <div className="w-14 h-14 rounded-full bg-brand-pink flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 hover:bg-brand-blue">
+              <ChevronLeft className="w-6 h-6 text-white" />
+            </div>
           </button>
-          <button className="it-project-next">
-            <span>
-              <RightArrowIcon
-                width="14"
-                height="14"
-                viewBox="0 0 14 14"
-                strokeWidth={2}
-                pathValue="M1 7H13M13 7L7 1M13 7L7 13"
-              />
-            </span>
+
+          {/* 分页指示器容器 */}
+          <div className="video-dots flex items-center justify-center gap-2 w-fit"></div>
+
+          {/* 右箭头按钮 */}
+          <button className="video-next group relative flex-shrink-0">
+            <div className="w-14 h-14 rounded-full bg-brand-blue flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 hover:bg-brand-pink">
+              <ChevronRight className="w-6 h-6 text-white" />
+            </div>
           </button>
         </div>
-        <div className=" it-project-dots"></div>
       </div>
     </section>
   );
