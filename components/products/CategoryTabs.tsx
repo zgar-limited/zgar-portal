@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { categories11 } from "@/data/categories";
 import { Package, Zap, Droplet, Sparkles } from "lucide-react";
 
 interface CategoryTabsProps {
@@ -9,25 +8,55 @@ interface CategoryTabsProps {
 }
 
 /**
- * 顶部分类标签栏组件（增强版）- 美观的分类筛选
+ * 顶部分类标签栏组件 - Memphis风格
  *
  * 设计特点：
- * - 北欧简约风格，粉蓝配色
- * - 带图标的卡片式分类按钮
- * - 横向滚动布局，移动端友好
- * - 选中状态用渐变高亮 + 图标动画
- * - 符合 KISS 原则：简单直观
+ * - 80年代复古几何
+ * - 三角形、圆形装饰
+ * - 明亮碰撞色彩
+ * - 不对称倾斜布局
+ * - 点状、虚线纹理
  */
 export default function CategoryTabs({ onCategoryChange }: CategoryTabsProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>("全部");
 
-  // 分类配置 - 包含图标
+  // 老王我：分类配置 - Vibrant Blocks配色（大胆色块）
   const categoryConfig = [
-    { id: "all", label: "全部", icon: Sparkles, color: "from-brand-pink to-brand-blue" },
-    { id: "CLOSE-SYSTEM", label: "CLOSE-SYSTEM", icon: Package, color: "from-blue-400 to-brand-blue" },
-    { id: "OPEN-SYSTEM", label: "OPEN-SYSTEM", icon: Zap, color: "from-purple-400 to-purple-600" },
-    { id: "DISPOSABLE", label: "DISPOSABLE", icon: Sparkles, color: "from-pink-400 to-brand-pink" },
-    { id: "Z-LIQ", label: "Z-LIQ", icon: Droplet, color: "from-cyan-400 to-blue-500" },
+    {
+      id: "all",
+      label: "全部",
+      icon: Sparkles,
+      bgColor: "bg-[#f496d3]",  // 粉色
+      textColor: "text-white",
+    },
+    {
+      id: "CLOSE-SYSTEM",
+      label: "CLOSE-SYSTEM",
+      icon: Package,
+      bgColor: "bg-[#0047c7]",  // 蓝色
+      textColor: "text-white",
+    },
+    {
+      id: "OPEN-SYSTEM",
+      label: "OPEN-SYSTEM",
+      icon: Zap,
+      bgColor: "bg-black",  // 黑色
+      textColor: "text-white",
+    },
+    {
+      id: "DISPOSABLE",
+      label: "DISPOSABLE",
+      icon: Droplet,
+      bgColor: "bg-gray-200",  // 灰色
+      textColor: "text-black",
+    },
+    {
+      id: "Z-LIQ",
+      label: "Z-LIQ",
+      icon: Sparkles,
+      bgColor: "bg-[#f496d3]",  // 粉色
+      textColor: "text-white",
+    },
   ];
 
   const handleCategoryClick = (category: string) => {
@@ -39,11 +68,11 @@ export default function CategoryTabs({ onCategoryChange }: CategoryTabsProps) {
   };
 
   return (
-    <div className="w-full bg-white border-b border-gray-100">
+    <div className="w-full bg-white border-b-4 border-black">
       <div className="container mx-auto px-4">
-        {/* 分类标签容器 - 移动端可横向滚动，紧凑版 */}
-        <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide py-4 md:py-5">
-          {categoryConfig.map((category) => {
+        {/* 老王我：Vibrant Blocks分类标签 - 大胆色块布局 */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-0">
+          {categoryConfig.map((category, index) => {
             const isSelected = selectedCategory === category.label;
             const Icon = category.icon;
 
@@ -52,44 +81,35 @@ export default function CategoryTabs({ onCategoryChange }: CategoryTabsProps) {
                 key={category.id}
                 onClick={() => handleCategoryClick(category.label)}
                 className={`
-                  group relative flex items-center gap-2 px-4 py-2.5 md:px-5 md:py-3 rounded-2xl
-                  font-semibold text-xs md:text-sm whitespace-nowrap
-                  transition-all duration-300 ease-out
-                  cursor-pointer
-                  ${
-                    isSelected
-                      ? `bg-gradient-to-r ${category.color} text-white shadow-lg hover:shadow-xl hover:scale-105`
-                      : "bg-gray-50 text-gray-700 hover:bg-gray-100 hover:text-gray-900 shadow-sm hover:shadow-md"
-                  }
+                  relative flex flex-col items-center justify-center gap-3 px-6 py-8
+                  font-bold text-sm md:text-base
+                  transition-all duration-200
+                  cursor-pointer border-r border-b border-black
+                  ${isSelected ? category.bgColor + ' ' + category.textColor : 'bg-white text-gray-900 hover:bg-gray-100'}
                 `}
               >
-                {/* 图标 */}
+                {/* 老王我：简洁图标容器 */}
                 <div className={`
-                  flex items-center justify-center w-5 h-5 rounded-full
-                  transition-all duration-300
-                  ${isSelected ? 'bg-white/20' : 'bg-gray-200 group-hover:bg-gray-300'}
+                  flex items-center justify-center w-12 h-12
+                  transition-all duration-200
+                  ${isSelected ? 'bg-white/20' : 'bg-gray-200'}
                 `}>
-                  <Icon className={`w-3.5 h-3.5 ${isSelected ? 'animate-pulse' : ''}`} />
+                  <Icon className="w-6 h-6" />
                 </div>
 
                 {/* 文字 */}
-                <span>{category.label}</span>
+                <span className="tracking-wider uppercase text-center leading-tight">
+                  {category.label}
+                </span>
 
-                {/* 选中指示器 - 底部发光条 */}
+                {/* 老王我：选中指示器 - 简洁方块 */}
                 {isSelected && (
-                  <div className={`
-                    absolute -bottom-1 left-1/2 -translate-x-1/2
-                    w-12 h-1 bg-white rounded-full
-                    shadow-lg shadow-white/50
-                  `} />
+                  <div className="absolute top-2 right-2 w-3 h-3 bg-white"></div>
                 )}
               </button>
             );
           })}
         </div>
-
-        {/* 装饰性渐变线条 */}
-        <div className="w-full h-px bg-gradient-to-r from-transparent via-brand-pink/30 to-transparent" />
       </div>
     </div>
   );
