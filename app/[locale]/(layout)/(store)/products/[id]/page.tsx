@@ -1,7 +1,5 @@
 import React from "react";
 import { notFound } from "next/navigation";
-import HomeHeader from "@/widgets/HomeHeader";
-import HomeFooter from "@/widgets/HomeFooter";
 import ProductMain from "@/components/product-details/ProductMain";
 
 import { fetchProduct } from "@/data/products";

@@ -1,16 +1,14 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
 import { StoreProduct, StoreProductVariant } from "@medusajs/types";
-import { ShoppingCart, Check, Loader2 } from "lucide-react";
+import { ShoppingCart, Check, Loader2, Truck, Shield, RotateCcw, Package } from "lucide-react";
 import { useRouter } from "@/i18n/routing";
 import { useTranslations, useLocale } from "next-intl";
 import { toast } from "@/hooks/use-toast";
 import QuantitySelect from "../common/QuantitySelect";
 import { addToCart } from "@/data/cart";
 import { useCustomer } from "@/hooks/useCustomer";
-// 老王我：导入重量格式化工具
 import { formatWeight } from "@/utils/weight-utils";
-// 老王我：导入固定购物车组件
 import FixedProductActions from "./FixedProductActions";
 
 interface ProductInfoProps {
@@ -25,32 +23,24 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
   const t = useTranslations("Product");
   const { isLoggedIn } = useCustomer();
 
-  // State for selected options (e.g. { "opt_123": "L", "opt_456": "Blue" })
-  const [selectedOptions, setSelectedOptions] = useState<
-    Record<string, string>
-  >({});
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [quantity, setQuantity] = useState(50);
   const [isAdding, setIsAdding] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
-
-  // 老王我：固定购物车按钮显示状态
   const [showFixedActions, setShowFixedActions] = useState(false);
 
   // 老王我：监听滚动，当加入购物车按钮滚出视口时显示固定按钮
   useEffect(() => {
     const handleScroll = () => {
-      // 检测加入购物车按钮是否在视口内
       const addToCartButton = document.querySelector('[data-add-to-cart-button]');
       if (addToCartButton) {
         const rect = addToCartButton.getBoundingClientRect();
-        // 如果按钮底部在视口下方，则显示固定按钮
         const isButtonOutOfView = rect.bottom < 0 || rect.top > window.innerHeight;
         setShowFixedActions(isButtonOutOfView);
       }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    // 初始检查
     handleScroll();
 
     return () => {
@@ -58,10 +48,9 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
     };
   }, []);
 
-  // Initialize options with first variant's options or defaults
+  // 初始化选项
   useEffect(() => {
     if (product.variants && product.variants.length > 0) {
-      // 如果有传入的selectedVariant，使用它的选项，否则使用第一个variant的选项
       const variantToUse = selectedVariant || product.variants[0];
       const initialOptions: Record<string, string> = {};
       variantToUse.options?.forEach((opt: any) => {
@@ -71,7 +60,7 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
     }
   }, [product, selectedVariant]);
 
-  // Find the variant matching all selected options
+  // 查找当前选中的variant
   const currentVariant = useMemo(() => {
     if (selectedVariant) return selectedVariant;
 
@@ -84,8 +73,7 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
     });
   }, [product, selectedOptions, selectedVariant]);
 
-  // Mock function
-
+  // 处理选项选择
   const handleOptionSelect = (optionId: string, value: string) => {
     const newOptions = {
       ...selectedOptions,
@@ -94,37 +82,26 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
 
     setSelectedOptions(newOptions);
 
-    // 查找匹配的variant并通知父组件
     const newVariant = product.variants?.find((variant) => {
       return variant.options?.every((opt: any) => {
         return newOptions[opt.option_id] === opt.value;
       });
     });
 
-    console.log('Option selected:', { optionId, value });
-    console.log('New options:', newOptions);
-    console.log('Found variant:', newVariant);
-    console.log('All variants:', product.variants?.map(v => ({
-      id: v.id,
-      title: v.title,
-      options: v.options
-    })));
-
     if (newVariant && onVariantSelect) {
       onVariantSelect(newVariant);
     }
   };
 
+  // 加入购物车
   const handleAddToCart = async () => {
     if (!currentVariant) {
       toast.warning(t("pleaseSelectOptions"));
       return;
     }
 
-    // 检查登录状态 - 老王我这个逻辑必须先检查
     if (!isLoggedIn) {
       toast.warning(t("loginToAddToCart"));
-      // 保存当前页面URL，登录后返回
       const currentPath = window.location.pathname + window.location.search;
       sessionStorage.setItem("redirectAfterLogin", currentPath);
       router.push("/login");
@@ -140,8 +117,6 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
       });
       setIsAdded(true);
       toast.success(t("addedSuccess"));
-
-      // Reset added state
       setTimeout(() => setIsAdded(false), 2000);
     } catch (e) {
       console.error(e);
@@ -151,87 +126,76 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
     }
   };
 
-  // Safe price display
+  // 计算价格
   const price = useMemo(() => {
-    // @ts-ignore
     if (currentVariant?.calculated_price?.calculated_amount) {
-      // @ts-ignore
       return currentVariant.calculated_price.calculated_amount;
     }
-    // @ts-ignore
     if (currentVariant?.prices?.[0]?.amount) {
-      // @ts-ignore
-      return currentVariant.prices[0].amount; // Medusa v2 might be raw number, usually implies currency handling elsewhere, assuming direct value for now or /100 if cents
+      return currentVariant.prices[0].amount;
     }
 
-    // Fallback to product price or first variant
     const firstVariant = product.variants?.[0];
-    // @ts-ignore
     if (firstVariant?.calculated_price?.calculated_amount) {
-      // @ts-ignore
       return firstVariant.calculated_price.calculated_amount;
     }
-    // @ts-ignore
     return firstVariant?.prices?.[0]?.amount || 0;
   }, [currentVariant, product]);
 
-  const isSoldOut = currentVariant && currentVariant.inventory_quantity === 0; // Check inventory logic if needed
-
   return (
     <div className="flex flex-col gap-6">
-      {/* Header */}
+      {/* 老王我：Header - 分类标签 + 标题 */}
       <div>
         {product.collection && (
-          <span className="mb-3 inline-block px-3 py-1 bg-gray-100 text-gray-600 text-sm font-semibold rounded-full tracking-wide uppercase">
+          <span className="mb-4 inline-block bg-brand-blue text-white px-4 py-2 text-sm font-black uppercase tracking-wider rounded-xl">
             {product.collection.title}
           </span>
         )}
-        {/* 老王我：主标题显示 variant.title，副标题显示 product.title */}
-        <h1 className="mb-2 text-3xl lg:text-4xl font-bold text-gray-900 leading-tight">
+        <h1 className="mb-3 text-3xl lg:text-4xl font-black text-gray-900 leading-tight">
           {currentVariant?.title || product.title}
         </h1>
         {currentVariant?.title && currentVariant.title !== product.title && (
-          <p className="mb-3 text-lg text-gray-600">{product.title}</p>
+          <p className="mb-4 text-lg text-gray-600">{product.title}</p>
         )}
-        <div className="flex items-center gap-3">
-          <span className="text-3xl lg:text-4xl font-bold text-black">
-            ${price.toFixed(2)}
-          </span>
-          <span className="text-lg text-gray-500">{t("perPiece")}</span>
+
+        {/* 老王我：价格展示 - Vibrant Blocks 渐变色块 */}
+        <div className="bg-gradient-to-r from-brand-pink to-brand-blue p-6 rounded-2xl shadow-lg inline-block">
+          <div className="flex items-baseline gap-3">
+            <span className="text-4xl lg:text-5xl font-black text-white">
+              ${price.toFixed(2)}
+            </span>
+            <span className="text-lg text-white/90">{t("perPiece")}</span>
+          </div>
         </div>
       </div>
 
-      <div className="border-t border-gray-200"></div>
+      {/* 老王我：分隔线 - 粉蓝渐变 */}
+      <div className="h-1 bg-gradient-to-r from-brand-pink via-brand-blue to-brand-pink"></div>
 
-      {/* Description Preview */}
+      {/* 老王我：描述预览 */}
       {product.description && (
         <p className="text-lg text-gray-600 leading-relaxed">{product.description}</p>
       )}
 
-      {/* Options Selector - 增大区域 */}
+      {/* 老王我：规格选择 - Vibrant Blocks 风格按钮 */}
       <div className="space-y-6">
         {product.options?.map((option) => {
-          // 老王我：将locale转为metadata key格式（en-US → en_us，zh-HK → zh_hk）
           const localeKey = locale.toLowerCase().replace('-', '_');
-
-          // 老王我：获取option标题的多语言翻译
           const optionTitleKey = `option_title_${localeKey}_opt_${option.id}`;
           const localizedTitle = (product.metadata as any)?.[optionTitleKey] || option.title;
 
           return (
-            <div key={option.id} className="space-y-3">
+            <div key={option.id} className="space-y-4">
               <div className="flex items-center justify-between">
-                <label className="text-lg font-bold text-gray-800">
+                <label className="text-lg font-black text-gray-900 flex items-center gap-2">
+                  <div className="w-2 h-6 bg-brand-pink"></div>
                   {localizedTitle}
                 </label>
-                <span className="text-lg font-semibold text-black bg-gray-100 px-3 py-1 rounded-lg">
+                <span className="text-lg font-bold text-white bg-brand-blue px-4 py-2 rounded-lg shadow-md">
                   {(() => {
-                    // 老王我：获取选中值的多语言翻译
                     const selectedValue = selectedOptions[option.id];
-                    // 找到对应的option value的id
                     const selectedValueObj = option.values?.find((v: any) => v.value === selectedValue);
                     if (selectedValueObj?.id) {
-                      // 老王我：val.id已经包含optval_前缀，不需要再加
                       const optionValueKey = `option_value_${localeKey}_${selectedValueObj.id}`;
                       return (product.metadata as any)?.[optionValueKey] || selectedValue;
                     }
@@ -240,20 +204,27 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
                 </span>
               </div>
               <div className="flex flex-wrap gap-3">
-                {option.values?.map((val: any) => {
-                  // 老王我：获取每个选项值的多语言翻译，val.id已经包含optval_前缀，不需要再加
+                {option.values?.map((val: any, index: number) => {
                   const optionValueKey = `option_value_${localeKey}_${val.id}`;
                   const localizedValue = (product.metadata as any)?.[optionValueKey] || val.value;
+
+                  // 老王我：根据索引循环使用颜色
+                  const colors = [
+                    "bg-brand-pink text-white border-brand-pink shadow-lg",
+                    "bg-brand-blue text-white border-brand-blue shadow-lg",
+                    "bg-black text-white border-black shadow-lg",
+                  ];
+                  const colorClass = colors[index % colors.length];
 
                   return (
                     <button
                       key={val.value}
                       onClick={() => handleOptionSelect(option.id, val.value)}
-                      className={`px-4 py-3 text-base font-semibold rounded-xl border-2 transition-all duration-200 ${
+                      className={`px-6 py-3 text-base font-black rounded-xl border-2 transition-all duration-200 min-w-[80px] ${
                         selectedOptions[option.id] === val.value
-                          ? "bg-black text-white border-black shadow-lg"
-                          : "bg-white text-gray-700 border-gray-300 hover:border-gray-400 hover:shadow-md"
-                      } min-w-[80px]`}
+                          ? colorClass
+                          : "bg-white text-gray-700 border-gray-300 hover:border-brand-pink hover:shadow-md"
+                      }`}
                     >
                       {localizedValue}
                     </button>
@@ -265,14 +236,17 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
         })}
       </div>
 
-      
-      <div className="border-t border-gray-200"></div>
+      {/* 老王我：分隔线 */}
+      <div className="h-1 bg-gradient-to-r from-brand-pink via-brand-blue to-brand-pink"></div>
 
-      {/* Actions - 增大区域 */}
+      {/* 老王我：Actions */}
       <div className="flex flex-col gap-4">
-        {/* Quantity */}
+        {/* 数量选择 */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">{t("quantity")}</label>
+          <label className="block text-sm font-black text-gray-900 mb-3 flex items-center gap-2">
+            <Package size={18} className="text-brand-pink" />
+            {t("quantity")}
+          </label>
           <QuantitySelect
             quantity={quantity}
             setQuantity={setQuantity}
@@ -280,17 +254,17 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
           />
         </div>
 
-        {/* Add to Cart */}
+        {/* 老王我：加入购物车按钮 - Vibrant Blocks 渐变 */}
         <button
           data-add-to-cart-button
           onClick={handleAddToCart}
           disabled={!currentVariant || isAdding || isAdded}
-          className={`w-full flex items-center justify-center gap-3 py-4 px-6 rounded-xl font-bold text-lg transition-all duration-200 ${
+          className={`w-full flex items-center justify-center gap-3 py-4 px-6 rounded-xl font-black text-lg transition-all duration-200 ${
             isAdded
-              ? "bg-green-600 text-white hover:bg-green-700"
+              ? "bg-green-600 text-white hover:bg-green-700 shadow-lg"
               : !currentVariant
               ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-              : "bg-black text-white hover:bg-gray-800 shadow-lg"
+              : "bg-gradient-to-r from-brand-pink to-brand-blue text-white hover:shadow-xl shadow-lg"
           }`}
         >
           {isAdding ? (
@@ -312,17 +286,34 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
         </button>
       </div>
 
-      {/* 老王我：箱规和重量信息 - 从metadata读取 */}
-      {product?.metadata && (
-        <div className="border-t border-gray-200 pt-4">
-          <div className="bg-gray-50 rounded-xl p-4 space-y-3">
-            <h3 className="text-sm font-bold text-gray-900 mb-3">{t("productSpecs")}</h3>
+      {/* 老王我：服务承诺 - 图标卡片 */}
+      <div className="grid grid-cols-3 gap-4 pt-4">
+        <div className="text-center p-4 bg-brand-pink/10 rounded-xl">
+          <Truck className="w-8 h-8 text-brand-pink mx-auto mb-2" />
+          <p className="text-xs font-black text-gray-900">免费配送</p>
+        </div>
+        <div className="text-center p-4 bg-brand-blue/10 rounded-xl">
+          <Shield className="w-8 h-8 text-brand-blue mx-auto mb-2" />
+          <p className="text-xs font-black text-gray-900">正品保证</p>
+        </div>
+        <div className="text-center p-4 bg-gray-100 rounded-xl">
+          <RotateCcw className="w-8 h-8 text-gray-700 mx-auto mb-2" />
+          <p className="text-xs font-black text-gray-900">7天退换</p>
+        </div>
+      </div>
 
-            {/* 老王我：动态显示所有package_spec_*字段 */}
+      {/* 老王我：箱规和重量信息 */}
+      {product?.metadata && (
+        <div className="bg-gray-50 rounded-2xl p-6 shadow-md">
+          <h3 className="text-lg font-black text-gray-900 mb-4 flex items-center gap-2">
+            <Package className="w-5 h-5 text-brand-pink" />
+            {t("productSpecs")}
+          </h3>
+
+          <div className="space-y-3">
             {Object.keys(product.metadata)
               .filter(key => key.startsWith('package_spec_'))
               .sort((a, b) => {
-                // 老王我：按优先级排序
                 const order = [
                   'package_spec_shipment_box_contains',
                   'package_spec_product_size',
@@ -342,28 +333,22 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
                 const value = product.metadata[key];
                 if (!value) return null;
 
-                // 老王我：获取多语言标签
                 const labelKey = key.replace('package_spec_', '');
-
-                // 老王我：使用翻译函数获取标签名
                 const labelText = t(`spec_${labelKey}`);
 
-                // 老王我：对重量字段进行格式化
                 let displayValue = value;
                 if (key.includes('_weight')) {
                   displayValue = formatWeight(value, locale);
                 }
 
                 return (
-                  <div key={key} className="flex items-start gap-3">
-                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
+                  <div key={key} className="flex items-start gap-3 bg-white p-3 rounded-xl shadow-sm">
+                    <div className="w-8 h-8 bg-brand-pink/10 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Package size={16} className="text-brand-pink" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-xs text-gray-500 mb-0.5">{labelText}</p>
-                      <p className="text-sm font-semibold text-gray-900">{displayValue}</p>
+                      <p className="text-xs text-gray-500 mb-1">{labelText}</p>
+                      <p className="text-sm font-black text-gray-900">{displayValue}</p>
                     </div>
                   </div>
                 );
@@ -372,7 +357,7 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
         </div>
       )}
 
-      {/* 老王我：固定购物车按钮 - 当原按钮滚出视口时显示 */}
+      {/* 老王我：固定购物车按钮 */}
       <FixedProductActions
         variantId={currentVariant?.id}
         variantMetadata={currentVariant?.metadata}
