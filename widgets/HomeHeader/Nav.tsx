@@ -69,12 +69,14 @@ export default function Nav() {
       key: "contact",
       href: "https://docs.google.com/forms/d/e/1FAIpQLSfldYo7ddIAghTH67MDuuZAwV1fEP0aGcKz-L-kKRAaCctKZg/viewform",
       label: t("contact"),
+      target: "_blank",
       hasDropdown: true,
       items: [
         {
           href: "https://docs.google.com/forms/d/e/1FAIpQLSfldYo7ddIAghTH67MDuuZAwV1fEP0aGcKz-L-kKRAaCctKZg/viewform",
           label: t("contact_sub.wholesaler"),
           icon: UserPlus,
+          target: "_blank",
         },
       ],
     },
@@ -106,6 +108,7 @@ export default function Nav() {
           >
             <Link
               href={menu.href}
+              target={menu.target || "_self"}
               className="item-link relative text-sm font-semibold text-gray-700 hover:text-brand-pink transition-all duration-200 rounded-xl px-4 py-2.5 flex items-center gap-2.5 group"
             >
               {menu.key === 'products' && <Box size={18} className="text-gray-500 transition-colors group-hover:text-brand-pink" />}
