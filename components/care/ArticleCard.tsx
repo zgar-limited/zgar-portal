@@ -5,7 +5,7 @@ import type { StrapiArticle } from "@/data/articles";
 
 /**
  * 老王我：文章卡片组件 - Vibrant Blocks 风格
- * 大胆色块边框 + 清晰层次
+ * 柔和阴影立体效果 + 清晰层次
  */
 interface ArticleCardProps {
   article: StrapiArticle;
@@ -35,7 +35,7 @@ export default function ArticleCard({ article }: ArticleCardProps) {
   return (
     <Link
       href={`/care/${article.slug}`}
-      className="group relative bg-white border-2 border-black overflow-hidden transition-all duration-200 hover:shadow-lg"
+      className="group relative bg-white shadow-md overflow-hidden transition-all duration-200 hover:shadow-xl rounded-2xl"
     >
       {/* 老王我：封面图片 */}
       <div className="relative aspect-[16/9] overflow-hidden bg-gray-100">

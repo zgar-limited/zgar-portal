@@ -59,7 +59,7 @@ export default function CareArticleList({
         {/* 老王我：空状态 - Vibrant Blocks 风格 */}
         {articles.length === 0 && (
           <div className="text-center py-16">
-            <div className="inline-block bg-gray-100 border-2 border-black p-12">
+            <div className="inline-block bg-gray-100 shadow-md rounded-2xl p-12">
               <p className="text-2xl font-black text-gray-900 mb-4">
                 暂无文章
               </p>

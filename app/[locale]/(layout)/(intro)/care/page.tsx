@@ -100,7 +100,7 @@ function ArticleCard({ article }: { article: typeof articles[0] }) {
   return (
     <Link
       href={`/care/${article.slug}`}
-      className="group relative bg-white border-2 border-black overflow-hidden transition-all duration-200 hover:shadow-lg"
+      className="group relative bg-white shadow-md overflow-hidden transition-all duration-200 hover:shadow-xl rounded-2xl"
     >
       {/* 老王我：封面图片 */}
       <div className="relative aspect-[16/9] overflow-hidden bg-gray-100">
