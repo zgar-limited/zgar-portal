@@ -3,10 +3,10 @@ import {createNavigation} from 'next-intl/navigation';
 
 export const routing = defineRouting({
   // A list of all locales that are supported
-  locales: ['en-us', 'zh-hk'],
+  locales: ['zh-cn', 'en-us', 'zh-hk'],
 
   // Used when no locale matches
-  defaultLocale: 'en-us',
+  defaultLocale: 'zh-cn',
 
   // 老王我：SEO 最佳实践 - 所有 locale 都显示在 URL 中
   // 'always' = 所有 locale 都显示（SEO 最友好）✅

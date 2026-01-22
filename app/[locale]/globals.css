@@ -157,10 +157,39 @@
     border-color: var(--color-border-light);
   }
 
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    overflow-x: hidden;
+  }
+
   body {
     background-color: var(--color-bg-primary);
     color: var(--color-text-primary);
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* 老王我：确保wrapper真正满屏，艹！没有任何SB限制 */
+  #wrapper {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    min-width: 100vw !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+
+  /* 老王我：确保body和html也彻底满屏 */
+  html,
+  body {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   /* 确保文字在深色背景上可见 */

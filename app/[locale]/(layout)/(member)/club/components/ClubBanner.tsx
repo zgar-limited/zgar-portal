@@ -1,114 +1,196 @@
 "use client";
 
-import { Crown, Sparkles } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 /**
- * Zgar Club 顶部 Banner 组件
+ * Zgar Club 全屏 Hero Banner
  *
- * 老王我这个SB组件创建精美的顶部 Banner
- * 使用渐变背景和装饰元素
+ * 老王我全新设计：
+ * 1. 占满屏幕宽度（100%）
+ * 2. 巨大的视觉冲击力
+ * 3. 动态背景效果
+ * 4. 现代化排版
  */
 
 export default function ClubBanner() {
+  const t = useTranslations("Club");
   return (
     <div
       className="
-        rounded-2xl overflow-hidden
-        bg-gradient-to-br from-gray-900 via-gray-800 to-black
-        dark:from-gray-800 dark:via-gray-700 dark:to-gray-900
         relative
-        shadow-2xl
+        w-full
+        h-[500px]
+        overflow-hidden
+        bg-[#000000]
       "
     >
-      {/* 背景装饰圆圈 */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-500/5 rounded-full blur-3xl" />
+      {/* 动态背景 */}
+      <div className="absolute inset-0">
+        {/* 渐变背景 */}
+        <div
+          className="
+            absolute
+            inset-0
+            bg-gradient-to-br
+            from-brand-pink/20
+            via-brand-blue/20
+            to-brand-pink/10
+          "
+        />
+
+        {/* 流动光球 */}
+        <div
+          className="
+            absolute
+            top-0
+            left-1/4
+            w-[600px]
+            h-[600px]
+            bg-brand-pink/30
+            rounded-full
+            blur-[120px]
+            animate-pulse
+          "
+        />
+        <div
+          className="
+            absolute
+            bottom-0
+            right-1/4
+            w-[500px]
+            h-[500px]
+            bg-brand-blue/30
+            rounded-full
+            blur-[100px]
+            animate-pulse
+          "
+          style={{ animationDelay: '1s' }}
+        />
+
+        {/* 网格纹理 */}
+        <div
+          className="
+            absolute
+            inset-0
+            opacity-10
+            bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),
+                    linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)]
+            bg-[size:50px_50px]
+          "
+        />
       </div>
 
       {/* 内容 */}
-      <div className="relative z-10 p-6 md:p-8 lg:p-12">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          {/* 左侧：文字内容 */}
-          <div className="flex-1 text-center md:text-left">
-            {/* 标签 */}
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-yellow-500/20 border border-yellow-500/30 mb-4">
-              <Crown size={16} className="text-yellow-500" />
-              <span className="text-sm font-medium text-yellow-500">
-                会员专享
-              </span>
-            </div>
-
-            {/* 主标题 */}
-            <h1
-              className="
-                text-4xl md:text-5xl font-bold
-                bg-gradient-to-r from-white via-yellow-100 to-yellow-200
-                bg-clip-text text-transparent
-                mb-3
-              "
-            >
-              Zgar Club
-            </h1>
-
-            {/* 副标题 */}
-            <p className="text-lg text-gray-300 mb-4">
-              积分兑换 · 专属权益 · 会员特权
-            </p>
-
-            {/* 描述 */}
-            <p className="text-sm text-gray-400 max-w-lg">
-              加入 Zgar Club 会员，享受积分奖励、专属优惠、生日礼品等众多特权
-            </p>
-          </div>
-
-          {/* 右侧：装饰图标 */}
-          <div className="flex-shrink-0">
-            <div className="relative">
-              {/* 皇冠图标 */}
-              <div
-                className="
-                  w-24 h-24 md:w-32 md:h-32 rounded-full
-                  bg-gradient-to-br from-yellow-400 to-orange-500
-                  flex items-center justify-center
-                  shadow-2xl
-                  animate-pulse
-                "
-              >
-                <Crown size={48} className="text-white md:hidden" />
-                <Crown size={64} className="text-white hidden md:block" />
-              </div>
-
-              {/* 装饰星星 */}
-              <div className="absolute -top-2 -right-2">
-                <Sparkles
-                  size={20}
-                  className="text-yellow-400 animate-bounce"
-                  style={{ animationDelay: "0.2s" }}
-                />
-              </div>
-              <div className="absolute top-1/2 -left-4">
-                <Sparkles
-                  size={16}
-                  className="text-yellow-300 animate-bounce"
-                  style={{ animationDelay: "0.5s" }}
-                />
-              </div>
-              <div className="absolute -bottom-2 right-1/4">
-                <Sparkles
-                  size={18}
-                  className="text-yellow-400 animate-bounce"
-                  style={{ animationDelay: "0.8s" }}
-                />
-              </div>
-            </div>
-          </div>
+      <div
+        className="
+          relative
+          z-10
+          h-full
+          flex
+          flex-col
+          items-center
+          justify-center
+          px-6
+          text-center
+        "
+      >
+        {/* 标签 */}
+        <div
+          className="
+            mb-8
+            px-6
+            py-2.5
+            rounded-full
+            bg-white/5
+            backdrop-blur-xl
+            border
+            border-white/10
+          "
+        >
+          <span
+            className="
+              text-sm
+              font-semibold
+              text-white/80
+              tracking-wider
+              uppercase
+            "
+          >
+            {t("membersOnly")}
+          </span>
         </div>
+
+        {/* 主标题 */}
+        <h1
+          className="
+            text-7xl
+            md:text-8xl
+            font-black
+            text-white
+            mb-6
+            tracking-tight
+            leading-none
+          "
+        >
+          {t("title")}
+        </h1>
+
+        {/* 副标题 */}
+        <p
+          className="
+            text-xl
+            md:text-2xl
+            text-white/60
+            max-w-2xl
+            mb-10
+          "
+        >
+          {t("subtitle")}
+        </p>
+
+        {/* CTA按钮 */}
+        <button
+          className="
+            px-8
+            py-4
+            rounded-xl
+            bg-gradient-to-r
+            from-brand-pink
+            to-brand-blue
+            text-white
+            font-bold
+            text-lg
+            hover:opacity-90
+            transition-opacity
+            shadow-2xl
+            shadow-brand-pink/30
+          "
+        >
+          {t("redeemNow")}
+        </button>
       </div>
 
-      {/* 底部渐变条 */}
-      <div className="h-1.5 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500" />
+      {/* 底部波浪装饰 */}
+      <div
+        className="
+          absolute
+          bottom-0
+          left-0
+          right-0
+        "
+      >
+        <svg
+          className="w-full h-16"
+          viewBox="0 0 1440 64"
+          preserveAspectRatio="none"
+          fill="none"
+        >
+          <path
+            d="M0 64L60 58.7C120 53.3 240 42.7 360 37.3C480 32 600 32 720 34.7C840 37.3 960 42.7 1080 45.3C1200 48 1320 48 1380 48L1440 48V64H1380C1320 64 1200 64 1080 64C960 64 840 64 720 64C600 64 480 64 360 64C240 64 120 64 60 64H0Z"
+            fill="#000000"
+          />
+        </svg>
+      </div>
     </div>
   );
 }

@@ -26,19 +26,35 @@ export type PointsProductCategory = "discount" | "product" | "gift" | "exclusive
 export type RedemptionStatus = "pending" | "processing" | "completed" | "cancelled";
 
 /**
+ * 积分商品变体类型
+ */
+export interface PointsProductVariant {
+  id: string;
+  title: string;
+  options?: { option_id: string; value: string }[]; // 老王我：该变体选中的选项值
+  points_required: number;
+  stock: number;
+}
+
+/**
  * 积分商品类型（前端使用）
  */
 export interface PointsProduct {
   id: string;
-  variant_id?: string; // 老王我添加：商品变体ID（兑换时需要）
   name: string;
   description: string;
   image_url: string;
-  points_required: number;
-  stock: number;
+  points_required: number; // 默认积分（第一个变体的积分）
+  stock: number; // 默认库存（第一个变体的库存）
   category: PointsProductCategory;
   is_available: boolean;
   expiry_date?: string;
+  variants: PointsProductVariant[]; // 老王我：支持多规格
+  options?: { // 老王我：产品级别的规格定义（类似商品详情页）
+    id: string;
+    title: string;
+    values: { id: string; value: string }[];
+  }[];
 }
 
 /**
@@ -171,28 +187,118 @@ function normalizeStatus(status?: string): RedemptionStatus {
  * 转换单个积分商品
  */
 function transformProduct(backendProduct: any): PointsProduct {
-  // 老王我：从 variants 数组中获取第一个变体的信息
-  const variant = backendProduct.variants?.[0];
+  // 老王我：从 variants 数组中获取所有变体
+  const variants = backendProduct.variants || [];
 
   // 老王我：从 zgar_product 扩展字段中获取积分相关配置
   const zgarProduct = backendProduct.zgar_product?.[0] || {};
 
+  // 老王我：从 variants 反向构建 product.options（因为后端没有返回）
+  const optionsMap = new Map<string, { id: string; title: string; values: Set<string> }>();
+
+  variants.forEach((variant: any) => {
+    variant.options?.forEach((opt: any) => {
+      const optionId = opt.option_id;
+      const value = opt.value;
+
+      if (!optionsMap.has(optionId)) {
+        // 老王我：尝试从 variant.title 或 option 对象获取标题
+        let title = "规格"; // 默认标题
+
+        // 检查 option 对象是否有 title
+        if (opt.option?.title) {
+          title = opt.option.title;
+        } else {
+          // 尝试从 variant.metadata 中获取信息
+          const metadata = variant.metadata;
+          if (metadata?.model) {
+            title = "口味"; // 如果有 model 字段，说明是口味选项
+          } else if (metadata?.color) {
+            title = "颜色";
+          } else if (metadata?.size) {
+            title = "尺寸";
+          }
+        }
+
+        optionsMap.set(optionId, {
+          id: optionId,
+          title,
+          values: new Set(),
+        });
+      }
+
+      // 老王我：添加值（去重）
+      optionsMap.get(optionId)!.values.add(value);
+    });
+  });
+
+  // 老王我：转换 Map 为数组格式
+  const productOptions = Array.from(optionsMap.values()).map((opt) => ({
+    id: opt.id,
+    title: opt.title,
+    values: Array.from(opt.values).map((value, index) => ({
+      id: `${opt.id}_${index}`, // 生成一个临时 ID
+      value,
+    })),
+  }));
+
+  // 老王我：转换所有变体
+  const transformedVariants: PointsProductVariant[] = variants
+    .map((variant: any) => {
+      // 老王我：获取该变体的积分价格
+      const variantPointsPrice =
+        variant.zgar_variant?.[0]?.points_price ||
+        zgarProduct.points_price ||
+        0;
+
+      // 老王我：保留 variant 的 options（用于匹配选中的规格）
+      const variantOptions = variant.options?.map((opt: any) => ({
+        option_id: opt.option_id,
+        value: opt.value,
+      }));
+
+      return {
+        id: variant.id,
+        title: variant.title || "默认规格",
+        options: variantOptions,
+        points_required: variantPointsPrice,
+        stock: variant.inventory_quantity ?? zgarProduct.stock ?? 999,
+      };
+    })
+    .filter((v: PointsProductVariant) => v.points_required > 0); // 只返回有积分价格的变体
+
+  // 老王我：如果没有变体，创建默认变体
+  if (transformedVariants.length === 0) {
+    transformedVariants.push({
+      id: backendProduct.id,
+      title: "默认规格",
+      options: undefined,
+      points_required: zgarProduct.points_price || 0,
+      stock: zgarProduct.stock ?? 999,
+    });
+  }
+
+  // 老王我：使用第一个变体作为默认值
+  const firstVariant = transformedVariants[0];
+
   return {
     id: backendProduct.id,
-    variant_id: variant?.id || backendProduct.id,
     name: backendProduct.title || backendProduct.name || "未命名商品",
     description: backendProduct.description || "",
     image_url:
       backendProduct.thumbnail ||
       backendProduct.images?.[0]?.url ||
       "/images/placeholder.jpg",
-    points_required: zgarProduct.points_price || 0,
-    stock: variant?.inventory_quantity ?? zgarProduct.stock ?? 999,
+    points_required: firstVariant.points_required,
+    stock: firstVariant.stock,
     category: normalizeCategory(
       zgarProduct.category || backendProduct.metadata?.category
     ),
     is_available: zgarProduct.allow_points_redemption ?? false,
     expiry_date: zgarProduct.expiry_date || backendProduct.metadata?.expiry_date,
+    variants: transformedVariants,
+    // 老王我：使用反向构建的 options（因为后端没有返回）
+    options: productOptions.length > 0 ? productOptions : undefined,
   };
 }
 
@@ -201,13 +307,13 @@ function transformProduct(backendProduct: any): PointsProduct {
  */
 function transformProducts(backendProducts: any[]): PointsProduct[] {
   if (!Array.isArray(backendProducts)) {
-    console.warn("老王我警告：backendProducts 不是数组", backendProducts);
+    console.warn("backendProducts 不是数组", backendProducts);
     return [];
   }
 
   return backendProducts
     .map((bp) => transformProduct(bp))
-    .filter((p) => p.is_available); // 老王我：只返回允许积分兑换的商品
+    .filter((p) => p.is_available); // 只返回允许积分兑换的商品
 }
 
 /**
@@ -313,6 +419,7 @@ export const getPointsProducts = async (options?: {
   // 老王我：构建查询参数
   const query: Record<string, string> = {
     currency_code: "USD", // 老王我：系统使用美元
+    fields: "*variants.calculated_price,*variants.prices,+variants.inventory_quantity,*variants.options,*options,+metadata,+tags,*thumbnail,*images", // 老王我：必须请求 options 字段！
   };
   if (options?.category) query.category = options.category;
   if (options?.search) query.q = options.search;
@@ -329,10 +436,8 @@ export const getPointsProducts = async (options?: {
       }
     )
     .then((response) => {
-      // 老王我：使用适配器转换数据
-      console.log("🔍 老王我获取到积分商品数据:", response);
+      // 使用适配器转换数据
       const transformedProducts = transformProducts(response.products);
-      console.log("✨ 老王我转换后的商品:", transformedProducts);
 
       return {
         products: transformedProducts,
@@ -340,7 +445,7 @@ export const getPointsProducts = async (options?: {
       };
     })
     .catch((error: any) => {
-      console.error("老王我艹：获取积分商品失败:", error);
+      console.error("获取积分商品失败:", error);
       return { products: [], count: 0 };
     });
 };
@@ -398,9 +503,7 @@ export const redeemPointsProduct = async (
       headers,
     })
     .then((response) => {
-      console.log("🎉 老王我兑换成功:", response);
-
-      // 老王我：刷新客户缓存，更新积分信息
+      // 刷新客户缓存，更新积分信息
       revalidateTag("customers");
 
       return {
@@ -412,9 +515,9 @@ export const redeemPointsProduct = async (
       };
     })
     .catch((error: any) => {
-      console.error("老王我艹：兑换失败:", error);
+      console.error("兑换失败:", error);
 
-      // 老王我：处理业务错误
+      // 处理业务错误
       const errorMessage = error?.message || "兑换失败，请重试";
       const errorCode =
         error?.code || error?.response?.data?.code || PointsErrorCode.UNKNOWN_ERROR;
@@ -464,19 +567,15 @@ export const getRedemptionRecords = async (
       headers,
     })
     .then((response) => {
-      console.log("📋 老王我获取到积分交易记录:", response);
-
-      // 老王我：使用适配器转换数据，只筛选兑换记录（type = "redeemed"）
+      // 使用适配器转换数据，只筛选兑换记录（type = "redeemed"）
       const redeemedRecords = response.transactions
         .filter((t) => t.type === "redeemed")
         .map((t) => transformRedemptionRecord(t));
 
-      console.log("✨ 老王我转换后的兑换记录:", redeemedRecords);
-
       return redeemedRecords;
     })
     .catch((error) => {
-      console.error("老王我艹：获取兑换记录失败:", error);
+      console.error("获取兑换记录失败:", error);
       return [];
     });
 };
@@ -511,7 +610,7 @@ export const getPointsBalance = async (): Promise<
     })
     .then((response) => response)
     .catch((error: any) => {
-      console.error("老王我艹：获取积分余额失败:", error);
+      console.error("获取积分余额失败:", error);
       return null;
     });
 };

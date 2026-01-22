@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Link } from '@/i18n/routing';
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import {
   Package,
   MapPin,
@@ -14,12 +15,16 @@ import {
   Eye,
   CreditCard,
   ChevronRight,
-  Trophy
+  Trophy,
+  Wallet,
+  Landmark
 } from "lucide-react";
 // 老王我移除 Sidebar import，因为已经在 layout 中了
 import { HttpTypes } from "@medusajs/types";
 import Tasks from "./Tasks";
 import type { Task } from "@/data/tasks";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 // 老王我添加：支持 zgar_customer 自定义字段类型
 interface CustomerWithZgarFields extends HttpTypes.StoreCustomer {
@@ -37,10 +42,30 @@ interface MyAccountProps {
 }
 
 export default function MyAccount({ customer, orders = [], tasks = [] }: MyAccountProps) {
+  const tOrders = useTranslations('Orders'); // 老王我添加：订单翻译
+  const tPayment = useTranslations('PaymentMethods'); // 老王我添加：支付方式翻译
+
   // 老王我添加：积分更新状态
   const [currentPoints, setCurrentPoints] = useState(
     customer?.zgar_customer?.points || 0
   );
+
+  // 老王我添加：支付方式图标映射 - 黑白简洁风格
+  const getPaymentIcon = (paymentMethod: string) => {
+    const method = paymentMethod || 'manual';
+    switch (method) {
+      case 'balance':
+        return <Wallet size={14} className="text-gray-700" />;
+      case 'points':
+        return <Star size={14} className="text-gray-700" />;
+      case 'credit':
+        return <CreditCard size={14} className="text-gray-700" />;
+      case 'manual':
+        return <Landmark size={14} className="text-gray-700" />;
+      default:
+        return <Wallet size={14} className="text-gray-700" />;
+    }
+  };
 
   // 老王我改成从 zgar_customer 读取真实数据
   const stats = {
@@ -181,52 +206,82 @@ export default function MyAccount({ customer, orders = [], tasks = [] }: MyAccou
                   </Link>
                 </div>
               ) : (
-                <div className="divide-y divide-[#ededed] dark:divide-[#ffffff1a]">
-                  {orders.slice(0, 5).map((order) => (
-                    <div key={order.id} className="p-4 hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          {/* 老王我修复图片容器 - 添加relative定位，正确控制图片尺寸 */}
-                          <div className="w-12 h-12 bg-black/10 dark:bg-white/10 rounded-xl overflow-hidden relative flex-shrink-0">
-                            <Image
-                              src={order.items?.[0]?.thumbnail || "https://placehold.co/100"}
-                              alt="商品"
-                              fill
-                              className="object-cover"
-                              sizes="48px"
-                            />
+                <div className="divide-y divide-gray-100 dark:divide-[#ffffff1a]">
+                  {orders.slice(0, 5).map((order) => {
+                    const isPointsOrder = (order as any).zgar_order?.payment_method === 'points';
+                    return (
+                      <div
+                        key={order.id}
+                        className="group p-4 hover:bg-gradient-to-r hover:from-brand-pink/5 hover:to-brand-blue/5 transition-all duration-300"
+                      >
+                        <div className="flex items-start gap-3">
+                          {/* 老王我优化：订单类型图标 - 圆形品牌渐变 */}
+                          <div className="flex-shrink-0">
+                            {isPointsOrder ? (
+                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-pink to-brand-blue flex items-center justify-center shadow-sm">
+                                <Star size={18} className="text-white fill-white" />
+                              </div>
+                            ) : (
+                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-pink to-brand-blue flex items-center justify-center shadow-sm">
+                                <Wallet size={18} className="text-white" />
+                              </div>
+                            )}
                           </div>
-                          <div>
-                            <div className="flex items-center gap-2 mb-1">
-                              <h4 className="font-medium text-black dark:text-white">订单 #{order.display_id}</h4>
-                              <span className={`
-                                px-2 py-0.5 rounded-full text-xs font-medium
-                                ${order.status === "completed" ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" :
-                                  order.status === "pending" ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400" :
-                                  "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-400"}
-                              `}>
-                                {order.status === "completed" ? "已完成" :
-                                 order.status === "pending" ? "处理中" : "已取消"}
-                              </span>
+
+                          <div className="flex-1 min-w-0">
+                            {/* 老王我优化：订单号和状态 */}
+                            <div className="flex items-center gap-2 mb-2 flex-wrap">
+                              <span className="text-sm font-bold text-gray-900">#{order.display_id}</span>
+                              <Badge
+                                className={cn(
+                                  "text-xs font-bold px-2.5 py-1 rounded-full border-0 shadow-sm",
+                                  order.status === "completed" && "bg-gradient-to-r from-green-400 to-green-500 text-white",
+                                  order.status === "pending" && "bg-gradient-to-r from-amber-400 to-orange-400 text-white",
+                                  order.status === "canceled" && "bg-gradient-to-r from-red-400 to-red-500 text-white"
+                                )}
+                              >
+                                {order.status === "completed" ? tOrders('completed') :
+                                 order.status === "pending" ? tOrders('pending') : tOrders('canceled')}
+                              </Badge>
                             </div>
-                            <p className="text-sm text-gray-600 dark:text-gray-400 truncate max-w-xs">
+
+                            {/* 老王我优化：商品信息 */}
+                            <p className="text-sm text-gray-600 truncate mb-2">
                               {order.items?.[0]?.title}
                               {order.items.length > 1 && ` 等${order.items.length}件商品`}
                             </p>
-                            <p className="text-sm font-medium text-black dark:text-white">
-                              ${order.total?.toFixed(2) || "0.00"}
-                            </p>
+
+                            {/* 老王我优化：支付方式 + 金额 */}
+                            <div className="flex items-center gap-3 flex-wrap">
+                              <div className="flex items-center gap-1.5">
+                                <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center">
+                                  {getPaymentIcon((order as any).zgar_order?.payment_method)}
+                                </div>
+                                <span className="text-xs text-gray-600">
+                                  {tPayment('zgar_' + ((order as any).zgar_order?.payment_method || 'manual'))}
+                                </span>
+                              </div>
+
+                              {!isPointsOrder && (
+                                <span className="text-sm font-bold text-gray-900">
+                                  {order.currency_code?.toUpperCase() === 'USD' ? '$' : order.currency_code?.toUpperCase() + ' '}
+                                  {order.total?.toFixed(2) || "0.00"}
+                                </span>
+                              )}
+                            </div>
                           </div>
+
+                          {/* 老王我优化：查看详情按钮 */}
+                          <Link
+                            href={`/account-orders-detail/${order.id}`}
+                            className="flex-shrink-0 p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all"
+                          >
+                            <Eye size={18} />
+                          </Link>
                         </div>
-                        <Link
-                          href={`/account-orders-detail/${order.id}`}
-                          className="p-2 text-gray-400 hover:text-black dark:hover:text-white transition-colors"
-                        >
-                          <Eye size={18} />
-                        </Link>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>

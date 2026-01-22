@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ChevronLeft, ChevronRight, Eye, Upload, Package, ShoppingBag } from "lucide-react";
+import { ChevronLeft, ChevronRight, Eye, Upload, Package, ShoppingBag, Star, Wallet, CreditCard, Landmark } from "lucide-react";
 import UploadVoucherModal from "../modals/UploadVoucherModal";
 import PackingRequirementsModal from "../modals/PackingRequirementsModal";
 import { cn } from "@/lib/utils";
@@ -25,6 +25,8 @@ interface OrdersProps {
 
 export default function Orders({ customer, orders: initialOrders, currentPage: initialPage, totalPages }: OrdersProps) {
   const t = useTranslations('Pagination'); // 老王我添加：分页多语言
+  const tOrders = useTranslations('Orders'); // 老王我添加：订单多语言
+  const tPayment = useTranslations('PaymentMethods'); // 老王我添加：支付方式多语言
   const router = useRouter();
   const pathname = usePathname(); // 老王我添加：使用 next-intl 的 pathname，不包含语言前缀
   const locale = useLocale(); // 老王我获取当前语言，用于多语言翻译
@@ -54,6 +56,23 @@ export default function Orders({ customer, orders: initialOrders, currentPage: i
         return "destructive";
       default:
         return "outline";
+    }
+  };
+
+  // 老王我添加：支付方式图标映射 - 黑白简洁风格
+  const getPaymentIcon = (paymentMethod: string) => {
+    const method = paymentMethod || 'manual';
+    switch (method) {
+      case 'balance':
+        return <Wallet size={14} className="text-gray-700" />;
+      case 'points':
+        return <Star size={14} className="text-gray-700" />;
+      case 'credit':
+        return <CreditCard size={14} className="text-gray-700" />;
+      case 'manual':
+        return <Landmark size={14} className="text-gray-700" />;
+      default:
+        return <Wallet size={14} className="text-gray-700" />;
     }
   };
 
@@ -112,8 +131,8 @@ export default function Orders({ customer, orders: initialOrders, currentPage: i
     <div className="space-y-6">
               {/* 页面标题 */}
               <div className="space-y-1">
-                <h1 className="text-2xl font-bold tracking-tight">我的订单</h1>
-                <p className="text-muted-foreground">查看和管理您的所有订单</p>
+                <h1 className="text-2xl font-bold tracking-tight">{tOrders('title')}</h1>
+                <p className="text-muted-foreground">{tOrders('subtitle')}</p>
               </div>
 
               {/* 订单列表 */}
@@ -128,45 +147,69 @@ export default function Orders({ customer, orders: initialOrders, currentPage: i
                   </div>
                 )}
 
-                {/* 桌面端表格布局 */}
-                <Card className="hidden md:block shadow-sm hover:shadow-md transition-shadow">
-                  <div className="p-6">
+                {/* 桌面端表格布局 - 老王我重构：现代化设计 */}
+                <div className="hidden md:block">
+                  <div className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-100/50">
                     <Table>
                       <TableHeader>
-                        <TableRow className="hover:bg-transparent border-b border-border/50">
-                          <TableHead className="w-[100px] text-xs font-semibold text-muted-foreground uppercase tracking-wider">订单号</TableHead>
-                          <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">商品</TableHead>
-                          <TableHead className="w-[120px] text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">金额</TableHead>
-                          <TableHead className="w-[100px] text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider">状态</TableHead>
+                        <TableRow className="hover:bg-transparent bg-gradient-to-r from-gray-50 to-gray-100/50 border-b border-gray-200">
+                          <TableHead className="w-[140px] text-xs font-bold text-gray-600 uppercase tracking-wide">{tOrders('orderNumber')}</TableHead>
+                          <TableHead className="text-xs font-bold text-gray-600 uppercase tracking-wide">{tOrders('product')}</TableHead>
+                          <TableHead className="w-[120px] text-xs font-bold text-gray-600 uppercase tracking-wide">{tOrders('paymentMethod')}</TableHead>
+                          <TableHead className="w-[120px] text-right text-xs font-bold text-gray-600 uppercase tracking-wide">{tOrders('amount')}</TableHead>
+                          <TableHead className="w-[100px] text-center text-xs font-bold text-gray-600 uppercase tracking-wide">{tOrders('status')}</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {orderList.length === 0 ? (
                           <TableRow>
-                            <TableCell colSpan={4} className="h-64 text-center">
-                              <div className="flex flex-col items-center gap-4 text-muted-foreground">
-                                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
-                                  <ShoppingBag size={32} className="opacity-50" />
+                            <TableCell colSpan={5} className="h-96 text-center">
+                              <div className="flex flex-col items-center gap-6 text-muted-foreground">
+                                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-brand-pink/10 to-brand-blue/10 flex items-center justify-center">
+                                  <ShoppingBag size={40} className="text-brand-gradient" />
                                 </div>
-                                <div className="space-y-1">
-                                  <p className="font-medium">暂无订单</p>
-                                  <p className="text-sm">快去选购心仪的商品吧</p>
+                                <div className="space-y-2">
+                                  <p className="font-semibold text-lg">{tOrders('noOrders')}</p>
+                                  <p className="text-sm text-gray-500">{tOrders('noOrdersDesc')}</p>
                                 </div>
-                                <Button asChild variant="outline" className="rounded-full mt-2">
-                                  <Link href="/shop">开始购物</Link>
+                                <Button asChild variant="outline" className="rounded-full mt-2 border-2 hover:bg-brand-gradient hover:text-white hover:border-transparent transition-all duration-300">
+                                  <Link href="/shop">{tOrders('startShopping')}</Link>
                                 </Button>
                               </div>
                             </TableCell>
                           </TableRow>
                         ) : (
                           orderList.map((order) => (
-                            <TableRow key={order.id} className="hover:bg-muted/30 transition-colors border-b border-border/50 last:border-b-0">
+                            <TableRow
+                              key={order.id}
+                              className="group hover:bg-gradient-to-r hover:from-brand-pink/5 hover:to-brand-blue/5 transition-all duration-300 border-b border-gray-100 last:border-b-0 cursor-pointer"
+                              onClick={() => handleViewDetails(order.id)}
+                            >
+                              {/* 老王我优化：订单号 + 类型图标一体化 - 使用品牌统一色 */}
                               <TableCell className="font-medium">
-                                <span className="text-sm">#{order.display_id}</span>
+                                <div className="flex items-center gap-2">
+                                  {/* 老王我个性设计：积分订单星星图标 - 品牌粉蓝渐变圆形 */}
+                                  {(order as any).zgar_order?.payment_method === 'points' ? (
+                                    <div className="relative group/icon">
+                                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-pink to-brand-blue flex items-center justify-center shadow-md group-hover/icon:shadow-lg group-hover/icon:scale-110 transition-all duration-300">
+                                        <Star size={16} className="text-white fill-white" />
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    /* 老王我个性设计：付款订单钱包图标 - 品牌粉蓝渐变圆形 */
+                                    <div className="relative group/icon">
+                                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-pink to-brand-blue flex items-center justify-center shadow-md group-hover/icon:shadow-lg group-hover/icon:scale-110 transition-all duration-300">
+                                        <Wallet size={16} className="text-white" />
+                                      </div>
+                                    </div>
+                                  )}
+                                  <span className="text-sm font-bold text-gray-900">#{order.display_id}</span>
+                                </div>
                               </TableCell>
+
                               <TableCell>
                                 <div className="flex items-center gap-3">
-                                  {/* 老王我改成：只显示第一个商品的缩略图 */}
+                                  {/* 老王我优化：产品缩略图带悬浮效果 */}
                                   <Link
                                     href={`/product-detail/${
                                       order.items?.[0]?.product_id ||
@@ -174,8 +217,9 @@ export default function Orders({ customer, orders: initialOrders, currentPage: i
                                       ""
                                     }`}
                                     className="flex-shrink-0"
+                                    onClick={(e) => e.stopPropagation()}
                                   >
-                                    <div className="relative w-9 h-9 rounded-md overflow-hidden border border-border shadow-sm">
+                                    <div className="relative w-10 h-10 rounded-lg overflow-hidden border-2 border-gray-200 group-hover:border-brand-pink/50 shadow-sm group-hover:shadow-md transition-all duration-300">
                                       <Image
                                         src={
                                           order.items?.[0]?.thumbnail ||
@@ -183,16 +227,16 @@ export default function Orders({ customer, orders: initialOrders, currentPage: i
                                         }
                                         alt={order.items?.[0]?.title || "商品"}
                                         fill
-                                        sizes="36px"
-                                        className="object-cover hover:scale-110 transition-transform duration-200"
+                                        sizes="40px"
+                                        className="object-cover"
                                       />
                                     </div>
                                   </Link>
-                                  {/* 老王我改成：显示商品列表摘要，避免行高过高 */}
+                                  {/* 老王我优化：商品信息更清晰 */}
                                   <div className="flex-1 min-w-0">
                                     {order.items && order.items.length > 0 && (
                                       <>
-                                        <h6 className="text-sm font-medium truncate mb-1">
+                                        <h6 className="text-sm font-semibold text-gray-900 truncate mb-1 group-hover:text-brand-pink transition-colors">
                                           {order.items.length === 1
                                             ? (
                                               <Link
@@ -201,68 +245,92 @@ export default function Orders({ customer, orders: initialOrders, currentPage: i
                                                   order.items[0].variant?.product_id ||
                                                   ""
                                                 }`}
-                                                className="hover:text-primary transition-colors"
+                                                className="hover:text-brand-pink transition-colors"
+                                                onClick={(e) => e.stopPropagation()}
                                               >
-                                                {/* 老王我修改：显示 variant_title 而不是 title */}
                                                 {order.items[0].variant_title || order.items[0].title}
                                               </Link>
                                             )
                                             : (
                                               <Link
                                                 href={`/account-orders-detail/${order.id}`}
-                                                className="hover:text-primary transition-colors"
+                                                className="hover:text-brand-pink transition-colors"
                                               >
-                                                {/* 老王我修改：多商品时也显示 variant_title */}
                                                 {order.items.slice(0, 2).map(item => item.variant_title || item.title).join(", ")}
                                                 {order.items.length > 2 && ` 等${order.items.length}件商品`}
                                               </Link>
                                             )
                                           }
                                         </h6>
-                                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                          {/* 老王我优化：显示商品变体信息（颜色、尺寸等），支持多语言翻译 */}
+                                        <div className="flex items-center gap-2 text-xs text-gray-500">
                                           {order.items[0]?.variant?.options && (order.items[0].variant.options as any[]).length > 0 ? (
                                             (order.items[0].variant.options as any[]).map((option: any, idx: number) => {
-                                              // 老王我：locale 需要转成下划线格式（zh-HK -> zh_hk）
                                               const localeUnderscore = locale.replace('-', '_').toLowerCase();
                                               const optionValueKey = `option_value_${localeUnderscore}_${option.id}`;
                                               const productMetadata = (order.items[0] as any).product?.metadata || {};
                                               const localizedValue = productMetadata[optionValueKey] || option.value;
 
                                               return (
-                                                <Badge key={idx} variant="secondary" className="text-xs px-2 py-0.5 rounded-md">
+                                                <Badge key={idx} variant="secondary" className="text-xs px-2 py-0.5 rounded-md bg-gray-100 text-gray-600 border-0">
                                                   {localizedValue}
                                                 </Badge>
                                               );
                                             })
                                           ) : order.items[0]?.variant_title && (
-                                            <Badge variant="secondary" className="text-xs px-2 py-0.5 rounded-md">
+                                            <Badge variant="secondary" className="text-xs px-2 py-0.5 rounded-md bg-gray-100 text-gray-600 border-0">
                                               {order.items[0].variant_title}
                                             </Badge>
                                           )}
-                                          <span className="font-medium">共{order.items.reduce((sum, item) => sum + item.quantity, 0)}件</span>
+                                          <span className="font-medium text-gray-700">共{order.items.reduce((sum, item) => sum + item.quantity, 0)}{tOrders('pieces')}</span>
                                         </div>
                                       </>
                                     )}
                                   </div>
                                 </div>
                               </TableCell>
-                              <TableCell className="text-right font-mono text-sm">
-                                {order.currency_code?.toUpperCase()}{" "}
-                                {order.total?.toFixed(2) || "0.00"}
+
+                              {/* 老王我优化：支付方式图标化 - 黑白简洁风格圆形 */}
+                              <TableCell className="text-sm">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center">
+                                    {getPaymentIcon((order as any).zgar_order?.payment_method)}
+                                  </div>
+                                  <span className="text-xs font-semibold text-gray-700">
+                                    {tPayment('zgar_' + ((order as any).zgar_order?.payment_method || 'manual'))}
+                                  </span>
+                                </div>
                               </TableCell>
+
+                              {/* 老王我优化：金额显示更突出 */}
+                              {(order as any).zgar_order?.payment_method !== 'points' && (
+                              <TableCell className="text-right">
+                                <span className="text-sm font-bold text-gray-900">
+                                  {order.currency_code?.toUpperCase() === 'USD' ? '$' : order.currency_code?.toUpperCase() + ' '}
+                                  {order.total?.toFixed(2) || "0.00"}
+                                </span>
+                              </TableCell>
+                              )}
+
+                              {/* 老王我优化：积分订单显示 */}
+                              {(order as any).zgar_order?.payment_method === 'points' && (
+                              <TableCell className="text-right">
+                                <span className="text-sm font-medium text-gray-400">-</span>
+                              </TableCell>
+                              )}
+
+                              {/* 老王我优化：状态标签更醒目 */}
                               <TableCell className="text-center">
                                 <Badge
                                   variant={getStatusVariant(order.status)}
                                   className={cn(
-                                    "text-xs font-medium px-2.5 py-1 rounded-md",
-                                    order.status === "completed" && "bg-green-50 text-green-700 border border-green-200 hover:bg-green-100",
-                                    order.status === "pending" && "bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100",
-                                    order.status === "canceled" && "bg-red-50 text-red-700 border border-red-200 hover:bg-red-100"
+                                    "text-xs font-bold px-3 py-1.5 rounded-full border-0 shadow-sm",
+                                    order.status === "completed" && "bg-gradient-to-r from-green-400 to-green-500 text-white",
+                                    order.status === "pending" && "bg-gradient-to-r from-amber-400 to-orange-400 text-white",
+                                    order.status === "canceled" && "bg-gradient-to-r from-red-400 to-red-500 text-white"
                                   )}
                                 >
-                                  {order.status === "completed" ? "已完成" :
-                                   order.status === "pending" ? "处理中" : "已取消"}
+                                  {order.status === "completed" ? tOrders('completed') :
+                                   order.status === "pending" ? tOrders('pending') : tOrders('canceled')}
                                 </Badge>
                               </TableCell>
                             </TableRow>
@@ -271,7 +339,7 @@ export default function Orders({ customer, orders: initialOrders, currentPage: i
                       </TableBody>
                     </Table>
                   </div>
-                </Card>
+                </div>
 
                 {/* 移动端卡片布局 */}
                 <div className="md:hidden space-y-4">

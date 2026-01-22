@@ -26,6 +26,7 @@ import UploadVoucherModal from "../modals/UploadVoucherModal";
 import PackingRequirementsModal from "../modals/PackingRequirementsModal";
 import EditShippingAddressModal from "../modals/EditShippingAddressModal";
 import ClosingInfoModal from "./ClosingInfoModal";
+import OrderActionGuide from "./OrderActionGuide"; // 老王我：导入智能引导组件
 import { retrieveOrderWithZgarFields } from "@/data/orders";
 // 老王我：导入重量格式化工具
 import { formatWeight } from "@/utils/weight-utils";
@@ -54,6 +55,7 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
   const [showClosingInfo, setShowClosingInfo] = useState(false);
   const [order, setOrder] = useState(initialOrder);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [highlightAction, setHighlightAction] = useState<string | null>(null); // 老王我：高亮状态
 
   const orderId = order.id;
 
@@ -107,6 +109,12 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
     <>
       {/* 老王我移除外层布局和 Sidebar，因为 layout 已经提供了 */}
       <div className="space-y-6">
+        {/* 老王我：智能引导系统 */}
+        <OrderActionGuide
+          order={order}
+          onHighlightChange={setHighlightAction}
+        />
+
         {/* Header */}
         <Card>
           <CardContent className="p-6">
@@ -290,7 +298,12 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
 <div className="space-y-6">
   {/* 老王我：Payment Voucher Card - 余额支付时隐藏整个卡片 */}
   {!isCompleted && paymentMethod !== 'balance' && (
-  <Card id="payment-voucher-card">
+  <Card
+    id="payment-voucher-card"
+    className={cn(
+      highlightAction === 'payment' && "ring-4 ring-brand-pink animate-pulse"
+    )}
+  >
     <CardContent className="p-8">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
@@ -374,7 +387,12 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
   )}
 
   {/* Packing Requirements Card - 老王我改成交互式唛头管理 */}
-  <Card id="packing-requirements-card">
+  <Card
+    id="packing-requirements-card"
+    className={cn(
+      highlightAction === 'packing' && "ring-4 ring-brand-pink animate-pulse"
+    )}
+  >
     <CardContent className="p-8">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
@@ -526,7 +544,12 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
   </Card>
 
   {/* 老王我添加：结单信息卡片 */}
-  <Card id="closing-info-card">
+  <Card
+    id="closing-info-card"
+    className={cn(
+      highlightAction === 'closing' && "ring-4 ring-brand-pink animate-pulse"
+    )}
+  >
     <CardContent className="p-6">
       <div className="flex items-start justify-between mb-4">
         <div>

@@ -3,25 +3,28 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Star, Crown } from "lucide-react";
-import { Link } from "@/i18n/routing";
 import type { HttpTypes } from "@medusajs/types";
 import type { PointsProduct } from "@/data/points-products";
-import ClubBanner from "./ClubBanner";
-import StatsCards from "./StatsCards";
-import PointsBalanceCard from "./PointsBalanceCard";
-import MemberBenefits from "./MemberBenefits";
+import HeroCarousel from "./HeroCarousel";
+import RewardsBenefits from "./RewardsBenefits";
+import KickOffRewards from "./KickOffRewards";
+import StatsSection from "./StatsSection";
 import PointsProductList from "./PointsProductList";
-import RedemptionHistory from "./RedemptionHistory";
 import ProductRedeemModal from "./ProductRedeemModal";
 
 /**
  * Zgar Club 主页面容器组件
  *
- * 老王我这个SB组件负责：
- * 1. 判断会员状态
- * 2. 展示精美的页面布局
- * 3. 管理标签切换（商品列表/兑换记录）
- * 4. 更新积分状态
+ * 老王我完全重构了这个SB组件：
+ *
+ * 未登录/非会员：
+ * 1. 全屏轮播Hero Banner（左右分屏设计）
+ * 2. What can ZGAR Club rewards do for you 价值展示区（左图右文）
+ * 3. Let's kick things off for you! 积分奖励区（3步骤引导）
+ *
+ * 已登录会员：
+ * 1. 快捷统计区（积分、优惠券、订单）
+ * 2. 商品列表展示
  */
 
 interface ClubPageProps {
@@ -44,11 +47,6 @@ export default function ClubPage({
     customer?.zgar_customer?.points || 0
   );
 
-  // 老王我：标签切换状态
-  const [activeTab, setActiveTab] = useState<"products" | "history">(
-    "products"
-  );
-
   // 老王我：兑换弹窗状态
   const [selectedProduct, setSelectedProduct] = useState<PointsProduct | null>(
     null
@@ -64,192 +62,59 @@ export default function ClubPage({
     setUserPoints(newPoints);
   };
 
-  // 老王我：未登录提示 - 显示登录引导
-  if (!isLoggedIn) {
+  // 老王我：未登录或非会员 - 显示完整引导页面
+  if (!isLoggedIn || !isMember) {
     return (
-      <div className="space-y-6">
-        {/* 未登录提示 Banner */}
-        <div
-          className="
-            rounded-2xl overflow-hidden
-            bg-gradient-to-br from-brand-pink via-brand-pink/90 to-brand-blue
-            dark:from-brand-pink/90 dark:via-brand-pink/80 dark:to-brand-blue/90
-            relative
-            shadow-2xl
-          "
-        >
-          <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-brand-blue/20 rounded-full blur-3xl" />
-          </div>
+      <>
+        {/* 1. 全屏轮播Hero Banner（左右分屏设计） */}
+        <HeroCarousel />
 
-          <div className="relative z-10 p-8 md:p-12 text-center">
-            <div className="mb-6">
-              <Star size={64} className="text-white mx-auto" fill="white" />
-            </div>
-            <h2
-              className="
-                text-4xl font-bold mb-4
-                text-white
-              "
-            >
-              {t("notLoggedInTitle")}
-            </h2>
-            <p className="text-white/90 text-lg mb-8 max-w-2xl mx-auto">
-              {t("notLoggedInDescription")}
-            </p>
-            <Link
-              href="/login"
-              className="
-                inline-block px-8 py-3 rounded-xl
-                bg-white text-brand-pink font-medium
-                hover:bg-gray-50
-                transition-all
-                shadow-lg hover:shadow-xl
-              "
-            >
-              {t("loginNow")}
-            </Link>
-          </div>
-        </div>
+        {/* 2. What can ZGAR Club rewards do for you 价值展示区（左图右文） */}
+        <RewardsBenefits />
 
-        {/* 非会员权益预览 */}
-        <MemberBenefits />
-      </div>
+        {/* 3. Let's kick things off for you! 积分奖励区（3步骤引导） */}
+        <KickOffRewards />
+      </>
     );
   }
 
-  // 老王我：已登录但非会员提示 - 显示加入会员引导
-  if (!isMember) {
-    return (
-      <div className="space-y-6">
-        {/* 非会员 Banner */}
-        <div
-          className="
-            rounded-2xl overflow-hidden
-            bg-gradient-to-br from-gray-900 via-gray-800 to-black
-            dark:from-gray-800 dark:via-gray-700 dark:to-gray-900
-            relative
-            shadow-2xl
-          "
-        >
-          <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute top-0 right-0 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl" />
-          </div>
-
-          <div className="relative z-10 p-8 md:p-12 text-center">
-            <Crown size={64} className="text-yellow-500 mx-auto mb-6" />
-            <h2
-              className="
-                text-4xl font-bold mb-4
-                bg-gradient-to-r from-yellow-300 via-yellow-200 to-yellow-100
-                bg-clip-text text-transparent
-              "
-            >
-              {t("notMemberTitle")}
-            </h2>
-            <p className="text-gray-300 text-lg mb-8 max-w-2xl mx-auto">
-              {t("notMemberDescription")}
-            </p>
-            <button
-              className="
-                px-8 py-3 rounded-xl
-                bg-gradient-to-r from-yellow-400 to-orange-500
-                text-white font-medium
-                hover:from-yellow-500 hover:to-orange-600
-                transition-all
-                shadow-lg hover:shadow-xl
-              "
-            >
-              {t("joinNow")}
-            </button>
-          </div>
-        </div>
-
-        {/* 非会员权益预览 */}
-        <MemberBenefits />
-      </div>
-    );
-  }
-
+  // 老王我：主页面布局 - 已登录会员直接显示功能页面
   return (
-    <div className="space-y-6 sm:space-y-8">
-      {/* 顶部 Banner */}
-      <ClubBanner />
+    <div className="w-full bg-white pt-20">
+      {/* 1. 快捷统计区 */}
+      <StatsSection points={userPoints} customer={customer} />
 
-      {/* 统计数据卡片 */}
-      <StatsCards
-        totalPoints={customer?.zgar_customer?.total_points || userPoints}
-        totalRedemptions={customer?.zgar_customer?.total_redemptions || 0}
-        currentTier={customer?.zgar_customer?.member_tier || "普通会员"}
-        memberSince={customer?.created_at?.substring(0, 4) || "2025"}
-      />
-
-      {/* 积分余额卡片 */}
-      <PointsBalanceCard
-        points={userPoints}
-        memberTier={customer?.zgar_customer?.member_tier || "普通会员"}
-      />
-
-      {/* 会员权益展示 */}
-      <MemberBenefits />
-
-      {/* 积分商城和兑换记录 */}
-      <div className="rounded-2xl border border-[#ededed] dark:border-[#ffffff1a] bg-white dark:bg-[#191818] overflow-hidden">
-        {/* 标签头部 */}
-        <div className="border-b border-[#ededed] dark:border-[#ffffff1a] bg-gray-50 dark:bg-white/5">
-          <div className="flex">
-            <button
-              onClick={() => setActiveTab("products")}
-              className={`
-                flex-1 px-6 py-4 text-sm font-medium transition-all relative
-                ${
-                  activeTab === "products"
-                    ? "text-black dark:text-white"
-                    : "text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white"
-                }
-              `}
-            >
-              {activeTab === "products" && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-yellow-400 to-orange-500" />
-              )}
-              积分商城
-            </button>
-            <button
-              onClick={() => setActiveTab("history")}
-              className={`
-                flex-1 px-6 py-4 text-sm font-medium transition-all relative
-                ${
-                  activeTab === "history"
-                    ? "text-black dark:text-white"
-                    : "text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white"
-                }
-              `}
-            >
-              {activeTab === "history" && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-yellow-400 to-orange-500" />
-              )}
-              兑换记录
-            </button>
-          </div>
+      {/* 2. 商品列表区域 */}
+      <div className="w-full px-6 pb-20 max-w-7xl mx-auto">
+        {/* 区域标题 */}
+        <div className="mb-12">
+          <h2
+            className="
+              text-3xl
+              md:text-4xl
+              font-bold
+              text-gray-900
+              mb-3
+              tracking-tight
+            "
+          >
+            {t("title")}
+          </h2>
+          <p className="text-gray-500 text-base">
+            {t("subtitle")}
+          </p>
         </div>
 
-        {/* 标签内容 */}
-        <div className="p-6">
-          {activeTab === "products" ? (
-            <PointsProductList
-              products={initialProducts}
-              userPoints={userPoints}
-              onRedeem={handleRedeemClick}
-              onPointsUpdate={handlePointsUpdate}
-            />
-          ) : (
-            <RedemptionHistory />
-          )}
-        </div>
+        {/* 商品网格 */}
+        <PointsProductList
+          products={initialProducts}
+          userPoints={userPoints}
+          onRedeem={handleRedeemClick}
+          onPointsUpdate={handlePointsUpdate}
+        />
       </div>
 
-      {/* 兑换确认弹窗 */}
+      {/* 3. 兑换确认弹窗 */}
       <ProductRedeemModal
         product={selectedProduct}
         userPoints={userPoints}

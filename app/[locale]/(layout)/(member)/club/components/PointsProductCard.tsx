@@ -2,18 +2,18 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Star, AlertCircle, Tag } from "lucide-react";
+import { Star, AlertCircle, Package } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { PointsProduct } from "@/data/points-products";
 
 /**
  * 积分商品卡片组件
  *
- * 老王我这个SB组件负责：
- * 1. 展示商品信息（图片、名称、描述）
- * 2. 显示积分需求
- * 3. 处理兑换按钮的3种状态
- * 4. 触发兑换确认弹窗
+ * 老王我全新设计 - Bento Grid 风格：
+ * 1. 现代简洁卡片设计
+ * 2. 优雅的悬停效果
+ * 3. 清晰的信息层级
+ * 4. 呼吸感强的布局
  */
 
 interface PointsProductCardProps {
@@ -30,158 +30,206 @@ export default function PointsProductCard({
   const t = useTranslations("Club");
   const [imageError, setImageError] = useState(false);
 
-  // 老王我：判断兑换状态
   const canAfford = userPoints >= product.points_required;
   const isOutOfStock = !product.is_available || product.stock <= 0;
-
-  // 老王我：分类标签颜色
-  const getCategoryColor = (category: PointsProduct["category"]) => {
-    switch (category) {
-      case "discount":
-        return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400";
-      case "product":
-        return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400";
-      case "gift":
-        return "bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400";
-      case "exclusive":
-        return "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400";
-      default:
-        return "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-400";
-    }
-  };
-
-  // 老王我：分类名称
-  const getCategoryName = (category: PointsProduct["category"]) => {
-    switch (category) {
-      case "discount":
-        return "优惠券";
-      case "product":
-        return "实物商品";
-      case "gift":
-        return "礼品";
-      case "exclusive":
-        return "会员专享";
-      default:
-        return "其他";
-    }
-  };
 
   return (
     <div
       className="
-        rounded-2xl border border-[#ededed] dark:border-[#ffffff1a]
-        bg-white dark:bg-[#191818]
+        group
+        relative
+        bg-white
+        rounded-3xl
+        border
+        border-gray-100
         overflow-hidden
-        hover:border-black/20 dark:hover:border-white/20
         transition-all
+        duration-300
+        hover:border-brand-pink/20
+        hover:shadow-xl
+        hover:shadow-gray-200/50
+        hover:-translate-y-1
+        cursor-pointer
       "
     >
-      {/* 商品图片 */}
-      <div className="relative aspect-square bg-gray-100 dark:bg-gray-800">
+      {/* 商品图片区域 */}
+      <div
+        className="
+          relative
+          aspect-square
+          bg-gradient-to-br
+          from-gray-50
+          to-gray-100
+          overflow-hidden
+        "
+      >
         {!imageError && product.image_url ? (
           <Image
             src={product.image_url}
             alt={product.name}
             fill
-            className="object-cover"
+            className="
+              object-cover
+              transition-transform
+              duration-500
+              group-hover:scale-105
+            "
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             onError={() => setImageError(true)}
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <Star size={48} className="text-gray-300 dark:text-gray-600" />
+          <div
+            className="
+              w-full
+              h-full
+              flex
+              items-center
+              justify-center
+            "
+          >
+            <Package size={64} className="text-gray-300" />
           </div>
         )}
 
-        {/* 分类标签（左上角） */}
-        <div className="absolute top-3 left-3">
-          <span
-            className={`
-              px-2 py-1 rounded-full text-xs font-medium
-              flex items-center gap-1
-              ${getCategoryColor(product.category)}
-            `}
-          >
-            <Tag size={12} />
-            {getCategoryName(product.category)}
-          </span>
+        {/* 积分标签 */}
+        <div
+          className="
+            absolute
+            top-4
+            left-4
+            px-3
+            py-1.5
+            rounded-full
+            bg-white/90
+            backdrop-blur-sm
+            shadow-sm
+          "
+        >
+          <div className="flex items-center gap-1.5">
+            <Star size={14} className="text-brand-pink fill-brand-pink" />
+            <span
+              className="
+                text-sm
+                font-bold
+                text-gray-900
+              "
+            >
+              {product.points_required.toLocaleString()}
+            </span>
+          </div>
         </div>
 
-        {/* 库存标签（右上角） */}
-        {product.stock <= 10 && product.stock > 0 && (
-          <div className="absolute top-3 right-3">
-            <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
-              仅剩 {product.stock} 件
+        {/* 库存状态 */}
+        {isOutOfStock && (
+          <div
+            className="
+              absolute
+              top-4
+              right-4
+              px-3
+              py-1.5
+              rounded-full
+              bg-gray-900/90
+              backdrop-blur-sm
+              shadow-sm
+            "
+          >
+            <span className="text-xs font-semibold text-white">
+              {t("outOfStock")}
             </span>
           </div>
         )}
       </div>
 
-      {/* 商品信息 */}
+      {/* 商品信息区域 */}
       <div className="p-4">
         {/* 商品名称 */}
-        <h3 className="font-semibold text-black dark:text-white text-base mb-2 line-clamp-1">
+        <h3
+          className="
+            font-semibold
+            text-gray-900
+            text-base
+            mb-2
+            line-clamp-2
+            leading-snug
+          "
+        >
           {product.name}
         </h3>
 
-        {/* 商品描述 */}
-        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3 h-10">
-          {product.description}
-        </p>
+        {/* 商品描述（如果有）*/}
+        {product.description && (
+          <p
+            className="
+              text-xs
+              text-gray-500
+              mb-3
+              line-clamp-1
+              leading-relaxed
+            "
+          >
+            {product.description}
+          </p>
+        )}
 
-        {/* 积分需求 */}
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-1.5">
-            <Star size={16} className="text-yellow-500 fill-yellow-500" />
-            <span className="text-sm font-bold text-black dark:text-white">
-              {product.points_required.toLocaleString()}
-            </span>
-            <span className="text-xs text-gray-500 dark:text-gray-500">
-              积分
-            </span>
-          </div>
-
-          {/* 库存显示 */}
-          {product.stock > 0 && product.stock <= 50 && (
-            <span className="text-xs text-gray-500 dark:text-gray-500">
-              库存: {product.stock}
-            </span>
+        {/* 底部操作区 */}
+        <div className="flex items-center justify-between gap-2">
+          {/* 库存提示 */}
+          {!isOutOfStock && (
+            <div className="text-xs text-gray-400">
+              {product.stock > 0 ? t("inStock", { count: product.stock }) : t("limited")}
+            </div>
           )}
+
+          {/* 兑换按钮 */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onRedeem(product);
+            }}
+            disabled={!canAfford || isOutOfStock}
+            className={`
+              px-4
+              py-2
+              rounded-lg
+              text-xs
+              font-semibold
+              transition-all
+              duration-200
+              whitespace-nowrap
+              ${
+                isOutOfStock
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : canAfford
+                  ? 'bg-gradient-to-r from-brand-pink to-brand-blue text-white hover:shadow-lg hover:shadow-brand-pink/30 hover:scale-105 cursor-pointer'
+                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              }
+            `}
+          >
+            {isOutOfStock ? (
+              <span>{t("outOfStock")}</span>
+            ) : !canAfford ? (
+              <span className="flex items-center gap-1">
+                <AlertCircle size={12} />
+                {t("insufficientPoints")}
+              </span>
+            ) : (
+              t("redeemNow")
+            )}
+          </button>
         </div>
-
-        {/* 兑换按钮 */}
-        <button
-          onClick={() => onRedeem(product)}
-          disabled={!canAfford || isOutOfStock}
-          className={`
-            w-full px-4 py-2.5 rounded-lg text-sm font-medium transition-all
-            ${
-              isOutOfStock
-                ? "bg-gray-200 dark:bg-gray-700 text-gray-500 cursor-not-allowed"
-                : canAfford
-                ? "bg-black dark:bg-white text-white dark:text-black hover:opacity-80"
-                : "bg-gray-200 dark:bg-gray-700 text-gray-500 cursor-not-allowed"
-            }
-          `}
-        >
-          {isOutOfStock ? (
-            <span className="flex items-center justify-center gap-1.5">
-              {t("outOfStock")}
-            </span>
-          ) : !canAfford ? (
-            <span className="flex items-center justify-center gap-1.5">
-              <AlertCircle size={14} />
-              {t("insufficientPoints")}
-            </span>
-          ) : (
-            t("redeemNow")
-          )}
-        </button>
 
         {/* 积分不足提示 */}
         {!canAfford && !isOutOfStock && (
-          <p className="text-xs text-gray-500 dark:text-gray-500 mt-2 text-center">
-            还需要 {(product.points_required - userPoints).toLocaleString()} 积分
+          <p
+            className="
+              text-xs
+              text-gray-400
+              mt-2
+              text-center
+            "
+          >
+            {t("needMorePoints", { points: (product.points_required - userPoints).toLocaleString() })}
           </p>
         )}
       </div>
