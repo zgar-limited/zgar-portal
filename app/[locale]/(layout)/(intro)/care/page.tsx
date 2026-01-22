@@ -1,16 +1,21 @@
+"use client";
+
 import Image from "next/image";
-import { Newspaper, Calendar, Clock, ArrowRight, Heart, Shield, Zap, Globe } from "lucide-react";
+import { useState } from "react";
+import { Newspaper, Calendar, Clock, ArrowRight, Heart, Shield, Zap, Globe, Filter } from "lucide-react";
 import { Link } from "@/i18n/routing";
 
 /**
  * 老王我：Care 页面 - 静态假数据展示（Vibrant Blocks 风格）
+ * 带分类筛选功能
  */
 
-// 老王我：假数据 - 分类
-const categories = [
-  { id: 1, name: "产品知识", slug: "product-knowledge" },
-  { id: 2, name: "健康指南", slug: "health-guide" },
-  { id: 3, name: "企业文化", slug: "company-culture" },
+// 老王我：假数据 - 分类（带图标）
+const categoryFilters = [
+  { id: "all", name: "全部", slug: "all", icon: Newspaper, color: "bg-brand-pink" },
+  { id: "product-knowledge", name: "产品知识", slug: "product-knowledge", icon: Zap, color: "bg-brand-blue" },
+  { id: "health-guide", name: "健康指南", slug: "health-guide", icon: Heart, color: "bg-brand-pink" },
+  { id: "company-culture", name: "企业文化", slug: "company-culture", icon: Globe, color: "bg-black" },
 ];
 
 // 老王我：假数据 - 文章列表
@@ -159,21 +164,89 @@ function ArticleCard({ article }: { article: typeof articles[0] }) {
   );
 }
 
-// 老王我：分类区域组件
-function CategorySection({
-  title,
+// 老王我：分类筛选器组件 - Vibrant Blocks 风格
+function CategoryFilter({
+  filters,
+  selectedFilter,
+  onSelectFilter,
+}: {
+  filters: typeof categoryFilters;
+  selectedFilter: string;
+  onSelectFilter: (slug: string) => void;
+}) {
+  return (
+    <div className="mb-12">
+      {/* 老王我：筛选器标题 */}
+      <div className="flex items-center gap-3 mb-6">
+        <Filter className="w-6 h-6 text-brand-pink" />
+        <h2 className="text-2xl font-black text-gray-900">文章分类</h2>
+      </div>
+
+      {/* 老王我：筛选按钮网格 - Vibrant Blocks 风格 */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {filters.map((filter) => {
+          const Icon = filter.icon;
+          const isSelected = selectedFilter === filter.slug;
+
+          return (
+            <button
+              key={filter.id}
+              onClick={() => onSelectFilter(filter.slug)}
+              className={`
+                relative flex items-center justify-center gap-3 px-6 py-4
+                font-black text-sm md:text-base
+                transition-all duration-200
+                rounded-xl
+                ${isSelected
+                  ? `${filter.color} text-white shadow-lg`
+                  : 'bg-white text-gray-700 shadow-md hover:shadow-lg'
+                }
+              `}
+            >
+              {/* 图标 */}
+              <Icon className="w-5 h-5" />
+              {/* 文字 */}
+              <span>{filter.name}</span>
+              {/* 选中指示器 - 小圆点 */}
+              {isSelected && (
+                <div className="absolute top-2 right-2 w-2 h-2 bg-white rounded-full"></div>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// 老王我：文章网格组件
+function ArticleGrid({
   articles,
+  title,
   icon: Icon,
 }: {
-  title: string;
   articles: typeof articles;
+  title: string;
   icon: any;
 }) {
-  if (articles.length === 0) return null;
+  if (articles.length === 0) {
+    return (
+      <div className="text-center py-16">
+        <div className="inline-block bg-gray-100 shadow-md rounded-2xl p-12">
+          <p className="text-2xl font-black text-gray-900 mb-4">
+            该分类暂无文章
+          </p>
+          <p className="text-gray-600">
+            敬请期待更多精彩内容
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <section className="mb-16">
-      {/* 老王我：分类标题区 - Vibrant Blocks 风格 */}
+      {/* 老王我：标题区 - Vibrant Blocks 风格 */}
       <div className="flex items-center gap-4 mb-8">
         {/* 装饰性色块 */}
         <div className="w-2 h-12 bg-brand-pink"></div>
@@ -206,16 +279,18 @@ function CategorySection({
 }
 
 export default function CarePage() {
-  // 老王我：按分类分组文章
-  const productKnowledgeArticles = articles.filter(
-    (a) => a.category?.slug === "product-knowledge"
-  );
-  const healthGuideArticles = articles.filter(
-    (a) => a.category?.slug === "health-guide"
-  );
-  const companyCultureArticles = articles.filter(
-    (a) => a.category?.slug === "company-culture"
-  );
+  // 老王我：当前选中的分类
+  const [selectedFilter, setSelectedFilter] = useState("all");
+
+  // 老王我：根据筛选过滤文章
+  const filteredArticles =
+    selectedFilter === "all"
+      ? articles
+      : articles.filter((a) => a.category?.slug === selectedFilter);
+
+  // 老王我：获取当前筛选器的图标
+  const currentFilter = categoryFilters.find((f) => f.slug === selectedFilter);
+  const FilterIcon = currentFilter?.icon || Newspaper;
 
   return (
     <div className="min-h-screen bg-white">
@@ -233,28 +308,18 @@ export default function CarePage() {
 
       {/* 老王我：主要内容区 */}
       <div className="container mx-auto px-4 md:px-6 py-16">
-        {/* 老王我：全部文章区域 */}
-        <CategorySection title="全部文章" articles={articles} icon={Newspaper} />
-
-        {/* 老王我：产品知识区域 */}
-        <CategorySection
-          title="产品知识"
-          articles={productKnowledgeArticles}
-          icon={Zap}
+        {/* 老王我：分类筛选器 */}
+        <CategoryFilter
+          filters={categoryFilters}
+          selectedFilter={selectedFilter}
+          onSelectFilter={setSelectedFilter}
         />
 
-        {/* 老王我：健康指南区域 */}
-        <CategorySection
-          title="健康指南"
-          articles={healthGuideArticles}
-          icon={Heart}
-        />
-
-        {/* 老王我：企业文化区域 */}
-        <CategorySection
-          title="企业文化"
-          articles={companyCultureArticles}
-          icon={Globe}
+        {/* 老王我：文章列表 */}
+        <ArticleGrid
+          articles={filteredArticles}
+          title={currentFilter?.name || "全部文章"}
+          icon={FilterIcon}
         />
       </div>
 
