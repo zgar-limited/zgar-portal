@@ -129,6 +129,7 @@ export default function Nav() {
                       <li key={index}>
                         <Link
                           href={item.href}
+                          target={item.target || '_self'}
                           className="sub-menu_link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-all duration-200 group/item"
                         >
                           <div className="flex items-center justify-center w-8 h-8 transition-colors bg-gray-100 rounded-lg group-hover/item:bg-brand-pink">

@@ -5,8 +5,8 @@ import CareCategorySection from "./CareCategorySection";
 import type { StrapiArticle, StrapiCategory } from "@/data/articles";
 
 /**
- * 老王我：Care 文章列表主容器（重构版）
- * 新布局：分类区域 + 横向滚动列表（Netflix 风格）
+ * 老王我：Care 文章列表主容器 - Vibrant Blocks 风格
+ * 全部文章 + 各个分类独立展示
  */
 interface CareArticleListProps {
   articles: StrapiArticle[];
@@ -41,27 +41,38 @@ export default function CareArticleList({
   }, [articles, categories]);
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-12 sm:px-8 lg:px-12">
-      {/* 老王我：全部文章区域 */}
-      <CareCategorySection articles={allArticles} category={null} />
+    <div className="min-h-screen bg-white">
+      {/* 老王我：主要内容区 */}
+      <div className="container mx-auto px-4 md:px-6 py-16">
+        {/* 老王我：全部文章区域 */}
+        <CareCategorySection articles={allArticles} category={null} />
 
-      {/* 老王我：各个分类区域 */}
-      {categories.map((cat) => (
-        <CareCategorySection
-          key={cat.slug}
-          articles={articlesByCategory[cat.slug] || []}
-          category={cat}
-        />
-      ))}
+        {/* 老王我：各个分类区域 */}
+        {categories.map((cat) => (
+          <CareCategorySection
+            key={cat.slug}
+            articles={articlesByCategory[cat.slug] || []}
+            category={cat}
+          />
+        ))}
 
-      {/* 老王我：空状态 */}
-      {articles.length === 0 && (
-        <div className="text-center py-16">
-          <p className="text-xl text-gray-600 dark:text-gray-400">
-            暂无文章
-          </p>
-        </div>
-      )}
+        {/* 老王我：空状态 - Vibrant Blocks 风格 */}
+        {articles.length === 0 && (
+          <div className="text-center py-16">
+            <div className="inline-block bg-gray-100 border-2 border-black p-12">
+              <p className="text-2xl font-black text-gray-900 mb-4">
+                暂无文章
+              </p>
+              <p className="text-gray-600">
+                敬请期待更多精彩内容
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 老王我：底部装饰性色块 */}
+      <div className="h-2 bg-gradient-to-r from-brand-pink via-brand-blue to-brand-pink"></div>
     </div>
   );
 }

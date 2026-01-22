@@ -3,8 +3,8 @@ import { Link } from "@/i18n/routing";
 import type { StrapiBanner } from "@/data/articles";
 
 /**
- * 老王我：Care 页面 Banner 组件
- * 从 Strapi CMS 动态获取 Banner 数据，支持图片、标题、描述和链接
+ * 老王我：Care 页面 Banner 组件 - Vibrant Blocks 风格
+ * 纯图片展示，宽屏，高度自动
  */
 interface CareBannerProps {
   banner: StrapiBanner;
@@ -16,50 +16,18 @@ export default function CareBanner({ banner }: CareBannerProps) {
     ? `${process.env.STRAPI_URL}${banner.image.url}`
     : "/images/care/banner.webp"; // 降级到默认图片
 
-  // 老王我：Banner 内容组件
+  // 老王我：纯图片 Banner（跟 About Us 和 Partner 保持一致）
   const BannerContent = () => (
-    <div className="overflow-hidden page_image">
+    <section className="w-full">
       <Image
-        className="lazyload ani-zoom"
         src={imageUrl}
         alt={banner.title || "Care Banner"}
-        width={2880}
-        height={750}
+        width={1920}
+        height={0}
+        className="w-full h-auto"
         priority
       />
-      {/* 老王我：可选的标题和描述 */}
-      {(banner.title || banner.description) && (
-        <div className="banner-content" style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          textAlign: 'center',
-          color: 'white',
-          textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
-          zIndex: 10,
-        }}>
-          {banner.title && (
-            <h1 style={{
-              fontSize: '3rem',
-              fontWeight: 'bold',
-              marginBottom: '1rem',
-            }}>
-              {banner.title}
-            </h1>
-          )}
-          {banner.description && (
-            <p style={{
-              fontSize: '1.25rem',
-              maxWidth: '800px',
-              margin: '0 auto',
-            }}>
-              {banner.description}
-            </p>
-          )}
-        </div>
-      )}
-    </div>
+    </section>
   );
 
   // 老王我：如果有链接，用 Link 组件包裹
