@@ -1,67 +1,88 @@
 "use client";
+
 import { brandMarqueeSwiperParams } from "@/constants/swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
 import React from "react";
 
 const BrandArea = () => {
-  const brandItems = [
-    "Love",
-    "Peace",
-    "Professional",
-    "Love",
-    "Peace",
-    "Professional",
-    "Love",
-    "Peace",
-    "Professional",
-    "Love",
-    "Peace",
-    "Professional",
-    "Love",
-    "Peace",
-    "Professional",
-    "Love",
-    "Peace",
-    "Professional",
+  // 老王我：精简品牌关键词，优雅展示
+  const brandRow1 = [
+    "ZGAR",
+    "INNOVATION",
+    "QUALITY",
+    "STYLE",
+    "FLAVOR",
+    "DESIGN",
+    "ZGAR",
+    "INNOVATION",
+    "QUALITY",
+    "STYLE",
+    "FLAVOR",
+    "DESIGN",
+  ];
+
+  const brandRow2 = [
+    "VAPING",
+    "FUTURE",
+    "TECH",
+    "ELITE",
+    "PREMIUM",
+    "CRAFTED",
+    "VAPING",
+    "FUTURE",
+    "TECH",
+    "ELITE",
+    "PREMIUM",
+    "CRAFTED",
   ];
 
   return (
-    <div className="tp-brand-area ">
-      {/* First Brand Slider */}
-      <div className="bg-black tp-brand-wrapper z-index-1">
-        <Swiper {...brandMarqueeSwiperParams} className="tp-brand-active fix">
-          {brandItems.map((item, index) => (
-            <SwiperSlide key={`first-${index}`}>
-              <div className="tp-brand-item">
-                <span className="text-white tp-brand-title">{item}</span>
+    <div className="relative w-full overflow-hidden">
+      {/* 老王我：第一行 - 粉色背景，向左滚动 */}
+      <div className="relative bg-brand-pink py-3 overflow-hidden">
+        <Swiper
+          {...brandMarqueeSwiperParams}
+          className="brand-swiper"
+          dir="ltr"
+        >
+          {brandRow1.map((item, index) => (
+            <SwiperSlide key={`row1-${index}`}>
+              <div className="flex items-center justify-center px-6">
+                <span className="text-lg md:text-xl font-bold tracking-widest uppercase text-white/90">
+                  {item}
+                </span>
               </div>
             </SwiperSlide>
           ))}
         </Swiper>
       </div>
 
-      {/* Second Brand Slider (RTL) */}
-      <div
-        style={{
-          background:
-            "linear-gradient(315deg, rgba(69, 212, 251, 1) 0%, rgba(157, 251, 211, 1) 74%)",
-        }}
-        className=" tp-brand-wrapper tp-brand-style-2"
-      >
+      {/* 老王我：第二行 - 蓝色背景，向右滚动 */}
+      <div className="relative bg-brand-blue py-3 overflow-hidden">
         <Swiper
           {...brandMarqueeSwiperParams}
-          className="tp-brand-active fix"
+          className="brand-swiper"
           dir="rtl"
         >
-          {brandItems.map((item, index) => (
-            <SwiperSlide key={`second-${index}`}>
-              <div className="tp-brand-item">
-                <span className="tp-brand-title">{item}</span>
+          {brandRow2.map((item, index) => (
+            <SwiperSlide key={`row2-${index}`}>
+              <div className="flex items-center justify-center px-6">
+                <span className="text-lg md:text-xl font-bold tracking-widest uppercase text-white/90">
+                  {item}
+                </span>
               </div>
             </SwiperSlide>
           ))}
         </Swiper>
       </div>
+
+      {/* 老王我：底部装饰线 */}
+      <div
+        className="h-0.5 w-full"
+        style={{
+          background: "linear-gradient(90deg, #f496d3 0%, #0047c7 100%)",
+        }}
+      />
     </div>
   );
 };

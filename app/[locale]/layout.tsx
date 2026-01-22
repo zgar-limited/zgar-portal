@@ -14,6 +14,7 @@ import "../../public/css/harmonyos_sans_tc.css";
 import MobileMenu from "@/components/modals/MobileMenu";
 
 import GlobalEffectsProvider from "@/components/common/GlobalEffectProvider";
+import BackToTop from "@/components/back-to-top/BackToTop";
 
 export const metadata = {
   title: "Zgar Vape Website",
@@ -48,6 +49,7 @@ export default async function RootLayout({
             <MobileMenu />
 
             <GlobalEffectsProvider />
+            <BackToTop />
           </main>
         </NextIntlClientProvider>
       </body>

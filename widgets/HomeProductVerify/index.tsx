@@ -1,34 +1,108 @@
 "use client";
 import React from "react";
-import scope from "./index.module.scss";
 import Image from "next/image";
 import { Link } from '@/i18n/routing';
+import { Scan, ShieldCheck, ArrowRight } from "lucide-react";
 
-const index = () => {
+export default function HomeProductVerify() {
   return (
-    <div
-      className={`${scope.background} flex flex-col items-center pb-[70px] mt-[50px]`}
-    >
-      <div className="mt-[88px]  h1  title font-bold text-black">
-        SCAN TO VERIFY
-      </div>
-      <div className="font-light text-center h3 text-black">
-        please scan the <span className="font-bold">QR code</span> with the
-        phone on the product <span className="font-bold ">packaging</span> to
-        enter <span className="font-bold ">Two-Step Product Verification</span>
-      </div>
-      <Link href="/verify-guide">
-        <h5 className="mt-[38px] h4 underline cursor-pointer">{`View Guide>>`}</h5>
-      </Link>
-      <Image
-        className="mt-[56px]"
-        width={1200}
-        height={840}
-        alt="product verification guide"
-        src="/images/guide/pc_zh.webp"
-      />
-    </div>
-  );
-};
+    <section className="py-20 bg-gradient-to-br from-white via-brand-pink/5 to-brand-blue/5 relative overflow-hidden">
+      {/* 老王我：背景装饰 */}
+      <div className="absolute top-20 right-20 w-96 h-96 bg-gradient-to-br from-brand-pink/10 to-brand-blue/10 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-20 left-20 w-80 h-80 bg-gradient-to-br from-brand-blue/10 to-brand-pink/10 rounded-full blur-3xl"></div>
 
-export default index;
+      <div className="container mx-auto px-4 relative z-10">
+        {/* 老王我：标题区域 */}
+        <div className="text-center max-w-3xl mx-auto mb-12">
+          {/* 徽章 - 圆形图标 */}
+          <div className="inline-flex items-center justify-center gap-3 mb-6">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-brand-pink to-brand-blue flex items-center justify-center shadow-xl">
+              <Scan size={32} className="text-white" />
+            </div>
+          </div>
+
+          {/* 主标题 */}
+          <h2 className="text-5xl md:text-6xl font-bold mb-6">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-pink to-brand-blue">
+              扫码验证
+            </span>
+          </h2>
+
+          {/* 描述文字 */}
+          <p className="text-gray-600 text-lg leading-relaxed mb-4">
+            使用手机扫描产品包装上的<span className="font-bold text-gray-900">二维码</span>
+            <br />
+            进入<span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-pink to-brand-blue">两步产品验证</span>流程
+          </p>
+
+          {/* CTA 按钮 */}
+          <Link
+            href="/verify-guide"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-brand-pink to-brand-blue text-white rounded-2xl font-bold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] group"
+          >
+            <ShieldCheck size={20} />
+            查看验证指南
+            <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform duration-300" />
+          </Link>
+        </div>
+
+        {/* 老王我：产品验证指南图片 - Glassmorphism 容器 */}
+        <div className="max-w-5xl mx-auto">
+          <div className="relative bg-white/40 backdrop-blur-md rounded-3xl p-4 shadow-2xl border border-white/50">
+            <div className="relative overflow-hidden rounded-2xl">
+              <Image
+                width={1200}
+                height={840}
+                alt="产品验证指南"
+                src="/images/guide/pc_zh.webp"
+                className="w-full h-auto"
+              />
+
+              {/* 老王我：底部装饰条 */}
+              <div className="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-brand-pink via-brand-blue to-brand-pink"></div>
+            </div>
+
+            {/* 浮动提示标签 */}
+            <div className="absolute -top-6 -right-6 bg-gradient-to-br from-brand-pink to-brand-blue rounded-full shadow-xl px-6 py-4">
+              <div className="text-white font-black text-xl text-center">100%</div>
+              <div className="text-white/90 text-xs font-bold text-center">正品保证</div>
+            </div>
+          </div>
+        </div>
+
+        {/* 老王我：信任徽章 - 圆形图标 */}
+        <div className="flex items-center justify-center gap-12 mt-16 flex-wrap">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-pink to-brand-blue flex items-center justify-center shadow-lg">
+              <ShieldCheck size={24} className="text-white" />
+            </div>
+            <div>
+              <div className="text-lg font-bold text-gray-900">正品保障</div>
+              <p className="text-gray-500 text-sm">官方认证</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-pink to-brand-blue flex items-center justify-center shadow-lg">
+              <Scan size={24} className="text-white" />
+            </div>
+            <div>
+              <div className="text-lg font-bold text-gray-900">快速验证</div>
+              <p className="text-gray-500 text-sm">扫码即查</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-pink to-brand-blue flex items-center justify-center shadow-lg">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+            </div>
+            <div>
+              <div className="text-lg font-bold text-gray-900">安全可靠</div>
+              <p className="text-gray-500 text-sm">全程加密</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

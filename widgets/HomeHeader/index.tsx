@@ -72,7 +72,7 @@ export default function HomeHeader({
           {/* Navigation Menu */}
           <div className="hidden xl:block flex-1 ml-8">
             <nav className="box-navigation">
-              <ul className="box-nav-menu flex items-center gap-2">
+              <ul className="box-nav-menu flex items-center justify-center gap-2">
                 <Nav />
               </ul>
             </nav>
