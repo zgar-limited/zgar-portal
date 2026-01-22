@@ -67,12 +67,12 @@ export default function Nav() {
     },
     {
       key: "contact",
-      href: "/contact-us",
+      href: "https://docs.google.com/forms/d/e/1FAIpQLSfldYo7ddIAghTH67MDuuZAwV1fEP0aGcKz-L-kKRAaCctKZg/viewform",
       label: t("contact"),
       hasDropdown: true,
       items: [
         {
-          href: "/register",
+          href: "https://docs.google.com/forms/d/e/1FAIpQLSfldYo7ddIAghTH67MDuuZAwV1fEP0aGcKz-L-kKRAaCctKZg/viewform",
           label: t("contact_sub.wholesaler"),
           icon: UserPlus,
         },
@@ -88,7 +88,7 @@ export default function Nav() {
           href="/"
           className="item-link relative text-sm font-semibold text-gray-700 hover:text-brand-pink transition-all duration-200 rounded-xl px-4 py-2.5 flex items-center gap-2.5 group"
         >
-          <Home size={18} className="text-gray-500 group-hover:text-brand-pink transition-colors" />
+          <Home size={18} className="text-gray-500 transition-colors group-hover:text-brand-pink" />
           <span>{t("home")}</span>
         </Link>
       </li>
@@ -97,7 +97,7 @@ export default function Nav() {
       {menuItems.map((menu) => (
         <li
           key={menu.key}
-          className="menu-item relative"
+          className="relative menu-item"
         >
           {/* 包装整个菜单区域 - 包括菜单项和下拉菜单 */}
           <div
@@ -108,9 +108,9 @@ export default function Nav() {
               href={menu.href}
               className="item-link relative text-sm font-semibold text-gray-700 hover:text-brand-pink transition-all duration-200 rounded-xl px-4 py-2.5 flex items-center gap-2.5 group"
             >
-              {menu.key === 'products' && <Box size={18} className="text-gray-500 group-hover:text-brand-pink transition-colors" />}
-              {menu.key === 'about' && <Info size={18} className="text-gray-500 group-hover:text-brand-pink transition-colors" />}
-              {menu.key === 'contact' && <Handshake size={18} className="text-gray-500 group-hover:text-brand-pink transition-colors" />}
+              {menu.key === 'products' && <Box size={18} className="text-gray-500 transition-colors group-hover:text-brand-pink" />}
+              {menu.key === 'about' && <Info size={18} className="text-gray-500 transition-colors group-hover:text-brand-pink" />}
+              {menu.key === 'contact' && <Handshake size={18} className="text-gray-500 transition-colors group-hover:text-brand-pink" />}
               <span>{menu.label}</span>
               {menu.hasDropdown && <ChevronDown className="h-4 w-4 ml-0.5 text-gray-400 group-hover:text-brand-pink transition-transform group-hover:rotate-180" />}
             </Link>
@@ -119,7 +119,7 @@ export default function Nav() {
             {menu.hasDropdown && openMenu === menu.key && (
               <div className="sub-menu absolute left-0 top-full mt-2 min-w-[240px] rounded-xl bg-white shadow-lg p-2 z-50 border border-gray-200">
                 <div className="absolute -top-1.5 left-6 w-3 h-3 bg-white border-l border-t border-gray-200 transform rotate-45"></div>
-                <ul className="sub-menu_list flex flex-col gap-1">
+                <ul className="flex flex-col gap-1 sub-menu_list">
                   {menu.items.map((item, index) => {
                     const Icon = item.icon;
                     return (
@@ -128,8 +128,8 @@ export default function Nav() {
                           href={item.href}
                           className="sub-menu_link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-all duration-200 group/item"
                         >
-                          <div className="w-8 h-8 rounded-lg bg-gray-100 group-hover/item:bg-brand-pink flex items-center justify-center transition-colors">
-                            <Icon size={16} className="text-gray-600 group-hover/item:text-white transition-colors" />
+                          <div className="flex items-center justify-center w-8 h-8 transition-colors bg-gray-100 rounded-lg group-hover/item:bg-brand-pink">
+                            <Icon size={16} className="text-gray-600 transition-colors group-hover/item:text-white" />
                           </div>
                           <span>{item.label}</span>
                         </Link>
@@ -149,7 +149,7 @@ export default function Nav() {
           href="/care"
           className="item-link relative text-sm font-semibold text-gray-700 hover:text-brand-pink transition-all duration-200 rounded-xl px-4 py-2.5 flex items-center gap-2.5 group"
         >
-          <Heart size={18} className="text-gray-500 group-hover:text-brand-pink transition-colors" />
+          <Heart size={18} className="text-gray-500 transition-colors group-hover:text-brand-pink" />
           <span>{t("care")}</span>
         </Link>
       </li>
@@ -160,7 +160,7 @@ export default function Nav() {
           href="/verify-guide"
           className="item-link relative text-sm font-semibold text-gray-700 hover:text-brand-pink transition-all duration-200 rounded-xl px-4 py-2.5 flex items-center gap-2.5 group"
         >
-          <Shield size={18} className="text-gray-500 group-hover:text-brand-pink transition-colors" />
+          <Shield size={18} className="text-gray-500 transition-colors group-hover:text-brand-pink" />
           <span>{t("authentication")}</span>
         </Link>
       </li>
