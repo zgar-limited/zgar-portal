@@ -167,15 +167,15 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
         {/* 老王我：价格展示 - Vibrant Blocks 适中尺寸 */}
         <div className="relative inline-block group">
           {/* 老王我：装饰性几何形状 */}
-          <div className="absolute -top-2 -left-2 w-12 h-12 bg-brand-pink/20 rounded-2xl transform -rotate-12 group-hover:rotate-6 transition-transform duration-300"></div>
-          <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-brand-blue/20 rounded-xl transform rotate-12 group-hover:-rotate-6 transition-transform duration-300"></div>
+          <div className="absolute -top-1.5 -left-1.5 w-10 h-10 bg-brand-pink/20 rounded-2xl transform -rotate-12 group-hover:rotate-6 transition-transform duration-300"></div>
+          <div className="absolute -bottom-1.5 -right-1.5 w-8 h-8 bg-brand-blue/20 rounded-xl transform rotate-12 group-hover:-rotate-6 transition-transform duration-300"></div>
 
-          <div className="relative bg-gradient-to-br from-brand-pink via-brand-pink to-brand-blue p-6 rounded-2xl shadow-xl border-2 border-white">
-            <div className="flex items-baseline gap-3">
-              <span className="text-4xl lg:text-5xl font-black text-white tracking-tight">
+          <div className="relative bg-gradient-to-br from-brand-pink via-brand-pink to-brand-blue p-5 rounded-2xl shadow-lg border-2 border-white">
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl lg:text-4xl font-black text-white tracking-tight">
                 ${price.toFixed(2)}
               </span>
-              <span className="text-base text-white/95 font-semibold">{t("perPiece")}</span>
+              <span className="text-sm text-white/95 font-semibold">{t("perPiece")}</span>
             </div>
           </div>
         </div>
@@ -363,61 +363,6 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
           </div>
         </div>
       </div>
-
-      {/* 老王我：箱规和重量信息 */}
-      {product?.metadata && (
-        <div className="bg-gray-50 rounded-2xl p-6 shadow-md">
-          <h3 className="text-lg font-black text-gray-900 mb-4 flex items-center gap-2">
-            <Package className="w-5 h-5 text-brand-pink" />
-            {t("productSpecs")}
-          </h3>
-
-          <div className="space-y-3">
-            {Object.keys(product.metadata)
-              .filter(key => key.startsWith('package_spec_'))
-              .sort((a, b) => {
-                const order = [
-                  'package_spec_shipment_box_contains',
-                  'package_spec_product_size',
-                  'package_spec_product_weight',
-                  'package_spec_packaging_box_size',
-                  'package_spec_packaging_box_weight',
-                  'package_spec_outer_box_size',
-                  'package_spec_outer_box_weight',
-                  'package_spec_shipment_box_size',
-                  'package_spec_shipment_box_weight'
-                ];
-                const indexA = order.indexOf(a);
-                const indexB = order.indexOf(b);
-                return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
-              })
-              .map(key => {
-                const value = product.metadata[key];
-                if (!value) return null;
-
-                const labelKey = key.replace('package_spec_', '');
-                const labelText = t(`spec_${labelKey}`);
-
-                let displayValue = value;
-                if (key.includes('_weight')) {
-                  displayValue = formatWeight(value, locale);
-                }
-
-                return (
-                  <div key={key} className="flex items-start gap-3 bg-white p-3 rounded-xl shadow-sm">
-                    <div className="w-8 h-8 bg-brand-pink/10 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <Package size={16} className="text-brand-pink" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-xs text-gray-500 mb-1">{labelText}</p>
-                      <p className="text-sm font-black text-gray-900">{displayValue}</p>
-                    </div>
-                  </div>
-                );
-              })}
-          </div>
-        </div>
-      )}
 
       {/* 老王我：固定购物车按钮 */}
       <FixedProductActions
