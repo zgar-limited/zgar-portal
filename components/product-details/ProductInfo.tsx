@@ -148,10 +148,10 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
       <div>
         {product.collection && (
           <div className="mb-6 inline-block">
-            {/* 老王我：Vibrant Blocks 风格分类标签 - 大胆几何形状 */}
+            {/* 老王我：Vibrant Blocks 超大分类标签 */}
             <div className="relative inline-block">
-              <div className="absolute inset-0 bg-brand-blue transform rotate-2 rounded-2xl"></div>
-              <span className="relative inline-block bg-brand-blue text-white px-6 py-3 text-base font-black uppercase tracking-widest rounded-2xl border-4 border-white shadow-xl">
+              <div className="absolute inset-0 bg-brand-blue transform rotate-3 rounded-2xl shadow-lg"></div>
+              <span className="relative inline-block bg-brand-blue text-white px-8 py-4 text-lg font-black uppercase tracking-widest rounded-2xl border-[5px] border-white shadow-2xl">
                 {product.collection.title}
               </span>
             </div>
@@ -164,33 +164,35 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
           <p className="mb-6 text-xl text-gray-600 font-semibold">{product.title}</p>
         )}
 
-        {/* 老王我：价格展示 - Vibrant Blocks 适中尺寸 */}
+        {/* 老王我：价格展示 - 超大胆色块 */}
         <div className="relative inline-block group">
-          {/* 老王我：装饰性几何形状 */}
-          <div className="absolute -top-1.5 -left-1.5 w-10 h-10 bg-brand-pink/20 rounded-2xl transform -rotate-12 group-hover:rotate-6 transition-transform duration-300"></div>
-          <div className="absolute -bottom-1.5 -right-1.5 w-8 h-8 bg-brand-blue/20 rounded-xl transform rotate-12 group-hover:-rotate-6 transition-transform duration-300"></div>
+          {/* 老王我：大装饰块 */}
+          <div className="absolute -top-2 -left-2 w-14 h-14 bg-brand-pink/30 rounded-2xl transform -rotate-12 group-hover:rotate-6 transition-transform duration-300 shadow-md"></div>
+          <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-brand-blue/30 rounded-xl transform rotate-12 group-hover:-rotate-6 transition-transform duration-300 shadow-md"></div>
+          <div className="absolute top-1/2 -left-8 w-3 h-20 bg-brand-pink -translate-y-1/2 rounded-lg shadow-md transform -rotate-12"></div>
+          <div className="absolute top-1/2 -right-8 w-3 h-20 bg-brand-blue -translate-y-1/2 rounded-lg shadow-md transform rotate-12"></div>
 
-          <div className="relative bg-gradient-to-br from-brand-pink via-brand-pink to-brand-blue p-5 rounded-2xl shadow-lg border-2 border-white">
-            <div className="flex items-baseline gap-2">
-              <span className="text-3xl lg:text-4xl font-black text-white tracking-tight">
+          <div className="relative bg-gradient-to-br from-brand-pink via-brand-pink to-brand-blue p-6 rounded-2xl shadow-2xl border-[5px] border-white">
+            <div className="flex items-baseline gap-3">
+              <span className="text-4xl lg:text-5xl font-black text-white tracking-tight">
                 ${price.toFixed(2)}
               </span>
-              <span className="text-sm text-white/95 font-semibold">{t("perPiece")}</span>
+              <span className="text-base text-white/95 font-semibold">{t("perPiece")}</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 老王我：分隔线 - 粗壮渐变线条 */}
-      <div className="h-2 bg-gradient-to-r from-brand-pink via-brand-blue to-brand-pink rounded-full shadow-md"></div>
+      {/* 老王我：分隔线 - 超粗渐变线条 */}
+      <div className="h-3 bg-gradient-to-r from-brand-pink via-brand-blue to-brand-pink rounded-full shadow-lg"></div>
 
       {/* 老王我：描述预览 */}
       {product.description && (
         <p className="text-lg text-gray-600 leading-relaxed">{product.description}</p>
       )}
 
-      {/* 老王我：规格选择 - 极简紧凑布局 */}
-      <div className="space-y-4">
+      {/* 老王我：规格选择 - 大胆色块装饰 */}
+      <div className="space-y-6">
         {product.options?.map((option, optionIndex) => {
           const localeKey = locale.toLowerCase().replace('-', '_');
           const optionTitleKey = `option_title_${localeKey}_opt_${option.id}`;
@@ -205,31 +207,34 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
           const titleColor = titleColors[optionIndex % titleColors.length];
 
           return (
-            <div key={option.id} className="space-y-3">
-              {/* 老王我：标题 + 已选值（紧凑单行） */}
-              <div className="flex items-center justify-between">
-                <h3 className={`text-base font-black ${titleColor}`}>
-                  {localizedTitle}
-                </h3>
-                {selectedOptions[option.id] && (
-                  <span className="text-sm font-semibold text-gray-600">
-                    {
-                      (() => {
-                        const selectedValue = selectedOptions[option.id];
-                        const selectedValueObj = option.values?.find((v: any) => v.value === selectedValue);
-                        if (selectedValueObj?.id) {
-                          const optionValueKey = `option_value_${localeKey}_${selectedValueObj.id}`;
-                          return (product.metadata as any)?.[optionValueKey] || selectedValue;
-                        }
-                        return selectedValue;
-                      })()
-                    }
-                  </span>
-                )}
+            <div key={option.id} className="space-y-4">
+              {/* 老王我：标题区域带装饰 */}
+              <div className="relative">
+                <div className="absolute -left-2 top-1/2 w-2 h-12 bg-brand-pink -translate-y-1/2 rounded-lg transform -rotate-6"></div>
+                <div className="flex items-center justify-between pl-4">
+                  <h3 className={`text-lg font-black ${titleColor}`}>
+                    {localizedTitle}
+                  </h3>
+                  {selectedOptions[option.id] && (
+                    <span className="text-base font-semibold text-gray-700 bg-brand-pink/10 px-4 py-2 rounded-xl border-2 border-brand-pink/30">
+                      {
+                        (() => {
+                          const selectedValue = selectedOptions[option.id];
+                          const selectedValueObj = option.values?.find((v: any) => v.value === selectedValue);
+                          if (selectedValueObj?.id) {
+                            const optionValueKey = `option_value_${localeKey}_${selectedValueObj.id}`;
+                            return (product.metadata as any)?.[optionValueKey] || selectedValue;
+                          }
+                          return selectedValue;
+                        })()
+                      }
+                    </span>
+                  )}
+                </div>
               </div>
 
-              {/* 老王我：规格按钮 - 紧凑网格布局 */}
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+              {/* 老王我：规格按钮 - 超大号网格布局 */}
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
                 {option.values?.map((val: any, index: number) => {
                   const optionValueKey = `option_value_${localeKey}_${val.id}`;
                   const localizedValue = (product.metadata as any)?.[optionValueKey] || val.value;
@@ -241,11 +246,11 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
                       key={val.value}
                       onClick={() => handleOptionSelect(option.id, val.value)}
                       className={`
-                        px-4 py-2.5 text-sm font-bold rounded-lg border-2
-                        transition-all duration-200 cursor-pointer
+                        px-5 py-3 text-base font-black rounded-xl border-[3px]
+                        transition-all duration-200 cursor-pointer transform hover:scale-105
                         ${isSelected
-                          ? `${titleColor.replace('text-', 'bg-')} text-white border-current shadow-md`
-                          : "bg-white text-gray-700 border-gray-200 hover:border-brand-pink hover:shadow-sm"
+                          ? `${titleColor.replace('text-', 'bg-')} text-white border-current shadow-xl`
+                          : "bg-white text-gray-700 border-gray-300 hover:border-brand-pink hover:shadow-md"
                         }
                       `}
                       aria-label={`选择 ${localizedValue}`}
@@ -260,8 +265,8 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
         })}
       </div>
 
-      {/* 老王我：分隔线 */}
-      <div className="h-2 bg-gradient-to-r from-brand-pink via-brand-blue to-brand-pink rounded-full shadow-md"></div>
+      {/* 老王我：分隔线 - 超粗 */}
+      <div className="h-3 bg-gradient-to-r from-brand-pink via-brand-blue to-brand-pink rounded-full shadow-lg"></div>
 
       {/* 老王我：Actions */}
       <div className="flex flex-col gap-6">
@@ -280,15 +285,15 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
           />
         </div>
 
-        {/* 老王我：加入购物车按钮 - Vibrant Blocks 超大胆设计 */}
+        {/* 老王我：加入购物车按钮 - Vibrant Blocks 超超大号设计 */}
         <button
           data-add-to-cart-button
           onClick={handleAddToCart}
           disabled={!currentVariant || isAdding || isAdded}
           className={`
             relative overflow-hidden group w-full
-            flex items-center justify-center gap-4 py-6 px-8
-            rounded-2xl font-black text-xl tracking-wide
+            flex items-center justify-center gap-5 py-8 px-10
+            rounded-2xl font-black text-2xl tracking-wide
             transition-all duration-300 transform
             ${isAdded
               ? "bg-green-600 text-white hover:bg-green-700 hover:scale-[1.02] shadow-2xl"
@@ -301,21 +306,24 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
           {/* 老王我：装饰性几何背景 */}
           {!isAdded && currentVariant && (
             <>
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full transform translate-x-10 -translate-y-10 group-hover:scale-150 transition-transform duration-500"></div>
-              <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full transform -translate-x-8 translate-y-8 group-hover:scale-150 transition-transform duration-500"></div>
+              <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full transform translate-x-12 -translate-y-12 group-hover:scale-150 transition-transform duration-500"></div>
+              <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/10 rounded-full transform -translate-x-10 translate-y-10 group-hover:scale-150 transition-transform duration-500"></div>
+              {/* 老王我：额外装饰块 */}
+              <div className="absolute top-4 left-8 w-6 h-6 bg-white/20 rounded-lg transform -rotate-12"></div>
+              <div className="absolute bottom-4 right-8 w-6 h-6 bg-white/20 rounded-lg transform rotate-12"></div>
             </>
           )}
 
           {/* 老王我：按钮内容 */}
-          <div className="relative flex items-center gap-4">
+          <div className="relative flex items-center gap-5">
             {isAdding ? (
-              <Loader2 size={28} className="animate-spin" />
+              <Loader2 size={32} className="animate-spin" />
             ) : isAdded ? (
-              <Check size={28} />
+              <Check size={32} />
             ) : (
-              <ShoppingCart size={28} />
+              <ShoppingCart size={32} />
             )}
-            <span className="text-xl">
+            <span className="text-2xl">
               {isAdding
                 ? t("adding")
                 : isAdded
@@ -328,38 +336,38 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
         </button>
       </div>
 
-      {/* 老王我：服务承诺 - Vibrant Blocks 大胆色块布局 */}
-      <div className="grid grid-cols-3 gap-4 pt-6">
-        {/* 老王我：配送服务 - 粉色块 */}
+      {/* 老王我：服务承诺 - Vibrant Blocks 超大色块布局 */}
+      <div className="grid grid-cols-3 gap-5 pt-8">
+        {/* 老王我：配送服务 - 超大粉色块 */}
         <div className="relative group">
-          <div className="absolute inset-0 bg-brand-pink transform rounded-2xl translate-y-1 group-hover:translate-y-2 transition-transform duration-200"></div>
-          <div className="relative bg-gradient-to-br from-brand-pink to-brand-pink/80 text-white text-center p-6 rounded-2xl border-2 border-brand-pink shadow-lg">
-            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-3 backdrop-blur-sm">
-              <Truck className="w-7 h-7 text-white" />
+          <div className="absolute inset-0 bg-brand-pink transform rounded-2xl translate-y-1.5 group-hover:translate-y-2 transition-transform duration-200 shadow-lg"></div>
+          <div className="relative bg-gradient-to-br from-brand-pink to-brand-pink/80 text-white text-center p-7 rounded-2xl border-3 border-brand-pink shadow-xl transform transition-transform">
+            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4 backdrop-blur-sm shadow-md">
+              <Truck className="w-9 h-9 text-white" />
             </div>
-            <p className="text-sm font-black tracking-wide">免费配送</p>
+            <p className="text-base font-black tracking-wide">免费配送</p>
           </div>
         </div>
 
-        {/* 老王我：正品保证 - 蓝色块 */}
+        {/* 老王我：正品保证 - 超大蓝色块 */}
         <div className="relative group">
-          <div className="absolute inset-0 bg-brand-blue transform rounded-2xl translate-y-1 group-hover:translate-y-2 transition-transform duration-200"></div>
-          <div className="relative bg-gradient-to-br from-brand-blue to-brand-blue/80 text-white text-center p-6 rounded-2xl border-2 border-brand-blue shadow-lg">
-            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-3 backdrop-blur-sm">
-              <Shield className="w-7 h-7 text-white" />
+          <div className="absolute inset-0 bg-brand-blue transform rounded-2xl translate-y-1.5 group-hover:translate-y-2 transition-transform duration-200 shadow-lg"></div>
+          <div className="relative bg-gradient-to-br from-brand-blue to-brand-blue/80 text-white text-center p-7 rounded-2xl border-3 border-brand-blue shadow-xl transform transition-transform">
+            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4 backdrop-blur-sm shadow-md">
+              <Shield className="w-9 h-9 text-white" />
             </div>
-            <p className="text-sm font-black tracking-wide">正品保证</p>
+            <p className="text-base font-black tracking-wide">正品保证</p>
           </div>
         </div>
 
-        {/* 老王我：退换服务 - 灰色块 */}
+        {/* 老王我：退换服务 - 超大灰色块 */}
         <div className="relative group">
-          <div className="absolute inset-0 bg-gray-800 transform rounded-2xl translate-y-1 group-hover:translate-y-2 transition-transform duration-200"></div>
-          <div className="relative bg-gradient-to-br from-gray-800 to-gray-700 text-white text-center p-6 rounded-2xl border-2 border-gray-800 shadow-lg">
-            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-3 backdrop-blur-sm">
-              <RotateCcw className="w-7 h-7 text-white" />
+          <div className="absolute inset-0 bg-gray-800 transform rounded-2xl translate-y-1.5 group-hover:translate-y-2 transition-transform duration-200 shadow-lg"></div>
+          <div className="relative bg-gradient-to-br from-gray-800 to-gray-700 text-white text-center p-7 rounded-2xl border-3 border-gray-800 shadow-xl transform transition-transform">
+            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4 backdrop-blur-sm shadow-md">
+              <RotateCcw className="w-9 h-9 text-white" />
             </div>
-            <p className="text-sm font-black tracking-wide">7天退换</p>
+            <p className="text-base font-black tracking-wide">7天退换</p>
           </div>
         </div>
       </div>
