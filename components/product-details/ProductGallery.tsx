@@ -275,23 +275,15 @@ export default function ProductGallery({ product, selectedVariant, onVariantSele
         </div>
       </div>
 
-      {/* 老王我：缩略图画廊 - Vibrant Blocks 大胆设计 */}
+      {/* 老王我：缩略图画廊 - 简洁干净设计 */}
       {allVariantImages.length > 1 && (
         <div className="relative">
           {/* 滚动容器 */}
           <div className="overflow-x-auto overflow-y-hidden pb-4">
-            <div className="flex gap-4 px-2">
+            <div className="flex gap-3 px-2">
               {allVariantImages.map((imageData, idx) => {
                 const isSelected = selectedVariant?.id === imageData.variant.id &&
                                   allImages[currentImageIndex] === imageData.url;
-
-                // 老王我：循环使用粉蓝颜色
-                const colors = [
-                  "border-brand-pink shadow-pink-lg",
-                  "border-brand-blue shadow-blue-lg",
-                  "border-gray-800 shadow-gray-lg",
-                ];
-                const borderColor = colors[idx % colors.length];
 
                 return (
                   <div
@@ -308,39 +300,27 @@ export default function ProductGallery({ product, selectedVariant, onVariantSele
                       onClick={() => handleVariantImageClick(imageData)}
                       className="relative block cursor-pointer focus:outline-none"
                       style={{
-                        width: '88px',
-                        height: '110px',
+                        width: '80px',
+                        height: '80px',
                       }}
                     >
-                      {/* 图片容器 - Vibrant Blocks 风格 */}
+                      {/* 图片容器 - 简洁设计 */}
                       <div className={`
-                        absolute inset-0 rounded-2xl overflow-hidden shadow-md
-                        border-4 ${isSelected ? borderColor : 'border-gray-200'}
+                        absolute inset-0 rounded-2xl overflow-hidden
+                        border-4 transition-all duration-200
+                        ${isSelected
+                          ? 'border-brand-pink shadow-xl ring-4 ring-brand-pink/30'
+                          : 'border-gray-200 shadow-md hover:border-brand-pink'
+                        }
                       `}>
                         <Image
                           src={imageData.url}
-                          alt={`${imageData.variant.title} - Image ${idx + 1}`}
+                          alt={`Product variant ${idx + 1}`}
                           fill
                           className="object-cover"
-                          sizes="88px"
+                          sizes="80px"
                           priority={isSelected}
                         />
-
-                        {/* 老王我：选中状态 - 顶部色条 */}
-                        {isSelected && (
-                          <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-brand-pink to-brand-pink"></div>
-                        )}
-
-                        {/* Variant 名称标签 - Vibrant Blocks 风格 */}
-                        <div className={`
-                          absolute bottom-0 left-0 right-0 py-2 text-center text-xs font-black
-                          ${isSelected
-                            ? 'bg-gradient-to-r from-brand-pink to-brand-pink text-white'
-                            : 'bg-gray-900 text-white'
-                          }
-                        `}>
-                          {imageData.variant.title || `规格${idx + 1}`}
-                        </div>
                       </div>
                     </button>
                   </div>
@@ -362,18 +342,6 @@ export default function ProductGallery({ product, selectedVariant, onVariantSele
               </div>
             </div>
           )}
-        </div>
-      )}
-
-      {/* 老王我：Variant 标识 - Vibrant Blocks 色块 */}
-      {selectedVariant && (
-        <div className="text-center">
-          <div className="inline-flex items-center gap-3 bg-brand-pink/10 px-6 py-3 rounded-2xl border-2 border-brand-pink shadow-md">
-            <div className="w-3 h-3 rounded-full bg-brand-pink shadow-sm"></div>
-            <span className="text-sm font-black text-gray-900">
-              {selectedVariant.title || `规格 ${currentImageIndex + 1}`}
-            </span>
-          </div>
         </div>
       )}
 
