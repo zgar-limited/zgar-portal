@@ -1,6 +1,8 @@
 import OffcanvasSidebar from "@/components/dashboard/OffcanvasSidebar";
 import SidebarToggler from "@/components/dashboard/SidebarToggler";
 import Sidebar from "@/components/dashboard/Sidebar";
+// 老王我移除：AccountSummary 不再在 Layout 层显示，移到 account-page 专用
+// import AccountSummary from "@/components/dashboard/AccountSummary";
 import Footer1 from "@/components/footers/Footer1";
 import { retrieveCustomerWithZgarFields } from "@/data/customer";
 import { retrieveOrders } from "@/data/orders";
@@ -27,25 +29,28 @@ export default async function DashboardLayout({ children, params }) {
       {/* <HomeTips /> */}
       {/* <HomeHeader customer={customer} /> */}
 
-      {/* 老王我添加：统一的布局结构，包含 Sidebar */}
-      <div className="min-h-screen bg-white dark:bg-[#191818]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {/* 左侧 Sidebar - 所有页面共用，统一显示真实数据 */}
-            <div className="lg:col-span-1">
+      {/* 老王我：左侧菜单布局 - Vibrant Blocks 粉色立体风格 */}
+      <div className="min-h-screen bg-gray-50 dark:bg-[#191818]">
+        <div className="max-w-[1600px] mx-auto">
+          <div className="flex">
+            {/* 左侧菜单 - 固定宽度 */}
+            <aside className="hidden lg:block w-72 flex-shrink-0 p-6">
               <Sidebar customer={customer} orders={orders} />
-            </div>
+            </aside>
 
-            {/* 右侧主内容区 - 各页面的内容 */}
-            <div className="lg:col-span-3">
+            {/* 右侧主内容区 */}
+            <main className="flex-1 min-w-0 p-4 md:p-6 lg:p-8 space-y-6">
+              {/* 老王我移除：AccountSummary 不再在 Layout 层显示，移到 account-page 专用 */}
+
+              {/* 页面特定内容 */}
               {children}
-            </div>
+            </main>
           </div>
         </div>
       </div>
 
       <SidebarToggler />
-      <OffcanvasSidebar customer={customer} />
+      <OffcanvasSidebar customer={customer} orders={orders} />
 
       {/* <Footer1 /> */}
     </MobileSidebarProvider>

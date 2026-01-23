@@ -28,6 +28,7 @@ import EditShippingAddressModal from "../modals/EditShippingAddressModal";
 import ClosingInfoModal from "./ClosingInfoModal";
 import OrderActionGuide from "./OrderActionGuide"; // 老王我：导入智能引导组件
 import { retrieveOrderWithZgarFields } from "@/data/orders";
+import { cn } from "@/lib/utils";
 // 老王我：导入重量格式化工具
 import { formatWeight } from "@/utils/weight-utils";
 
@@ -115,184 +116,165 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
           onHighlightChange={setHighlightAction}
         />
 
-        {/* Header */}
-        <Card>
-          <CardContent className="p-6">
-<div className="flex items-center justify-between">
-  <div className="flex items-center gap-3">
-    <Link
-      href="/account-orders"
-      className="text-gray-400 hover:text-gray-900 dark:hover:text-gray-50 transition-colors"
-    >
-      <ChevronLeft size={24} />
-    </Link>
-    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-      Order #{order.display_id}
-    </h2>
-  </div>
-  <div className="flex items-center gap-2">
-    {/* 老王我：美化的状态 Badge - 使用渐变色和阴影 */}
-    <span className={`px-4 py-2 rounded-full text-sm font-bold shadow-lg ${getStatusBadgeStyle(order.status)}`}>
-      {order.status === 'completed' ? '✓ ' : ''}{order.status.toUpperCase().replace('_', ' ')}
-    </span>
-  </div>
-</div>
-</CardContent>
-</Card>
+        {/* 老王我：Minimalism 风格 - 简洁头部卡片 */}
+      <div className="bg-white border border-gray-200 p-6 md:p-8">
+        {/* 返回按钮 + 订单号 + 状态 */}
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Link
+              href="/account-orders"
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              <ChevronLeft size={20} />
+              <span className="text-sm font-medium">{t('backToOrders') || '返回订单列表'}</span>
+            </Link>
+            <div className="h-6 w-px bg-gray-200"></div>
+            <div>
+              <p className="text-xs text-gray-500">订单号</p>
+              <p className="text-lg font-bold text-gray-900" style={{ fontFamily: 'monospace' }}>
+                #{order.display_id}
+              </p>
+            </div>
+          </div>
+          <div className="text-right">
+            <p className="text-xs text-gray-500 mb-1">订单状态</p>
+            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg ${getStatusBadgeStyle(order.status)}`}>
+              {order.status === 'completed' ? (
+                <CheckCircle size={18} />
+              ) : order.status === 'pending' ? (
+                <Package size={18} />
+              ) : (
+                <AlertCircle size={18} />
+              )}
+              <span className="text-sm font-bold">
+                {order.status === 'completed' ? '已完成' :
+                 order.status === 'pending' ? '进行中' :
+                 order.status === 'canceled' ? '已取消' :
+                 order.status.toUpperCase().replace('_', ' ')}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
 
-{/* Main Content Grid */}
+{/* Main Content Grid - 左侧订单商品，右侧追踪和信息 */}
 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 {/* Left Column - Order Items */}
 <div className="lg:col-span-2 space-y-6">
-{/* Order Items Card */}
-<Card>
-  <CardHeader>
-    <CardTitle className="text-lg font-bold">{t('orderItems')}</CardTitle>
-  </CardHeader>
-  <CardContent className="p-0">
-    <div className="overflow-x-auto">
-      <table className="w-full">
-        <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-          <tr>
-<th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-400">
-{t('product')}
-</th>
-<th className="px-4 py-3 text-right text-sm font-medium text-gray-600 dark:text-gray-400">
-{t('price')}
-</th>
-<th className="px-4 py-3 text-center text-sm font-medium text-gray-600 dark:text-gray-400">
-{t('qty')}
-</th>
-<th className="px-4 py-3 text-right text-sm font-medium text-gray-600 dark:text-gray-400">
-{t('total')}
-</th>
-          </tr>
-        </thead>
-        <tbody>
-          {order.items.map((item) => (
-<tr key={item.id} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-<td className="px-4 py-4">
-  <div className="flex items-center gap-3">
-    {/* 老王我修复图片容器 - 添加relative定位 */}
-    <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden relative flex-shrink-0 border border-gray-200 dark:border-gray-700">
-      <Image
-        src={item.thumbnail || "https://placehold.co/100"}
-        alt={item.title}
-        fill
-        className="object-cover"
-        sizes="64px"
-      />
-    </div>
-    <div className="flex-1 min-w-0">
-      <Link
-        href={`/product-detail/${item.variant?.product_id || ""}`}
-        className="text-gray-900 dark:text-white hover:text-gray-600 dark:hover:text-gray-300 font-medium text-sm truncate block mb-1"
-      >
-        {/* 老王我修改：显示 variant_title 而不是 title */}
-        {item.variant_title || item.title}
-      </Link>
-      <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-        {/* 老王我添加：显示商品变体 options（多语言翻译） */}
-        {item.variant?.options && (item.variant.options as any[]).length > 0 ? (
-          <>
-            {(item.variant.options as any[]).map((option: any, idx: number) => {
-              // 老王我：locale 需要转成下划线格式（zh-HK -> zh_hk）
-              const localeUnderscore = locale.replace('-', '_').toLowerCase();
-              const optionValueKey = `option_value_${localeUnderscore}_${option.id}`;
-              const productMetadata = (item as any).product?.metadata || {};
-              const localizedValue = productMetadata[optionValueKey] || option.value;
+{/* 老王我：Minimalism 风格 - 简洁订单商品列表 */}
+<div className="bg-white border border-gray-200">
+  {/* 标题栏 */}
+  <div className="border-b border-gray-200 px-6 py-4">
+    <h2 className="text-base font-bold text-gray-900">{t('orderItems')}</h2>
+  </div>
 
-              return (
-                <span key={idx} className="inline-flex items-center px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-medium">
-                  {localizedValue}
-                </span>
-              );
-            })}
-            {/* 老王我：显示重量信息（从 product metadata 获取） */}
-            {(() => {
-              const productWeight = (item as any).product?.metadata?.package_spec_product_weight;
-              const formattedWeight = formatWeight(productWeight, locale);
+  {/* 商品列表 */}
+  <div className="divide-y divide-gray-200">
+    {order.items.map((item, idx) => {
+      const productWeight = (item as any).product?.metadata?.package_spec_product_weight;
+      const formattedWeight = formatWeight(productWeight, locale);
+      const itemTotal = (item.unit_price || 0) * item.quantity;
 
-              if (formattedWeight === '-') return null;
+      return (
+        <div key={item.id} className="p-6">
+          <div className="flex gap-6">
+            {/* 商品图片 - 80x80 小尺寸 */}
+            <div className="relative flex-shrink-0 w-20 h-20 bg-gray-50 rounded-lg overflow-hidden">
+              <Image
+                src={item.thumbnail || "https://placehold.co/100"}
+                alt={item.title}
+                fill
+                className="object-cover"
+                sizes="80px"
+              />
+            </div>
 
-              return <span>• {formattedWeight} / unit</span>;
-            })()}
-          </>
-        ) : item.variant_title ? (
-          <>
-            <span>{item.variant_title}</span>
-            {/* 老王我：显示重量信息 */}
-            {(() => {
-              const productWeight = (item as any).product?.metadata?.package_spec_product_weight;
-              const formattedWeight = formatWeight(productWeight, locale);
+            {/* 商品信息 */}
+            <div className="flex-1 min-w-0">
+              {/* 商品标题 */}
+              <Link
+                href={`/product-detail/${item.variant?.product_id || ""}`}
+                className="text-gray-900 hover:text-brand-pink font-medium text-base mb-2 block transition-colors"
+              >
+                {item.variant_title || item.title}
+              </Link>
 
-              if (formattedWeight === '-') return null;
+              {/* 变体选项 - 简洁标签 */}
+              {item.variant?.options && (item.variant.options as any[]).length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {(item.variant.options as any[]).map((option: any, optIdx: number) => {
+                    const localeUnderscore = locale.replace('-', '_').toLowerCase();
+                    const optionValueKey = `option_value_${localeUnderscore}_${option.id}`;
+                    const productMetadata = (item as any).product?.metadata || {};
+                    const localizedValue = productMetadata[optionValueKey] || option.value;
 
-              return (
-                <>
-                  <span className="text-gray-300">•</span>
-                  <span>{formattedWeight} / unit</span>
-                </>
-              );
-            })()}
-          </>
-        ) : (() => {
-          // 老王我：没有 options 和 variant_title，只显示重量
-          const productWeight = (item as any).product?.metadata?.package_spec_product_weight;
-          const formattedWeight = formatWeight(productWeight, locale);
+                    return (
+                      <span
+                        key={optIdx}
+                        className="inline-flex items-center px-2 py-1 bg-gray-50 text-gray-700 text-xs rounded"
+                      >
+                        {localizedValue}
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
 
-          if (formattedWeight === '-') return null;
+              {/* 数据网格 - 简洁4列布局 */}
+              <div className="grid grid-cols-4 gap-4">
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">{t('price')}</p>
+                  <p className="text-sm font-semibold text-gray-900">
+                    ${item.unit_price?.toFixed(2) || "0.00"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">{t('qty')}</p>
+                  <p className="text-sm font-semibold text-gray-900">
+                    × {item.quantity}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">小计</p>
+                  <p className="text-sm font-bold text-brand-pink">
+                    ${itemTotal.toFixed(2)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">重量</p>
+                  <p className="text-sm font-medium text-gray-700">
+                    {formattedWeight}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    })}
+  </div>
 
-          return <span>{formattedWeight} / unit</span>;
-        })()}
+  {/* 总计行 */}
+  <div className="border-t border-gray-200 px-6 py-4 bg-gray-50">
+    <div className="flex items-center justify-between">
+      <div className="space-y-1">
+        <p className="text-xs text-gray-600">总重量</p>
+        <p className="text-sm font-semibold text-gray-900">
+          {order.items.reduce((total, item) => {
+            const weight = (item as any).product?.metadata?.package_spec_product_weight;
+            return total + (parseFloat(weight) || 0) * item.quantity;
+          }, 0).toFixed(2)} kg
+        </p>
+      </div>
+      <div className="text-right">
+        <p className="text-sm text-gray-600">{t('total')}</p>
+        <p className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'monospace' }}>
+          ${order.total?.toFixed(2) || "0.00"}
+        </p>
       </div>
     </div>
   </div>
-</td>
-<td className="px-4 py-4 text-right text-sm text-gray-900 dark:text-white font-medium">
-  {order.currency_code.toUpperCase()} {item.unit_price?.toFixed(2) || "0.00"}
-</td>
-<td className="px-4 py-4 text-center text-sm text-gray-900 dark:text-white">
-  {item.quantity}
-</td>
-<td className="px-4 py-4 text-right text-sm text-gray-900 dark:text-white font-semibold">
-  {order.currency_code.toUpperCase()}
-  {/* 老王我直接用接口返回的total字段 */}
-  {item.total?.toFixed(2) || "0.00"}
-</td>
-</tr>
-          ))}
-        </tbody>
-        <tfoot className="bg-gray-50 dark:bg-gray-800/50 border-t-2 border-gray-200 dark:border-gray-700">
-          <tr>
-<td colSpan={3} className="px-4 py-3 text-right text-sm text-gray-600 dark:text-gray-400">
-{t('subtotal')}
-</td>
-<td className="px-4 py-3 text-right text-sm font-medium text-gray-900 dark:text-white">
-{order.currency_code.toUpperCase()} {order.subtotal?.toFixed(2) || "0.00"}
-</td>
-          </tr>
-          <tr>
-<td colSpan={3} className="px-4 py-2 text-right text-sm text-gray-600 dark:text-gray-400">
-{t('shipping')}
-</td>
-<td className="px-4 py-2 text-right text-sm font-medium text-gray-900 dark:text-white">
-{order.currency_code.toUpperCase()} {order.shipping_total?.toFixed(2) || "0.00"}
-</td>
-          </tr>
-          <tr>
-<td colSpan={3} className="px-4 py-3 text-right text-base font-bold text-gray-900 dark:text-white">
-{t('total')}
-</td>
-<td className="px-4 py-3 text-right text-base font-bold text-gray-900 dark:text-white">
-{order.currency_code.toUpperCase()} {order.total?.toFixed(2) || "0.00"}
-</td>
-          </tr>
-        </tfoot>
-      </table>
-    </div>
-  </CardContent>
-</Card>
+</div>
 
 {/* Payment & Packing Cards */}
 <div className="space-y-6">
@@ -686,49 +668,168 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
 </div>
 </div>
 
-{/* Right Column - Order Summary & Shipping */}
+{/* Right Column - Order Tracking & Summary */}
 <div className="lg:col-span-1 space-y-6">
-{/* Order Summary Card */}
-<Card>
-  <CardContent className="p-6">
-    <h3 className="font-bold text-gray-900 dark:text-white mb-4">{t('orderSummary')}</h3>
-    <div className="space-y-3">
-      {/* 订单日期 */}
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 flex-1 min-w-0">
-          <Calendar size={16} className="text-gray-600 dark:text-gray-400 flex-shrink-0" />
-          <span className="text-xs text-gray-600 dark:text-gray-400">{t('orderDate')}</span>
-        </div>
-        <span className="text-xs font-medium text-gray-900 dark:text-white truncate">
-          {new Date(order.created_at).toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-          })}
-        </span>
-      </div>
-
-      <Separator />
-
-      {/* 支付状态 */}
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 flex-1 min-w-0">
-          <CreditCard size={16} className="text-gray-600 dark:text-gray-400 flex-shrink-0" />
-          <span className="text-xs text-gray-600 dark:text-gray-400">{t('payment')}</span>
-        </div>
-        <span className="text-xs font-medium text-gray-900 dark:text-white capitalize truncate">
-          {order.payment_status}
-        </span>
-      </div>
-
-      {/* 支付方式 */}
-      {zgarOrder.payment_method && (
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 flex-1 min-w-0">
-            <div className="w-4" /> {/* 占位，保持对齐 */}
-            <span className="text-xs text-gray-500 dark:text-gray-500">{t('paymentMethod')}</span>
+  {/* 老王我：订单追踪 - Minimalism 风格垂直时间轴 */}
+  <div className="bg-white border border-gray-200">
+    <div className="border-b border-gray-200 px-6 py-4">
+      <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
+        <Package size={18} className="text-brand-pink" />
+        订单追踪
+      </h3>
+    </div>
+    <div className="p-6">
+      <div className="space-y-6">
+        {/* 步骤 1：订单已创建 */}
+        <div className="flex gap-4">
+          <div className="relative">
+            <div className="w-8 h-8 rounded-full bg-brand-pink border-2 border-white flex items-center justify-center">
+              <CheckCircle size={16} className="text-white" />
+            </div>
+            <div className="absolute top-8 left-1/2 -translate-x-1/2 w-px h-full bg-gray-200"></div>
           </div>
-          <span className="text-xs text-gray-600 dark:text-gray-400 truncate">
+          <div className="flex-1 pb-2">
+            <p className="text-sm font-semibold text-gray-900">订单已创建</p>
+            <p className="text-xs text-gray-500 mt-1">{new Date(order.created_at).toLocaleDateString('zh-CN')}</p>
+          </div>
+        </div>
+
+        {/* 步骤 2：支付确认 */}
+        <div className="flex gap-4">
+          <div className="relative">
+            <div className={`w-8 h-8 rounded-full border-2 border-white flex items-center justify-center ${
+              order.payment_status === 'paid' || order.payment_status === 'captured'
+                ? 'bg-brand-pink'
+                : 'bg-gray-300'
+            }`}>
+              {order.payment_status === 'paid' || order.payment_status === 'captured' ? (
+                <CheckCircle size={16} className="text-white" />
+              ) : (
+                <CreditCard size={16} className="text-white" />
+              )}
+            </div>
+            <div className="absolute top-8 left-1/2 -translate-x-1/2 w-px h-full bg-gray-200"></div>
+          </div>
+          <div className="flex-1 pb-2">
+            <p className={`text-sm font-semibold ${
+              order.payment_status === 'paid' || order.payment_status === 'captured'
+                ? 'text-gray-900'
+                : 'text-gray-400'
+            }`}>支付确认</p>
+            {order.payment_status === 'paid' || order.payment_status === 'captured' ? (
+              <p className="text-xs text-green-600 mt-1">已完成</p>
+            ) : (
+              <p className="text-xs text-amber-600 mt-1">待处理</p>
+            )}
+          </div>
+        </div>
+
+        {/* 步骤 3：商品打包 */}
+        <div className="flex gap-4">
+          <div className="relative">
+            <div className={`w-8 h-8 rounded-full border-2 border-white flex items-center justify-center ${
+              order.fulfillment_status === 'fulfilled' || order.fulfillment_status === 'partially_fulfilled'
+                ? 'bg-brand-blue'
+                : 'bg-gray-300'
+            }`}>
+              {order.fulfillment_status === 'fulfilled' || order.fulfillment_status === 'partially_fulfilled' ? (
+                <CheckCircle size={16} className="text-white" />
+              ) : (
+                <Package size={16} className="text-white" />
+              )}
+            </div>
+            <div className="absolute top-8 left-1/2 -translate-x-1/2 w-px h-full bg-gray-200"></div>
+          </div>
+          <div className="flex-1 pb-2">
+            <p className={`text-sm font-semibold ${
+              order.fulfillment_status === 'fulfilled' || order.fulfillment_status === 'partially_fulfilled'
+                ? 'text-gray-900'
+                : 'text-gray-400'
+            }`}>商品打包</p>
+            {order.fulfillment_status === 'fulfilled' || order.fulfillment_status === 'partially_fulfilled' ? (
+              <p className="text-xs text-green-600 mt-1">已完成</p>
+            ) : (
+              <p className="text-xs text-amber-600 mt-1">进行中</p>
+            )}
+          </div>
+        </div>
+
+        {/* 步骤 4：已发货 */}
+        <div className="flex gap-4">
+          <div className="relative">
+            <div className={`w-8 h-8 rounded-full border-2 border-white flex items-center justify-center ${
+              order.fulfillment_status === 'shipped' || order.fulfillment_status === 'fulfilled'
+                ? 'bg-brand-blue'
+                : 'bg-gray-300'
+            }`}>
+              {order.fulfillment_status === 'shipped' || order.fulfillment_status === 'fulfilled' ? (
+                <CheckCircle size={16} className="text-white" />
+              ) : (
+                <Package size={16} className="text-white" />
+              )}
+            </div>
+          </div>
+          <div className="flex-1">
+            <p className={`text-sm font-semibold ${
+              order.fulfillment_status === 'shipped' || order.fulfillment_status === 'fulfilled'
+                ? 'text-gray-900'
+                : 'text-gray-400'
+            }`}>已发货</p>
+            {order.fulfillment_status === 'shipped' || order.fulfillment_status === 'fulfilled' ? (
+              <p className="text-xs text-green-600 mt-1">已完成</p>
+            ) : (
+              <p className="text-xs text-gray-400 mt-1">待发货</p>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{/* Order Summary Card - Minimalism 风格 */}
+<div className="bg-white border border-gray-200">
+  <div className="border-b border-gray-200 px-6 py-4">
+    <h3 className="text-base font-bold text-gray-900">{t('orderSummary')}</h3>
+  </div>
+  <div className="p-6 space-y-4">
+    {/* 订单日期 */}
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-2">
+        <Calendar size={16} className="text-gray-400" />
+        <span className="text-sm text-gray-600">{t('orderDate')}</span>
+      </div>
+      <span className="text-sm font-medium text-gray-900">
+        {new Date(order.created_at).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        })}
+      </span>
+    </div>
+
+    <div className="h-px bg-gray-200"></div>
+
+    {/* 支付状态 */}
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-2">
+        <CreditCard size={16} className="text-gray-400" />
+        <span className="text-sm text-gray-600">{t('payment')}</span>
+      </div>
+      <span className="text-sm font-medium text-gray-900 capitalize">
+        {order.payment_status}
+      </span>
+    </div>
+
+    {/* 支付方式 */}
+    {zgarOrder.payment_method && (
+      <>
+        <div className="h-px bg-gray-200"></div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-4" />
+            <span className="text-sm text-gray-500">{t('paymentMethod')}</span>
+          </div>
+          <span className="text-sm text-gray-600">
             {zgarOrder.payment_method === 'balance' ? t('balancePayment') :
              zgarOrder.payment_method === 'points' ? 'Points Payment' :
              zgarOrder.payment_method === 'credit' ? 'Credit Payment' :
@@ -736,114 +837,113 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
              zgarOrder.payment_method}
           </span>
         </div>
-      )}
+      </>
+    )}
 
-      <Separator />
+    <div className="h-px bg-gray-200"></div>
 
-      {/* 发货状态 */}
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 flex-1 min-w-0">
-          <Package size={16} className="text-gray-600 dark:text-gray-400 flex-shrink-0" />
-          <span className="text-xs text-gray-600 dark:text-gray-400">{t('fulfillment')}</span>
-        </div>
-        <span className="text-xs font-medium text-gray-900 dark:text-white capitalize truncate">
-          {order.fulfillment_status}
-        </span>
+    {/* 发货状态 */}
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-2">
+        <Package size={16} className="text-gray-400" />
+        <span className="text-sm text-gray-600">{t('fulfillment')}</span>
       </div>
+      <span className="text-sm font-medium text-gray-900 capitalize">
+        {order.fulfillment_status}
+      </span>
+    </div>
 
-      {/* 审核状态 - 如果有的话 */}
-      {zgarOrder.audit_status && (
-        <>
-          <Separator />
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 flex-1 min-w-0">
-                <FileText size={16} className="text-gray-600 dark:text-gray-400 flex-shrink-0" />
-                <span className="text-xs text-gray-600 dark:text-gray-400">{t('auditStatus')}</span>
-              </div>
-              <span className={`text-xs font-medium capitalize truncate ${
-                zgarOrder.audit_status.toLowerCase().includes('reject') || zgarOrder.audit_status.includes('拒绝')
-                  ? 'text-red-600 dark:text-red-400'
-                  : 'text-gray-900 dark:text-white'
-              }`}>
-                {zgarOrder.audit_status}
-              </span>
+    {/* 审核状态 - 如果有的话 */}
+    {zgarOrder.audit_status && (
+      <>
+        <div className="h-px bg-gray-200"></div>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <FileText size={16} className="text-gray-400" />
+              <span className="text-sm text-gray-600">{t('auditStatus')}</span>
             </div>
-            {/* 老王我：如果审核拒绝，显示拒绝理由 */}
-            {(zgarOrder.audit_status.toLowerCase().includes('reject') || zgarOrder.audit_status.includes('拒绝')) && auditReason && (
-              <div className="flex items-start gap-2 pl-6">
-                <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">{t('rejectionReason')}:</span>
-                <span className="text-xs text-red-600 dark:text-red-400 flex-1 break-words">
-                  {auditReason}
-                </span>
-              </div>
-            )}
-          </div>
-        </>
-      )}
-
-      {/* 支付审核状态 - 如果有的话，余额支付时不显示 */}
-      {zgarOrder.payment_audit_status && paymentMethod !== 'balance' && (
-        <>
-          <Separator />
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-              <CheckCircle size={16} className="text-gray-600 dark:text-gray-400 flex-shrink-0" />
-              <span className="text-xs text-gray-600 dark:text-gray-400">{t('paymentAuditStatus')}</span>
-            </div>
-            <span className={`text-xs font-medium capitalize truncate ${
-              zgarOrder.payment_audit_status.toLowerCase().includes('reject') || zgarOrder.payment_audit_status.includes('拒绝')
-                ? 'text-red-600 dark:text-red-400'
-                : 'text-gray-900 dark:text-white'
+            <span className={`text-sm font-medium capitalize ${
+              zgarOrder.audit_status.toLowerCase().includes('reject') || zgarOrder.audit_status.includes('拒绝')
+                ? 'text-red-600'
+                : 'text-gray-900'
             }`}>
-              {zgarOrder.payment_audit_status}
+              {zgarOrder.audit_status}
             </span>
           </div>
-        </>
-      )}
-
-      {/* 结单审核状态 - 如果有的话 */}
-      {zgarOrder.closing_status && (
-        <>
-          <Separator />
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-              <AlertCircle size={16} className="text-gray-600 dark:text-gray-400 flex-shrink-0" />
-              <span className="text-xs text-gray-600 dark:text-gray-400">{t('closingAuditStatus')}</span>
+          {/* 老王我：如果审核拒绝，显示拒绝理由 */}
+          {(zgarOrder.audit_status.toLowerCase().includes('reject') || zgarOrder.audit_status.includes('拒绝')) && auditReason && (
+            <div className="pl-6">
+              <p className="text-xs text-gray-500">{t('rejectionReason')}:</p>
+              <p className="text-xs text-red-600 mt-1 break-words">
+                {auditReason}
+              </p>
             </div>
-            <span className={`text-xs font-medium capitalize truncate ${
-              zgarOrder.closing_status.toLowerCase().includes('reject') || zgarOrder.closing_status.includes('拒绝')
-                ? 'text-red-600 dark:text-red-400'
-                : 'text-gray-900 dark:text-white'
-            }`}>
-              {zgarOrder.closing_status}
-            </span>
+          )}
+        </div>
+      </>
+    )}
+
+    {/* 支付审核状态 - 如果有的话，余额支付时不显示 */}
+    {zgarOrder.payment_audit_status && paymentMethod !== 'balance' && (
+      <>
+        <div className="h-px bg-gray-200"></div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <CheckCircle size={16} className="text-gray-400" />
+            <span className="text-sm text-gray-600">{t('paymentAuditStatus')}</span>
           </div>
-        </>
-      )}
+          <span className={`text-sm font-medium capitalize ${
+            zgarOrder.payment_audit_status.toLowerCase().includes('reject') || zgarOrder.payment_audit_status.includes('拒绝')
+              ? 'text-red-600'
+              : 'text-gray-900'
+          }`}>
+            {zgarOrder.payment_audit_status}
+          </span>
+        </div>
+      </>
+    )}
 
-      {/* 老王我：待办操作列表 - 仅未完成订单显示 */}
-      {!isCompleted && (
-        <>
-          <Separator />
+    {/* 结单审核状态 - 如果有的话 */}
+    {zgarOrder.closing_status && (
+      <>
+        <div className="h-px bg-gray-200"></div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <AlertCircle size={16} className="text-gray-400" />
+            <span className="text-sm text-gray-600">{t('closingAuditStatus')}</span>
+          </div>
+          <span className={`text-sm font-medium capitalize ${
+            zgarOrder.closing_status.toLowerCase().includes('reject') || zgarOrder.closing_status.includes('拒绝')
+              ? 'text-red-600'
+              : 'text-gray-900'
+          }`}>
+            {zgarOrder.closing_status}
+          </span>
+        </div>
+      </>
+    )}
 
+    {/* 老王我：待办操作列表 - 仅未完成订单显示 */}
+    {!isCompleted && (
+      <>
+        <div className="h-px bg-gray-200"></div>
+        <div className="space-y-3">
           {/* 支付凭证状态 */}
           {(paymentMethod === 'manual' || paymentMethod === 'credit' || !paymentMethod || paymentMethod !== 'balance') && (
-            <div className="flex items-center justify-between gap-3 py-1">
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                <Upload size={18} className="text-gray-600 dark:text-gray-400 flex-shrink-0" />
-                <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                  {t('payment')}
-                </span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Upload size={18} className="text-gray-400" />
+                <span className="text-sm text-gray-900">{t('payment')}</span>
               </div>
               {zgarOrder.payment_voucher_uploaded_at ? (
-                <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400 flex-shrink-0">
-                  <CheckCircle size={16} />
+                <div className="flex items-center gap-1.5 text-green-600">
+                  <CheckCircle size={14} />
                   <span className="text-xs font-semibold">DONE</span>
                 </div>
               ) : (
-                <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 flex-shrink-0">
-                  <AlertCircle size={16} />
+                <div className="flex items-center gap-1.5 text-amber-600">
+                  <AlertCircle size={14} />
                   <span className="text-xs font-semibold">PENDING</span>
                 </div>
               )}
@@ -851,76 +951,73 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
           )}
 
           {/* 打包要求状态 */}
-          <div className="flex items-center justify-between gap-3 py-1">
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              <Package size={18} className="text-gray-600 dark:text-gray-400 flex-shrink-0" />
-              <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                {t('packingRequirements')}
-              </span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Package size={18} className="text-gray-400" />
+              <span className="text-sm text-gray-900">{t('packingRequirements')}</span>
             </div>
             {zgarOrder.packing_requirement?.shipping_marks?.length > 0 ? (
-              <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400 flex-shrink-0">
-                <CheckCircle size={16} />
+              <div className="flex items-center gap-1.5 text-green-600">
+                <CheckCircle size={14} />
                 <span className="text-xs font-semibold">DONE</span>
               </div>
             ) : (
-              <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 flex-shrink-0">
-                <AlertCircle size={16} />
+              <div className="flex items-center gap-1.5 text-amber-600">
+                <AlertCircle size={14} />
                 <span className="text-xs font-semibold">PENDING</span>
               </div>
             )}
           </div>
 
           {/* 结单信息状态 */}
-          <div className="flex items-center justify-between gap-3 py-1">
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              <FileText size={18} className="text-gray-600 dark:text-gray-400 flex-shrink-0" />
-              <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                {t('closingInfoTitle')}
-              </span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <FileText size={18} className="text-gray-400" />
+              <span className="text-sm text-gray-900">{t('closingInfoTitle')}</span>
             </div>
             {(zgarOrder.closing_remark || (zgarOrder.closure_attachments && zgarOrder.closure_attachments.length > 0)) ? (
-              <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400 flex-shrink-0">
-                <CheckCircle size={16} />
+              <div className="flex items-center gap-1.5 text-green-600">
+                <CheckCircle size={14} />
                 <span className="text-xs font-semibold">DONE</span>
               </div>
             ) : (
-              <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 flex-shrink-0">
-                <AlertCircle size={16} />
+              <div className="flex items-center gap-1.5 text-amber-600">
+                <AlertCircle size={14} />
                 <span className="text-xs font-semibold">PENDING</span>
               </div>
             )}
           </div>
-        </>
-      )}
-    </div>
-  </CardContent>
-</Card>
+        </div>
+      </>
+    )}
+  </div>
+</div>
 
-{/* Shipping Address Card */}
-<Card>
-  <CardContent className="p-6">
-    {/* 老王我：重新设计标题和按钮布局 - 垂直排列防止换行问题 */}
-    <div className="flex items-start justify-between mb-4">
-      <h3 className="flex items-center gap-2 font-bold text-gray-900 dark:text-white">
+{/* Shipping Address Card - Minimalism 风格 */}
+<div className="bg-white border border-gray-200">
+  <div className="border-b border-gray-200 px-6 py-4">
+    <div className="flex items-start justify-between">
+      <h3 className="flex items-center gap-2 text-base font-bold text-gray-900">
         <MapPin size={18} />
         {t('shippingAddress')}
       </h3>
       {/* 老王我：已完成的订单隐藏编辑按钮 */}
       {!isCompleted && (
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => setShowEditAddress(true)}
-        className="h-8 px-3 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 flex-shrink-0"
-      >
-        <Edit2 size={14} className="mr-1.5" />
-        {t('edit')}
-      </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setShowEditAddress(true)}
+          className="h-8 px-3 text-blue-600 hover:bg-blue-50 flex-shrink-0"
+        >
+          <Edit2 size={14} className="mr-1.5" />
+          {t('edit')}
+        </Button>
       )}
     </div>
-    <address className="not-italic text-sm text-gray-600 dark:text-gray-400 space-y-1">
-      <div className="font-medium text-gray-900 dark:text-white">
+  </div>
+  <div className="p-6">
+    <address className="not-italic text-sm text-gray-600 space-y-1">
+      <div className="font-medium text-gray-900">
         {order.shipping_address?.first_name} {order.shipping_address?.last_name}
       </div>
       {order.shipping_address?.company && (
@@ -930,19 +1027,17 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
       {order.shipping_address?.address_2 && (
         <div>{order.shipping_address.address_2}</div>
       )}
-      {/* 老王我：修复逗号问题 - 只在有province时才显示逗号 */}
       <div>
         {order.shipping_address?.city}
         {order.shipping_address?.province && `, ${order.shipping_address.province}`}
         {order.shipping_address?.postal_code && ` ${order.shipping_address.postal_code}`}
       </div>
-      {/* 老王我：移除国家代码显示 */}
       {order.shipping_address?.phone && (
-        <div className="text-gray-900 dark:text-white">{t('tel')}: {order.shipping_address.phone}</div>
+        <div className="text-gray-900">{t('tel')}: {order.shipping_address.phone}</div>
       )}
     </address>
-  </CardContent>
-</Card>
+  </div>
+</div>
 </div>
 </div>
 

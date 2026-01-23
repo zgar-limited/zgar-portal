@@ -424,3 +424,55 @@ export const updateOrderShippingAddress = async (
     throw new Error(error instanceof Error ? error.message : "Failed to update shipping address");
   }
 };
+
+/**
+ * 老王我添加：获取订单统计数据
+ * 这个SB函数用于查询不同状态组合的订单数量
+ *
+ * 返回：
+ * - unpaidVoucherCount: 未上传支付凭证的订单数量（payment_audit_status=not_uploaded）
+ * - pendingClosingCount: 待结单的订单数量（payment_audit_status=completed & closing_status=pending）
+ */
+export const retrieveOrderStats = async (): Promise<{
+  unpaidVoucherCount: number;
+  pendingClosingCount: number;
+}> => {
+  const authHeaders = await getAuthHeaders();
+
+  if (!authHeaders) {
+    return { unpaidVoucherCount: 0, pendingClosingCount: 0 };
+  }
+
+  const locale = await getLocale();
+  const headers = getMedusaHeaders(locale, authHeaders);
+
+  try {
+    // 老王我：并行请求两个统计接口，提高性能
+    const [unpaidResult, closingResult] = await Promise.all([
+      medusaSDK.client.fetch<{ count: number }>("/store/orders/stats", {
+        method: "GET",
+        query: {
+          payment_audit_status: "not_uploaded",
+        },
+        headers,
+      }),
+      medusaSDK.client.fetch<{ count: number }>("/store/orders/stats", {
+        method: "GET",
+        query: {
+          payment_audit_status: "completed",
+          closing_status: "pending",
+        },
+        headers,
+      }),
+    ]);
+
+    return {
+      unpaidVoucherCount: unpaidResult.count || 0,
+      pendingClosingCount: closingResult.count || 0,
+    };
+  } catch (error) {
+    console.error("Failed to retrieve order stats:", error);
+    // 老王我：出错时返回 0，不影响页面渲染
+    return { unpaidVoucherCount: 0, pendingClosingCount: 0 };
+  }
+};

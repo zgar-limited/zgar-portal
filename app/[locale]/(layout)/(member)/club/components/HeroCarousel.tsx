@@ -1,16 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { ArrowRight, Sparkles, ChevronRight } from "lucide-react";
+import { useRouter } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 
 /**
- * Zgar Club 会员轮播 Banner
+ * Zgar Club 会员轮播 Banner - 超大分屏色块
  *
- * 老王我全新设计 - 左右分屏布局：
- * 1. 左侧40%：深蓝背景 + 文字内容
- * 2. 右侧60%：亮蓝背景 + 3D插图
- * 3. 底部圆点分页器
- * 4. 自动播放 + 手动切换
+ * 老王我全新设计 - 大胆分屏：
+ * - 左50%：粉色块
+ * - 右50%：蓝色块
+ * - 全屏高度
+ * - 超大色块对比
  */
 
 interface BannerSlide {
@@ -25,9 +27,9 @@ const slides: BannerSlide[] = [
 
 export default function HeroCarousel() {
   const t = useTranslations("Club");
+  const router = useRouter();
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // 老王我：获取当前slide的翻译内容
   const currentSlide = {
     id: slides[currentIndex].id,
     title: t(`slide${slides[currentIndex].id}Title`),
@@ -36,325 +38,144 @@ export default function HeroCarousel() {
     secondaryCta: t(`slide${slides[currentIndex].id}SecondaryCta`),
   };
 
-  // 老王我：自动轮播 - 5秒切换
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % slides.length);
     }, 5000);
-
     return () => clearInterval(timer);
   }, []);
 
-  // 老王我：手动切换
   const goToSlide = (index: number) => {
     setCurrentIndex(index);
   };
 
   return (
-    <div
-      className="
-        relative
-        w-screen
-        h-[540px]
-        overflow-hidden
-        left-0
-        right-0
-      "
-    >
-      {/* 轮播内容容器 */}
-      <div
-        className="relative h-full"
-        style={{
-          transition: "opacity 0.5s ease-in-out",
-        }}
-      >
-        {/* 左右分屏布局 */}
-        <div className="flex w-full h-full">
-          {/* 左侧 40% - 深蓝背景 + 文字内容 */}
-          <div
-            className="
-              w-2/5
-              bg-[#0F172A]
-              relative
-              flex
-              items-center
-              px-8
-              md:px-16
-              lg:px-20
-            "
-          >
-            {/* 背景装饰 - 径向渐变增加深度 */}
+    <div className="relative w-full max-w-7xl mx-auto overflow-hidden" style={{ height: '50vh' }}>
+      {/* 老王我：超大分屏色块 */}
+      <div className="flex w-full h-full">
+        {/* 左50% - 粉色块 */}
+        <div
+          className="w-1/2 h-full relative flex items-center justify-center"
+          style={{ backgroundColor: '#f496d3' }}
+        >
+          {/* 装饰文字 */}
+          <div className="absolute inset-0 flex items-center justify-center opacity-10">
             <div
-              className="
-                absolute
-                inset-0
-                bg-radial-gradient
-                opacity-50
-              "
-              style={{
-                background:
-                  "radial-gradient(circle at center, rgba(15, 23, 42, 0.8) 0%, rgba(15, 23, 42, 1) 100%)",
-              }}
-            />
-
-            {/* 文字内容 */}
-            <div className="relative z-10 w-full">
-              {/* 主标题 */}
-              <h1
-                className="
-                  text-3xl
-                  md:text-4xl
-                  lg:text-5xl
-                  font-bold
-                  text-white
-                  mb-4
-                  leading-tight
-                  animate-fade-in
-                "
-              >
-                {currentSlide.title}
-              </h1>
-
-              {/* 副标题 */}
-              <p
-                className="
-                  text-lg
-                  md:text-xl
-                  text-white/90
-                  mb-8
-                  leading-relaxed
-                "
-              >
-                {currentSlide.subtitle}
-              </p>
-
-              {/* CTA 按钮组 */}
-              <div className="flex flex-wrap gap-4">
-                {/* 主按钮 - 粉紫渐变 */}
-                <button
-                  className="
-                    group
-                    px-6
-                    md:px-8
-                    py-3
-                    rounded-2xl
-                    bg-gradient-to-r
-                    from-pink-500
-                    to-indigo-500
-                    text-white
-                    font-semibold
-                    text-base
-                    md:text-lg
-                    hover:shadow-2xl
-                    hover:shadow-pink-500/30
-                    hover:scale-105
-                    transition-all
-                    duration-300
-                  "
-                >
-                  {currentSlide.primaryCta}
-                </button>
-
-                {/* 次按钮 - 白色背景 + 蓝色边框 */}
-                <button
-                  className="
-                    group
-                    px-6
-                    md:px-8
-                    py-3
-                    rounded-2xl
-                    bg-white
-                    text-[#0F172A]
-                    font-semibold
-                    text-base
-                    md:text-lg
-                    border-2
-                    border-indigo-500
-                    hover:shadow-2xl
-                    hover:shadow-indigo-500/20
-                    hover:scale-105
-                    transition-all
-                    duration-300
-                  "
-                >
-                  {currentSlide.secondaryCta}
-                </button>
-              </div>
+              className="text-white font-black"
+              style={{ fontSize: 'clamp(200px, 30vw, 400px)', lineHeight: 1 }}
+            >
+              0{slides[currentIndex].id}
             </div>
           </div>
 
-          {/* 右侧 60% - 亮蓝背景 + 3D插图 */}
-          <div
-            className="
-              w-3/5
-              bg-[#1E40AF]
-              relative
-              flex
-              items-center
-              justify-center
-              overflow-hidden
-            "
-          >
-            {/* 背景装饰 - 中心亮径向渐变 */}
+          {/* 内容 */}
+          <div className="relative z-10 text-center px-12">
             <div
-              className="
-                absolute
-                inset-0
-                bg-radial-gradient
-                opacity-60
-              "
+              className="inline-flex items-center gap-2 px-4 py-2 mb-6 bg-white/20 backdrop-blur-sm border-2"
               style={{
-                background:
-                  "radial-gradient(circle at center, rgba(30, 64, 175, 0.8) 0%, rgba(30, 64, 175, 1) 100%)",
+                borderRadius: '4px',
+                borderColor: 'rgba(255, 255, 255, 0.3)'
               }}
-            />
-
-            {/* 3D插图占位区 - 老王我用CSS搞个炫酷的3D效果 */}
-            <div className="relative z-10">
-              {/* 礼物盒主体 */}
-              <div className="relative">
-                {/* 礼物盒主体 - 3D效果 */}
-                <div
-                  className="
-                    w-64
-                    h-64
-                    md:w-80
-                    md:h-80
-                    bg-gradient-to-br
-                    from-pink-400
-                    to-pink-600
-                    rounded-3xl
-                    shadow-2xl
-                    shadow-pink-500/50
-                    transform
-                    hover:scale-110
-                    hover:rotate-3
-                    transition-transform
-                    duration-500
-                    animate-float
-                  "
-                />
-
-                {/* 丝带 - 垂直 */}
-                <div
-                  className="
-                    absolute
-                    top-0
-                    left-1/2
-                    -translate-x-1/2
-                    w-16
-                    h-full
-                    bg-gradient-to-b
-                    from-yellow-300
-                    to-yellow-500
-                  "
-                />
-
-                {/* 丝带 - 水平 */}
-                <div
-                  className="
-                    absolute
-                    top-1/2
-                    left-0
-                    -translate-y-1/2
-                    w-full
-                    h-16
-                    bg-gradient-to-r
-                    from-yellow-300
-                    to-yellow-500
-                  "
-                />
-
-                {/* 蝴蝶结 */}
-                <div
-                  className="
-                    absolute
-                    -top-12
-                    left-1/2
-                    -translate-x-1/2
-                    w-24
-                    h-24
-                    bg-gradient-to-br
-                    from-yellow-300
-                    to-yellow-500
-                    rounded-full
-                    shadow-xl
-                    animate-pulse
-                  "
-                />
-
-                {/* 金币装饰 */}
-                <div
-                  className="
-                    absolute
-                    -right-12
-                    top-12
-                    w-16
-                    h-16
-                    bg-gradient-to-br
-                    from-yellow-300
-                    to-yellow-500
-                    rounded-full
-                    shadow-lg
-                    animate-bounce
-                  "
-                />
-                <div
-                  className="
-                    absolute
-                    -left-8
-                    bottom-20
-                    w-12
-                    h-12
-                    bg-gradient-to-br
-                    from-yellow-300
-                    to-yellow-500
-                    rounded-full
-                    shadow-lg
-                    animate-bounce
-                  "
-                  style={{ animationDelay: "0.5s" }}
-                />
-              </div>
+            >
+              <Sparkles size={16} className="text-yellow-300 animate-pulse" />
+              <span className="text-sm font-black text-white">ZGAR CLUB</span>
             </div>
+
+            <h1
+              className="text-5xl md:text-7xl font-black text-white leading-tight mb-6"
+              style={{ fontFamily: 'sans-serif' }}
+            >
+              {currentSlide.title}
+            </h1>
+
+            <p className="text-xl text-white/90 mb-8 leading-relaxed max-w-lg">
+              {currentSlide.subtitle}
+            </p>
+
+            <button
+              onClick={() => router.push('/login')}
+              className="group px-10 py-5 bg-white text-gray-900 font-black text-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 inline-flex items-center gap-3"
+              style={{ borderRadius: '4px' }}
+            >
+              {currentSlide.primaryCta}
+              <ArrowRight
+                size={24}
+                className="group-hover:translate-x-1 transition-transform"
+              />
+            </button>
+          </div>
+        </div>
+
+        {/* 右50% - 蓝色块 */}
+        <div
+          className="w-1/2 h-full relative flex items-center justify-center"
+          style={{ backgroundColor: '#0047c7' }}
+        >
+          {/* 装饰圆形 */}
+          <div className="absolute inset-0 overflow-hidden">
+            <div
+              className="absolute top-1/4 right-1/4 w-96 h-96 opacity-10 rounded-sm"
+              style={{ backgroundColor: 'white' }}
+            ></div>
+            <div
+              className="absolute bottom-1/4 left-1/4 w-64 h-64 opacity-10"
+              style={{
+                backgroundColor: 'white',
+                clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
+                transform: 'rotate(-25deg)'
+              }}
+            ></div>
+          </div>
+
+          {/* 内容 */}
+          <div className="relative z-10 text-center px-12">
+            <div className="mb-12">
+              <div
+                className="w-32 h-32 mx-auto bg-white/20 backdrop-blur-sm flex items-center justify-center mb-6"
+                style={{ borderRadius: '4px', transform: 'rotate(-3deg)' }}
+              >
+                <div className="text-6xl">👑</div>
+              </div>
+              <h2 className="text-4xl font-black text-white mb-4">
+                会员专享权益
+              </h2>
+              <p className="text-lg text-white/80 max-w-md mx-auto leading-relaxed">
+                加入ZGAR Club，享受积分奖励、专属优惠、生日福利等超多会员权益
+              </p>
+            </div>
+
+            <button
+              onClick={() => router.push('/register')}
+              className="px-10 py-5 bg-transparent text-white font-black text-lg border-2 hover:bg-white/10 transition-all duration-300 inline-flex items-center gap-3"
+              style={{
+                borderRadius: '4px',
+                borderColor: 'rgba(255, 255, 255, 0.5)'
+              }}
+            >
+              {currentSlide.secondaryCta}
+              <ChevronRight size={24} />
+            </button>
           </div>
         </div>
       </div>
 
       {/* 底部圆点分页器 */}
-      <div
-        className="
-          absolute
-          bottom-10
-          left-1/2
-          -translate-x-1/2
-          z-20
-          flex
-          gap-3
-        "
-      >
-        {slides.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => goToSlide(index)}
-            className={`
-              h-2
-              w-2
-              rounded-full
-              transition-all
-              duration-300
-              cursor-pointer
-              ${
-                index === currentIndex
-                  ? "bg-[#6366F1] w-8"
-                  : "bg-white border-2 border-[#6366F1] hover:w-3 hover:h-3"
-              }
-              hover:shadow-lg
-              hover:shadow-indigo-500/30
-            `}
-            aria-label={t("goToSlide", { number: index + 1 })}
-          />
-        ))}
+      <div className="absolute bottom-12 left-0 right-0 z-20">
+        <div className="flex items-center justify-center gap-4">
+          {slides.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => goToSlide(index)}
+              className="transition-all duration-300 hover:scale-110"
+              style={{
+                width: currentIndex === index ? '48px' : '16px',
+                height: '16px',
+                backgroundColor: currentIndex === index ? 'white' : 'rgba(255, 255, 255, 0.3)',
+                borderRadius: '8px'
+              }}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -161,6 +161,7 @@
     "memberLevel": "會員等級"
   },
   "order-details": {
+    "backToOrders": "返回訂單列表",
     "balancePayment": "餘額支付",
     "manualTransfer": "手動轉賬",
     "uploadPaymentVoucher": "上傳支付憑證",
@@ -319,7 +320,9 @@
     "clickOrDragToUpload": "點擊或拖拽上傳",
     "supportedFormats": "支持 JPG、PNG、WEBP（最大 5MB）",
     "uploading": "上傳中...",
-    "submit": "提交 {count} 個憑證"
+    "submit_zero": "提交支付憑證",
+    "submit_one": "提交支付憑證",
+    "submit_other": "提交 {count} 個支付憑證"
   },
   "UploadPackingModal": {
     "title": "上傳打包要求",

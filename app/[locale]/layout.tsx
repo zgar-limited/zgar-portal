@@ -11,8 +11,6 @@ import "../../public/scss/main.scss";
 import "../../public/css/harmonyos_sans.css";
 import "../../public/css/harmonyos_sans_tc.css";
 
-import MobileMenu from "@/components/modals/MobileMenu";
-
 import GlobalEffectsProvider from "@/components/common/GlobalEffectProvider";
 import BackToTop from "@/components/back-to-top/BackToTop";
 
@@ -46,7 +44,6 @@ export default async function RootLayout({
         <NextIntlClientProvider messages={messages}>
           <main id="wrapper">
             {children}
-            <MobileMenu />
 
             <GlobalEffectsProvider />
             <BackToTop />

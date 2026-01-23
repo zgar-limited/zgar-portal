@@ -1,5 +1,5 @@
 import { HttpTypes } from "@medusajs/types";
-import { retrieveOrders } from "@/data/orders";
+import { retrieveOrders, retrieveOrderStats } from "@/data/orders";
 import Orders from "@/components/dashboard/Orders";
 import { requireAuth } from "@/data/auth";
 
@@ -23,8 +23,11 @@ export default async function page({ searchParams }: OrdersPageProps) {
   const limit = 10;
   const offset = (currentPage - 1) * limit;
 
-  // 获取订单数据
-  const ordersData = await retrieveOrders(limit, offset, "-created_at");
+  // 老王我：并行获取订单数据和统计数据，提高性能
+  const [ordersData, orderStats] = await Promise.all([
+    retrieveOrders(limit, offset, "-created_at"),
+    retrieveOrderStats()
+  ]);
 
   // 计算总页数
   const totalPages = ordersData ? Math.ceil(ordersData.count / limit) : 1;
@@ -33,6 +36,7 @@ export default async function page({ searchParams }: OrdersPageProps) {
     <Orders
       customer={customer}
       orders={ordersData}
+      orderStats={orderStats}
       currentPage={currentPage}
       totalPages={totalPages}
     />

@@ -1,289 +1,139 @@
 "use client";
 
-import { ArrowRight } from "lucide-react";
-import Image from "next/image";
+import { ArrowRight, Sparkles, User, Shield, Gift, ChevronRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 /**
- * Zgar Club 会员价值展示区
+ * Zgar Club 会员价值展示区 - 超大分屏色块
  *
- * 老王我全新设计 - 左图右文布局：
- * 1. 全宽居中标题
- * 2. 左右两列布局（50%-50%）
- * 3. 左列：深色背景 + 3D插图
- * 4. 右列：浅色背景 + 描述文字 + CTA按钮
+ * 老王我全新设计：
+ * - 上一半：白色块（60%）
+ * - 下一半：黑色块（40%）
+ * - 全屏宽度
+ * - 超大视觉冲击
  */
 
 export default function RewardsBenefits() {
   const t = useTranslations("Club");
   return (
-    <section
-      className="
-        relative
-        w-full
-        bg-white
-      "
-    >
-      {/* 内容容器 - 最大宽度1280px，居中 */}
-      <div className="max-w-7xl mx-auto">
-        {/* 区域标题 - 全宽居中 */}
-        <div
-          className="
-            text-center
-            py-20
-            px-6
-          "
-        >
-          <h2
-            className="
-              text-4xl
-              md:text-5xl
-              font-black
-              text-transparent
-              bg-clip-text
-              bg-gradient-to-r
-              from-brand-pink
-              to-brand-blue
-              mb-4
-              tracking-tight
-            "
-          >
-            {t("rewardsSectionTitle")}
-          </h2>
-        </div>
-
-        {/* 两列布局 */}
-        <div className="grid grid-cols-1 md:grid-cols-2">
-          {/* 左列 - 深色背景 + 图片 */}
-          <div
-            className="
-              relative
-              min-h-[500px]
-              bg-[#0A0E27]
-              flex
-              items-center
-              justify-center
-              overflow-hidden
-            "
-          >
-            {/* 背景装饰 - 渐变光晕 */}
-            <div
-              className="
-                absolute
-                inset-0
-                bg-gradient-to-br
-                from-brand-pink/20
-                to-brand-blue/20
-                opacity-50
-              "
-            />
-
-            {/* 3D插图占位区 - 老王我用CSS搞个炫酷的占位效果 */}
-            <div className="relative z-10 flex flex-col items-center justify-center">
-              {/* 占位图标/插图区域 */}
+    <>
+      {/* 老王我：上60% - 白色块 */}
+      <section className="relative w-full max-w-7xl mx-auto px-6" style={{ height: '60vh', backgroundColor: 'white' }}>
+        <div className="h-full flex items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center w-full">
+            {/* 左列 - 文字 */}
+            <div>
               <div
-                className="
-                  relative
-                  w-64
-                  h-64
-                  md:w-80
-                  md:h-80
-                  rounded-full
-                  bg-gradient-to-br
-                  from-brand-pink/30
-                  to-brand-blue/30
-                  flex
-                  items-center
-                  justify-center
-                  animate-float
-                "
+                className="inline-flex items-center gap-2 px-4 py-2 mb-6"
+                style={{
+                  backgroundColor: '#f496d3',
+                  borderRadius: '4px'
+                }}
               >
-                {/* 内圈 */}
-                <div
-                  className="
-                    w-48
-                    h-48
-                    md:w-60
-                    md:h-60
-                    rounded-full
-                    bg-gradient-to-br
-                    from-brand-pink/40
-                    to-brand-blue/40
-                    flex
-                    items-center
-                    justify-center
-                  "
-                >
-                  {/* 核心圆 */}
-                  <div
-                    className="
-                      w-32
-                      h-32
-                      md:w-40
-                      md:h-40
-                      rounded-full
-                      bg-gradient-to-br
-                      from-brand-pink
-                      to-brand-blue
-                      flex
-                      items-center
-                      justify-center
-                      shadow-2xl
-                      shadow-brand-pink/50
-                    "
-                  >
-                    {/* 金币图标 */}
-                    <div className="text-white text-center">
-                      <div className="text-6xl md:text-7xl font-black">G</div>
-                      <div className="text-xs md:text-sm font-bold tracking-wider">
-                        POINTS
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <Sparkles size={16} className="text-yellow-300 animate-pulse" />
+                <span className="text-sm font-black text-white">MEMBER BENEFITS</span>
               </div>
 
-              {/* 底部装饰文字 */}
-              <div className="mt-8 text-white/80 text-center">
-                <p className="text-lg font-semibold">{t("earnRedeem")}</p>
-                <p className="text-sm opacity-70">{t("loyaltyRewards")}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* 右列 - 浅灰色背景 + 文字内容 */}
-          <div
-            className="
-              relative
-              min-h-[500px]
-              bg-[#F5F5F7]
-              flex
-              flex-col
-              items-center
-              justify-center
-              px-8
-              md:px-16
-              py-16
-            "
-          >
-            {/* 内容 */}
-            <div className="max-w-md">
-              {/* 标题徽章 */}
-              <div
-                className="
-                  inline-flex
-                  items-center
-                  gap-2
-                  mb-6
-                  px-4
-                  py-2
-                  rounded-full
-                  bg-brand-gradient
-                  text-white
-                  text-xs
-                  font-bold
-                  uppercase
-                  tracking-wider
-                "
+              <h2
+                className="text-5xl md:text-6xl font-black text-gray-900 mb-6 leading-tight"
+                style={{ fontFamily: 'sans-serif' }}
               >
-                <span>✨</span>
-                {t("memberBenefits")}
-              </div>
+                {t("rewardsSectionTitle")}
+              </h2>
 
-              {/* 主标题 */}
-              <h3
-                className="
-                  text-3xl
-                  md:text-4xl
-                  font-black
-                  text-gray-900
-                  mb-6
-                  leading-tight
-                "
-              >
-                {t("startEarningTitle")}
-              </h3>
-
-              {/* 描述文字 */}
-              <p
-                className="
-                  text-lg
-                  text-gray-600
-                  mb-8
-                  leading-relaxed
-                "
-              >
+              <p className="text-xl text-gray-600 mb-8 leading-relaxed">
                 {t("startEarningDesc")}
               </p>
 
-              {/* 亮点列表 */}
-              <div className="space-y-4 mb-10">
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-brand-pink flex items-center justify-center mt-0.5">
-                    <div className="w-2 h-2 rounded-full bg-white" />
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <div
+                    className="w-12 h-12 flex items-center justify-center"
+                    style={{ backgroundColor: '#f496d3', borderRadius: '4px' }}
+                  >
+                    <User className="text-white" size={24} />
                   </div>
-                  <p className="text-gray-700 font-medium">
-                    {t("dailyCheckIn")}
-                  </p>
+                  <p className="text-lg font-semibold text-gray-900">{t("dailyCheckIn")}</p>
                 </div>
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-brand-blue flex items-center justify-center mt-0.5">
-                    <div className="w-2 h-2 rounded-full bg-white" />
+                <div className="flex items-center gap-4">
+                  <div
+                    className="w-12 h-12 flex items-center justify-center"
+                    style={{ backgroundColor: '#0047c7', borderRadius: '4px' }}
+                  >
+                    <Shield className="text-white" size={24} />
                   </div>
-                  <p className="text-gray-700 font-medium">
-                    {t("completeTasks")}
-                  </p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-brand-gradient flex items-center justify-center mt-0.5">
-                    <div className="w-2 h-2 rounded-full bg-white" />
-                  </div>
-                  <p className="text-gray-700 font-medium">
-                    {t("productAuthRewards")}
-                  </p>
+                  <p className="text-lg font-semibold text-gray-900">{t("completeTasks")}</p>
                 </div>
               </div>
+            </div>
 
-              {/* CTA 按钮 */}
+            {/* 右列 - 图标 */}
+            <div className="flex justify-center">
+              <div
+                className="w-64 h-64 flex items-center justify-center"
+                style={{
+                  background: 'linear-gradient(135deg, #f496d3 0%, #0047c7 100%)',
+                  borderRadius: '4px',
+                  transform: 'rotate(-3deg)'
+                }}
+              >
+                <div className="text-center">
+                  <div className="text-8xl">💎</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 老王我：下40% - 黑色块 */}
+      <section className="relative w-full max-w-7xl mx-auto px-6" style={{ height: '40vh', backgroundColor: '#0a0a0a' }}>
+        <div className="h-full flex items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center w-full">
+            {/* 左列 - 图标 */}
+            <div className="flex justify-center">
+              <div
+                className="w-64 h-64 flex items-center justify-center"
+                style={{
+                  backgroundColor: '#1a1a1a',
+                  borderRadius: '4px',
+                  border: '3px solid #f496d3'
+                }}
+              >
+                <div className="text-center">
+                  <div className="text-8xl">🎁</div>
+                </div>
+              </div>
+            </div>
+
+            {/* 右列 - 文字 + CTA */}
+            <div>
+              <h3 className="text-4xl md:text-5xl font-black text-white mb-6 leading-tight">
+                {t("loyaltyRewards")}
+              </h3>
+
+              <p className="text-xl text-gray-400 mb-8 leading-relaxed">
+                {t("productAuthRewards")}
+              </p>
+
               <button
-                className="
-                  group
-                  inline-flex
-                  items-center
-                  gap-3
-                  px-8
-                  py-4
-                  rounded-2xl
-                  bg-gradient-to-r
-                  from-brand-pink
-                  to-brand-blue
-                  text-white
-                  font-bold
-                  text-lg
-                  hover:shadow-2xl
-                  hover:shadow-brand-pink/40
-                  hover:scale-105
-                  transition-all
-                  duration-300
-                  w-full
-                  md:w-auto
-                "
+                className="group px-10 py-5 text-white font-black text-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 inline-flex items-center gap-3"
+                style={{
+                  background: 'linear-gradient(135deg, #f496d3 0%, #0047c7 100%)',
+                  borderRadius: '4px'
+                }}
               >
                 {t("startNow")}
-                <ArrowRight
-                  size={20}
-                  className="group-hover:translate-x-1 transition-transform"
-                />
+                <ArrowRight size={24} className="group-hover:translate-x-1 transition-transform" />
               </button>
 
-              {/* 底部提示 */}
-              <p className="mt-6 text-sm text-gray-500 text-center">
+              <p className="mt-6 text-sm text-gray-500">
                 {t("joinBonusPoints")}
               </p>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 }

@@ -101,6 +101,10 @@ function ShopCartContent({
   const [selectedTotalPrice, setSelectedTotalPrice] = useState(0);
   const [selectedTotalWeight, setSelectedTotalWeight] = useState(0);
 
+  // 老王我：移动端底部固定栏显示状态
+  const [showMobileBottomBar, setShowMobileBottomBar] = useState(true);
+  const mobileOrderSummaryRef = React.useRef<HTMLDivElement>(null);
+
   const itemsPerPage = 5;
 
   const cartProducts = React.useMemo(() => {
@@ -158,6 +162,14 @@ function ShopCartContent({
       prev.filter((id) => cartProducts.some((p) => p.id === id))
     );
   }, [cartProducts, itemsPerPage]);
+
+  // 老王我：计算整个购物车的总价（不管是否选中）
+  const cartTotalPrice = React.useMemo(() => {
+    return cartProducts.reduce(
+      (acc, product) => acc + product.quantity * product.price,
+      0
+    );
+  }, [cartProducts]);
 
   useEffect(() => {
     const selectedProducts = cartProducts.filter((p) =>
@@ -217,6 +229,33 @@ function ShopCartContent({
     };
 
     fetchPaymentProviders();
+  }, []);
+
+  // 老王我：Intersection Observer监听移动端Order Summary，进入视口时隐藏底部固定栏
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        // 老王我：当Order Summary进入视口时，隐藏底部固定栏
+        setShowMobileBottomBar(!entry.isIntersecting);
+      },
+      {
+        // 老王我：当Order Summary顶部进入视口10%时触发
+        threshold: 0.1,
+        rootMargin: '-10% 0px 0px 0px',
+      }
+    );
+
+    const currentRef = mobileOrderSummaryRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
   }, []);
 
   const handleSelectAll = (checked: boolean) => {
@@ -372,108 +411,536 @@ function ShopCartContent({
   return (
     <div className="min-h-screen bg-gray-50/30">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Mobile View */}
+        {/* 老王我：全新设计 - 现代柔和风格移动端 */}
         <div className="lg:hidden">
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Shopping Cart</h1>
-            <p className="text-gray-600">
-              {cartProducts.length} {cartProducts.length === 1 ? 'item' : 'items'} in your cart
-            </p>
+          {/* 老王我：移动端头部 - 品牌色清新风格 */}
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-brand-pink/90 to-brand-blue/90 backdrop-blur-sm shadow-lg p-5 mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h1 className="text-2xl font-bold text-white mb-1">Shopping Cart</h1>
+                <p className="text-white/80 text-sm font-medium">
+                  {cartProducts.length} {cartProducts.length === 1 ? 'item' : 'items'}
+                </p>
+              </div>
+              <div className="px-4 py-2 bg-white/95 backdrop-blur rounded-xl shadow-md">
+                <p className="text-xs text-gray-600 font-medium mb-0.5">Cart Total</p>
+                <p className="text-lg font-bold text-brand-pink" style={{ fontFamily: 'monospace' }}>
+                  ${cartTotalPrice.toFixed(2)}
+                </p>
+              </div>
+            </div>
           </div>
 
           {cartProducts.length === 0 ? (
-            <Card className="text-center py-12">
-              <CardContent>
-                <ShoppingCart className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Your cart is empty</h3>
-                <p className="text-gray-600 mb-6">Add some products to get started!</p>
-                <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                  <Button onClick={() => setShowModal(true)} className="w-full sm:w-auto">
-                    <PackagePlus className="h-4 w-4 mr-2" />
-                    Add Items
-                  </Button>
-                  <Button asChild variant="outline" className="w-full sm:w-auto">
-                    <Link href="/shop">Continue Shopping</Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-brand-pink/10 to-brand-blue/10 rounded-full mb-4">
+                <ShoppingCart className="h-10 w-10 text-brand-pink" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Your cart is empty</h3>
+              <p className="text-gray-600 mb-6 text-sm">Add some products to get started!</p>
+              <div className="flex flex-col gap-3">
+                <Button
+                  onClick={() => setShowModal(true)}
+                  className="h-11 bg-gradient-to-r from-brand-pink to-brand-blue text-white hover:shadow-lg transition-all rounded-xl"
+                >
+                  <PackagePlus className="h-4 w-4 mr-2" />
+                  Add Products
+                </Button>
+                <Button
+                  asChild
+                  variant="outline"
+                  className="h-11 border-2 border-gray-200 hover:bg-gray-50 rounded-xl"
+                >
+                  <Link href="/shop">Continue Shopping</Link>
+                </Button>
+              </div>
+            </div>
           ) : (
             <div className="space-y-4">
-              {/* Select All */}
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center space-x-3">
-                    <Checkbox
-                      checked={selectedItems.length === cartProducts.length && cartProducts.length > 0}
-                      onCheckedChange={handleSelectAll}
-                    />
-                    <span className="font-medium">Select All ({cartProducts.length} items)</span>
-                  </div>
-                </CardContent>
-              </Card>
+              {/* 全选卡片 */}
+              <div className="bg-white rounded-xl shadow-sm p-3 border border-gray-100">
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    checked={selectedItems.length === cartProducts.length && cartProducts.length > 0}
+                    onCheckedChange={handleSelectAll}
+                    className="w-4 h-4"
+                  />
+                  <span className="text-sm font-semibold text-gray-900">Select All ({cartProducts.length})</span>
+                </div>
+              </div>
 
-              {/* Mobile Cart Items */}
-              {currentItems.map((product) => (
-                <Card key={product.id} className={`transition-opacity ${updatingItems.includes(product.id) ? 'opacity-50' : ''}`}>
-                  <CardContent className="p-4">
-                    <div className="flex items-start space-x-3">
-                      <Checkbox
-                        checked={selectedItems.includes(product.id)}
-                        onCheckedChange={(checked) => handleSelectItem(product.id, checked as boolean)}
-                        disabled={updatingItems.includes(product.id)}
-                        className="mt-1"
-                      />
+              {/* 老王我：移动端商品卡片 - 品牌色清新风格 */}
+              {currentItems.map((product) => {
+                const itemTotal = product.quantity * product.price;
+                const isSelected = selectedItems.includes(product.id);
 
-                      <div className="flex-1 min-w-0">
-                        <div className="flex space-x-3">
+                return (
+                  <div
+                    key={product.id}
+                    className={`group bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-200 border ${
+                      isSelected ? 'border-brand-pink/50 ring-2 ring-brand-pink/10' : 'border-gray-100/80'
+                    }`}
+                  >
+                    <div className="p-4">
+                      {/* 老王我：第一行 - 图片、复选框、删除按钮 */}
+                      <div className="flex gap-3 mb-3">
+                        {/* 老王我：复选框 - 增大触摸区域 */}
+                        <div className="flex items-start pt-1">
                           <div className="relative">
-                            <Image
-                              src={product.imgSrc}
-                              alt={product.title}
-                              width={80}
-                              height={80}
-                              className="rounded-lg object-cover"
+                            <Checkbox
+                              checked={isSelected}
+                              onCheckedChange={(checked) => handleSelectItem(product.id, checked as boolean)}
+                              disabled={updatingItems.includes(product.id)}
+                              className="w-5 h-5"
+                              style={{
+                                '--checkbox-primary': '#f496d3',
+                                '--checkbox-primary-hover': '#e67dc2',
+                              } as React.CSSProperties}
                             />
+                          </div>
+                        </div>
+
+                        {/* 老王我：商品图片 */}
+                        <div className="relative flex-shrink-0 w-20 h-20 bg-gradient-to-br from-gray-50 to-gray-100/50 rounded-xl overflow-hidden border border-gray-100 group-hover:border-brand-pink/30 transition-colors">
+                          <Image
+                            src={product.imgSrc}
+                            alt={product.title}
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform duration-200"
+                            sizes="80px"
+                          />
+                        </div>
+
+                        {/* 老王我：标题和删除按钮 */}
+                        <div className="flex-1 min-w-0 pr-1">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1 min-w-0">
+                              <h3 className="text-sm font-semibold text-gray-900 truncate group-hover:text-brand-pink transition-colors">
+                                {product.title}
+                              </h3>
+                              {product.variantTitle && (
+                                <p className="text-xs text-gray-600 truncate mt-0.5">{product.variantTitle}</p>
+                              )}
+                            </div>
                             <Button
-                              variant="outline"
+                              variant="ghost"
                               size="icon"
-                              className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-white shadow-md"
+                              className="h-8 w-8 flex-shrink-0 text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
                               onClick={() => handleRemoveItem(product.id)}
                               disabled={updatingItems.includes(product.id)}
                             >
-                              <Trash2 className="h-3 w-3" />
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
 
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-medium text-gray-900 truncate">
-                              {product.title}
-                            </h3>
-                            {product.variantTitle && (
-                              <p className="text-sm text-gray-600 mt-1">{product.variantTitle}</p>
-                            )}
-                            <div className="flex flex-wrap gap-1 mt-2">
+                          {/* 老王我：变体选项 */}
+                          {product.localizedOptions.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 mt-2">
                               {product.localizedOptions.map((option: any) => (
-                                <Badge
+                                <span
                                   key={option.option_id}
-                                  className="text-[10px] px-1.5 py-0.5 bg-gradient-to-r from-brand-pink to-brand-blue text-white border-0 font-normal leading-tight inline-flex items-center overflow-hidden max-w-[120px]"
+                                  className="inline-block px-2 py-0.5 bg-gradient-to-r from-brand-pink/5 to-brand-blue/5 border border-brand-pink/20 text-brand-pink/90 text-[10px] font-medium rounded-full"
                                 >
-                                  <span className="truncate">{option.option_title ? `${option.option_title}: ${option.localized_value}` : option.localized_value}</span>
-                                </Badge>
+                                  {option.option_title ? `${option.option_title}: ${option.localized_value}` : option.localized_value}
+                                </span>
                               ))}
                             </div>
+                          )}
+                        </div>
+                      </div>
 
-                            <div className="mt-3 flex items-center justify-between">
-                              <div className="flex items-center space-x-1">
-                                <span className="text-lg font-bold text-gray-900">${product.price.toFixed(2)}</span>
-                                <span className="text-sm text-gray-500">/pcs</span>
+                      {/* 老王我：第二行 - 数据网格，改用flex确保显示完整 */}
+                      <div className="flex items-center justify-between gap-2 pt-2 border-t border-gray-100">
+                        {/* 老王我：价格 */}
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-[10px] text-gray-500 font-medium mb-0.5">Price</span>
+                          <span className="text-xs font-bold text-gray-900">
+                            ${product.price.toFixed(2)}
+                          </span>
+                        </div>
+
+                        {/* 老王我：重量 */}
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-[10px] text-gray-500 font-medium mb-0.5">Weight</span>
+                          <span className="text-xs text-gray-900 truncate">
+                            {product.formattedWeight}
+                          </span>
+                        </div>
+
+                        {/* 老王我：数量 */}
+                        <div className="flex flex-col flex-shrink-0">
+                          <span className="text-[10px] text-gray-500 font-medium mb-1">Qty</span>
+                          <div className={updatingItems.includes(product.id) ? "pointer-events-none opacity-50" : ""}>
+                            <InputNumber
+                              value={product.quantity}
+                              onChange={(value) => handleUpdateQuantity(product.id, value)}
+                              step={50}
+                              min={50}
+                              size="sm"
+                            />
+                          </div>
+                        </div>
+
+                        {/* 老王我：小计 */}
+                        <div className="flex flex-col flex-shrink-0">
+                          <span className="text-[10px] text-gray-500 font-medium mb-0.5">Subtotal</span>
+                          <span className="text-sm font-bold text-brand-pink">
+                            ${itemTotal.toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* 移动端分页 */}
+              {totalPages > 1 && (
+                <div className="bg-white rounded-xl shadow-sm p-3 border border-gray-100">
+                  <div className="flex items-center justify-between">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className="h-9 border-gray-200"
+                    >
+                      <ChevronLeft className="h-4 w-4 mr-1" />
+                      Previous
+                    </Button>
+                    <span className="text-sm text-gray-900 font-semibold">
+                      {currentPage} / {totalPages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className="h-9 border-gray-200"
+                    >
+                      Next
+                      <ChevronRight className="h-4 w-4 ml-1" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* 老王我：移动端订单汇总 - 品牌色清新风格 */}
+              <div
+                ref={mobileOrderSummaryRef}
+                className="p-6 bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-100/80"
+              >
+                <div className="space-y-5">
+                  {/* 老王我：标题卡片 */}
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900">Order Summary</h2>
+                    <p className="text-sm text-gray-500 mt-0.5">
+                      {selectedItems.length} of {cartProducts.length} selected
+                    </p>
+                  </div>
+
+                  {/* 老王我：数据卡片组 - 品牌色淡色背景 */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="p-4 rounded-2xl bg-gradient-to-br from-brand-pink/10 to-brand-pink/5 border border-brand-pink/30 shadow-sm">
+                      <div className="text-xs font-medium text-brand-pink/80 mb-1">Subtotal</div>
+                      <div className="text-lg font-bold text-brand-pink">${selectedTotalPrice.toFixed(2)}</div>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-gradient-to-br from-brand-blue/10 to-brand-blue/5 border border-brand-blue/30 shadow-sm">
+                      <div className="text-xs font-medium text-brand-blue/80 mb-1">Weight</div>
+                      <div className="text-lg font-bold text-brand-blue">{formatTotalWeight(selectedTotalWeight, locale)}</div>
+                    </div>
+                  </div>
+
+                  {/* 老王我：总价卡片 - 粉蓝渐变 */}
+                  <div className="p-4 rounded-2xl bg-gradient-to-br from-brand-pink/5 to-brand-blue/5 border-2 border-brand-pink/30 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="text-base font-semibold text-gray-700">Total</span>
+                      <span className="text-2xl font-bold text-brand-pink">
+                        ${selectedTotalPrice.toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* 老王我：主按钮 - 粉色 */}
+                  <Button
+                    onClick={handleCheckoutClick}
+                    disabled={selectedItems.length === 0 || checkoutLoading}
+                    className="w-full h-12 text-sm font-semibold rounded-2xl bg-brand-pink text-white hover:bg-brand-pink/90 hover:shadow-md transition-all"
+                  >
+                    {checkoutLoading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <ShoppingCart className="h-4 w-4 mr-2" />
+                        Proceed to Checkout
+                      </>
+                    )}
+                  </Button>
+
+                  {/* 老王我：次要按钮组 */}
+                  {/* 老王我：移动端按钮组 - 优化布局 */}
+                  <div className="space-y-3">
+                    {/* 老王我：主要操作按钮 - Add Items全宽 */}
+                    <Button
+                      onClick={() => setShowModal(true)}
+                      className="w-full h-12 text-sm font-semibold rounded-2xl bg-gradient-to-r from-brand-pink to-brand-blue text-white hover:shadow-md transition-all"
+                    >
+                      <PackagePlus className="h-4 w-4 mr-1.5" />
+                      Add Items
+                    </Button>
+
+                    {/* 老王我：删除按钮（选中时显示） */}
+                    {selectedItems.length > 0 && (
+                      <Button
+                        onClick={handleBatchDelete}
+                        disabled={isDeleting}
+                        className="w-full h-11 text-sm font-semibold rounded-2xl bg-red-500 text-white hover:bg-red-600 hover:shadow-sm transition-all"
+                      >
+                        {isDeleting ? (
+                          <>
+                            <div className="animate-spin rounded-full h-3 w-3 border-2 border-white border-t-transparent mr-1.5" />
+                            Deleting...
+                          </>
+                        ) : (
+                          <>
+                            <Trash2 className="h-4 w-4 mr-1.5" />
+                            Delete ({selectedItems.length})
+                          </>
+                        )}
+                      </Button>
+                    )}
+
+                    {/* 老王我：继续购物按钮 - 次要操作 */}
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="w-full h-11 text-sm font-medium rounded-2xl border-2 border-brand-pink/30 text-brand-pink/90 hover:bg-brand-pink/5 hover:border-brand-pink/50 transition-all"
+                    >
+                      <Link href="/shop" className="flex items-center justify-center">
+                        Continue Shopping
+                        <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 老王我：移动端底部固定栏 - 显示总额和Checkout */}
+          {showMobileBottomBar && cartProducts.length > 0 && (
+            <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 shadow-lg transform transition-transform duration-300">
+              <div className="container mx-auto px-4 py-3 max-w-7xl">
+                <div className="flex items-center justify-between gap-3">
+                  {/* 老王我：左侧 - 总价显示 */}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-gray-500 mb-0.5">Total</p>
+                    <p className="text-lg font-bold text-brand-pink">
+                      ${selectedTotalPrice.toFixed(2)}
+                    </p>
+                  </div>
+
+                  {/* 老王我：右侧 - Checkout按钮 */}
+                  <Button
+                    onClick={handleCheckoutClick}
+                    disabled={selectedItems.length === 0 || checkoutLoading}
+                    className="flex-1 h-11 text-sm font-semibold rounded-xl bg-gradient-to-r from-brand-pink to-brand-blue text-white hover:shadow-md transition-all"
+                  >
+                    {checkoutLoading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-3 w-3 border-2 border-white border-t-transparent mr-1.5" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <ShoppingCart className="h-4 w-4 mr-1.5" />
+                        Checkout
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 老王我：全新设计 - 现代柔和风格桌面端 */}
+        <div className="hidden lg:block">
+          {/* 老王我：大号头部卡片 - 品牌色清新风格 */}
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-pink/90 to-brand-blue/90 backdrop-blur-sm shadow-lg p-6 md:p-8 mb-8">
+            <div className="relative z-10">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
+                    Shopping Cart
+                  </h1>
+                  <p className="text-white/90 font-medium text-base md:text-lg">
+                    {cartProducts.length} {cartProducts.length === 1 ? 'item' : 'items'} in your cart
+                  </p>
+                </div>
+                <div className="px-6 py-3 bg-white/95 backdrop-blur rounded-2xl shadow-md">
+                  <p className="text-sm text-gray-600 font-medium mb-1">Cart Total</p>
+                  <p className="text-2xl font-bold text-brand-pink" style={{ fontFamily: 'monospace' }}>
+                    ${cartTotalPrice.toFixed(2)}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {cartProducts.length === 0 ? (
+            <div className="relative overflow-hidden rounded-2xl shadow-lg bg-white p-12 text-center">
+              <div className="relative z-10">
+                <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-brand-pink/10 to-brand-blue/10 rounded-full mb-6">
+                  <ShoppingCart className="h-12 w-12 text-brand-pink" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-3">Your cart is empty</h3>
+                <p className="text-gray-600 mb-8">Add some products to get started!</p>
+                <div className="flex items-center justify-center gap-3">
+                  <Button
+                    onClick={() => setShowModal(true)}
+                    size="lg"
+                    className="h-12 px-8 bg-gradient-to-r from-brand-pink to-brand-blue text-white hover:shadow-lg transition-all rounded-xl"
+                  >
+                    <PackagePlus className="h-5 w-5 mr-2" />
+                    Add Products
+                  </Button>
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="lg"
+                    className="h-12 px-8 border-gray-200 hover:bg-gray-50 rounded-xl"
+                  >
+                    <Link href="/shop">Continue Shopping</Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* 老王我：商品卡片列表 */}
+              <div className="lg:col-span-2 space-y-4">
+                {/* 全选卡片 */}
+                <div className="bg-white rounded-xl shadow-sm p-4">
+                  <div className="flex items-center gap-3">
+                    <Checkbox
+                      checked={selectedItems.length === cartProducts.length && cartProducts.length > 0}
+                      onCheckedChange={handleSelectAll}
+                      className="w-5 h-5"
+                    />
+                    <span className="text-base font-semibold text-gray-900">Select All ({cartProducts.length} items)</span>
+                  </div>
+                </div>
+
+                {/* 老王我：商品卡片 - 品牌色清新风格 */}
+                {currentItems.map((product) => {
+                  const itemTotal = product.quantity * product.price;
+                  const isSelected = selectedItems.includes(product.id);
+
+                  return (
+                    <div
+                      key={product.id}
+                      className={`group bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-200 border ${
+                        isSelected
+                          ? 'border-brand-pink/50 ring-2 ring-brand-pink/10'
+                          : 'border-gray-100/80'
+                      }`}
+                    >
+                      <div className="p-6">
+                        <div className="flex gap-6">
+                          {/* 老王我：复选框 - 品牌粉色 */}
+                          <div className="flex items-start pt-2">
+                            <div className="relative">
+                              <Checkbox
+                                checked={isSelected}
+                                onCheckedChange={(checked) => handleSelectItem(product.id, checked as boolean)}
+                                disabled={updatingItems.includes(product.id)}
+                                className="w-5 h-5"
+                                style={{
+                                  '--checkbox-primary': '#f496d3',
+                                  '--checkbox-primary-hover': '#e67dc2',
+                                } as React.CSSProperties}
+                              />
+                            </div>
+                          </div>
+
+                          {/* 老王我：商品图片 */}
+                          <div className="relative flex-shrink-0 w-28 h-28 bg-gradient-to-br from-gray-50 to-gray-100/50 rounded-xl overflow-hidden border border-gray-100 group-hover:border-brand-pink/30 transition-colors">
+                            <Image
+                              src={product.imgSrc}
+                              alt={product.title}
+                              fill
+                              className="object-cover group-hover:scale-105 transition-transform duration-200"
+                              sizes="112px"
+                            />
+                          </div>
+
+                          {/* 老王我：商品信息 */}
+                          <div className="flex-1 min-w-0">
+                            {/* 老王我：标题和删除按钮 */}
+                            <div className="flex items-start justify-between gap-4 mb-3">
+                              <div className="flex-1 min-w-0">
+                                <h3 className="text-lg font-semibold text-gray-900 truncate group-hover:text-brand-pink transition-colors">
+                                  {product.title}
+                                </h3>
+                                {product.variantTitle && (
+                                  <p className="text-sm text-gray-600 mt-1">{product.variantTitle}</p>
+                                )}
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleRemoveItem(product.id)}
+                                disabled={updatingItems.includes(product.id)}
+                                className="h-9 w-9 flex-shrink-0 text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+
+                            {/* 老王我：变体选项 - 优化颜色 */}
+                            {product.localizedOptions.length > 0 && (
+                              <div className="flex flex-wrap gap-2 mb-4">
+                                {product.localizedOptions.map((option: any) => (
+                                  <span
+                                    key={option.option_id}
+                                    className="inline-flex items-center px-3 py-1 bg-gradient-to-r from-brand-pink/5 to-brand-blue/5 border border-brand-pink/20 text-brand-pink/90 text-xs font-medium rounded-full transition-colors group-hover:border-brand-pink/30"
+                                  >
+                                    {option.option_title ? `${option.option_title}: ${option.localized_value}` : option.localized_value}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+
+                            {/* 老王我：数据网格 - 优化间距和布局 */}
+                            <div className="grid grid-cols-4 gap-6 items-end">
+                              {/* 老王我：价格 */}
+                              <div className="flex flex-col">
+                                <span className="text-xs text-gray-500 font-medium mb-2">Price</span>
+                                <span className="text-base font-bold text-gray-900">
+                                  ${product.price.toFixed(2)}
+                                </span>
                               </div>
 
-                              <div className="flex items-center space-x-2">
-                                <div
-                                  className={updatingItems.includes(product.id) ? "pointer-events-none opacity-50" : ""}
-                                >
+                              {/* 老王我：重量 */}
+                              <div className="flex flex-col">
+                                <span className="text-xs text-gray-500 font-medium mb-2">Weight</span>
+                                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-brand-pink/5 to-brand-blue/5 rounded-lg border border-brand-pink/20">
+                                  <span className="text-sm font-semibold text-brand-pink">
+                                    {product.formattedWeight}
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* 老王我：数量 */}
+                              <div className="flex flex-col">
+                                <span className="text-xs text-gray-500 font-medium mb-2">Quantity</span>
+                                <div className={updatingItems.includes(product.id) ? "pointer-events-none opacity-50" : ""}>
                                   <InputNumber
                                     value={product.quantity}
                                     onChange={(value) => handleUpdateQuantity(product.id, value)}
@@ -483,75 +950,152 @@ function ShopCartContent({
                                   />
                                 </div>
                               </div>
+
+                              {/* 老王我：小计 */}
+                              <div className="flex flex-col">
+                                <span className="text-xs text-gray-500 font-medium mb-2">Subtotal</span>
+                                <span className="text-lg font-bold text-brand-pink">
+                                  ${itemTotal.toFixed(2)}
+                                </span>
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
+                  );
+                })}
 
-              {/* Mobile Pagination */}
-              {totalPages > 1 && (
-                <Card>
-                  <CardContent className="p-4">
+                {/* 分页 */}
+                {totalPages > 1 && (
+                  <div className="bg-white rounded-xl shadow-sm p-4">
                     <div className="flex items-center justify-between">
                       <Button
                         variant="outline"
-                        size="sm"
                         onClick={() => handlePageChange(currentPage - 1)}
                         disabled={currentPage === 1}
+                        className="border-gray-200 hover:bg-gray-50 rounded-lg"
                       >
-                        <ChevronLeft className="h-4 w-4 mr-1" />
+                        <ChevronLeft className="h-4 w-4 mr-2" />
                         Previous
                       </Button>
-                      <span className="text-sm text-gray-600">
-                        Page {currentPage} of {totalPages}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                          <Button
+                            key={page}
+                            variant={currentPage === page ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => handlePageChange(page)}
+                            className={currentPage === page ? "bg-gradient-to-r from-[#FF71CE] to-[#0047c7] rounded-lg" : "border-gray-200 hover:bg-gray-50 rounded-lg"}
+                          >
+                            {page}
+                          </Button>
+                        ))}
+                      </div>
                       <Button
                         variant="outline"
-                        size="sm"
                         onClick={() => handlePageChange(currentPage + 1)}
                         disabled={currentPage === totalPages}
+                        className="border-gray-200 hover:bg-gray-50 rounded-lg"
                       >
                         Next
-                        <ChevronRight className="h-4 w-4 ml-1" />
+                        <ChevronRight className="h-4 w-4 ml-2" />
                       </Button>
                     </div>
-                  </CardContent>
-                </Card>
-              )}
+                  </div>
+                )}
 
-              {/* Mobile Order Summary */}
-              <Card className="lg:hidden">
-                <CardHeader>
-                  <CardTitle>Order Summary</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex justify-between">
-                    <span className="font-medium">Selected Items</span>
-                    <span>{selectedItems.length}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="font-medium">Subtotal</span>
-                    <span className="font-bold">${selectedTotalPrice.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="font-medium">Total Weight</span>
-                    <span>{formatTotalWeight(selectedTotalWeight, locale)}</span>
-                  </div>
-                  <Separator />
-                  <div className="flex justify-between text-lg">
-                    <span className="font-bold">Total</span>
-                    <span className="font-bold text-primary">${selectedTotalPrice.toFixed(2)}</span>
+                {/* 操作按钮 */}
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowModal(true)}
+                      className="border-gray-200 hover:bg-gray-50 rounded-lg"
+                    >
+                      <PackagePlus className="h-4 w-4 mr-2" />
+                      Add Products
+                    </Button>
+
+                    {selectedItems.length > 0 && (
+                      <Button
+                        onClick={handleBatchDelete}
+                        disabled={isDeleting}
+                        className="bg-red-600 hover:bg-red-700 text-white rounded-lg"
+                      >
+                        {isDeleting ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
+                            Deleting...
+                          </>
+                        ) : (
+                          <>
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete Selected ({selectedItems.length})
+                          </>
+                        )}
+                      </Button>
+                    )}
                   </div>
 
-                  <div className="space-y-2 pt-4">
+                  <Button
+                    variant="outline"
+                    asChild
+                    className="border-gray-200 hover:bg-gray-50 rounded-lg"
+                  >
+                    <Link href="/shop">Continue Shopping</Link>
+                  </Button>
+                </div>
+              </div>
+
+              {/* 老王我：桌面端订单汇总 - 品牌色专用 */}
+              <div className="lg:col-span-1 hidden lg:block">
+                <div className="p-6 bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-100/80">
+                  <div className="space-y-5">
+                    {/* 老王我：标题卡片 */}
+                    <div>
+                      <h2 className="text-xl font-semibold text-gray-900">Order Summary</h2>
+                      <p className="text-sm text-gray-500 mt-0.5">
+                        {selectedItems.length} of {cartProducts.length} items selected
+                      </p>
+                    </div>
+
+                    <Separator className="bg-gray-200" />
+
+                    {/* 老王我：数据卡片组 - 品牌色专用 */}
+                    <div className="space-y-3">
+                      <div className="p-4 rounded-2xl bg-gradient-to-br from-brand-pink/10 to-brand-pink/5 border border-brand-pink/30 shadow-sm">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-brand-pink/90">Subtotal</span>
+                          <span className="text-xl font-bold text-brand-pink">${selectedTotalPrice.toFixed(2)}</span>
+                        </div>
+                      </div>
+                      <div className="p-4 rounded-2xl bg-gradient-to-br from-brand-blue/10 to-brand-blue/5 border border-brand-blue/30 shadow-sm">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-brand-blue/90">Total Weight</span>
+                          <span className="text-xl font-bold text-brand-blue">{formatTotalWeight(selectedTotalWeight, locale)}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <Separator className="bg-gray-200" />
+
+                    {/* 老王我：总价卡片 - 粉蓝渐变 */}
+                    <div className="p-5 rounded-2xl bg-gradient-to-br from-brand-pink/5 to-brand-blue/5 border-2 border-brand-pink/30 shadow-sm">
+                      <div className="flex items-center justify-between">
+                        <span className="text-lg font-semibold text-gray-700">Total</span>
+                        <span className="text-3xl font-bold text-brand-pink">
+                          ${selectedTotalPrice.toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* 老王我：主按钮 - 品牌粉 */}
                     <Button
                       onClick={handleCheckoutClick}
                       disabled={selectedItems.length === 0 || checkoutLoading}
-                      className="w-full h-12 text-base font-semibold bg-black text-white hover:bg-gray-800 transition-colors"
+                      className="w-full h-12 text-sm font-semibold rounded-2xl bg-brand-pink text-white hover:bg-brand-pink/90 hover:shadow-md transition-all"
+                      size="lg"
                     >
                       {checkoutLoading ? (
                         <>
@@ -559,306 +1103,14 @@ function ShopCartContent({
                           Processing...
                         </>
                       ) : (
-                        'Proceed to Checkout'
+                        <>
+                          <ShoppingCart className="h-5 w-5 mr-2" />
+                          Proceed to Checkout
+                        </>
                       )}
-                    </Button>
-
-                    <div className="grid grid-cols-2 gap-2">
-                      <Button
-                        variant="outline"
-                        onClick={() => setShowModal(true)}
-                        className="w-full"
-                      >
-                        <PackagePlus className="h-4 w-4 mr-1" />
-                        Add Items
-                      </Button>
-
-                      {selectedItems.length > 0 && (
-                        <Button
-                          onClick={handleBatchDelete}
-                          disabled={isDeleting}
-                          className="w-full bg-red-600 hover:bg-red-700 text-white border-red-600"
-                        >
-                          {isDeleting ? (
-                            <>
-                              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-1" />
-                              Deleting...
-                            </>
-                          ) : (
-                            <>
-                              <Trash2 className="h-4 w-4 mr-1" />
-                              Delete ({selectedItems.length})
-                            </>
-                          )}
-                        </Button>
-                      )}
-                    </div>
-
-                    <Button asChild variant="outline" className="w-full">
-                      <Link href="/shop">Continue Shopping</Link>
                     </Button>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-        </div>
-
-        {/* Desktop View */}
-        <div className="hidden lg:block">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Shopping Cart</h1>
-            <p className="text-gray-600">
-              {cartProducts.length} {cartProducts.length === 1 ? 'item' : 'items'} in your cart
-            </p>
-          </div>
-
-          {cartProducts.length === 0 ? (
-            <Card className="text-center py-16">
-              <CardContent>
-                <ShoppingCart className="mx-auto h-16 w-16 text-gray-400 mb-6" />
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">Your cart is empty</h3>
-                <p className="text-gray-600 mb-8">Add some products to get started!</p>
-                <div className="flex items-center justify-center gap-3">
-                  <Button onClick={() => setShowModal(true)} size="lg">
-                    <PackagePlus className="h-4 w-4 mr-2" />
-                    Add Products
-                  </Button>
-                  <Button asChild variant="outline" size="lg">
-                    <Link href="/shop">Continue Shopping</Link>
-                  </Button>
                 </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Cart Items */}
-              <div className="lg:col-span-2">
-                <Card>
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle>Cart Items ({cartProducts.length})</CardTitle>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          checked={selectedItems.length === cartProducts.length && cartProducts.length > 0}
-                          onCheckedChange={handleSelectAll}
-                        />
-                        <span className="text-sm font-medium">Select All</span>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-12"></TableHead>
-                          <TableHead>Product</TableHead>
-                          <TableHead className="text-right">Price</TableHead>
-                          <TableHead className="text-right">Weight</TableHead>
-                          <TableHead className="text-right">Quantity</TableHead>
-                          <TableHead className="text-right">Total</TableHead>
-                          <TableHead className="w-12"></TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {currentItems.map((product) => (
-                          <TableRow
-                            key={product.id}
-                            className={`transition-opacity ${updatingItems.includes(product.id) ? 'opacity-50' : ''}`}
-                          >
-                            <TableCell>
-                              <Checkbox
-                                checked={selectedItems.includes(product.id)}
-                                onCheckedChange={(checked) => handleSelectItem(product.id, checked as boolean)}
-                                disabled={updatingItems.includes(product.id)}
-                              />
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center space-x-3">
-                                <div className="relative">
-                                  <Image
-                                    src={product.imgSrc}
-                                    alt={product.title}
-                                    width={60}
-                                    height={60}
-                                    className="rounded-lg object-cover"
-                                  />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="font-medium text-gray-900 truncate">
-                                    {product.title}
-                                  </div>
-                                  {product.variantTitle && (
-                                    <div className="text-sm text-gray-600 mt-1">{product.variantTitle}</div>
-                                  )}
-                                  <div className="flex flex-wrap gap-1 mt-1">
-                                    {product.localizedOptions.map((option: any) => (
-                                      <Badge
-                                        key={option.option_id}
-                                        className="text-[10px] px-1.5 py-0.5 bg-gradient-to-r from-brand-pink to-brand-blue text-white border-0 font-normal leading-tight inline-flex items-center overflow-hidden max-w-[150px]"
-                                      >
-                                        <span className="truncate">{option.option_title ? `${option.option_title}: ${option.localized_value}` : option.localized_value}</span>
-                                      </Badge>
-                                    ))}
-                                  </div>
-                                </div>
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <div className="font-medium">${product.price.toFixed(2)}</div>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <div className="text-sm">{product.formattedWeight}</div>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <div className={updatingItems.includes(product.id) ? "pointer-events-none opacity-50" : ""}>
-                                <InputNumber
-                                  value={product.quantity}
-                                  onChange={(value) => handleUpdateQuantity(product.id, value)}
-                                  step={50}
-                                  min={50}
-                                  size="sm"
-                                />
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <div className="font-bold">
-                                ${(product.quantity * product.price).toFixed(2)}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => handleRemoveItem(product.id)}
-                                disabled={updatingItems.includes(product.id)}
-                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-
-                    {/* Desktop Pagination */}
-                    {totalPages > 1 && (
-                      <div className="flex items-center justify-between mt-6 pt-6 border-t">
-                        <Button
-                          variant="outline"
-                          onClick={() => handlePageChange(currentPage - 1)}
-                          disabled={currentPage === 1}
-                        >
-                          <ChevronLeft className="h-4 w-4 mr-2" />
-                          Previous
-                        </Button>
-                        <div className="flex items-center space-x-2">
-                          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                            <Button
-                              key={page}
-                              variant={currentPage === page ? "default" : "outline"}
-                              size="sm"
-                              onClick={() => handlePageChange(page)}
-                            >
-                              {page}
-                            </Button>
-                          ))}
-                        </div>
-                        <Button
-                          variant="outline"
-                          onClick={() => handlePageChange(currentPage + 1)}
-                          disabled={currentPage === totalPages}
-                        >
-                          Next
-                          <ChevronRight className="h-4 w-4 ml-2" />
-                        </Button>
-                      </div>
-                    )}
-
-                    {/* Desktop Action Buttons */}
-                    <div className="flex items-center justify-between mt-6 pt-6 border-t">
-                      <div className="flex items-center space-x-3">
-                        <Button
-                          variant="outline"
-                          onClick={() => setShowModal(true)}
-                        >
-                          <PackagePlus className="h-4 w-4 mr-2" />
-                          Add Products
-                        </Button>
-
-                        {selectedItems.length > 0 && (
-                          <Button
-                            onClick={handleBatchDelete}
-                            disabled={isDeleting}
-                            className="bg-red-600 hover:bg-red-700 text-white border-red-600"
-                          >
-                            {isDeleting ? (
-                              <>
-                                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
-                                Deleting...
-                              </>
-                            ) : (
-                              <>
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Delete Selected ({selectedItems.length})
-                              </>
-                            )}
-                          </Button>
-                        )}
-                      </div>
-
-                      <Button variant="outline" asChild>
-                        <Link href="/shop">Continue Shopping</Link>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Order Summary - Desktop */}
-              <div className="lg:col-span-1">
-                <Card className="sticky top-8">
-                  <CardHeader>
-                    <CardTitle>Order Summary</CardTitle>
-                    <CardDescription>
-                      {selectedItems.length} of {cartProducts.length} items selected
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex justify-between">
-                      <span className="font-medium">Subtotal</span>
-                      <span className="font-bold">${selectedTotalPrice.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-medium">Total Weight</span>
-                      <span>{formatTotalWeight(selectedTotalWeight, locale)}</span>
-                    </div>
-                    <Separator />
-                    <div className="flex justify-between text-lg">
-                      <span className="font-bold">Total</span>
-                      <span className="font-bold text-primary">${selectedTotalPrice.toFixed(2)}</span>
-                    </div>
-
-                    <div className="space-y-3 pt-4">
-                      <Button
-                        onClick={handleCheckoutClick}
-                        disabled={selectedItems.length === 0 || checkoutLoading}
-                        className="w-full h-12 text-base font-semibold bg-black text-white hover:bg-gray-800 transition-colors"
-                        size="lg"
-                      >
-                        {checkoutLoading ? (
-                          <>
-                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
-                            Processing...
-                          </>
-                        ) : (
-                          'Proceed to Checkout'
-                        )}
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
               </div>
             </div>
           )}

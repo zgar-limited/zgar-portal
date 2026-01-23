@@ -161,6 +161,7 @@
     "memberLevel": "Member Level"
   },
   "order-details": {
+    "backToOrders": "Back to Orders",
     "balancePayment": "Balance Payment",
     "manualTransfer": "Manual Transfer",
     "uploadPaymentVoucher": "Upload Payment Voucher",
