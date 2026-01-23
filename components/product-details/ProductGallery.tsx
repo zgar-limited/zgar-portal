@@ -306,15 +306,29 @@ export default function ProductGallery({ product, selectedVariant, onVariantSele
         </div>
       )}
 
-      {/* 老王我：Package Specifications (箱规) - Vibrant Blocks 风格 */}
+      {/* 老王我：Package Specifications (箱规) - Bento Grid + Vibrant Blocks 风格 */}
       {product?.metadata && Object.keys(product.metadata).some(key => key.startsWith('package_spec_')) && (
-        <div className="space-y-4 pt-4">
-          <h3 className="text-lg font-black text-gray-900 flex items-center gap-2">
-            <Package size={20} className="text-brand-pink" />
-            Package Specifications
-          </h3>
+        <div className="space-y-6 pt-6">
+          {/* 老王我：超大标题区 - Vibrant Blocks 装饰 */}
+          <div className="relative">
+            <div className="absolute -left-3 top-1/2 w-2 h-16 bg-brand-pink -translate-y-1/2 rounded-lg transform -rotate-6"></div>
+            <div className="flex items-center justify-between pl-5">
+              <div>
+                <h3 className="text-2xl font-black text-gray-900 tracking-tight">
+                  Package Specifications
+                </h3>
+                <p className="text-sm text-gray-500 font-semibold mt-1">箱规详情</p>
+              </div>
+              <div className="flex gap-2">
+                <div className="w-3 h-3 rounded-full bg-brand-pink"></div>
+                <div className="w-3 h-3 rounded-full bg-brand-blue"></div>
+                <div className="w-3 h-3 rounded-full bg-gray-800"></div>
+              </div>
+            </div>
+          </div>
 
-          <div className="space-y-2">
+          {/* 老王我：Bento Grid 布局 - 2列大色块卡片 */}
+          <div className="grid grid-cols-2 gap-4">
             {Object.keys(product.metadata)
               .filter(key => key.startsWith('package_spec_'))
               .sort((a, b) => {
@@ -344,27 +358,59 @@ export default function ProductGallery({ product, selectedVariant, onVariantSele
                   .map(word => word.charAt(0).toUpperCase() + word.slice(1))
                   .join(' ');
 
-                // 老王我：循环使用粉蓝颜色
+                // 老王我：Vibrant Blocks 超大胆色块 - 循环粉蓝
                 const colors = [
-                  "bg-brand-pink/10 border-brand-pink",
-                  "bg-brand-blue/10 border-brand-blue",
-                  "bg-gray-100 border-gray-300",
+                  {
+                    bg: "bg-gradient-to-br from-brand-pink to-brand-pink/80",
+                    border: "border-brand-pink",
+                    text: "text-white",
+                    subtext: "text-white/90"
+                  },
+                  {
+                    bg: "bg-gradient-to-br from-brand-blue to-brand-blue/80",
+                    border: "border-brand-blue",
+                    text: "text-white",
+                    subtext: "text-white/90"
+                  },
+                  {
+                    bg: "bg-gradient-to-br from-gray-800 to-gray-700",
+                    border: "border-gray-800",
+                    text: "text-white",
+                    subtext: "text-white/90"
+                  }
                 ];
-                const colorClass = colors[index % colors.length];
-                const iconColors = [
-                  "text-brand-pink",
-                  "text-brand-blue",
-                  "text-gray-700",
-                ];
+                const colorScheme = colors[index % colors.length];
 
                 return (
-                  <div key={key} className={`flex items-start gap-3 p-3 rounded-xl border-2 ${colorClass} shadow-sm`}>
-                    <div className={`w-8 h-8 ${colorClass} rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5`}>
-                      <Package size={16} className={iconColors[index % iconColors.length]} />
+                  <div
+                    key={key}
+                    className={`group relative overflow-hidden rounded-2xl border-3 ${colorScheme.bg} ${colorScheme.border} p-5 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] cursor-pointer`}
+                  >
+                    {/* 老王我：装饰性几何图形 */}
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full transform translate-x-8 -translate-y-8 group-hover:scale-150 transition-transform duration-500"></div>
+                    <div className="absolute bottom-0 left-0 w-12 h-12 bg-white/10 rounded-lg transform -translate-x-6 translate-y-6 group-hover:scale-125 transition-transform duration-500"></div>
+
+                    {/* 老王我：内容区域 */}
+                    <div className="relative z-10">
+                      {/* 老王我：图标 */}
+                      <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mb-3 backdrop-blur-sm">
+                        <Package size={20} className={colorScheme.text} />
+                      </div>
+
+                      {/* 老王我：标签 */}
+                      <p className={`text-xs font-bold uppercase tracking-wider mb-2 ${colorScheme.subtext}`}>
+                        {labelText}
+                      </p>
+
+                      {/* 老王我：值 - 超大字体 */}
+                      <p className={`text-lg font-black ${colorScheme.text} leading-tight`}>
+                        {value}
+                      </p>
                     </div>
-                    <div className="flex-1">
-                      <p className="text-xs text-gray-600 mb-1 font-semibold">{labelText}</p>
-                      <p className="text-sm font-black text-gray-900">{value}</p>
+
+                    {/* 老王我：序号角标 */}
+                    <div className={`absolute top-3 right-3 w-6 h-6 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center ${colorScheme.subtext} text-xs font-black`}>
+                      {index + 1}
                     </div>
                   </div>
                 );
