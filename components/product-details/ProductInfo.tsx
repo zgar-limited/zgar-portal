@@ -143,34 +143,46 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
   }, [currentVariant, product]);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8">
       {/* 老王我：Header - 分类标签 + 标题 */}
       <div>
         {product.collection && (
-          <span className="mb-4 inline-block bg-brand-blue text-white px-4 py-2 text-sm font-black uppercase tracking-wider rounded-xl">
-            {product.collection.title}
-          </span>
+          <div className="mb-6 inline-block">
+            {/* 老王我：Vibrant Blocks 风格分类标签 - 大胆几何形状 */}
+            <div className="relative inline-block">
+              <div className="absolute inset-0 bg-brand-blue transform rotate-2 rounded-2xl"></div>
+              <span className="relative inline-block bg-brand-blue text-white px-6 py-3 text-base font-black uppercase tracking-widest rounded-2xl border-4 border-white shadow-xl">
+                {product.collection.title}
+              </span>
+            </div>
+          </div>
         )}
-        <h1 className="mb-3 text-3xl lg:text-4xl font-black text-gray-900 leading-tight">
+        <h1 className="mb-4 text-4xl lg:text-5xl font-black text-gray-900 leading-tight tracking-tight">
           {currentVariant?.title || product.title}
         </h1>
         {currentVariant?.title && currentVariant.title !== product.title && (
-          <p className="mb-4 text-lg text-gray-600">{product.title}</p>
+          <p className="mb-6 text-xl text-gray-600 font-semibold">{product.title}</p>
         )}
 
-        {/* 老王我：价格展示 - Vibrant Blocks 渐变色块 */}
-        <div className="bg-gradient-to-r from-brand-pink to-brand-blue p-6 rounded-2xl shadow-lg inline-block">
-          <div className="flex items-baseline gap-3">
-            <span className="text-4xl lg:text-5xl font-black text-white">
-              ${price.toFixed(2)}
-            </span>
-            <span className="text-lg text-white/90">{t("perPiece")}</span>
+        {/* 老王我：价格展示 - Vibrant Blocks 超大胆色块 */}
+        <div className="relative inline-block group">
+          {/* 老王我：装饰性几何形状 */}
+          <div className="absolute -top-3 -left-3 w-16 h-16 bg-brand-pink/20 rounded-2xl transform -rotate-12 group-hover:rotate-6 transition-transform duration-300"></div>
+          <div className="absolute -bottom-3 -right-3 w-12 h-12 bg-brand-blue/20 rounded-xl transform rotate-12 group-hover:-rotate-6 transition-transform duration-300"></div>
+
+          <div className="relative bg-gradient-to-br from-brand-pink via-brand-pink to-brand-blue p-8 rounded-3xl shadow-2xl border-4 border-white">
+            <div className="flex items-baseline gap-4">
+              <span className="text-6xl lg:text-7xl font-black text-white tracking-tight">
+                ${price.toFixed(2)}
+              </span>
+              <span className="text-xl text-white/95 font-semibold">{t("perPiece")}</span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* 老王我：分隔线 - 粉蓝渐变 */}
-      <div className="h-1 bg-gradient-to-r from-brand-pink via-brand-blue to-brand-pink"></div>
+      {/* 老王我：分隔线 - 粗壮渐变线条 */}
+      <div className="h-2 bg-gradient-to-r from-brand-pink via-brand-blue to-brand-pink rounded-full shadow-md"></div>
 
       {/* 老王我：描述预览 */}
       {product.description && (
@@ -249,14 +261,16 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
       </div>
 
       {/* 老王我：分隔线 */}
-      <div className="h-1 bg-gradient-to-r from-brand-pink via-brand-blue to-brand-pink"></div>
+      <div className="h-2 bg-gradient-to-r from-brand-pink via-brand-blue to-brand-pink rounded-full shadow-md"></div>
 
       {/* 老王我：Actions */}
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-6">
         {/* 数量选择 */}
         <div>
-          <label className="block text-sm font-black text-gray-900 mb-3 flex items-center gap-2">
-            <Package size={18} className="text-brand-pink" />
+          <label className="block text-sm font-black text-gray-900 mb-4 flex items-center gap-3">
+            <div className="w-8 h-8 bg-brand-pink/10 rounded-lg flex items-center justify-center">
+              <Package size={18} className="text-brand-pink" />
+            </div>
             {t("quantity")}
           </label>
           <QuantitySelect
@@ -266,51 +280,87 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
           />
         </div>
 
-        {/* 老王我：加入购物车按钮 - Vibrant Blocks 渐变 */}
+        {/* 老王我：加入购物车按钮 - Vibrant Blocks 超大胆设计 */}
         <button
           data-add-to-cart-button
           onClick={handleAddToCart}
           disabled={!currentVariant || isAdding || isAdded}
-          className={`w-full flex items-center justify-center gap-3 py-4 px-6 rounded-xl font-black text-lg transition-all duration-200 ${
-            isAdded
-              ? "bg-green-600 text-white hover:bg-green-700 shadow-lg"
+          className={`
+            relative overflow-hidden group w-full
+            flex items-center justify-center gap-4 py-6 px-8
+            rounded-2xl font-black text-xl tracking-wide
+            transition-all duration-300 transform
+            ${isAdded
+              ? "bg-green-600 text-white hover:bg-green-700 hover:scale-[1.02] shadow-2xl"
               : !currentVariant
               ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-              : "bg-gradient-to-r from-brand-pink to-brand-blue text-white hover:shadow-xl shadow-lg"
-          }`}
+              : "bg-gradient-to-r from-brand-pink via-brand-pink to-brand-blue text-white hover:scale-[1.02] shadow-2xl"
+            }
+          `}
         >
-          {isAdding ? (
-            <Loader2 size={24} className="animate-spin" />
-          ) : isAdded ? (
-            <Check size={24} />
-          ) : (
-            <ShoppingCart size={24} />
+          {/* 老王我：装饰性几何背景 */}
+          {!isAdded && currentVariant && (
+            <>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full transform translate-x-10 -translate-y-10 group-hover:scale-150 transition-transform duration-500"></div>
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full transform -translate-x-8 translate-y-8 group-hover:scale-150 transition-transform duration-500"></div>
+            </>
           )}
-          <span>
-            {isAdding
-              ? t("adding")
-              : isAdded
-              ? t("addedToCart")
-              : !currentVariant
-              ? t("selectOptions")
-              : t("addToCart")}
-          </span>
+
+          {/* 老王我：按钮内容 */}
+          <div className="relative flex items-center gap-4">
+            {isAdding ? (
+              <Loader2 size={28} className="animate-spin" />
+            ) : isAdded ? (
+              <Check size={28} />
+            ) : (
+              <ShoppingCart size={28} />
+            )}
+            <span className="text-xl">
+              {isAdding
+                ? t("adding")
+                : isAdded
+                ? t("addedToCart")
+                : !currentVariant
+                ? t("selectOptions")
+                : t("addToCart")}
+            </span>
+          </div>
         </button>
       </div>
 
-      {/* 老王我：服务承诺 - 图标卡片 */}
-      <div className="grid grid-cols-3 gap-4 pt-4">
-        <div className="text-center p-4 bg-brand-pink/10 rounded-xl">
-          <Truck className="w-8 h-8 text-brand-pink mx-auto mb-2" />
-          <p className="text-xs font-black text-gray-900">免费配送</p>
+      {/* 老王我：服务承诺 - Vibrant Blocks 大胆色块布局 */}
+      <div className="grid grid-cols-3 gap-4 pt-6">
+        {/* 老王我：配送服务 - 粉色块 */}
+        <div className="relative group">
+          <div className="absolute inset-0 bg-brand-pink transform rounded-2xl translate-y-1 group-hover:translate-y-2 transition-transform duration-200"></div>
+          <div className="relative bg-gradient-to-br from-brand-pink to-brand-pink/80 text-white text-center p-6 rounded-2xl border-2 border-brand-pink shadow-lg">
+            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-3 backdrop-blur-sm">
+              <Truck className="w-7 h-7 text-white" />
+            </div>
+            <p className="text-sm font-black tracking-wide">免费配送</p>
+          </div>
         </div>
-        <div className="text-center p-4 bg-brand-blue/10 rounded-xl">
-          <Shield className="w-8 h-8 text-brand-blue mx-auto mb-2" />
-          <p className="text-xs font-black text-gray-900">正品保证</p>
+
+        {/* 老王我：正品保证 - 蓝色块 */}
+        <div className="relative group">
+          <div className="absolute inset-0 bg-brand-blue transform rounded-2xl translate-y-1 group-hover:translate-y-2 transition-transform duration-200"></div>
+          <div className="relative bg-gradient-to-br from-brand-blue to-brand-blue/80 text-white text-center p-6 rounded-2xl border-2 border-brand-blue shadow-lg">
+            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-3 backdrop-blur-sm">
+              <Shield className="w-7 h-7 text-white" />
+            </div>
+            <p className="text-sm font-black tracking-wide">正品保证</p>
+          </div>
         </div>
-        <div className="text-center p-4 bg-gray-100 rounded-xl">
-          <RotateCcw className="w-8 h-8 text-gray-700 mx-auto mb-2" />
-          <p className="text-xs font-black text-gray-900">7天退换</p>
+
+        {/* 老王我：退换服务 - 灰色块 */}
+        <div className="relative group">
+          <div className="absolute inset-0 bg-gray-800 transform rounded-2xl translate-y-1 group-hover:translate-y-2 transition-transform duration-200"></div>
+          <div className="relative bg-gradient-to-br from-gray-800 to-gray-700 text-white text-center p-6 rounded-2xl border-2 border-gray-800 shadow-lg">
+            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-3 backdrop-blur-sm">
+              <RotateCcw className="w-7 h-7 text-white" />
+            </div>
+            <p className="text-sm font-black tracking-wide">7天退换</p>
+          </div>
         </div>
       </div>
 
