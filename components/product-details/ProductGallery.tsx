@@ -306,29 +306,53 @@ export default function ProductGallery({ product, selectedVariant, onVariantSele
         </div>
       )}
 
-      {/* 老王我：Package Specifications (箱规) - Bento Grid + Vibrant Blocks 风格 */}
+      {/* 老王我：Package Specifications (箱规) - Memphis 风格 */}
       {product?.metadata && Object.keys(product.metadata).some(key => key.startsWith('package_spec_')) && (
-        <div className="space-y-6 pt-6">
-          {/* 老王我：超大标题区 - Vibrant Blocks 装饰 */}
+        <div className="space-y-8 pt-8">
+          {/* 老王我：Memphis 风格标题区 - 几何装饰 */}
           <div className="relative">
-            <div className="absolute -left-3 top-1/2 w-2 h-16 bg-brand-pink -translate-y-1/2 rounded-lg transform -rotate-6"></div>
-            <div className="flex items-center justify-between pl-5">
+            {/* 老王我：装饰性三角形 */}
+            <div
+              className="absolute -left-8 top-1/2 w-12 h-12 opacity-30"
+              style={{
+                backgroundColor: '#FF71CE',
+                clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
+                transform: 'translateY(-50%) rotate(-15deg)'
+              }}
+            ></div>
+
+            <div className="flex items-center justify-between pl-8">
               <div>
-                <h3 className="text-2xl font-black text-gray-900 tracking-tight">
+                {/* 老王我：波浪线装饰 */}
+                <div className="w-20 h-2 mb-2">
+                  <svg viewBox="0 0 80 8" className="w-full h-full">
+                    <path
+                      d="M0,4 Q10,0 20,4 T40,4 T60,4 T80,4"
+                      fill="none"
+                      stroke="#FFCE5C"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </div>
+
+                <h3 className="text-3xl font-black text-gray-900 tracking-tight" style={{ fontFamily: 'sans-serif' }}>
                   Package Specifications
                 </h3>
-                <p className="text-sm text-gray-500 font-semibold mt-1">箱规详情</p>
+                <p className="text-base text-gray-600 font-bold mt-1">箱规详情</p>
               </div>
-              <div className="flex gap-2">
-                <div className="w-3 h-3 rounded-full bg-brand-pink"></div>
-                <div className="w-3 h-3 rounded-full bg-brand-blue"></div>
-                <div className="w-3 h-3 rounded-full bg-gray-800"></div>
+
+              {/* 老王我：装饰性圆形 */}
+              <div className="flex gap-3">
+                <div className="w-5 h-5 rounded-full border-3 border-pink-400 bg-pink-100" style={{ borderWidth: '3px' }}></div>
+                <div className="w-5 h-5 rounded-full border-3 border-yellow-400 bg-yellow-100" style={{ borderWidth: '3px' }}></div>
+                <div className="w-5 h-5 rounded-full border-3 border-teal-400 bg-teal-100" style={{ borderWidth: '3px' }}></div>
               </div>
             </div>
           </div>
 
-          {/* 老王我：Bento Grid 布局 - 2列大色块卡片 */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* 老王我：Memphis 风格网格 - 几何卡片 */}
+          <div className="grid grid-cols-2 gap-5">
             {Object.keys(product.metadata)
               .filter(key => key.startsWith('package_spec_'))
               .sort((a, b) => {
@@ -358,59 +382,115 @@ export default function ProductGallery({ product, selectedVariant, onVariantSele
                   .map(word => word.charAt(0).toUpperCase() + word.slice(1))
                   .join(' ');
 
-                // 老王我：Vibrant Blocks 超大胆色块 - 循环粉蓝
-                const colors = [
+                // 老王我：Memphis 明亮碰撞色彩
+                const memphisColors = [
                   {
-                    bg: "bg-gradient-to-br from-brand-pink to-brand-pink/80",
-                    border: "border-brand-pink",
-                    text: "text-white",
-                    subtext: "text-white/90"
+                    bg: 'bg-pink-400',
+                    border: 'border-pink-500',
+                    text: 'text-white',
+                    subtext: 'text-pink-100',
+                    accent: '#FF71CE'
                   },
                   {
-                    bg: "bg-gradient-to-br from-brand-blue to-brand-blue/80",
-                    border: "border-brand-blue",
-                    text: "text-white",
-                    subtext: "text-white/90"
+                    bg: 'bg-yellow-400',
+                    border: 'border-yellow-500',
+                    text: 'text-gray-900',
+                    subtext: 'text-yellow-900',
+                    accent: '#FFCE5C'
                   },
                   {
-                    bg: "bg-gradient-to-br from-gray-800 to-gray-700",
-                    border: "border-gray-800",
-                    text: "text-white",
-                    subtext: "text-white/90"
+                    bg: 'bg-teal-400',
+                    border: 'border-teal-500',
+                    text: 'text-white',
+                    subtext: 'text-teal-100',
+                    accent: '#86CCCA'
+                  },
+                  {
+                    bg: 'bg-purple-400',
+                    border: 'border-purple-500',
+                    text: 'text-white',
+                    subtext: 'text-purple-100',
+                    accent: '#6A7BB4'
                   }
                 ];
-                const colorScheme = colors[index % colors.length];
+                const colorScheme = memphisColors[index % memphisColors.length];
 
                 return (
                   <div
                     key={key}
-                    className={`group relative overflow-hidden rounded-2xl border-3 ${colorScheme.bg} ${colorScheme.border} p-5 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] cursor-pointer`}
+                    className="group relative overflow-hidden"
+                    style={{
+                      backgroundColor: colorScheme.accent,
+                      borderRadius: '16px'
+                    }}
                   >
-                    {/* 老王我：装饰性几何图形 */}
-                    <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full transform translate-x-8 -translate-y-8 group-hover:scale-150 transition-transform duration-500"></div>
-                    <div className="absolute bottom-0 left-0 w-12 h-12 bg-white/10 rounded-lg transform -translate-x-6 translate-y-6 group-hover:scale-125 transition-transform duration-500"></div>
+                    {/* 老王我：Memphis 装饰边框 - 虚线 */}
+                    <div
+                      className="absolute inset-0 rounded-2xl"
+                      style={{
+                        border: '3px dashed',
+                        borderColor: 'rgba(255, 255, 255, 0.5)',
+                        padding: '12px'
+                      }}
+                    ></div>
+
+                    {/* 老王我：装饰性几何图形 - 三角形 */}
+                    <div
+                      className="absolute -top-4 -right-4 w-20 h-20 opacity-20"
+                      style={{
+                        backgroundColor: 'white',
+                        clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
+                        transform: 'rotate(25deg)'
+                      }}
+                    ></div>
+
+                    {/* 老王我：波点装饰 */}
+                    <div
+                      className="absolute bottom-0 left-0 w-16 h-16 opacity-10"
+                      style={{
+                        backgroundImage: 'radial-gradient(circle, white 2px, transparent 2px)',
+                        backgroundSize: '8px 8px'
+                      }}
+                    ></div>
 
                     {/* 老王我：内容区域 */}
-                    <div className="relative z-10">
-                      {/* 老王我：图标 */}
-                      <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mb-3 backdrop-blur-sm">
-                        <Package size={20} className={colorScheme.text} />
+                    <div className="relative z-10 p-5">
+                      {/* 老王我：序号 - 圆形徽章 */}
+                      <div className="absolute -top-3 -right-3 w-10 h-10 rounded-full bg-white border-4 shadow-lg flex items-center justify-center" style={{ borderColor: colorScheme.accent }}>
+                        <span className={`text-sm font-black ${colorScheme.text}`}>
+                          {index + 1}
+                        </span>
                       </div>
 
-                      {/* 老王我：标签 */}
-                      <p className={`text-xs font-bold uppercase tracking-wider mb-2 ${colorScheme.subtext}`}>
+                      {/* 老王我：图标容器 - 方形旋转 */}
+                      <div
+                        className="w-12 h-12 bg-white/30 backdrop-blur-sm rounded-lg flex items-center justify-center mb-3"
+                        style={{ transform: 'rotate(-5deg)' }}
+                      >
+                        <Package size={24} className={colorScheme.text} />
+                      </div>
+
+                      {/* 老王我：标签 - 粗体大写 */}
+                      <p className={`text-xs font-black uppercase tracking-widest mb-2 ${colorScheme.subtext}}`}>
                         {labelText}
                       </p>
 
-                      {/* 老王我：值 - 超大字体 */}
-                      <p className={`text-lg font-black ${colorScheme.text} leading-tight`}>
+                      {/* 老王我：值 - 超粗字体 */}
+                      <p className={`text-xl font-black ${colorScheme.text} leading-tight`}>
                         {value}
                       </p>
-                    </div>
 
-                    {/* 老王我：序号角标 */}
-                    <div className={`absolute top-3 right-3 w-6 h-6 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center ${colorScheme.subtext} text-xs font-black`}>
-                      {index + 1}
+                      {/* 老王我：装饰性X标记 */}
+                      <div className="absolute bottom-3 right-3 w-4 h-4 opacity-20">
+                        <svg viewBox="0 0 16 16" className="w-full h-full">
+                          <path
+                            d="M2,2 L14,14 M14,2 L2,14"
+                            stroke="white"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                      </div>
                     </div>
                   </div>
                 );
