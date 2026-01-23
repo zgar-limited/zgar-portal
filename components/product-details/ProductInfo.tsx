@@ -233,7 +233,7 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
                 </div>
               </div>
 
-              {/* 老王我：规格按钮 - 超大号网格布局 */}
+              {/* 老王我：规格按钮 - 适中尺寸网格布局 */}
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
                 {option.values?.map((val: any, index: number) => {
                   const optionValueKey = `option_value_${localeKey}_${val.id}`;
@@ -246,16 +246,16 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
                       key={val.value}
                       onClick={() => handleOptionSelect(option.id, val.value)}
                       className={`
-                        px-5 py-3 text-base font-black rounded-xl border-[3px]
-                        transition-all duration-200 cursor-pointer transform hover:scale-105
+                        px-3 py-2.5 text-sm font-black rounded-lg border-2
+                        transition-all duration-200 cursor-pointer hover:scale-105
                         ${isSelected
-                          ? `${titleColor.replace('text-', 'bg-')} text-white border-current shadow-xl`
+                          ? `${titleColor.replace('text-', 'bg-')} text-white border-current shadow-lg`
                           : "bg-white text-gray-700 border-gray-300 hover:border-brand-pink hover:shadow-md"
                         }
                       `}
                       aria-label={`选择 ${localizedValue}`}
                     >
-                      {localizedValue}
+                      <span className="block truncate">{localizedValue}</span>
                     </button>
                   );
                 })}
