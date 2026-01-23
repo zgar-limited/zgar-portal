@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { useTranslations } from "next-intl";
 import { HttpTypes } from "@medusajs/types";
 import { retrieveOrders } from "@/data/orders";
-import { ShoppingBag, Star, Wallet, CreditCard, Landmark, Eye, ChevronRight, ChevronLeft } from "lucide-react";
+import { ShoppingBag, Star, Wallet, CreditCard, Landmark, Eye, ChevronRight, ChevronLeft, Upload, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface OrdersProps {
@@ -13,6 +13,10 @@ interface OrdersProps {
   orders: { orders: HttpTypes.StoreOrder[]; count: number } | null;
   currentPage: number;
   totalPages: number;
+  orderStats: {
+    unpaidVoucherCount: number;
+    pendingClosingCount: number;
+  };
 }
 
 /**
@@ -24,7 +28,7 @@ interface OrdersProps {
  * - 保留 Vibrant Blocks 配色
  * - 圆角卡片（rounded-xl）
  */
-export default function Orders({ customer, orders: initialOrders, currentPage: initialPage, totalPages }: OrdersProps) {
+export default function Orders({ customer, orders: initialOrders, currentPage: initialPage, totalPages, orderStats }: OrdersProps) {
   const t = useTranslations('Pagination');
   const tOrders = useTranslations('Orders');
   const router = useRouter();
