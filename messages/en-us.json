@@ -367,7 +367,9 @@
     "noOrders": "No orders",
     "noOrdersDesc": "Go shop for your favorite products",
     "startShopping": "Start Shopping",
-    "pieces": "items"
+    "pieces": "items",
+    "unpaidVoucher": "Unpaid Voucher",
+    "pendingClosing": "Pending Closing"
   },
   "pendingAction": {
     "title": {

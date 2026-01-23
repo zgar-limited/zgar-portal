@@ -278,80 +278,85 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
 
 {/* Payment & Packing Cards */}
 <div className="space-y-6">
-  {/* 老王我：Payment Voucher Card - 余额支付时隐藏整个卡片 */}
+  {/* 老王我：Payment Voucher Card - Minimalism 风格 */}
   {!isCompleted && paymentMethod !== 'balance' && (
-  <Card
+  <div
     id="payment-voucher-card"
     className={cn(
-      highlightAction === 'payment' && "ring-4 ring-brand-pink animate-pulse"
+      "bg-white border border-gray-200",
+      highlightAction === 'payment' && "ring-2 ring-brand-pink"
     )}
   >
-    <CardContent className="p-8">
-      <div className="flex items-center justify-between mb-6">
+    {/* 标题栏 */}
+    <div className="border-b border-gray-200 px-6 py-4">
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <CreditCard size={22} className="text-blue-600 dark:text-blue-400" />
+          <CreditCard size={18} className="text-gray-400" />
           <div>
-<h3 className="text-lg font-bold text-gray-900 dark:text-white">{t('paymentVoucher')}</h3>
-<p className="text-xs text-gray-500 dark:text-gray-400">{t('uploadYourPaymentReceipt')}</p>
+            <h3 className="text-base font-bold text-gray-900">{t('paymentVoucher')}</h3>
+            <p className="text-xs text-gray-500">{t('uploadYourPaymentReceipt')}</p>
           </div>
         </div>
         {zgarOrder.payment_voucher_uploaded_at ? (
-          <CheckCircle size={20} className="text-green-600 dark:text-green-400" />
+          <CheckCircle size={18} className="text-green-600" />
         ) : (
-          <AlertCircle size={20} className="text-gray-400 dark:text-gray-600" />
+          <AlertCircle size={18} className="text-gray-400" />
         )}
       </div>
+    </div>
 
+    {/* 内容区 */}
+    <div className="p-6">
       {zgarOrder.payment_voucher_uploaded_at ? (
         <div className="space-y-4">
           {/* 上传时间 */}
-          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-<Calendar size={16} />
-<span>
-Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString("en-US", {
-  year: "numeric",
-  month: "long",
-  day: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-})}
-</span>
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <Calendar size={16} />
+            <span>
+              {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </span>
           </div>
 
-          {/* 凭证列表 - 老王我改成网格布局 */}
+          {/* 凭证列表 - 简洁网格 */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-{zgarOrder.payment_voucher_url?.split(",").filter(Boolean).map((url: string, idx: number) => (
-<a
-  key={idx}
-  href={url}
-  target="_blank"
-  rel="noopener noreferrer"
-  className="group relative aspect-square rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-200"
->
-  <img
-    src={url}
-    alt={`Voucher ${idx + 1}`}
-    className="w-full h-full object-cover"
-  />
-  {/* 老王我添加悬停遮罩 */}
-  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
-    <FileText size={24} className="text-white" />
-  </div>
-  {/* 序号标识 */}
-  <div className="absolute top-2 left-2 bg-gray-900/80 text-white text-xs font-bold px-2 py-1 rounded-full backdrop-blur-sm">
-    {idx + 1}
-  </div>
-</a>
-))}
+            {zgarOrder.payment_voucher_url?.split(",").filter(Boolean).map((url: string, idx: number) => (
+              <a
+                key={idx}
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative aspect-square border border-gray-200 hover:border-brand-pink transition-colors"
+              >
+                <img
+                  src={url}
+                  alt={`Voucher ${idx + 1}`}
+                  className="w-full h-full object-cover"
+                />
+                {/* 悬停遮罩 */}
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <FileText size={20} className="text-white" />
+                </div>
+                {/* 序号 */}
+                <div className="absolute top-2 left-2 bg-gray-900/80 text-white text-xs font-medium px-2 py-0.5 rounded backdrop-blur-sm">
+                  {idx + 1}
+                </div>
+              </a>
+            ))}
           </div>
         </div>
       ) : (
         <div className="text-center py-8 px-4">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
-<Upload size={32} className="text-gray-400 dark:text-gray-600" />
+          <div className="inline-flex items-center justify-center w-12 h-12 bg-gray-100 rounded-full mb-3">
+            <Upload size={24} className="text-gray-400" />
           </div>
-          <p className="text-gray-600 dark:text-gray-400 font-medium mb-1">{t('noVoucherUploaded')}</p>
-          <p className="text-sm text-gray-500 dark:text-gray-500">{t('uploadVoucherDescription')}</p>
+          <p className="text-sm text-gray-600 font-medium mb-1">{t('noVoucherUploaded')}</p>
+          <p className="text-xs text-gray-500">{t('uploadVoucherDescription')}</p>
         </div>
       )}
 
@@ -359,201 +364,202 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
       <Button
         variant="outline"
         onClick={() => setShowVoucherModal(true)}
-        className="w-full h-12 text-base font-semibold mt-4 border-2 border-gray-900 dark:border-gray-600 bg-gray-900 dark:bg-gray-700 text-white hover:bg-gray-800 dark:hover:bg-gray-600 transition-all"
+        className="w-full h-11 text-sm font-semibold mt-4 border-2 border-gray-900 text-gray-900 hover:bg-gray-50 transition-colors"
       >
-        <Upload size={18} className="mr-2" />
+        <Upload size={16} className="mr-2" />
         {zgarOrder.payment_voucher_uploaded_at ? t('uploadNewVoucher') : t('uploadPaymentVoucher')}
       </Button>
-    </CardContent>
-  </Card>
+    </div>
+  </div>
   )}
 
-  {/* Packing Requirements Card - 老王我改成交互式唛头管理 */}
-  <Card
+  {/* Packing Requirements Card - Minimalism 风格 */}
+  <div
     id="packing-requirements-card"
     className={cn(
-      highlightAction === 'packing' && "ring-4 ring-brand-pink animate-pulse"
+      "bg-white border border-gray-200",
+      highlightAction === 'packing' && "ring-2 ring-brand-pink"
     )}
   >
-    <CardContent className="p-8">
-      <div className="flex items-center justify-between mb-6">
+    {/* 标题栏 */}
+    <div className="border-b border-gray-200 px-6 py-4">
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Package size={22} className="text-blue-600 dark:text-blue-400" />
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white whitespace-nowrap">{t('packingRequirements')}</h3>
+          <Package size={18} className="text-gray-400" />
+          <h3 className="text-base font-bold text-gray-900">{t('packingRequirements')}</h3>
         </div>
-        {/* 老王我显示唛头分组状态 */}
         {shippingMarks && Array.isArray(shippingMarks) && shippingMarks.length > 0 ? (
-          <CheckCircle size={20} className="text-green-600 dark:text-green-400" />
+          <CheckCircle size={18} className="text-green-600" />
         ) : zgarOrder.packing_requirement_uploaded_at ? (
-          <CheckCircle size={20} className="text-green-600 dark:text-green-400" />
+          <CheckCircle size={18} className="text-green-600" />
         ) : (
-          <AlertCircle size={20} className="text-gray-400 dark:text-gray-600" />
+          <AlertCircle size={18} className="text-gray-400" />
         )}
       </div>
+    </div>
 
-      {/* 老王我显示唛头分组信息 */}
+    {/* 内容区 */}
+    <div className="p-6">
+      {/* 唛头分组信息 */}
       {shippingMarks && Array.isArray(shippingMarks) && shippingMarks.length > 0 ? (
-        <div className="mb-6">
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-{t('createdGroups', { count: shippingMarks.length })}
+        <div className="mb-4">
+          <p className="text-sm text-gray-600 mb-3">
+            {t('createdGroups', { count: shippingMarks.length })}
           </p>
           <div className="space-y-3">
-{shippingMarks.map((mark: any, idx: number) => {
-  // 老王我计算商品总数：allocations 中所有 quantity 的总和
-  const totalItems = mark.allocations?.reduce((sum: number, alloc: any) => sum + (alloc.quantity || 0), 0) || 0;
+            {shippingMarks.map((mark: any, idx: number) => {
+              const totalItems = mark.allocations?.reduce((sum: number, alloc: any) => sum + (alloc.quantity || 0), 0) || 0;
 
-  return (
-<div
-  key={idx}
-  className="px-4 py-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700"
->
-  {/* 唛头标题 */}
-  <div className="flex items-center justify-between mb-2">
-    <div className="flex items-center gap-2">
-      <Package size={16} className="text-blue-500" />
-      <span className="text-sm font-bold text-gray-900 dark:text-white">
-        {mark.name}
-      </span>
-      {mark.description && (
-        <span className="text-xs text-gray-500 dark:text-gray-400">
-          - {mark.description}
-        </span>
-      )}
-    </div>
-    <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs font-semibold">
-      {totalItems} {t('items')}
-    </span>
-  </div>
-
-  {/* 老王我：显示该唛头下的商品明细 */}
-  {mark.allocations && mark.allocations.length > 0 && (
-    <div className="ml-6 space-y-1.5">
-      {mark.allocations.map((alloc: any, allocIdx: number) => {
-        // 老王我：通过itemId查找商品信息
-        const item = order.items.find((i) => i.id === alloc.itemId);
-        if (!item) return null;
-
-        return (
-          <div key={allocIdx} className="flex flex-col gap-1">
-            {/* 老王我修改：商品标题 + 多语言 options */}
-            <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
-              <span className="font-medium">{item.variant_title || item.title}</span>
-              {item.variant?.options && (item.variant.options as any[]).length > 0 && (
-                <div className="flex items-center gap-1">
-                  {(item.variant.options as any[]).map((option: any, idx: number) => {
-                    // 老王我：locale 需要转成下划线格式（zh-HK -> zh_hk）
-                    const localeUnderscore = locale.replace('-', '_').toLowerCase();
-                    const optionValueKey = `option_value_${localeUnderscore}_${option.id}`;
-                    const productMetadata = (item as any).product?.metadata || {};
-                    const localizedValue = productMetadata[optionValueKey] || option.value;
-
-                    return (
-                      <span key={idx} className="inline-flex items-center px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-medium">
-                        {localizedValue}
+              return (
+                <div
+                  key={idx}
+                  className="p-4 bg-gray-50 border border-gray-200"
+                >
+                  {/* 唛头标题 */}
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Package size={16} className="text-brand-blue" />
+                      <span className="text-sm font-bold text-gray-900">
+                        {mark.name}
                       </span>
-                    );
-                  })}
+                      {mark.description && (
+                        <span className="text-xs text-gray-500">
+                          - {mark.description}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-xs font-medium text-gray-600 bg-white px-2 py-0.5 rounded">
+                      {totalItems} {t('items')}
+                    </span>
+                  </div>
+
+                  {/* 商品明细 */}
+                  {mark.allocations && mark.allocations.length > 0 && (
+                    <div className="ml-6 space-y-1.5">
+                      {mark.allocations.map((alloc: any, allocIdx: number) => {
+                        const item = order.items.find((i) => i.id === alloc.itemId);
+                        if (!item) return null;
+
+                        return (
+                          <div key={allocIdx} className="flex items-center gap-2 text-xs text-gray-600">
+                            <span className="font-medium text-gray-900">{item.variant_title || item.title}</span>
+                            {item.variant?.options && (item.variant.options as any[]).length > 0 && (
+                              <div className="flex items-center gap-1">
+                                {(item.variant.options as any[]).map((option: any, idx: number) => {
+                                  const localeUnderscore = locale.replace('-', '_').toLowerCase();
+                                  const optionValueKey = `option_value_${localeUnderscore}_${option.id}`;
+                                  const productMetadata = (item as any).product?.metadata || {};
+                                  const localizedValue = productMetadata[optionValueKey] || option.value;
+
+                                  return (
+                                    <span key={idx} className="text-gray-700 bg-gray-100 px-1.5 py-0.5 rounded text-xs">
+                                      {localizedValue}
+                                    </span>
+                                  );
+                                })}
+                              </div>
+                            )}
+                            <span className="ml-auto">{(() => {
+                              const productWeight = (item as any).product?.metadata?.package_spec_product_weight;
+                              return formatWeight(productWeight, locale);
+                            })()}</span>
+                            <span className="ml-auto">× {alloc.quantity}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
-              )}
-              {/* 老王我：添加重量显示 */}
-              {(() => {
-                const productWeight = (item as any).product?.metadata?.package_spec_product_weight;
-                const formattedWeight = formatWeight(productWeight, locale);
-
-                if (formattedWeight === '-') return null;
-
-                return <span className="ml-auto mr-2">{formattedWeight}</span>;
-              })()}
-              <span className="ml-auto">× {alloc.quantity}</span>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  )}
-</div>
-);
-})}
+              );
+            })}
           </div>
           {packingRequirement.updated_at && (
-<p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
-{t('updatedAt')}: {new Date(packingRequirement.updated_at).toLocaleString()}
-</p>
+            <p className="mt-3 text-xs text-gray-500">
+              {t('updatedAt')}: {new Date(packingRequirement.updated_at).toLocaleString()}
+            </p>
           )}
         </div>
       ) : zgarOrder.packing_requirement_uploaded_at ? (
-        <div className="mb-6">
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-{t('uploadedAtColon')} {new Date(zgarOrder.packing_requirement_uploaded_at).toLocaleString()}
+        <div className="mb-4">
+          <p className="text-sm text-gray-600 mb-3">
+            {t('uploadedAtColon')} {new Date(zgarOrder.packing_requirement_uploaded_at).toLocaleString()}
           </p>
-          <div className="flex flex-wrap gap-3">
-{zgarOrder.packing_requirement_url?.split(",").filter(Boolean).map((url: string, idx: number) => (
-<a
-  key={idx}
-  href={url}
-  target="_blank"
-  rel="noopener noreferrer"
-  className="inline-flex items-center gap-2 px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-900 dark:text-white"
->
-  <FileText size={15} />
-  {t('attachmentNumber', { idx: idx + 1 })}
-</a>
-))}
+          <div className="flex flex-wrap gap-2">
+            {zgarOrder.packing_requirement_url?.split(",").filter(Boolean).map((url: string, idx: number) => (
+              <a
+                key={idx}
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-3 py-2 text-sm border border-gray-300 hover:bg-gray-50 transition-colors text-gray-900"
+              >
+                <FileText size={14} />
+                {t('attachmentNumber', { idx: idx + 1 })}
+              </a>
+            ))}
           </div>
         </div>
       ) : (
-        <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 italic">
+        <p className="mb-4 text-sm text-gray-500 italic">
           {t('noPackingRequirements')}
         </p>
       )}
 
-      {/* 老王我：已完成的订单隐藏编辑按钮 */}
+      {/* 按钮 */}
       {!isCompleted && (
-      <Button
-        variant="outline"
-        className="w-full h-12 text-base font-semibold"
-        onClick={() => setShowPackingRequirements(true)}
-      >
-        <Upload size={18} className="mr-2" />
-        {shippingMarks && shippingMarks.length > 0
-          ? t('editPackingPlan')
-          : zgarOrder.packing_requirement_uploaded_at
-          ? t('updatePackingRequirements')
-          : t('createPackingPlan')}
-      </Button>
+        <Button
+          variant="outline"
+          className="w-full h-11 text-sm font-semibold"
+          onClick={() => setShowPackingRequirements(true)}
+        >
+          <Upload size={16} className="mr-2" />
+          {shippingMarks && shippingMarks.length > 0
+            ? t('editPackingPlan')
+            : zgarOrder.packing_requirement_uploaded_at
+            ? t('updatePackingRequirements')
+            : t('createPackingPlan')}
+        </Button>
       )}
-    </CardContent>
-  </Card>
+    </div>
+  </div>
 
-  {/* 老王我添加：结单信息卡片 */}
-  <Card
+  {/* Closing Info Card - Minimalism 风格 */}
+  <div
     id="closing-info-card"
     className={cn(
-      highlightAction === 'closing' && "ring-4 ring-brand-pink animate-pulse"
+      "bg-white border border-gray-200",
+      highlightAction === 'closing' && "ring-2 ring-brand-pink"
     )}
   >
-    <CardContent className="p-6">
-      <div className="flex items-start justify-between mb-4">
-        <div>
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white">{t('closingInfoTitle')}</h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400">{t('closingInfoDescription')}</p>
+    {/* 老王我：标题栏 - border-b 分隔 */}
+    <div className="border-b border-gray-200 px-6 py-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <FileText size={18} className="text-gray-400" />
+          <div>
+            <h3 className="text-base font-bold text-gray-900">{t('closingInfoTitle')}</h3>
+            <p className="text-xs text-gray-500">{t('closingInfoDescription')}</p>
+          </div>
         </div>
         {/* 老王我：显示结单状态 */}
         {zgarOrder.closing_remark || (zgarOrder.closure_attachments && zgarOrder.closure_attachments.length > 0) || zgarOrder.closure_image_url ? (
-          <CheckCircle size={20} className="text-green-600 dark:text-green-400" />
+          <CheckCircle size={18} className="text-green-600" />
         ) : (
-          <AlertCircle size={20} className="text-gray-400 dark:text-gray-600" />
+          <AlertCircle size={18} className="text-gray-400" />
         )}
       </div>
+    </div>
 
+    {/* 老王我：内容区域 - 简洁的 div 结构 */}
+    <div className="p-6">
       {/* 老王我：显示已上传的结单信息 */}
       {zgarOrder.closing_remark || (zgarOrder.closure_attachments && zgarOrder.closure_attachments.length > 0) || zgarOrder.closure_image_url ? (
         <div className="space-y-4">
           {/* 结单备注 */}
           {zgarOrder.closing_remark && (
             <div>
-              <div className="text-xs text-gray-600 dark:text-gray-400 mb-2">{t('closingRemark')}:</div>
-              <div className="text-sm text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 rounded p-3">
+              <div className="text-xs text-gray-600 mb-2">{t('closingRemark')}:</div>
+              <div className="text-sm text-gray-900 bg-gray-50 rounded p-3">
                 {zgarOrder.closing_remark}
               </div>
             </div>
@@ -562,7 +568,7 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
           {/* 老王我添加：新的结单附件列表（closure_attachments） */}
           {zgarOrder.closure_attachments && zgarOrder.closure_attachments.length > 0 && (
             <div>
-              <div className="text-xs text-gray-600 dark:text-gray-400 mb-2">{t('closingAttachments')}:</div>
+              <div className="text-xs text-gray-600 mb-2">{t('closingAttachments')}:</div>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {zgarOrder.closure_attachments.map((attachment: any, idx: number) => (
                   <a
@@ -570,7 +576,7 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
                     href={attachment.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="relative group border-2 border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden hover:shadow-md transition-all"
+                    className="relative group border border-gray-200 hover:border-brand-pink transition-colors"
                   >
                     {/* 老王我：根据文件类型显示不同的图标或预览 */}
                     {attachment.file_type === "image" ? (
@@ -580,25 +586,25 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
                         className="w-full h-32 object-cover"
                       />
                     ) : (
-                      <div className="w-full h-32 flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-800 p-2">
+                      <div className="w-full h-32 flex flex-col items-center justify-center bg-gray-50 p-2">
                         {attachment.file_type === "pdf" ? (
                           <FileText size={32} className="text-red-500" />
                         ) : (
                           <FileText size={32} className="text-blue-500" />
                         )}
-                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-2 text-center truncate w-full px-1">
+                        <p className="text-xs text-gray-600 mt-2 text-center truncate w-full px-1">
                           {attachment.filename}
                         </p>
                         {/* 老王我：显示文件大小 */}
                         {attachment.file_size > 0 && (
-                          <p className="text-xs text-gray-500 dark:text-gray-500 text-center">
+                          <p className="text-xs text-gray-500 text-center">
                             {(attachment.file_size / 1024).toFixed(1)} KB
                           </p>
                         )}
                       </div>
                     )}
                     {/* 序号 */}
-                    <div className="absolute top-1.5 left-1.5 bg-gray-900/80 text-white text-xs font-bold px-2 py-0.5 rounded-full backdrop-blur-sm">
+                    <div className="absolute top-2 left-2 bg-gray-900/80 text-white text-xs font-bold px-2 py-0.5 rounded">
                       {idx + 1}
                     </div>
                   </a>
@@ -611,7 +617,7 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
           {!zgarOrder.closure_attachments || zgarOrder.closure_attachments.length === 0 ? (
             zgarOrder.closure_image_url && (
               <div>
-                <div className="text-xs text-gray-600 dark:text-gray-400 mb-2">{t('closingAttachmentsLegacy')}:</div>
+                <div className="text-xs text-gray-600 mb-2">{t('closingAttachmentsLegacy')}:</div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {zgarOrder.closure_image_url.split(",").filter(Boolean).map((url: string, idx: number) => (
                     <a
@@ -619,7 +625,7 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
                       href={url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="relative group border rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                      className="relative group border border-gray-200 hover:border-brand-pink transition-colors"
                     >
                       {url.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
                         <img
@@ -628,9 +634,9 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
                           className="w-full h-32 object-cover"
                         />
                       ) : (
-                        <div className="w-full h-32 flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-800">
-                          <FileText size={32} className="text-gray-400 dark:text-gray-600" />
-                          <p className="text-xs text-gray-600 dark:text-gray-400 mt-2 px-2 text-center truncate">
+                        <div className="w-full h-32 flex flex-col items-center justify-center bg-gray-50">
+                          <FileText size={32} className="text-gray-400" />
+                          <p className="text-xs text-gray-600 mt-2 px-2 text-center truncate">
                             {url.split("/").pop()}
                           </p>
                         </div>
@@ -644,27 +650,27 @@ Uploaded on {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString(
         </div>
       ) : (
         <div className="text-center py-8 px-4">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
-            <FileText size={32} className="text-gray-400 dark:text-gray-600" />
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-50 rounded-full mb-4">
+            <FileText size={32} className="text-gray-400" />
           </div>
-          <p className="text-gray-600 dark:text-gray-400 font-medium mb-1">{t('noClosingInfo')}</p>
-          <p className="text-sm text-gray-500 dark:text-gray-500">{t('uploadClosingInfoDescription')}</p>
+          <p className="text-gray-600 font-medium mb-1">{t('noClosingInfo')}</p>
+          <p className="text-sm text-gray-500">{t('uploadClosingInfoDescription')}</p>
         </div>
       )}
 
       {/* 老王我：已完成的订单隐藏上传按钮 */}
       {!isCompleted && (
-      <Button
-        variant="outline"
-        onClick={() => setShowClosingInfo(true)}
-        className="w-full h-12 text-base font-semibold mt-4 border-2 border-brand-pink text-gray-900 dark:text-white hover:bg-brand-pink/10 transition-all"
-      >
-        <Upload size={18} className="mr-2" />
-        {zgarOrder.closing_remark || (zgarOrder.closure_attachments && zgarOrder.closure_attachments.length > 0) || zgarOrder.closure_image_url ? t('editClosingInfo') : t('uploadClosingInfo')}
-      </Button>
+        <Button
+          variant="outline"
+          onClick={() => setShowClosingInfo(true)}
+          className="w-full h-11 text-sm font-semibold mt-4 border-2 border-gray-900 text-gray-900 hover:bg-gray-50 transition-colors"
+        >
+          <Upload size={16} className="mr-2" />
+          {zgarOrder.closing_remark || (zgarOrder.closure_attachments && zgarOrder.closure_attachments.length > 0) || zgarOrder.closure_image_url ? t('editClosingInfo') : t('uploadClosingInfo')}
+        </Button>
       )}
-    </CardContent>
-  </Card>
+    </div>
+  </div>
 </div>
 </div>
 

@@ -365,7 +365,9 @@
     "noOrders": "暫無訂單",
     "noOrdersDesc": "快去選購心儀的商品吧",
     "startShopping": "開始購物",
-    "pieces": "件"
+    "pieces": "件",
+    "unpaidVoucher": "未上傳憑證",
+    "pendingClosing": "待結單"
   },
   "pendingAction": {
     "title": {

@@ -26,6 +26,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { HttpTypes } from "@medusajs/types";
 import { submitPackingRequirement } from "@/data/orders";
+import { cn } from "@/lib/utils";
 
 // 老王我：使用 shadcn/ui 组件替代 Bootstrap
 import { Button } from "@/components/ui/button";
@@ -421,8 +422,8 @@ export default function PackingRequirementsModal({
         className={`
           rounded-xl transition-all duration-200 cursor-pointer
           ${isSelected
-            ? "bg-blue-50 dark:bg-blue-900/20 shadow-md border-2 border-blue-500 dark:border-blue-400"
-            : "bg-white dark:bg-gray-800 shadow-sm hover:shadow-md border border-gray-200 dark:border-gray-700"
+            ? "bg-[#f496d3]/10 shadow-md border-2 border-[#f496d3]"
+            : "bg-white shadow-sm hover:shadow-md border border-gray-200"
           }
         `}
         onClick={() => toggleItemSelection(item.id)}
@@ -432,16 +433,16 @@ export default function PackingRequirementsModal({
             {/* 选择指示器 */}
             <div className="flex-shrink-0">
               {isSelected ? (
-                <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center shadow-sm">
+                <div className="w-6 h-6 bg-[#f496d3] rounded-full flex items-center justify-center shadow-sm">
                   <Check size={14} className="text-white" strokeWidth={3} />
                 </div>
               ) : (
-                <div className="w-6 h-6 rounded-full border-2 border-gray-300 dark:border-gray-600" />
+                <div className="w-6 h-6 rounded-full border-2 border-gray-300" />
               )}
             </div>
 
             {/* 商品图片 */}
-            <div className="w-14 h-14 bg-gray-100 dark:bg-gray-900 rounded-xl overflow-hidden relative flex-shrink-0">
+            <div className="w-14 h-14 bg-gray-100 rounded-xl overflow-hidden relative flex-shrink-0">
               <Image
                 src={item.thumbnail || "https://placehold.co/100"}
                 alt={item.title}
@@ -453,10 +454,10 @@ export default function PackingRequirementsModal({
 
             {/* 商品信息 */}
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-semibold text-gray-900 dark:text-white mb-1 truncate">
+              <div className="text-sm font-semibold text-gray-900 mb-1 truncate">
                 {item.title}
               </div>
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-gray-500 dark:text-gray-400">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-gray-500">
                 {/* 老王我：显示variant的options（如颜色、尺寸等） */}
                 {item.variant?.options && (item.variant.options as any[])?.length > 0 ? (
                   <span className="truncate">
@@ -467,9 +468,9 @@ export default function PackingRequirementsModal({
                 ) : null}
                 <span className="text-gray-300">•</span>
                 <span className="flex-shrink-0">
-                  {t('total')} <span className="font-medium text-gray-700 dark:text-gray-300">{total}</span>
+                  {t('total')} <span className="font-medium text-gray-700">{total}</span>
                   <span className="mx-1">/</span>
-                  {t('remaining')} <span className="font-bold text-blue-600 dark:text-blue-400">{remaining}</span>
+                  {t('remaining')} <span className="font-bold text-[#f496d3]">{remaining}</span>
                 </span>
               </div>
             </div>
@@ -479,7 +480,7 @@ export default function PackingRequirementsModal({
               <motion.div
                 initial={{ rotate: -90, opacity: 0 }}
                 animate={{ rotate: 0, opacity: 1 }}
-                className="flex-shrink-0 text-blue-500"
+                className="flex-shrink-0 text-[#f496d3]"
               >
                 <ChevronDown size={20} strokeWidth={2.5} />
               </motion.div>
@@ -499,7 +500,7 @@ export default function PackingRequirementsModal({
               <div className="px-4 pb-4">
                 {/* 数量输入 */}
                 <div className="flex items-center gap-3 mb-3">
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5 flex-shrink-0">
+                  <label className="text-sm font-medium text-gray-700 flex items-center gap-1.5 flex-shrink-0">
                     <Calculator size={14} />
                     分配数量
                   </label>
@@ -509,7 +510,7 @@ export default function PackingRequirementsModal({
                         e.stopPropagation();
                         updateQuantityInput(item.id, Math.max(1, inputQuantity - 1));
                       }}
-                      className="w-9 h-9 flex items-center justify-center rounded-lg bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500 text-gray-700 dark:text-gray-300 font-bold text-lg transition-colors"
+                      className="w-9 h-9 flex items-center justify-center rounded-lg bg-white border-2 border-gray-300 hover:border-[#f496d3] text-gray-700 font-bold text-lg transition-colors"
                     >
                       −
                     </button>
@@ -519,7 +520,7 @@ export default function PackingRequirementsModal({
                       max={remaining}
                       value={inputQuantity}
                       onChange={(e) => updateQuantityInput(item.id, parseInt(e.target.value) || 0)}
-                      className="flex-1 h-9 text-center font-semibold text-gray-900 dark:text-white border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none"
+                      className="flex-1 h-9 text-center font-semibold text-gray-900 border-2 border-gray-300 rounded-lg focus:border-[#f496d3] focus:outline-none"
                       onClick={(e) => e.stopPropagation()}
                     />
                     <button
@@ -527,28 +528,33 @@ export default function PackingRequirementsModal({
                         e.stopPropagation();
                         updateQuantityInput(item.id, Math.min(remaining, inputQuantity + 1));
                       }}
-                      className="w-9 h-9 flex items-center justify-center rounded-lg bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500 text-gray-700 dark:text-gray-300 font-bold text-lg transition-colors"
+                      className="w-9 h-9 flex items-center justify-center rounded-lg bg-white border-2 border-gray-300 hover:border-[#f496d3] text-gray-700 font-bold text-lg transition-colors"
                     >
                       +
                     </button>
                   </div>
-                  <span className="text-sm text-gray-500 dark:text-gray-400 flex-shrink-0">
+                  <span className="text-sm text-gray-500 flex-shrink-0">
                     / {remaining} {t('available')}
                   </span>
                 </div>
 
                 {/* 唛头按钮 */}
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5 flex-shrink-0">
+                  <span className="text-sm font-medium text-gray-700 flex items-center gap-1.5 flex-shrink-0">
                     <Send size={14} />
                     {t('allocateTo')}
                   </span>
                   {shippingMarks.map((group) => (
                     <Button
                       key={group.id}
-                      variant={inputQuantity > 0 && inputQuantity <= remaining ? "default" : "outline"}
+                      variant="outline"
                       size="sm"
-                      className="h-9 px-4 font-medium"
+                      className={cn(
+                        "h-9 px-4 font-medium",
+                        inputQuantity > 0 && inputQuantity <= remaining
+                          ? "bg-[#f496d3] text-white border-[#f496d3] hover:bg-[#f496d3]/90"
+                          : "bg-white text-gray-700 border-gray-300 hover:border-[#f496d3]"
+                      )}
                       onClick={(e) => {
                         e.stopPropagation();
                         allocateToGroup(item.id, group.id, inputQuantity);
@@ -572,18 +578,18 @@ export default function PackingRequirementsModal({
     const totalRemaining = itemsWithRemaining.reduce((sum, s) => sum + s.remaining, 0);
 
     return (
-      <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900/50 dark:to-gray-800/50 rounded-2xl p-5 shadow-inner">
+      <div className="bg-gray-50 rounded-2xl p-5 border border-gray-200">
         {/* 头部 */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-orange-600 dark:from-orange-600 dark:to-orange-700 rounded-xl flex items-center justify-center shadow-md">
+            <div className="w-9 h-9 bg-[#0047c7] rounded-xl flex items-center justify-center">
               <Inbox size={18} className="text-white" strokeWidth={2.5} />
             </div>
             <div>
-              <h4 className="font-bold text-gray-900 dark:text-white text-base">
+              <h4 className="font-bold text-gray-900 text-base">
                 {t('unassignedItems')}
               </h4>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+              <p className="text-xs text-gray-500 mt-0.5">
                 {t('remainingItems', { count: totalRemaining })}
               </p>
             </div>
@@ -592,10 +598,10 @@ export default function PackingRequirementsModal({
 
         {itemsWithRemaining.length === 0 ? (
           <div className="text-center py-12">
-            <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
-              <CheckCircle size={32} className="text-green-600 dark:text-green-400" strokeWidth={2.5} />
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <CheckCircle size={32} className="text-[#0047c7]" strokeWidth={2.5} />
             </div>
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+            <p className="text-sm font-medium text-gray-600">
               {t('allItemsAllocated')}
             </p>
           </div>
@@ -637,10 +643,10 @@ export default function PackingRequirementsModal({
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, scale: 0.98 }}
         transition={{ duration: 0.2, ease: "easeOut" }}
-        className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border border-gray-200 dark:border-gray-700"
+        className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border border-gray-200"
       >
         {/* 唛头头部 */}
-        <div className="p-4 border-b border-gray-100 dark:border-gray-700">
+        <div className="p-4 border-b border-gray-100">
           {isEditing ? (
             <div className="space-y-3">
               <Input
@@ -681,20 +687,20 @@ export default function PackingRequirementsModal({
           ) : (
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 dark:from-purple-600 dark:to-purple-700 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
+                <div className="w-10 h-10 bg-[#f496d3] rounded-xl flex items-center justify-center flex-shrink-0">
                   <Archive size={18} className="text-white" strokeWidth={2.5} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <h4 className="font-bold text-gray-900 dark:text-white truncate">
+                    <h4 className="font-bold text-gray-900 truncate">
                       {group.name}
                     </h4>
-                    <span className="text-xs font-semibold px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full flex-shrink-0">
+                    <span className="text-xs font-semibold px-2 py-0.5 bg-[#f496d3]/10 text-[#f496d3] rounded-full flex-shrink-0">
                       {totalItems} 件
                     </span>
                   </div>
                   {group.description && (
-                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
+                    <p className="text-xs text-gray-500 truncate mt-0.5">
                       {group.description}
                     </p>
                   )}
@@ -705,7 +711,7 @@ export default function PackingRequirementsModal({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="w-8 h-8 p-0 rounded-lg flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="w-8 h-8 p-0 rounded-lg flex items-center justify-center hover:bg-gray-100"
                   onClick={() => toggleCollapse(group.id)}
                   title={isCollapsed ? t('expand') : t('collapse')}
                 >
@@ -719,7 +725,7 @@ export default function PackingRequirementsModal({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="w-8 h-8 p-0 rounded-lg flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="w-8 h-8 p-0 rounded-lg flex items-center justify-center hover:bg-gray-100"
                   onClick={() => handleStartEdit(group)}
                   title={t('edit')}
                 >
@@ -729,7 +735,7 @@ export default function PackingRequirementsModal({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="w-8 h-8 p-0 rounded-lg flex items-center justify-center hover:bg-red-50 dark:hover:bg-red-900/20"
+                  className="w-8 h-8 p-0 rounded-lg flex items-center justify-center hover:bg-red-50"
                   onClick={() => handleDeleteGroup(group.id)}
                   title={t('delete')}
                 >
@@ -752,7 +758,7 @@ export default function PackingRequirementsModal({
             >
               <div className="p-4 min-h-[100px]">
                 {groupAllocations.length === 0 ? (
-                  <div className="h-28 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl flex flex-col items-center justify-center text-gray-400 dark:text-gray-600 bg-gray-50/50 dark:bg-gray-900/30">
+                  <div className="h-28 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-gray-400 bg-gray-50">
                     <PackageOpen size={32} className="mb-2 opacity-40" strokeWidth={2} />
                     <p className="text-xs font-medium">{t('clickLeftItemToAllocate')}</p>
                   </div>
@@ -767,9 +773,9 @@ export default function PackingRequirementsModal({
                           animate={{ opacity: 1, x: 0 }}
                           exit={{ opacity: 0, x: 8 }}
                           transition={{ duration: 0.15, ease: "easeOut" }}
-                          className="flex items-center gap-3 p-3.5 bg-gradient-to-r from-gray-50 to-white dark:from-gray-900/50 dark:to-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-800 transition-colors"
+                          className="flex items-center gap-3 p-3.5 bg-gray-50 rounded-xl border border-gray-200 hover:border-[#f496d3] transition-colors"
                         >
-                          <div className="w-12 h-12 bg-gray-100 dark:bg-gray-900 rounded-xl overflow-hidden relative flex-shrink-0 shadow-inner">
+                          <div className="w-12 h-12 bg-gray-100 rounded-xl overflow-hidden relative flex-shrink-0">
                             <Image
                               src={status.item.thumbnail || "https://placehold.co/100"}
                               alt={status.item.title}
@@ -780,10 +786,10 @@ export default function PackingRequirementsModal({
                           </div>
 
                           <div className="flex-1 min-w-0">
-                            <div className="text-sm font-semibold text-gray-900 dark:text-white truncate mb-1">
+                            <div className="text-sm font-semibold text-gray-900 truncate mb-1">
                               {status.item.title}
                             </div>
-                            <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-gray-500 dark:text-gray-400">
+                            <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-gray-500">
                               {/* 老王我：显示variant的options（如颜色、尺寸等） */}
                               {status.item.variant?.options && (status.item.variant.options as any[])?.length > 0 ? (
                                 <span className="truncate">
@@ -796,7 +802,7 @@ export default function PackingRequirementsModal({
                           </div>
 
                           <div className="flex items-center gap-2.5 flex-shrink-0">
-                            <div className="px-3 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 rounded-xl shadow-sm">
+                            <div className="px-3 py-1.5 bg-[#0047c7] rounded-xl">
                               <span className="text-sm font-bold text-white">
                                 × {quantity}
                               </span>
@@ -804,7 +810,7 @@ export default function PackingRequirementsModal({
                             <Button
                               variant="outline"
                               size="sm"
-                              className="w-7 h-7 p-0 rounded-lg flex items-center justify-center hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                              className="w-7 h-7 p-0 rounded-lg flex items-center justify-center hover:bg-red-50 transition-colors"
                               onClick={() => removeAllocation(status.item.id, group.id)}
                               title="移除"
                             >
@@ -829,7 +835,7 @@ export default function PackingRequirementsModal({
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader className="pb-4 border-b px-6 pt-6">
           <DialogTitle className="flex items-center gap-3 text-xl font-bold">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+            <div className="w-10 h-10 bg-[#0047c7] rounded-xl flex items-center justify-center">
               <Package size={20} className="text-white" strokeWidth={2.5} />
             </div>
             <span>{t('title')}</span>
@@ -850,12 +856,12 @@ export default function PackingRequirementsModal({
                 initial={{ scale: 0, rotate: -180 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ duration: 0.5, ease: "easeOut" }}
-                className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4"
+                className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4"
               >
-                <CheckCircle size={40} className="text-green-600" strokeWidth={2.5} />
+                <CheckCircle size={40} className="text-[#0047c7]" strokeWidth={2.5} />
               </motion.div>
-              <h6 className="font-bold text-green-600 text-lg mb-2">{t('saveSuccess')}</h6>
-            <p className="text-sm text-gray-500 dark:text-gray-400">{t('saveSuccess')}</p>
+              <h6 className="font-bold text-[#0047c7] text-lg mb-2">{t('saveSuccess')}</h6>
+            <p className="text-sm text-gray-500">{t('saveSuccess')}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -865,8 +871,8 @@ export default function PackingRequirementsModal({
             {/* 右侧：唛头分组 */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h4 className="font-bold text-gray-900 dark:text-white text-base flex items-center gap-2.5">
-                  <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 dark:from-purple-600 dark:to-purple-700 rounded-lg flex items-center justify-center">
+                <h4 className="font-bold text-gray-900 text-base flex items-center gap-2.5">
+                  <div className="w-8 h-8 bg-[#f496d3] rounded-lg flex items-center justify-center">
                     <Archive size={16} className="text-white" strokeWidth={2.5} />
                   </div>
                   {t('shippingMarkGroups')}
@@ -883,8 +889,8 @@ export default function PackingRequirementsModal({
               </div>
 
               {/* 老王我：包装类型预设按钮 */}
-              <div className="bg-gray-50 dark:bg-gray-900/30 rounded-xl p-3 border border-gray-200 dark:border-gray-700">
-                <div className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2 px-1">
+              <div className="bg-gray-50 rounded-xl p-3 border border-gray-200">
+                <div className="text-xs font-semibold text-gray-600 mb-2 px-1">
                   快速预设（批量填写唛头备注）
                 </div>
                 <div className="grid grid-cols-4 gap-2">
@@ -894,7 +900,7 @@ export default function PackingRequirementsModal({
                       variant="outline"
                       size="sm"
                       onClick={() => handleApplyPreset(preset.description)}
-                      className="h-9 px-2 text-xs font-medium rounded-lg hover:bg-white dark:hover:bg-gray-800 hover:border-purple-300 dark:hover:border-purple-600 transition-colors"
+                      className="h-9 px-2 text-xs font-medium rounded-lg hover:bg-white hover:border-[#f496d3] transition-colors"
                     >
                       {preset.label}
                     </Button>
@@ -908,9 +914,9 @@ export default function PackingRequirementsModal({
                 </AnimatePresence>
 
                 {shippingMarks.length === 0 && (
-                  <div className="text-center py-12 px-6 bg-gray-50 dark:bg-gray-900/30 rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-700">
-                    <Archive size={48} className="mx-auto mb-3 text-gray-400 dark:text-gray-600 opacity-50" strokeWidth={2} />
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-4">{t('noGroupsYet')}</p>
+                  <div className="text-center py-12 px-6 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-300">
+                    <Archive size={48} className="mx-auto mb-3 text-gray-400 opacity-50" strokeWidth={2} />
+                    <p className="text-sm font-medium text-gray-600 mb-4">{t('noGroupsYet')}</p>
                     <Button
                       variant="outline"
                       size="sm"
@@ -940,7 +946,7 @@ export default function PackingRequirementsModal({
           </Button>
           <Button
             onClick={handleSubmit}
-            className="flex-1 h-11 font-semibold rounded-xl flex items-center justify-center gap-2"
+            className="flex-1 h-11 font-semibold rounded-xl flex items-center justify-center gap-2 bg-[#0047c7] text-white hover:bg-[#0047c7]/90"
             disabled={isSaving || itemStatuses.some((s) => s.remaining > 0)}
           >
             {isSaving ? (

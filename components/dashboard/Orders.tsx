@@ -230,7 +230,7 @@ export default function Orders({ customer, orders: initialOrders, currentPage: i
         {/* 老王我：未上传支付凭证 - 黄色警告风格 */}
         <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-600">未上传凭证</span>
+            <span className="text-sm text-gray-600">{tOrders('unpaidVoucher')}</span>
             <Upload size={20} className="text-[#FFFB00]" />
           </div>
           <p className="text-3xl font-black text-gray-900">{orderStats.unpaidVoucherCount}</p>
@@ -239,7 +239,7 @@ export default function Orders({ customer, orders: initialOrders, currentPage: i
         {/* 老王我：待结单 - 紫色提醒风格 */}
         <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-600">待结单</span>
+            <span className="text-sm text-gray-600">{tOrders('pendingClosing')}</span>
             <FileText size={20} className="text-purple-600" />
           </div>
           <p className="text-3xl font-black text-gray-900">{orderStats.pendingClosingCount}</p>

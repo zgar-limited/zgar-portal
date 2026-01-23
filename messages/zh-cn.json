@@ -355,7 +355,9 @@
     "noOrders": "暂无订单",
     "noOrdersDesc": "快去选购心仪的商品吧",
     "startShopping": "开始购物",
-    "pieces": "件"
+    "pieces": "件",
+    "unpaidVoucher": "未上传凭证",
+    "pendingClosing": "待结单"
   },
   "pendingAction": {
     "title": {
