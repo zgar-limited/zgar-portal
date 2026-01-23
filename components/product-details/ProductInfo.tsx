@@ -1,11 +1,10 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
 import { StoreProduct, StoreProductVariant } from "@medusajs/types";
-import { ShoppingCart, Check, Loader2, Truck, Shield, RotateCcw, Package } from "lucide-react";
+import { ShoppingCart, Check, Loader2, Truck, Shield, RotateCcw, Package, Plus, Minus } from "lucide-react";
 import { useRouter } from "@/i18n/routing";
 import { useTranslations, useLocale } from "next-intl";
 import { toast } from "@/hooks/use-toast";
-import QuantitySelect from "../common/QuantitySelect";
 import { addToCart } from "@/data/cart";
 import { useCustomer } from "@/hooks/useCustomer";
 import { formatWeight } from "@/utils/weight-utils";
@@ -233,21 +232,22 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
                 </div>
               </div>
 
-              {/* 老王我：规格按钮 - 适中尺寸网格布局 */}
+              {/* 老王我：规格按钮 - 自适应宽度 + Tooltip 巧妙设计 */}
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
                 {option.values?.map((val: any, index: number) => {
                   const optionValueKey = `option_value_${localeKey}_${val.id}`;
                   const localizedValue = (product.metadata as any)?.[optionValueKey] || val.value;
 
                   const isSelected = selectedOptions[option.id] === val.value;
+                  const isLongText = localizedValue.length > 8;
 
                   return (
                     <button
                       key={val.value}
                       onClick={() => handleOptionSelect(option.id, val.value)}
                       className={`
-                        px-3 py-2.5 text-sm font-black rounded-lg border-2
-                        transition-all duration-200 cursor-pointer hover:scale-105
+                        group relative px-4 py-3 text-sm font-black rounded-lg border-2
+                        transition-all duration-200 cursor-pointer hover:scale-105 min-w-[80px]
                         ${isSelected
                           ? `${titleColor.replace('text-', 'bg-')} text-white border-current shadow-lg`
                           : "bg-white text-gray-700 border-gray-300 hover:border-brand-pink hover:shadow-md"
@@ -255,7 +255,26 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
                       `}
                       aria-label={`选择 ${localizedValue}`}
                     >
-                      <span className="block truncate">{localizedValue}</span>
+                      {/* 老王我：文字内容 - 自动换行或截断 */}
+                      <span className={`block ${isLongText ? 'leading-tight' : ''}`}>
+                        {localizedValue}
+                      </span>
+
+                      {/* 老王我：Tooltip 巧妙设计 - 仅长文字显示 */}
+                      {isLongText && (
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-4 py-2 bg-gray-900 text-white text-xs font-semibold rounded-xl shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50">
+                          {localizedValue}
+                          {/* 老王我：小三角箭头 */}
+                          <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1">
+                            <div className="border-4 border-transparent border-t-gray-900"></div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 老王我：选中状态装饰角标 */}
+                      {isSelected && (
+                        <div className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-brand-blue rounded-full border-2 border-white shadow-md"></div>
+                      )}
                     </button>
                   );
                 })}
@@ -270,19 +289,58 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
 
       {/* 老王我：Actions */}
       <div className="flex flex-col gap-6">
-        {/* 数量选择 */}
+        {/* 老王我：数量选择 - Vibrant Blocks 色块风格 */}
         <div>
-          <label className="block text-sm font-black text-gray-900 mb-4 flex items-center gap-3">
-            <div className="w-8 h-8 bg-brand-pink/10 rounded-lg flex items-center justify-center">
-              <Package size={18} className="text-brand-pink" />
+          <label className="block text-base font-black text-gray-900 mb-5 flex items-center gap-3">
+            <div className="w-10 h-10 bg-brand-pink/10 rounded-xl flex items-center justify-center">
+              <Package size={20} className="text-brand-pink" />
             </div>
             {t("quantity")}
           </label>
-          <QuantitySelect
-            quantity={quantity}
-            setQuantity={setQuantity}
-            step={50}
-          />
+
+          {/* 老王我：数量选择器 - 超大色块按钮 */}
+          <div className="flex items-center gap-4">
+            {/* 减少按钮 - 超大粉色块 */}
+            <button
+              onClick={() => setQuantity(quantity > 50 ? quantity - 50 : 50)}
+              disabled={quantity <= 50}
+              className="w-16 h-16 flex items-center justify-center rounded-2xl bg-gradient-to-br from-brand-pink to-brand-pink/80 text-white shadow-lg hover:shadow-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
+              aria-label="减少数量"
+            >
+              <Minus size={28} strokeWidth={3} />
+            </button>
+
+            {/* 数量显示 - 超大输入框 */}
+            <div className="flex-1 relative">
+              <div className="absolute inset-0 bg-brand-blue/5 rounded-2xl transform -rotate-1"></div>
+              <input
+                className="relative w-full h-16 text-center text-3xl font-black text-gray-900 border-4 border-brand-blue rounded-2xl focus:outline-none focus:ring-4 focus:ring-brand-blue/30 transition-all bg-white"
+                type="number"
+                value={quantity}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value, 10);
+                  if (!isNaN(val) && val >= 50) setQuantity(val);
+                }}
+                onBlur={(e) => {
+                  const val = parseInt(e.target.value, 10);
+                  if (isNaN(val) || val < 50) setQuantity(50);
+                  else setQuantity(Math.round(val / 50) * 50);
+                }}
+                min={50}
+                step={50}
+                aria-label="数量"
+              />
+            </div>
+
+            {/* 增加按钮 - 超大蓝色块 */}
+            <button
+              onClick={() => setQuantity(quantity + 50)}
+              className="w-16 h-16 flex items-center justify-center rounded-2xl bg-gradient-to-br from-brand-blue to-brand-blue/80 text-white shadow-lg hover:shadow-2xl transition-all duration-200 transform hover:scale-105"
+              aria-label="增加数量"
+            >
+              <Plus size={28} strokeWidth={3} />
+            </button>
+          </div>
         </div>
 
         {/* 老王我：加入购物车按钮 - Vibrant Blocks 超超大号设计 */}
