@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
 import { StoreProduct, StoreProductVariant } from "@medusajs/types";
-import { ShoppingCart, Check, Loader2, Truck, Shield, RotateCcw, Package, Plus, Minus } from "lucide-react";
+import { ShoppingCart, Check, Loader2, Truck, Shield, RotateCcw, Plus, Minus } from "lucide-react";
 import { useRouter } from "@/i18n/routing";
 import { useTranslations, useLocale } from "next-intl";
 import { toast } from "@/hooks/use-toast";
@@ -291,11 +291,14 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
       <div className="flex flex-col gap-6">
         {/* 老王我：数量选择 - Vibrant Blocks 色块风格 */}
         <div>
-          <label className="block text-base font-black text-gray-900 mb-5 flex items-center gap-3">
-            <div className="w-10 h-10 bg-brand-pink/10 rounded-xl flex items-center justify-center">
-              <Package size={20} className="text-brand-pink" />
+          <label className="block mb-5">
+            <div className="flex items-center gap-3">
+              {/* 老王我：蓝色横杆装饰 */}
+              <div className="w-2 h-8 bg-brand-blue rounded-full shadow-md"></div>
+              <span className="text-base font-black text-gray-900 tracking-wide">
+                {t("quantity")}
+              </span>
             </div>
-            {t("quantity")}
           </label>
 
           {/* 老王我：数量选择器 - 超大色块按钮 */}
