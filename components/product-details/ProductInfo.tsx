@@ -177,54 +177,66 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
         <p className="text-lg text-gray-600 leading-relaxed">{product.description}</p>
       )}
 
-      {/* 老王我：规格选择 - Vibrant Blocks 风格按钮 */}
-      <div className="space-y-6">
-        {product.options?.map((option) => {
+      {/* 老王我：规格选择 - 极简紧凑布局 */}
+      <div className="space-y-4">
+        {product.options?.map((option, optionIndex) => {
           const localeKey = locale.toLowerCase().replace('-', '_');
           const optionTitleKey = `option_title_${localeKey}_opt_${option.id}`;
           const localizedTitle = (product.metadata as any)?.[optionTitleKey] || option.title;
 
+          // 老王我：规格标题循环使用粉蓝颜色
+          const titleColors = [
+            "text-brand-pink",
+            "text-brand-blue",
+            "text-gray-900",
+          ];
+          const titleColor = titleColors[optionIndex % titleColors.length];
+
           return (
-            <div key={option.id} className="space-y-4">
+            <div key={option.id} className="space-y-3">
+              {/* 老王我：标题 + 已选值（紧凑单行） */}
               <div className="flex items-center justify-between">
-                <label className="text-lg font-black text-gray-900 flex items-center gap-2">
-                  <div className="w-2 h-6 bg-brand-pink"></div>
+                <h3 className={`text-base font-black ${titleColor}`}>
                   {localizedTitle}
-                </label>
-                <span className="text-lg font-bold text-white bg-brand-blue px-4 py-2 rounded-lg shadow-md">
-                  {(() => {
-                    const selectedValue = selectedOptions[option.id];
-                    const selectedValueObj = option.values?.find((v: any) => v.value === selectedValue);
-                    if (selectedValueObj?.id) {
-                      const optionValueKey = `option_value_${localeKey}_${selectedValueObj.id}`;
-                      return (product.metadata as any)?.[optionValueKey] || selectedValue;
+                </h3>
+                {selectedOptions[option.id] && (
+                  <span className="text-sm font-semibold text-gray-600">
+                    {
+                      (() => {
+                        const selectedValue = selectedOptions[option.id];
+                        const selectedValueObj = option.values?.find((v: any) => v.value === selectedValue);
+                        if (selectedValueObj?.id) {
+                          const optionValueKey = `option_value_${localeKey}_${selectedValueObj.id}`;
+                          return (product.metadata as any)?.[optionValueKey] || selectedValue;
+                        }
+                        return selectedValue;
+                      })()
                     }
-                    return selectedValue;
-                  })()}
-                </span>
+                  </span>
+                )}
               </div>
-              <div className="flex flex-wrap gap-3">
+
+              {/* 老王我：规格按钮 - 紧凑网格布局 */}
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
                 {option.values?.map((val: any, index: number) => {
                   const optionValueKey = `option_value_${localeKey}_${val.id}`;
                   const localizedValue = (product.metadata as any)?.[optionValueKey] || val.value;
 
-                  // 老王我：根据索引循环使用颜色
-                  const colors = [
-                    "bg-brand-pink text-white border-brand-pink shadow-lg",
-                    "bg-brand-blue text-white border-brand-blue shadow-lg",
-                    "bg-black text-white border-black shadow-lg",
-                  ];
-                  const colorClass = colors[index % colors.length];
+                  const isSelected = selectedOptions[option.id] === val.value;
 
                   return (
                     <button
                       key={val.value}
                       onClick={() => handleOptionSelect(option.id, val.value)}
-                      className={`px-6 py-3 text-base font-black rounded-xl border-2 transition-all duration-200 min-w-[80px] ${
-                        selectedOptions[option.id] === val.value
-                          ? colorClass
-                          : "bg-white text-gray-700 border-gray-300 hover:border-brand-pink hover:shadow-md"
-                      }`}
+                      className={`
+                        px-4 py-2.5 text-sm font-bold rounded-lg border-2
+                        transition-all duration-200 cursor-pointer
+                        ${isSelected
+                          ? `${titleColor.replace('text-', 'bg-')} text-white border-current shadow-md`
+                          : "bg-white text-gray-700 border-gray-200 hover:border-brand-pink hover:shadow-sm"
+                        }
+                      `}
+                      aria-label={`选择 ${localizedValue}`}
                     >
                       {localizedValue}
                     </button>

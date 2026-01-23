@@ -34,7 +34,7 @@ const QuantitySelect = ({
 
   const handleBlur = (e) => {
     let value = parseInt(e.target.value, 10);
-    
+
     if (isNaN(value) || value <= 0) {
       // Reset to current valid quantity if input is invalid
       setInputValue(quantity);
@@ -51,7 +51,7 @@ const QuantitySelect = ({
         }
       }
     }
-    
+
     // Ensure minimum value is at least step (or 1 if step is not set/invalid)
     const minVal = step > 0 ? step : 1;
     if (value < minVal) value = minVal;
@@ -60,27 +60,39 @@ const QuantitySelect = ({
     setInputValue(value);
   };
 
+  // 老王我：Vibrant Blocks 风格 - 紧凑现代设计
   return (
-    <div className={`wg-quantity ${styleClass}`}>
-      <button className="btn-quantity btn-decrease" onClick={handleDecrease}>
-        <Minus></Minus>
+    <div className={`flex items-center gap-3 ${styleClass}`}>
+      {/* 老王我：减少按钮 - 粉色渐变 */}
+      <button
+        onClick={handleDecrease}
+        className="w-12 h-12 flex items-center justify-center rounded-xl bg-gradient-to-br from-brand-pink to-brand-pink/80 text-white shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        disabled={quantity <= step}
+        aria-label="减少数量"
+      >
+        <Minus size={20} strokeWidth={3} />
       </button>
+
+      {/* 老王我：数量输入框 - 简洁边框 */}
       <input
-        className="quantity-product"
-        // type="number"
+        className="w-24 h-12 text-center text-xl font-black text-gray-900 border-2 border-brand-blue rounded-xl focus:outline-none focus:ring-4 focus:ring-brand-blue/20 transition-all"
+        type="number"
         name="number"
         value={inputValue}
         onChange={handleChange}
         onBlur={handleBlur}
+        min={step}
+        step={step}
+        aria-label="数量"
       />
+
+      {/* 老王我：增加按钮 - 蓝色渐变 */}
       <button
-        className="btn-quantity btn-increase"
         onClick={handleIncrease}
-        role="button"
-        tabIndex={0}
+        className="w-12 h-12 flex items-center justify-center rounded-xl bg-gradient-to-br from-brand-blue to-brand-blue/80 text-white shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
+        aria-label="增加数量"
       >
-        <Plus />
-        {/* <i className="icon icon-plus" /> */}
+        <Plus size={20} strokeWidth={3} />
       </button>
     </div>
   );
