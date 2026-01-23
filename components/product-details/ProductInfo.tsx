@@ -164,18 +164,18 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
           <p className="mb-6 text-xl text-gray-600 font-semibold">{product.title}</p>
         )}
 
-        {/* 老王我：价格展示 - Vibrant Blocks 超大胆色块 */}
+        {/* 老王我：价格展示 - Vibrant Blocks 适中尺寸 */}
         <div className="relative inline-block group">
           {/* 老王我：装饰性几何形状 */}
-          <div className="absolute -top-3 -left-3 w-16 h-16 bg-brand-pink/20 rounded-2xl transform -rotate-12 group-hover:rotate-6 transition-transform duration-300"></div>
-          <div className="absolute -bottom-3 -right-3 w-12 h-12 bg-brand-blue/20 rounded-xl transform rotate-12 group-hover:-rotate-6 transition-transform duration-300"></div>
+          <div className="absolute -top-2 -left-2 w-12 h-12 bg-brand-pink/20 rounded-2xl transform -rotate-12 group-hover:rotate-6 transition-transform duration-300"></div>
+          <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-brand-blue/20 rounded-xl transform rotate-12 group-hover:-rotate-6 transition-transform duration-300"></div>
 
-          <div className="relative bg-gradient-to-br from-brand-pink via-brand-pink to-brand-blue p-8 rounded-3xl shadow-2xl border-4 border-white">
-            <div className="flex items-baseline gap-4">
-              <span className="text-6xl lg:text-7xl font-black text-white tracking-tight">
+          <div className="relative bg-gradient-to-br from-brand-pink via-brand-pink to-brand-blue p-6 rounded-2xl shadow-xl border-2 border-white">
+            <div className="flex items-baseline gap-3">
+              <span className="text-4xl lg:text-5xl font-black text-white tracking-tight">
                 ${price.toFixed(2)}
               </span>
-              <span className="text-xl text-white/95 font-semibold">{t("perPiece")}</span>
+              <span className="text-base text-white/95 font-semibold">{t("perPiece")}</span>
             </div>
           </div>
         </div>

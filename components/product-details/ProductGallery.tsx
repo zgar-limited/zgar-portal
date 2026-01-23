@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { StoreProduct, StoreProductVariant } from "@medusajs/types";
-import { ChevronLeft, ChevronRight, ZoomIn } from "lucide-react";
+import { ChevronLeft, ChevronRight, ZoomIn, Sparkles, Shield, Award, Share2 } from "lucide-react";
 
 interface ProductGalleryProps {
   product: StoreProduct;
@@ -358,6 +358,73 @@ export default function ProductGallery({ product, selectedVariant, onVariantSele
           </div>
         </div>
       )}
+
+      {/* 老王我：产品亮点 - Vibrant Blocks 卡片布局 */}
+      <div className="space-y-4 pt-4">
+        <h3 className="text-lg font-black text-gray-900 flex items-center gap-2">
+          <Sparkles size={20} className="text-brand-pink" />
+          产品亮点
+        </h3>
+        <div className="grid grid-cols-2 gap-3">
+          {/* 老王我：亮点卡片 - 粉色 */}
+          <div className="relative group">
+            <div className="absolute inset-0 bg-brand-pink/20 transform translate-y-1 rounded-xl group-hover:translate-y-2 transition-transform duration-200"></div>
+            <div className="relative bg-gradient-to-br from-brand-pink to-brand-pink/80 p-4 rounded-xl border-2 border-brand-pink shadow-md">
+              <Award className="w-6 h-6 text-white mb-2" />
+              <p className="text-xs font-black text-white leading-tight">品质保证</p>
+            </div>
+          </div>
+
+          {/* 老王我：亮点卡片 - 蓝色 */}
+          <div className="relative group">
+            <div className="absolute inset-0 bg-brand-blue/20 transform translate-y-1 rounded-xl group-hover:translate-y-2 transition-transform duration-200"></div>
+            <div className="relative bg-gradient-to-br from-brand-blue to-brand-blue/80 p-4 rounded-xl border-2 border-brand-blue shadow-md">
+              <Shield className="w-6 h-6 text-white mb-2" />
+              <p className="text-xs font-black text-white leading-tight">正品认证</p>
+            </div>
+          </div>
+
+          {/* 老王我：亮点卡片 - 灰色 */}
+          <div className="relative group">
+            <div className="absolute inset-0 bg-gray-800/20 transform translate-y-1 rounded-xl group-hover:translate-y-2 transition-transform duration-200"></div>
+            <div className="relative bg-gradient-to-br from-gray-800 to-gray-700 p-4 rounded-xl border-2 border-gray-800 shadow-md">
+              <Sparkles className="w-6 h-6 text-white mb-2" />
+              <p className="text-xs font-black text-white leading-tight">优质材料</p>
+            </div>
+          </div>
+
+          {/* 老王我：亮点卡片 - 粉蓝渐变 */}
+          <div className="relative group">
+            <div className="absolute inset-0 bg-gradient-to-r from-brand-pink to-brand-blue/20 transform translate-y-1 rounded-xl group-hover:translate-y-2 transition-transform duration-200"></div>
+            <div className="relative bg-gradient-to-r from-brand-pink to-brand-blue p-4 rounded-xl border-2 border-transparent shadow-md">
+              <Share2 className="w-6 h-6 text-white mb-2" />
+              <p className="text-xs font-black text-white leading-tight">分享好友</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 老王我：信任徽章 - Vibrant Blocks 风格 */}
+      <div className="space-y-3 pt-2">
+        <h3 className="text-base font-black text-gray-900 flex items-center gap-2">
+          <Shield size={18} className="text-brand-blue" />
+          服务保障
+        </h3>
+        <div className="flex flex-wrap gap-2">
+          <div className="inline-flex items-center gap-2 bg-brand-pink/10 px-4 py-2 rounded-lg border border-brand-pink/30">
+            <div className="w-2 h-2 rounded-full bg-brand-pink"></div>
+            <span className="text-xs font-black text-gray-900">官方正品</span>
+          </div>
+          <div className="inline-flex items-center gap-2 bg-brand-blue/10 px-4 py-2 rounded-lg border border-brand-blue/30">
+            <div className="w-2 h-2 rounded-full bg-brand-blue"></div>
+            <span className="text-xs font-black text-gray-900">快速发货</span>
+          </div>
+          <div className="inline-flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-lg border border-gray-300">
+            <div className="w-2 h-2 rounded-full bg-gray-700"></div>
+            <span className="text-xs font-black text-gray-900">售后无忧</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
