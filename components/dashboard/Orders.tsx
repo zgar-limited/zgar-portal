@@ -190,8 +190,9 @@ export default function Orders({ customer, orders: initialOrders, currentPage: i
 
   return (
     <div className="space-y-6">
-      {/* 老王我：订单统计卡片 - 轻量设计 */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* 老王我：订单统计卡片 - 轻量设计，扩展到5个卡片 */}
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        {/* 总订单数 */}
         <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-gray-600">总订单数</span>
@@ -200,6 +201,7 @@ export default function Orders({ customer, orders: initialOrders, currentPage: i
           <p className="text-3xl font-black text-gray-900">{count}</p>
         </div>
 
+        {/* 已完成 */}
         <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-gray-600">已完成</span>
@@ -212,6 +214,7 @@ export default function Orders({ customer, orders: initialOrders, currentPage: i
           </p>
         </div>
 
+        {/* 进行中 */}
         <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-gray-600">进行中</span>
@@ -222,6 +225,24 @@ export default function Orders({ customer, orders: initialOrders, currentPage: i
           <p className="text-3xl font-black text-gray-900">
             {orderList.filter(o => o.fulfillment_status !== 'fulfilled' && o.fulfillment_status !== 'returned').length}
           </p>
+        </div>
+
+        {/* 老王我：未上传支付凭证 - 黄色警告风格 */}
+        <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm text-gray-600">未上传凭证</span>
+            <Upload size={20} className="text-[#FFFB00]" />
+          </div>
+          <p className="text-3xl font-black text-gray-900">{orderStats.unpaidVoucherCount}</p>
+        </div>
+
+        {/* 老王我：待结单 - 紫色提醒风格 */}
+        <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm text-gray-600">待结单</span>
+            <FileText size={20} className="text-purple-600" />
+          </div>
+          <p className="text-3xl font-black text-gray-900">{orderStats.pendingClosingCount}</p>
         </div>
       </div>
 
