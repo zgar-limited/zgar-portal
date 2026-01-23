@@ -203,79 +203,95 @@ export default function ProductGallery({ product, selectedVariant, onVariantSele
 
   return (
     <div className="flex flex-col gap-6" onKeyDown={handleKeyDown}>
-      {/* 老王我：主图容器 - Vibrant Blocks 风格 */}
-      <div
-        className={`relative overflow-hidden rounded-2xl shadow-lg bg-gray-100 ${
-          isZoomed ? 'cursor-zoom-out' : 'cursor-zoom-in'
-        }`}
-        style={{ aspectRatio: "1/1" }}
-        onClick={handleImageClick}
-      >
-        <Image
-          src={allImages[currentImageIndex]}
-          alt={`Product Image ${currentImageIndex + 1}`}
-          fill
-          className={`object-cover transition-all duration-300 ${
-            isZoomed ? 'scale-150' : 'scale-100'
-          }`}
-          priority
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-        />
+      {/* 老王我：主图容器 - Vibrant Blocks 蓝粉纯色碰撞风格 */}
+      <div className="relative">
+        {/* 老王我：装饰性几何色块 - 左上粉色 */}
+        <div className="absolute -top-2 -left-2 w-20 h-20 bg-brand-pink rounded-3xl -z-10"></div>
+        {/* 老王我：装饰性几何色块 - 右下蓝色 */}
+        <div className="absolute -bottom-2 -right-2 w-16 h-16 bg-brand-blue rounded-full -z-10"></div>
+        {/* 老王我：装饰性三角形 - 左下 */}
+        <div className="absolute bottom-8 left-0 w-0 h-0 border-l-[32px] border-l-transparent border-b-[24px] border-b-brand-pink opacity-60 -z-10"></div>
+        {/* 老王我：装饰性三角形 - 右上 */}
+        <div className="absolute top-8 right-0 w-0 h-0 border-r-[28px] border-r-transparent border-t-[20px] border-t-brand-blue opacity-60 -z-10"></div>
 
-        {/* 老王我：装饰性粉色三角形 - 右上角 */}
-        <div className="absolute top-0 right-0 w-0 h-0 border-l-[48px] border-l-transparent border-t-[36px] border-t-brand-pink opacity-80"></div>
+        <div
+          className={`relative overflow-hidden rounded-3xl shadow-2xl bg-white ${
+            isZoomed ? 'cursor-zoom-out' : 'cursor-zoom-in'
+          } border-4 border-brand-pink`}
+          style={{ aspectRatio: "1/1" }}
+          onClick={handleImageClick}
+        >
+          <Image
+            src={allImages[currentImageIndex]}
+            alt={`Product Image ${currentImageIndex + 1}`}
+            fill
+            className={`object-cover transition-all duration-300 ${
+              isZoomed ? 'scale-150' : 'scale-100'
+            }`}
+            priority
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          />
 
-        {/* 老王我：缩放提示 - Vibrant Blocks 风格 */}
-        {!isZoomed && allImages.length > 0 && (
-          <div className="absolute top-4 right-4 opacity-0 hover:opacity-100 transition-opacity duration-200">
-            <div className="bg-gradient-to-r from-brand-pink to-brand-blue text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2">
-              <ZoomIn size={18} />
-              <span className="text-sm font-black">点击放大</span>
+          {/* 老王我：缩放提示 - Vibrant Blocks 风格 */}
+          {!isZoomed && allImages.length > 0 && (
+            <div className="absolute top-4 right-4 opacity-0 hover:opacity-100 transition-opacity duration-200">
+              <div className="bg-gradient-to-r from-brand-pink to-brand-blue text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2">
+                <ZoomIn size={20} />
+                <span className="text-sm font-black">点击放大</span>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* 老王我：导航箭头 - 粉蓝渐变 */}
-        {allImages.length > 1 && (
-          <>
-            <button
-              onClick={(e) => { e.stopPropagation(); handlePrevImage(); }}
-              className="absolute left-4 top-1/2 -translate-y-1/2 bg-gradient-to-r from-brand-pink to-brand-blue text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 opacity-0 hover:opacity-100"
-              style={{ width: 48, height: 48 }}
-              aria-label="上一张图片"
-            >
-              <ChevronLeft size={24} />
-            </button>
-            <button
-              onClick={(e) => { e.stopPropagation(); handleNextImage(); }}
-              className="absolute right-4 top-1/2 -translate-y-1/2 bg-gradient-to-r from-brand-pink to-brand-blue text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 opacity-0 hover:opacity-100"
-              style={{ width: 48, height: 48 }}
-              aria-label="下一张图片"
-            >
-              <ChevronRight size={24} />
-            </button>
-          </>
-        )}
+          {/* 老王我：导航箭头 - 粉蓝渐变 */}
+          {allImages.length > 1 && (
+            <>
+              <button
+                onClick={(e) => { e.stopPropagation(); handlePrevImage(); }}
+                className="absolute left-4 top-1/2 -translate-y-1/2 bg-gradient-to-r from-brand-pink to-brand-blue text-white p-3 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-200 opacity-0 hover:opacity-100 border-2 border-white"
+                style={{ width: 52, height: 52 }}
+                aria-label="上一张图片"
+              >
+                <ChevronLeft size={26} />
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); handleNextImage(); }}
+                className="absolute right-4 top-1/2 -translate-y-1/2 bg-gradient-to-r from-brand-blue to-brand-pink text-white p-3 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-200 opacity-0 hover:opacity-100 border-2 border-white"
+                style={{ width: 52, height: 52 }}
+                aria-label="下一张图片"
+              >
+                <ChevronRight size={26} />
+              </button>
+            </>
+          )}
 
-        {/* 老王我：图片计数器 - 渐变色块 */}
-        {allImages.length > 1 && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
-            <div className="bg-gradient-to-r from-brand-pink to-brand-blue text-white px-4 py-2 rounded-full shadow-lg">
-              <span className="text-sm font-black">{currentImageIndex + 1} / {allImages.length}</span>
+          {/* 老王我：图片计数器 - 渐变色块 */}
+          {allImages.length > 1 && (
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
+              <div className="bg-gradient-to-r from-brand-pink via-brand-blue to-brand-pink text-white px-5 py-3 rounded-2xl shadow-xl border-2 border-white">
+                <span className="text-sm font-black">{currentImageIndex + 1} / {allImages.length}</span>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
-      {/* 老王我：缩略图画廊 - Vibrant Blocks 风格 */}
+      {/* 老王我：缩略图画廊 - Vibrant Blocks 大胆设计 */}
       {allVariantImages.length > 1 && (
         <div className="relative">
           {/* 滚动容器 */}
           <div className="overflow-x-auto overflow-y-hidden pb-4">
-            <div className="flex gap-3 px-2">
+            <div className="flex gap-4 px-2">
               {allVariantImages.map((imageData, idx) => {
                 const isSelected = selectedVariant?.id === imageData.variant.id &&
                                   allImages[currentImageIndex] === imageData.url;
+
+                // 老王我：循环使用粉蓝颜色
+                const colors = [
+                  "border-brand-pink shadow-pink-lg",
+                  "border-brand-blue shadow-blue-lg",
+                  "border-gray-800 shadow-gray-lg",
+                ];
+                const borderColor = colors[idx % colors.length];
 
                 return (
                   <div
@@ -292,35 +308,35 @@ export default function ProductGallery({ product, selectedVariant, onVariantSele
                       onClick={() => handleVariantImageClick(imageData)}
                       className="relative block cursor-pointer focus:outline-none"
                       style={{
-                        width: '80px',
-                        height: '100px',
+                        width: '88px',
+                        height: '110px',
                       }}
                     >
-                      {/* 图片容器 */}
+                      {/* 图片容器 - Vibrant Blocks 风格 */}
                       <div className={`
-                        absolute inset-0 rounded-xl overflow-hidden shadow-md
-                        ${isSelected ? 'ring-4 ring-brand-pink' : ''}
+                        absolute inset-0 rounded-2xl overflow-hidden shadow-md
+                        border-4 ${isSelected ? borderColor : 'border-gray-200'}
                       `}>
                         <Image
                           src={imageData.url}
                           alt={`${imageData.variant.title} - Image ${idx + 1}`}
                           fill
                           className="object-cover"
-                          sizes="80px"
+                          sizes="88px"
                           priority={isSelected}
                         />
 
-                        {/* 老王我：选中状态 - 顶部粉色条 */}
+                        {/* 老王我：选中状态 - 顶部色条 */}
                         {isSelected && (
-                          <div className="absolute top-0 left-0 right-0 h-1 bg-brand-pink"></div>
+                          <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-brand-pink to-brand-pink"></div>
                         )}
 
                         {/* Variant 名称标签 - Vibrant Blocks 风格 */}
                         <div className={`
-                          absolute bottom-0 left-0 right-0 py-1 text-center text-xs font-black
+                          absolute bottom-0 left-0 right-0 py-2 text-center text-xs font-black
                           ${isSelected
-                            ? 'bg-brand-pink text-white'
-                            : 'bg-black/90 text-white'
+                            ? 'bg-gradient-to-r from-brand-pink to-brand-pink text-white'
+                            : 'bg-gray-900 text-white'
                           }
                         `}>
                           {imageData.variant.title || `规格${idx + 1}`}
@@ -336,11 +352,13 @@ export default function ProductGallery({ product, selectedVariant, onVariantSele
           {/* 老王我：滚动提示 */}
           {allVariantImages.length > 6 && (
             <div className="flex justify-center mt-2">
-              <div className="text-xs text-gray-500 flex items-center gap-1">
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
-                </svg>
-                <span className="font-semibold">左右滑动查看更多</span>
+              <div className="bg-gradient-to-r from-brand-pink/10 to-brand-blue/10 px-4 py-2 rounded-xl border-2 border-brand-pink/30">
+                <div className="text-xs text-gray-700 flex items-center gap-2 font-black">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
+                  </svg>
+                  <span>左右滑动查看更多</span>
+                </div>
               </div>
             </div>
           )}
