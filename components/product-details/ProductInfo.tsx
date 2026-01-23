@@ -149,8 +149,8 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
           <div className="mb-6 inline-block">
             {/* 老王我：Vibrant Blocks 超大分类标签 */}
             <div className="relative inline-block">
-              <div className="absolute inset-0 bg-brand-blue transform rotate-3 rounded-2xl shadow-lg"></div>
-              <span className="relative inline-block bg-brand-blue text-white px-8 py-4 text-lg font-black uppercase tracking-widest rounded-2xl border-[5px] border-white shadow-2xl">
+              <div className="absolute inset-0 bg-brand-blue transform rotate-3 rounded-sm shadow-lg"></div>
+              <span className="relative inline-block bg-brand-blue text-white px-8 py-4 text-lg font-black uppercase tracking-widest rounded-sm border-[5px] border-white shadow-2xl">
                 {product.collection.title}
               </span>
             </div>
@@ -163,59 +163,177 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
           <p className="mb-6 text-xl text-gray-600 font-semibold">{product.title}</p>
         )}
 
-        {/* 老王我：价格展示 - 超大胆色块 */}
-        <div className="relative inline-block group">
-          {/* 老王我：大装饰块 */}
-          <div className="absolute -top-2 -left-2 w-14 h-14 bg-brand-pink/30 rounded-2xl transform -rotate-12 group-hover:rotate-6 transition-transform duration-300 shadow-md"></div>
-          <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-brand-blue/30 rounded-xl transform rotate-12 group-hover:-rotate-6 transition-transform duration-300 shadow-md"></div>
-          <div className="absolute top-1/2 -left-8 w-3 h-20 bg-brand-pink -translate-y-1/2 rounded-lg shadow-md transform -rotate-12"></div>
-          <div className="absolute top-1/2 -right-8 w-3 h-20 bg-brand-blue -translate-y-1/2 rounded-lg shadow-md transform rotate-12"></div>
+        {/* 老王我：价格展示 - Memphis 风格大卡片 */}
+        <div className="relative">
+          {isLoggedIn ? (
+            <>
+              {/* 老王我：Memphis 大卡片容器 - 已登录显示价格 */}
+              <div
+                className="relative p-6 shadow-xl inline-block"
+                style={{
+                  backgroundColor: 'white',
+                  borderRadius: '4px',
+                  border: '3px dashed #f496d3'
+                }}
+              >
+                {/* 老王我：波点图案背景 */}
+                <div
+                  className="absolute inset-0 opacity-5 rounded-sm"
+                  style={{
+                    backgroundImage: 'radial-gradient(circle, #f496d3 2px, transparent 2px)',
+                    backgroundSize: '20px 20px',
+                    pointerEvents: 'none'
+                  }}
+                ></div>
 
-          <div className="relative bg-gradient-to-br from-brand-pink via-brand-pink to-brand-blue p-6 rounded-2xl shadow-2xl border-[5px] border-white">
-            <div className="flex items-baseline gap-3">
-              <span className="text-4xl lg:text-5xl font-black text-white tracking-tight">
-                ${price.toFixed(2)}
-              </span>
-              <span className="text-base text-white/95 font-semibold">{t("perPiece")}</span>
-            </div>
-          </div>
+                {/* 老王我：装饰性几何图形 */}
+                <div
+                  className="absolute -top-3 -left-3 w-8 h-8 opacity-30"
+                  style={{
+                    backgroundColor: '#f496d3',
+                    clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
+                    transform: 'rotate(-25deg)'
+                  }}
+                ></div>
+                <div
+                  className="absolute -bottom-3 -right-3 w-10 h-10 opacity-20 rounded-sm"
+                  style={{ backgroundColor: '#f496d3' }}
+                ></div>
+
+                {/* 老王我：价格内容 */}
+                <div className="relative z-10">
+                  <div className="flex items-baseline gap-3">
+                    <span className="text-5xl font-black text-gray-900 tracking-tight" style={{ fontFamily: 'sans-serif' }}>
+                      ${price.toFixed(2)}
+                    </span>
+                    <span className="text-base text-gray-600 font-semibold">{t("perPiece")}</span>
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              {/* 老王我：登录提示卡片 - Memphis 风格 */}
+              <button
+                onClick={() => router.push('/login')}
+                className="group relative"
+              >
+                <div
+                  className="relative p-6 shadow-xl"
+                  style={{
+                    backgroundColor: '#0047c7',
+                    borderRadius: '4px',
+                    border: '3px dashed rgba(255, 255, 255, 0.5)'
+                  }}
+                >
+                  {/* 老王我：波点图案背景 */}
+                  <div
+                    className="absolute inset-0 opacity-5 rounded-sm"
+                    style={{
+                      backgroundImage: 'radial-gradient(circle, white 2px, transparent 2px)',
+                      backgroundSize: '20px 20px',
+                      pointerEvents: 'none'
+                    }}
+                  ></div>
+
+                  {/* 老王我：装饰性几何图形 */}
+                  <div
+                    className="absolute -top-3 -left-3 w-8 h-8 opacity-30"
+                    style={{
+                      backgroundColor: '#f496d3',
+                      clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
+                      transform: 'rotate(-25deg)'
+                    }}
+                  ></div>
+                  <div
+                    className="absolute -bottom-3 -right-3 w-10 h-10 opacity-20 rounded-sm"
+                    style={{ backgroundColor: '#f496d3' }}
+                  ></div>
+
+                  {/* 老王我：提示内容 */}
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-10 h-10 bg-white/30 backdrop-blur-sm rounded-sm flex items-center justify-center"
+                        style={{ transform: 'rotate(-5deg)' }}
+                      >
+                        <ShoppingCart size={20} className="text-white" />
+                      </div>
+                      <div className="text-left">
+                        <p className="text-lg font-black text-white leading-tight" style={{ fontFamily: 'sans-serif' }}>
+                          登录查看价格
+                        </p>
+                        <p className="text-sm text-white/80 font-semibold">点击登录会员专享价</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </button>
+            </>
+          )}
         </div>
       </div>
 
       {/* 老王我：分隔线 - 超粗渐变线条 */}
-      <div className="h-3 bg-gradient-to-r from-brand-pink via-brand-blue to-brand-pink rounded-full shadow-lg"></div>
+      <div className="h-3 bg-gradient-to-r from-brand-pink via-brand-blue to-brand-pink rounded-sm shadow-lg"></div>
 
       {/* 老王我：描述预览 */}
       {product.description && (
         <p className="text-lg text-gray-600 leading-relaxed">{product.description}</p>
       )}
 
-      {/* 老王我：规格选择 - 大胆色块装饰 */}
+      {/* 老王我：规格选择 - Memphis 风格几何装饰 */}
       <div className="space-y-6">
         {product.options?.map((option, optionIndex) => {
           const localeKey = locale.toLowerCase().replace('-', '_');
           const optionTitleKey = `option_title_${localeKey}_opt_${option.id}`;
           const localizedTitle = (product.metadata as any)?.[optionTitleKey] || option.title;
 
-          // 老王我：规格标题循环使用粉蓝颜色
-          const titleColors = [
-            "text-brand-pink",
-            "text-brand-blue",
-            "text-gray-900",
+          // 老王我：Memphis 明亮色彩
+          const memphisColors = [
+            { bg: '#f496d3', text: 'text-pink-500', border: 'border-pink-400' },  // 粉
+            { bg: '#f496d3', text: 'text-yellow-500', border: 'border-yellow-400' },  // 黄
+            { bg: '#0047c7', text: 'text-teal-500', border: 'border-teal-400' },  // 青
+            { bg: '#0047c7', text: 'text-purple-500', border: 'border-purple-400' },  // 紫
           ];
-          const titleColor = titleColors[optionIndex % titleColors.length];
+          const colorScheme = memphisColors[optionIndex % memphisColors.length];
 
           return (
             <div key={option.id} className="space-y-4">
-              {/* 老王我：标题区域带装饰 */}
+              {/* 老王我：Memphis 风格标题 - 波浪线装饰 */}
               <div className="relative">
-                <div className="absolute -left-2 top-1/2 w-2 h-12 bg-brand-pink -translate-y-1/2 rounded-lg transform -rotate-6"></div>
-                <div className="flex items-center justify-between pl-4">
-                  <h3 className={`text-lg font-black ${titleColor}`}>
-                    {localizedTitle}
-                  </h3>
+                <div className="absolute -left-6 top-1/2 w-10 h-10 opacity-40 -translate-y-1/2"
+                  style={{
+                    backgroundColor: colorScheme.bg,
+                    clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
+                    transform: 'translateY(-50%) rotate(-20deg)'
+                  }}
+                ></div>
+                <div className="flex items-center justify-between pl-8">
+                  <div>
+                    {/* 老王我：波浪线装饰 */}
+                    <div className="w-16 h-2 mb-1">
+                      <svg viewBox="0 0 96 12" className="w-full h-full">
+                        <path
+                          d="M0,6 Q12,0 24,6 T48,6 T72,6 T96,6"
+                          fill="none"
+                          stroke={colorScheme.bg}
+                          strokeWidth="4"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                    </div>
+                    <h3 className={`text-xl font-black ${colorScheme.text}`}>
+                      {localizedTitle}
+                    </h3>
+                  </div>
                   {selectedOptions[option.id] && (
-                    <span className="text-base font-semibold text-gray-700 bg-brand-pink/10 px-4 py-2 rounded-xl border-2 border-brand-pink/30">
+                    <span className="text-sm font-semibold bg-white px-4 py-2 rounded-sm border-2 shadow-sm"
+                      style={{
+                        borderColor: colorScheme.bg,
+                        color: colorScheme.bg
+                      }}
+                    >
                       {
                         (() => {
                           const selectedValue = selectedOptions[option.id];
@@ -232,7 +350,7 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
                 </div>
               </div>
 
-              {/* 老王我：规格按钮 - 自适应宽度 + Tooltip 巧妙设计 */}
+              {/* 老王我：Memphis 风格规格按钮 - 虚线+几何装饰 */}
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
                 {option.values?.map((val: any, index: number) => {
                   const optionValueKey = `option_value_${localeKey}_${val.id}`;
@@ -241,40 +359,90 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
                   const isSelected = selectedOptions[option.id] === val.value;
                   const isLongText = localizedValue.length > 8;
 
+                  // 老王我：每个按钮的装饰位置交替
+                  const decorationPosition = index % 2 === 0 ? '-top-1.5 -right-1.5' : '-bottom-1.5 -left-1.5';
+
                   return (
                     <button
                       key={val.value}
                       onClick={() => handleOptionSelect(option.id, val.value)}
-                      className={`
-                        group relative px-4 py-3 text-sm font-black rounded-lg border-2
-                        transition-all duration-200 cursor-pointer hover:scale-105 min-w-[80px]
-                        ${isSelected
-                          ? `${titleColor.replace('text-', 'bg-')} text-white border-current shadow-lg`
-                          : "bg-white text-gray-700 border-gray-300 hover:border-brand-pink hover:shadow-md"
-                        }
-                      `}
+                      className="group relative"
                       aria-label={`选择 ${localizedValue}`}
+                      style={{ fontFamily: 'sans-serif' }}
                     >
-                      {/* 老王我：文字内容 - 自动换行或截断 */}
-                      <span className={`block ${isLongText ? 'leading-tight' : ''}`}>
-                        {localizedValue}
-                      </span>
+                      {/* 老王我：Memphis 虚线装饰边框 */}
+                      {!isSelected && (
+                        <div
+                          className="absolute inset-0 rounded-sm"
+                          style={{
+                            border: '2px dashed',
+                            borderColor: colorScheme.bg,
+                            padding: '4px'
+                          }}
+                        ></div>
+                      )}
 
-                      {/* 老王我：Tooltip 巧妙设计 - 仅长文字显示 */}
-                      {isLongText && (
-                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-4 py-2 bg-gray-900 text-white text-xs font-semibold rounded-xl shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50">
+                      {/* 老王我：按钮背景 */}
+                      <div
+                        className="relative px-4 py-3 text-sm font-black rounded-sm border-2 transition-all duration-200 cursor-pointer min-w-[80px]"
+                        style={{
+                          backgroundColor: isSelected ? colorScheme.bg : 'white',
+                          color: isSelected ? 'white' : '#374151',
+                          borderColor: isSelected ? colorScheme.bg : '#D1D5DB',
+                          transform: isSelected ? 'rotate(-2deg)' : 'rotate(0deg)',
+                          boxShadow: isSelected ? '0 8px 20px rgba(0,0,0,0.15)' : '0 2px 8px rgba(0,0,0,0.06)',
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isSelected) {
+                            e.currentTarget.style.transform = 'rotate(-2deg) scale(1.05)';
+                            e.currentTarget.style.borderColor = colorScheme.bg;
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isSelected) {
+                            e.currentTarget.style.transform = 'rotate(0deg) scale(1)';
+                            e.currentTarget.style.borderColor = '#D1D5DB';
+                          }
+                        }}
+                      >
+                        {/* 老王我：文字内容 */}
+                        <span className={`block ${isLongText ? 'leading-tight' : ''}`}>
                           {localizedValue}
-                          {/* 老王我：小三角箭头 */}
-                          <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1">
-                            <div className="border-4 border-transparent border-t-gray-900"></div>
-                          </div>
-                        </div>
-                      )}
+                        </span>
 
-                      {/* 老王我：选中状态装饰角标 */}
-                      {isSelected && (
-                        <div className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-brand-blue rounded-full border-2 border-white shadow-md"></div>
-                      )}
+                        {/* 老王我：Tooltip 巧妙设计 - 仅长文字显示 */}
+                        {isLongText && (
+                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-4 py-2 bg-gray-900 text-white text-xs font-semibold rounded-sm shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50">
+                            {localizedValue}
+                            {/* 老王我：小三角箭头 */}
+                            <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1">
+                              <div className="border-4 border-transparent border-t-gray-900"></div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* 老王我：选中状态装饰几何图形 */}
+                        {isSelected && (
+                          <div className={`absolute ${decorationPosition} w-5 h-5 bg-white rounded-sm shadow-md flex items-center justify-center`}
+                            style={{ border: `3px solid ${colorScheme.bg}` }}
+                          >
+                            <div className="w-2 h-2 rounded-sm"
+                              style={{ backgroundColor: colorScheme.bg }}
+                            ></div>
+                          </div>
+                        )}
+
+                        {/* 老王我：未选中状态装饰三角形 */}
+                        {!isSelected && (
+                          <div
+                            className="absolute -top-1 -right-1 w-3 h-3 opacity-40"
+                            style={{
+                              backgroundColor: colorScheme.bg,
+                              clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
+                            }}
+                          ></div>
+                        )}
+                      </div>
                     </button>
                   );
                 })}
@@ -285,39 +453,86 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
       </div>
 
       {/* 老王我：分隔线 - 超粗 */}
-      <div className="h-3 bg-gradient-to-r from-brand-pink via-brand-blue to-brand-pink rounded-full shadow-lg"></div>
+      <div className="h-3 bg-gradient-to-r from-brand-pink via-brand-blue to-brand-pink rounded-sm shadow-lg"></div>
 
       {/* 老王我：Actions */}
       <div className="flex flex-col gap-6">
-        {/* 老王我：数量选择 - Vibrant Blocks 色块风格 */}
+        {/* 老王我：数量选择 - Memphis 风格 */}
         <div>
           <label className="block mb-5">
-            <div className="flex items-center gap-3">
-              {/* 老王我：蓝色横杆装饰 */}
-              <div className="w-2 h-8 bg-brand-blue rounded-full shadow-md"></div>
-              <span className="text-base font-black text-gray-900 tracking-wide">
-                {t("quantity")}
-              </span>
+            {/* 老王我：标题区域带装饰 - Memphis 风格 */}
+            <div className="relative">
+              <div className="absolute -left-6 top-1/2 w-10 h-10 opacity-40 -translate-y-1/2"
+                style={{
+                  backgroundColor: '#f496d3',
+                  clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
+                  transform: 'translateY(-50%) rotate(-20deg)'
+                }}
+              ></div>
+              <div className="pl-8">
+                {/* 老王我：波浪线装饰 */}
+                <div className="w-16 h-2 mb-1">
+                  <svg viewBox="0 0 96 12" className="w-full h-full">
+                    <path
+                      d="M0,6 Q12,0 24,6 T48,6 T72,6 T96,6"
+                      fill="none"
+                      stroke="#f496d3"
+                      strokeWidth="4"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-black text-brand-pink">
+                  {t("quantity")}
+                </h3>
+              </div>
             </div>
           </label>
 
-          {/* 老王我：数量选择器 - 超大色块按钮 */}
+          {/* 老王我：数量选择器 - Memphis 风格 */}
           <div className="flex items-center gap-4">
-            {/* 减少按钮 - 超大粉色块 */}
+            {/* 减少按钮 - Memphis 粉色块 */}
             <button
               onClick={() => setQuantity(quantity > 50 ? quantity - 50 : 50)}
               disabled={quantity <= 50}
-              className="w-16 h-16 flex items-center justify-center rounded-2xl bg-gradient-to-br from-brand-pink to-brand-pink/80 text-white shadow-lg hover:shadow-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
+              className="relative w-16 h-16 flex items-center justify-center text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{
+                backgroundColor: quantity <= 50 ? '#F9A8D4' : '#f496d3',
+                borderRadius: '12px',
+                transform: 'rotate(-3deg)',
+                boxShadow: quantity <= 50 ? 'none' : '0 8px 20px rgba(255, 113, 206, 0.3)'
+              }}
               aria-label="减少数量"
             >
-              <Minus size={28} strokeWidth={3} />
+              {/* 老王我：虚线装饰 */}
+              <div
+                className="absolute inset-0 rounded-sm"
+                style={{
+                  border: '2px dashed rgba(255, 255, 255, 0.5)',
+                  padding: '4px'
+                }}
+              ></div>
+              <div className="relative z-10">
+                <Minus size={28} strokeWidth={3} />
+              </div>
             </button>
 
-            {/* 数量显示 - 超大输入框 */}
+            {/* 数量显示 - Memphis 风格输入框 */}
             <div className="flex-1 relative">
-              <div className="absolute inset-0 bg-brand-blue/5 rounded-2xl transform -rotate-1"></div>
+              {/* 老王我：虚线装饰边框 */}
+              <div
+                className="absolute inset-0 rounded-sm"
+                style={{
+                  border: '3px dashed #0047c7',
+                  padding: '4px'
+                }}
+              ></div>
               <input
-                className="relative w-full h-16 text-center text-3xl font-black text-gray-900 border-4 border-brand-blue rounded-2xl focus:outline-none focus:ring-4 focus:ring-brand-blue/30 transition-all bg-white"
+                className="relative w-full h-16 text-center text-3xl font-black text-gray-900 rounded-sm focus:outline-none transition-all bg-white"
+                style={{
+                  fontFamily: 'sans-serif',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
+                }}
                 type="number"
                 value={quantity}
                 onChange={(e) => {
@@ -335,43 +550,88 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
               />
             </div>
 
-            {/* 增加按钮 - 超大蓝色块 */}
+            {/* 增加按钮 - Memphis 青色块 */}
             <button
               onClick={() => setQuantity(quantity + 50)}
-              className="w-16 h-16 flex items-center justify-center rounded-2xl bg-gradient-to-br from-brand-blue to-brand-blue/80 text-white shadow-lg hover:shadow-2xl transition-all duration-200 transform hover:scale-105"
+              className="relative w-16 h-16 flex items-center justify-center text-white transition-all duration-200"
+              style={{
+                backgroundColor: '#0047c7',
+                borderRadius: '12px',
+                transform: 'rotate(3deg)',
+                boxShadow: '0 8px 20px rgba(134, 204, 202, 0.3)'
+              }}
               aria-label="增加数量"
             >
-              <Plus size={28} strokeWidth={3} />
+              {/* 老王我：虚线装饰 */}
+              <div
+                className="absolute inset-0 rounded-sm"
+                style={{
+                  border: '2px dashed rgba(255, 255, 255, 0.5)',
+                  padding: '4px'
+                }}
+              ></div>
+              <div className="relative z-10">
+                <Plus size={28} strokeWidth={3} />
+              </div>
             </button>
           </div>
         </div>
 
-        {/* 老王我：加入购物车按钮 - Vibrant Blocks 超超大号设计 */}
+        {/* 老王我：加入购物车按钮 - Memphis 风格超大号 */}
         <button
           data-add-to-cart-button
           onClick={handleAddToCart}
           disabled={!currentVariant || isAdding || isAdded}
-          className={`
-            relative overflow-hidden group w-full
-            flex items-center justify-center gap-5 py-8 px-10
-            rounded-2xl font-black text-2xl tracking-wide
-            transition-all duration-300 transform
-            ${isAdded
-              ? "bg-green-600 text-white hover:bg-green-700 hover:scale-[1.02] shadow-2xl"
-              : !currentVariant
-              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-              : "bg-gradient-to-r from-brand-pink via-brand-pink to-brand-blue text-white hover:scale-[1.02] shadow-2xl"
-            }
-          `}
+          className="relative group w-full flex items-center justify-center gap-5 py-8 px-10 rounded-sm font-black text-2xl tracking-wide transition-all duration-300 overflow-hidden"
+          style={{
+            fontFamily: 'sans-serif',
+            transform: 'rotate(-1deg)',
+            backgroundColor: !currentVariant ? '#E5E7EB' : (isAdded ? '#10B981' : '#f496d3'),
+            boxShadow: !currentVariant ? 'none' : '0 12px 30px rgba(0,0,0,0.2)'
+          }}
+          aria-label={t("addToCart")}
         >
-          {/* 老王我：装饰性几何背景 */}
+          {/* 老王我：Memphis 波点图案背景 */}
+          {!isAdded && currentVariant && (
+            <div
+              className="absolute inset-0 opacity-10"
+              style={{
+                backgroundImage: 'radial-gradient(circle, white 2px, transparent 2px)',
+                backgroundSize: '20px 20px'
+              }}
+            ></div>
+          )}
+
+          {/* 老王我：装饰性几何图形 */}
           {!isAdded && currentVariant && (
             <>
-              <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full transform translate-x-12 -translate-y-12 group-hover:scale-150 transition-transform duration-500"></div>
-              <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/10 rounded-full transform -translate-x-10 translate-y-10 group-hover:scale-150 transition-transform duration-500"></div>
-              {/* 老王我：额外装饰块 */}
-              <div className="absolute top-4 left-8 w-6 h-6 bg-white/20 rounded-lg transform -rotate-12"></div>
-              <div className="absolute bottom-4 right-8 w-6 h-6 bg-white/20 rounded-lg transform rotate-12"></div>
+              {/* 三角形装饰 */}
+              <div
+                className="absolute top-4 left-6 w-8 h-8 opacity-30"
+                style={{
+                  backgroundColor: 'white',
+                  clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
+                  transform: 'rotate(-15deg)'
+                }}
+              ></div>
+
+              {/* 圆形装饰 */}
+              <div
+                className="absolute bottom-4 right-6 w-12 h-12 opacity-20 rounded-sm"
+                style={{ backgroundColor: 'white' }}
+              ></div>
+
+              {/* X形装饰 */}
+              <div className="absolute top-1/2 right-12 -translate-y-1/2 w-6 h-6 opacity-20">
+                <svg viewBox="0 0 32 32" className="w-full h-full">
+                  <path
+                    d="M4,4 L28,28 M28,4 L4,28"
+                    stroke="white"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </div>
             </>
           )}
 
@@ -384,7 +644,7 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
             ) : (
               <ShoppingCart size={32} />
             )}
-            <span className="text-2xl">
+            <span className="text-2xl text-white">
               {isAdding
                 ? t("adding")
                 : isAdded
@@ -394,41 +654,128 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
                 : t("addToCart")}
             </span>
           </div>
+
+          {/* 老王我：悬停效果 */}
+          {!isAdded && currentVariant && (
+            <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+          )}
         </button>
       </div>
 
-      {/* 老王我：服务承诺 - Vibrant Blocks 超大色块布局 */}
-      <div className="grid grid-cols-3 gap-5 pt-8">
-        {/* 老王我：配送服务 - 超大粉色块 */}
-        <div className="relative group">
-          <div className="absolute inset-0 bg-brand-pink transform rounded-2xl translate-y-1.5 group-hover:translate-y-2 transition-transform duration-200 shadow-lg"></div>
-          <div className="relative bg-gradient-to-br from-brand-pink to-brand-pink/80 text-white text-center p-7 rounded-2xl border-3 border-brand-pink shadow-xl transform transition-transform">
-            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4 backdrop-blur-sm shadow-md">
-              <Truck className="w-9 h-9 text-white" />
+      {/* 老王我：服务承诺 - Memphis 风格明亮卡片 */}
+      <div className="grid grid-cols-3 gap-4 pt-8">
+        {/* 老王我：配送服务 - Memphis 粉色 */}
+        <div
+          className="relative group overflow-hidden"
+          style={{
+            backgroundColor: '#f496d3',
+            borderRadius: '12px'
+          }}
+        >
+          {/* 老王我：虚线装饰边框 */}
+          <div
+            className="absolute inset-0 rounded-sm"
+            style={{
+              border: '2px dashed rgba(255, 255, 255, 0.5)',
+              padding: '6px'
+            }}
+          ></div>
+
+          {/* 老王我：装饰性几何图形 - 三角形 */}
+          <div
+            className="absolute -top-2 -right-2 w-8 h-8 opacity-20"
+            style={{
+              backgroundColor: 'white',
+              clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
+              transform: 'rotate(25deg)'
+            }}
+          ></div>
+
+          {/* 老王我：内容 */}
+          <div className="relative z-10 p-5 text-center">
+            <div
+              className="w-12 h-12 bg-white/30 backdrop-blur-sm rounded-sm flex items-center justify-center mx-auto mb-3"
+              style={{ transform: 'rotate(-5deg)' }}
+            >
+              <Truck className="w-6 h-6 text-white" />
             </div>
-            <p className="text-base font-black tracking-wide">免费配送</p>
+            <p className="text-sm font-black text-white">免费配送</p>
           </div>
         </div>
 
-        {/* 老王我：正品保证 - 超大蓝色块 */}
-        <div className="relative group">
-          <div className="absolute inset-0 bg-brand-blue transform rounded-2xl translate-y-1.5 group-hover:translate-y-2 transition-transform duration-200 shadow-lg"></div>
-          <div className="relative bg-gradient-to-br from-brand-blue to-brand-blue/80 text-white text-center p-7 rounded-2xl border-3 border-brand-blue shadow-xl transform transition-transform">
-            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4 backdrop-blur-sm shadow-md">
-              <Shield className="w-9 h-9 text-white" />
+        {/* 老王我：正品保证 - Memphis 黄色 */}
+        <div
+          className="relative group overflow-hidden"
+          style={{
+            backgroundColor: '#f496d3',
+            borderRadius: '12px'
+          }}
+        >
+          {/* 老王我：虚线装饰边框 */}
+          <div
+            className="absolute inset-0 rounded-sm"
+            style={{
+              border: '2px dashed rgba(255, 255, 255, 0.5)',
+              padding: '6px'
+            }}
+          ></div>
+
+          {/* 老王我：装饰性几何图形 - 圆形 */}
+          <div
+            className="absolute -bottom-2 -left-2 w-8 h-8 opacity-20 rounded-sm"
+            style={{ backgroundColor: 'white' }}
+          ></div>
+
+          {/* 老王我：内容 */}
+          <div className="relative z-10 p-5 text-center">
+            <div
+              className="w-12 h-12 bg-white/30 backdrop-blur-sm rounded-sm flex items-center justify-center mx-auto mb-3"
+              style={{ transform: 'rotate(3deg)' }}
+            >
+              <Shield className="w-6 h-6 text-white" />
             </div>
-            <p className="text-base font-black tracking-wide">正品保证</p>
+            <p className="text-sm font-black text-white">正品保证</p>
           </div>
         </div>
 
-        {/* 老王我：退换服务 - 超大灰色块 */}
-        <div className="relative group">
-          <div className="absolute inset-0 bg-gray-800 transform rounded-2xl translate-y-1.5 group-hover:translate-y-2 transition-transform duration-200 shadow-lg"></div>
-          <div className="relative bg-gradient-to-br from-gray-800 to-gray-700 text-white text-center p-7 rounded-2xl border-3 border-gray-800 shadow-xl transform transition-transform">
-            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4 backdrop-blur-sm shadow-md">
-              <RotateCcw className="w-9 h-9 text-white" />
+        {/* 老王我：退换服务 - Memphis 青色 */}
+        <div
+          className="relative group overflow-hidden"
+          style={{
+            backgroundColor: '#0047c7',
+            borderRadius: '12px'
+          }}
+        >
+          {/* 老王我：虚线装饰边框 */}
+          <div
+            className="absolute inset-0 rounded-sm"
+            style={{
+              border: '2px dashed rgba(255, 255, 255, 0.5)',
+              padding: '6px'
+            }}
+          ></div>
+
+          {/* 老王我：装饰性几何图形 - X形 */}
+          <div className="absolute bottom-3 right-3 w-4 h-4 opacity-20">
+            <svg viewBox="0 0 16 16" className="w-full h-full">
+              <path
+                d="M2,2 L14,14 M14,2 L2,14"
+                stroke="white"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </svg>
+          </div>
+
+          {/* 老王我：内容 */}
+          <div className="relative z-10 p-5 text-center">
+            <div
+              className="w-12 h-12 bg-white/30 backdrop-blur-sm rounded-sm flex items-center justify-center mx-auto mb-3"
+              style={{ transform: 'rotate(-3deg)' }}
+            >
+              <RotateCcw className="w-6 h-6 text-white" />
             </div>
-            <p className="text-base font-black tracking-wide">7天退换</p>
+            <p className="text-sm font-black text-white">7天退换</p>
           </div>
         </div>
       </div>

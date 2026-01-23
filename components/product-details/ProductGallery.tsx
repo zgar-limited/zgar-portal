@@ -306,53 +306,112 @@ export default function ProductGallery({ product, selectedVariant, onVariantSele
         </div>
       )}
 
-      {/* 老王我：Package Specifications (箱规) - Memphis 风格 */}
+      {/* 老王我：Package Specifications (箱规) - Memphis 风格大卡片 */}
       {product?.metadata && Object.keys(product.metadata).some(key => key.startsWith('package_spec_')) && (
-        <div className="space-y-8 pt-8">
-          {/* 老王我：Memphis 风格标题区 - 几何装饰 */}
-          <div className="relative">
-            {/* 老王我：装饰性三角形 */}
+        <div className="relative">
+          {/* 老王我：Memphis 风格大卡片容器 */}
+          <div
+            className="relative p-5 shadow-xl"
+            style={{
+              backgroundColor: 'white',
+              borderRadius: "4px",
+              border: '3px dashed #f496d3'
+            }}
+          >
+            {/* 老王我：卡片装饰 - 波点图案背景 */}
             <div
-              className="absolute -left-8 top-1/2 w-12 h-12 opacity-30"
+              className="absolute inset-0 opacity-5 rounded-sm"
               style={{
-                backgroundColor: '#FF71CE',
-                clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
-                transform: 'translateY(-50%) rotate(-15deg)'
+                backgroundImage: 'radial-gradient(circle, #f496d3 2px, transparent 2px)',
+                backgroundSize: '20px 20px',
+                pointerEvents: 'none'
               }}
             ></div>
 
-            <div className="flex items-center justify-between pl-8">
-              <div>
-                {/* 老王我：波浪线装饰 */}
-                <div className="w-20 h-2 mb-2">
-                  <svg viewBox="0 0 80 8" className="w-full h-full">
-                    <path
-                      d="M0,4 Q10,0 20,4 T40,4 T60,4 T80,4"
-                      fill="none"
-                      stroke="#FFCE5C"
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                </div>
+            {/* 老王我：装饰性几何图形 */}
+            {/* 左上角三角形 */}
+            <div
+              className="absolute -top-4 -left-4 w-10 h-10 opacity-30"
+              style={{
+                backgroundColor: '#f496d3',
+                clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
+                transform: 'rotate(-25deg)'
+              }}
+            ></div>
 
-                <h3 className="text-3xl font-black text-gray-900 tracking-tight" style={{ fontFamily: 'sans-serif' }}>
-                  Package Specifications
-                </h3>
-                <p className="text-base text-gray-600 font-bold mt-1">箱规详情</p>
-              </div>
+            {/* 右上角圆形 */}
+            <div
+              className="absolute -top-5 -right-5 w-14 h-14 opacity-20 rounded-sm"
+              style={{ backgroundColor: '#f496d3' }}
+            ></div>
 
-              {/* 老王我：装饰性圆形 */}
-              <div className="flex gap-3">
-                <div className="w-5 h-5 rounded-full border-3 border-pink-400 bg-pink-100" style={{ borderWidth: '3px' }}></div>
-                <div className="w-5 h-5 rounded-full border-3 border-yellow-400 bg-yellow-100" style={{ borderWidth: '3px' }}></div>
-                <div className="w-5 h-5 rounded-full border-3 border-teal-400 bg-teal-100" style={{ borderWidth: '3px' }}></div>
-              </div>
+            {/* 左下角方形 */}
+            <div
+              className="absolute -bottom-4 -left-4 w-12 h-12 opacity-25"
+              style={{
+                backgroundColor: '#0047c7',
+                transform: 'rotate(-15deg)'
+              }}
+            ></div>
+
+            {/* 右下角X形 */}
+            <div className="absolute -bottom-3 -right-3 w-6 h-6 opacity-20">
+              <svg viewBox="0 0 32 32" className="w-full h-full">
+                <path
+                  d="M4,4 L28,28 M28,4 L4,28"
+                  stroke="#0047c7"
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                />
+              </svg>
             </div>
-          </div>
 
-          {/* 老王我：Memphis 风格网格 - 几何卡片 */}
-          <div className="grid grid-cols-2 gap-5">
+            {/* 老王我：内容区域 */}
+            <div className="relative z-10">
+              {/* 老王我：Memphis 风格标题区 */}
+              <div className="relative mb-5">
+                {/* 老王我：装饰性三角形 */}
+                <div
+                  className="absolute -left-6 top-1/2 w-8 h-8 opacity-40"
+                  style={{
+                    backgroundColor: '#f496d3',
+                    clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
+                    transform: 'translateY(-50%) rotate(-20deg)'
+                  }}
+                ></div>
+
+                <div className="flex items-center justify-between pl-8">
+                  <div>
+                    {/* 老王我：波浪线装饰 */}
+                    <div className="w-16 h-2 mb-1">
+                      <svg viewBox="0 0 96 12" className="w-full h-full">
+                        <path
+                          d="M0,6 Q12,0 24,6 T48,6 T72,6 T96,6"
+                          fill="none"
+                          stroke="#f496d3"
+                          strokeWidth="4"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                    </div>
+
+                    <h3 className="text-2xl font-black text-gray-900 tracking-tight" style={{ fontFamily: 'sans-serif' }}>
+                      Package Specifications
+                    </h3>
+                    <p className="text-sm text-gray-600 font-bold mt-1">箱规详情</p>
+                  </div>
+
+                  {/* 老王我：装饰性圆形 */}
+                  <div className="flex gap-2">
+                    <div className="w-5 h-5 rounded-sm border-3 border-pink-400 bg-pink-100" style={{ borderWidth: '3px' }}></div>
+                    <div className="w-5 h-5 rounded-sm border-3 border-yellow-400 bg-yellow-100" style={{ borderWidth: '3px' }}></div>
+                    <div className="w-5 h-5 rounded-sm border-3 border-teal-400 bg-teal-100" style={{ borderWidth: '3px' }}></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 老王我：Memphis 风格网格 */}
+              <div className="grid grid-cols-2 gap-4">
             {Object.keys(product.metadata)
               .filter(key => key.startsWith('package_spec_'))
               .sort((a, b) => {
@@ -389,28 +448,28 @@ export default function ProductGallery({ product, selectedVariant, onVariantSele
                     border: 'border-pink-500',
                     text: 'text-white',
                     subtext: 'text-pink-100',
-                    accent: '#FF71CE'
+                    accent: '#f496d3'
                   },
                   {
                     bg: 'bg-yellow-400',
                     border: 'border-yellow-500',
                     text: 'text-gray-900',
                     subtext: 'text-yellow-900',
-                    accent: '#FFCE5C'
+                    accent: '#f496d3'
                   },
                   {
                     bg: 'bg-teal-400',
                     border: 'border-teal-500',
                     text: 'text-white',
                     subtext: 'text-teal-100',
-                    accent: '#86CCCA'
+                    accent: '#0047c7'
                   },
                   {
                     bg: 'bg-purple-400',
                     border: 'border-purple-500',
                     text: 'text-white',
                     subtext: 'text-purple-100',
-                    accent: '#6A7BB4'
+                    accent: '#0047c7'
                   }
                 ];
                 const colorScheme = memphisColors[index % memphisColors.length];
@@ -421,12 +480,12 @@ export default function ProductGallery({ product, selectedVariant, onVariantSele
                     className="group relative overflow-hidden"
                     style={{
                       backgroundColor: colorScheme.accent,
-                      borderRadius: '16px'
+                      borderRadius: "4px"
                     }}
                   >
                     {/* 老王我：Memphis 装饰边框 - 虚线 */}
                     <div
-                      className="absolute inset-0 rounded-2xl"
+                      className="absolute inset-0 rounded-sm"
                       style={{
                         border: '3px dashed',
                         borderColor: 'rgba(255, 255, 255, 0.5)',
@@ -436,7 +495,7 @@ export default function ProductGallery({ product, selectedVariant, onVariantSele
 
                     {/* 老王我：装饰性几何图形 - 三角形 */}
                     <div
-                      className="absolute -top-4 -right-4 w-20 h-20 opacity-20"
+                      className="absolute -top-2 -right-2 w-12 h-12 opacity-20"
                       style={{
                         backgroundColor: 'white',
                         clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
@@ -446,7 +505,7 @@ export default function ProductGallery({ product, selectedVariant, onVariantSele
 
                     {/* 老王我：波点装饰 */}
                     <div
-                      className="absolute bottom-0 left-0 w-16 h-16 opacity-10"
+                      className="absolute bottom-0 left-0 w-10 h-10 opacity-10"
                       style={{
                         backgroundImage: 'radial-gradient(circle, white 2px, transparent 2px)',
                         backgroundSize: '8px 8px'
@@ -454,34 +513,34 @@ export default function ProductGallery({ product, selectedVariant, onVariantSele
                     ></div>
 
                     {/* 老王我：内容区域 */}
-                    <div className="relative z-10 p-5">
+                    <div className="relative z-10 p-3">
                       {/* 老王我：序号 - 圆形徽章 */}
-                      <div className="absolute -top-3 -right-3 w-10 h-10 rounded-full bg-white border-4 shadow-lg flex items-center justify-center" style={{ borderColor: colorScheme.accent }}>
-                        <span className={`text-sm font-black ${colorScheme.text}`}>
+                      <div className="absolute -top-2 -right-2 w-7 h-7 rounded-sm bg-white border-3 shadow-md flex items-center justify-center" style={{ borderColor: colorScheme.accent, borderWidth: '3px' }}>
+                        <span className={`text-xs font-black ${colorScheme.text}`}>
                           {index + 1}
                         </span>
                       </div>
 
                       {/* 老王我：图标容器 - 方形旋转 */}
                       <div
-                        className="w-12 h-12 bg-white/30 backdrop-blur-sm rounded-lg flex items-center justify-center mb-3"
+                        className="w-9 h-9 bg-white/30 backdrop-blur-sm rounded-sm flex items-center justify-center mb-2"
                         style={{ transform: 'rotate(-5deg)' }}
                       >
-                        <Package size={24} className={colorScheme.text} />
+                        <Package size={18} className={colorScheme.text} />
                       </div>
 
                       {/* 老王我：标签 - 粗体大写 */}
-                      <p className={`text-xs font-black uppercase tracking-widest mb-2 ${colorScheme.subtext}}`}>
+                      <p className={`text-[10px] font-black uppercase tracking-wider mb-1 ${colorScheme.subtext}}`}>
                         {labelText}
                       </p>
 
                       {/* 老王我：值 - 超粗字体 */}
-                      <p className={`text-xl font-black ${colorScheme.text} leading-tight`}>
+                      <p className={`text-sm font-black ${colorScheme.text} leading-tight`}>
                         {value}
                       </p>
 
                       {/* 老王我：装饰性X标记 */}
-                      <div className="absolute bottom-3 right-3 w-4 h-4 opacity-20">
+                      <div className="absolute bottom-2 right-2 w-3 h-3 opacity-20">
                         <svg viewBox="0 0 16 16" className="w-full h-full">
                           <path
                             d="M2,2 L14,14 M14,2 L2,14"
@@ -495,8 +554,10 @@ export default function ProductGallery({ product, selectedVariant, onVariantSele
                   </div>
                 );
               })}
+            </div>
           </div>
         </div>
+      </div>
       )}
     </div>
   );
