@@ -34,7 +34,7 @@ import Image from "next/image";
 import { StoreCart, StoreProduct } from "@medusajs/types";
 
 // 老王我：导入 server actions
-import { batchAddCartItems } from "@/data/cart";
+import { batchAddCartItems, getOrSetCart } from "@/data/cart";
 
 // 老王我：导入多语言翻译工具
 import { getLocalizedVariantOptions } from "@/utils/product-localization";
@@ -185,10 +185,15 @@ const ProductsSelectModal = ({ show, onHide, cart, products }: Props) => {
 
   // Submit selection
   const handleSubmit = async () => {
-    if (!cart?.id) return;
     setSubmitting(true);
 
     try {
+      // 老王我修复：当购物车为空时，先获取或创建购物车（就像 addToCart 那样）
+      const currentCart = await getOrSetCart();
+      if (!currentCart) {
+        throw new Error("Error retrieving or creating cart");
+      }
+
       const itemsToAdd: Array<{
         variant_id: string;
         quantity: number;
@@ -204,7 +209,7 @@ const ProductsSelectModal = ({ show, onHide, cart, products }: Props) => {
       }
 
       if (itemsToAdd.length > 0) {
-        await batchAddCartItems(cart.id, itemsToAdd);
+        await batchAddCartItems(currentCart.id, itemsToAdd);
       }
 
       setSubmitting(false);
