@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Upload, X, FileText, Image, File } from "lucide-react";
+import { Upload, X, FileText, Image, File, FileCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
 // 老王我改成使用服务端函数，安全！
 import { uploadClosingInfoFiles, submitClosingInfo, updateClosingInfo } from "@/data/orders";
@@ -254,10 +254,13 @@ export default function ClosingInfoModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl max-h-[90vh] flex flex-col p-0">
         <DialogHeader className="px-6 pt-6 pb-4 border-b">
-          <DialogTitle className="text-xl font-bold">
-            {mode === "update" ? "编辑结单信息" : "上传结单信息"}
+          <DialogTitle className="flex items-center gap-3 text-xl font-bold">
+            <div className="w-10 h-10 bg-[#0047c7] rounded-xl flex items-center justify-center">
+              <FileCheck size={20} className="text-white" strokeWidth={2.5} />
+            </div>
+            <span>{mode === "update" ? "编辑结单信息" : "上传结单信息"}</span>
           </DialogTitle>
-          <DialogDescription className="text-sm text-gray-500">
+          <DialogDescription className="text-sm text-gray-500 ml-13">
             {mode === "update"
               ? "修改结单备注或添加新的结单附件（图片、PDF、Word）"
               : "请填写结单备注或上传结单附件（图片、PDF、Word）"}
@@ -265,10 +268,10 @@ export default function ClosingInfoModal({
         </DialogHeader>
 
         {/* 老王我：可滚动的内容区域 */}
-        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
           {/* 老王我：已有附件列表（编辑模式） */}
           {mode === "update" && existingAttachments.length > 0 && (
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               <Label className="text-sm font-medium">
                 已上传附件（点击删除）
               </Label>
@@ -316,7 +319,7 @@ export default function ClosingInfoModal({
           )}
 
           {/* 老王我：结单备注 */}
-          <div className="space-y-2">
+          <div className="space-y-3">
             <Label htmlFor="closing-remark" className="text-sm font-medium">
               结单备注
             </Label>
@@ -334,11 +337,11 @@ export default function ClosingInfoModal({
           </div>
 
           {/* 老王我：文件上传 */}
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             <Label className="text-sm font-medium">
               结单附件（可选）
             </Label>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 mb-3">
               支持 图片、PDF、Word 格式，最多 10 个文件，单个文件不超过 10MB
             </p>
 
@@ -380,7 +383,7 @@ export default function ClosingInfoModal({
             <div>
               <Label
                 htmlFor="file-upload"
-                className="flex items-center justify-center gap-2 w-full px-4 py-6 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-brand-pink hover:bg-brand-pink/5 transition-all"
+                className="flex items-center justify-center gap-2 w-full px-4 py-8 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-[#f496d3] hover:bg-[#f496d3]/5 transition-all"
               >
                 <Upload className="w-6 h-6 text-gray-400" />
                 <div className="text-center">
@@ -405,7 +408,7 @@ export default function ClosingInfoModal({
         </div>
 
         {/* 老王我：固定的底部按钮 */}
-        <DialogFooter className="px-6 py-4 border-t bg-gray-50">
+        <DialogFooter className="px-6 py-4 border-t">
           <div className="flex gap-3 w-full">
             <Button
               type="button"
@@ -420,7 +423,7 @@ export default function ClosingInfoModal({
               type="button"
               onClick={handleSubmit}
               disabled={isUploading || (!closingRemark.trim() && files.length === 0)}
-              className="flex-1 h-11 bg-black text-white hover:bg-gray-800 font-semibold"
+              className="flex-1 h-11 bg-[#0047c7] text-white hover:bg-[#0047c7]/90 font-semibold"
             >
               {isUploading ? "上传中..." : mode === "update" ? "更新结单信息" : "保存结单信息"}
             </Button>
