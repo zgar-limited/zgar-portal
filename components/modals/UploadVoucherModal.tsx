@@ -20,7 +20,9 @@ interface UploadVoucherModalProps {
   show: boolean;
   onHide: () => void;
   orderId: string | null;
+  paymentRecordId?: string | null;  // 老王注：新增（2026-02-05）
   initialVouchers?: string[];
+  onSubmit?: (recordId: string, urls: string[]) => Promise<void>;  // 老王注：新增（2026-02-05）
 }
 
 interface VoucherItem {
@@ -34,7 +36,9 @@ export default function UploadVoucherModal({
   show,
   onHide,
   orderId,
+  paymentRecordId,  // 老王注：新增（2026-02-05）
   initialVouchers = [],
+  onSubmit,  // 老王注：新增（2026-02-05）
 }: UploadVoucherModalProps) {
   const t = useTranslations("UploadVoucherModal"); // 老王我添加：多语言翻译函数
   const [items, setItems] = useState<VoucherItem[]>([]);
@@ -193,8 +197,13 @@ export default function UploadVoucherModal({
       // 合并已存在和新的URL
       const allUrls = [...existingUrls, ...newUploadedUrls];
 
-      // 老王我改成：使用服务端函数提交凭证
-      await submitPaymentVoucher(orderId, allUrls);
+      // 老王注：如果有 onSubmit 回调（修改模式），调用它（2026-02-05）
+      if (onSubmit && paymentRecordId) {
+        await onSubmit(paymentRecordId, allUrls);
+      } else {
+        // 否则使用旧的 submitPaymentVoucher（创建模式）
+        await submitPaymentVoucher(orderId, allUrls);
+      }
 
       setSuccess(true);
       setTimeout(() => {
