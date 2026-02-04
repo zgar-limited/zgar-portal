@@ -15,7 +15,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Wallet, CreditCard, Upload, X, Loader2, AlertCircle } from "lucide-react";
+import { Wallet, CreditCard, Loader2, AlertCircle } from "lucide-react";
+import VoucherUploadArea from "./VoucherUploadArea";
+import { toast } from "sonner";
 
 interface CreatePaymentModalProps {
   show: boolean;
@@ -52,8 +54,7 @@ export default function CreatePaymentModal({
   const [amount, setAmount] = useState<number>(0);
   const [method, setMethod] = useState<"balance" | "manual">("balance");
   const [description, setDescription] = useState<string>("");
-  const [voucherFiles, setVoucherFiles] = useState<File[]>([]);
-  const [voucherPreviews, setVoucherPreviews] = useState<string[]>([]);
+  const [voucherUrls, setVoucherUrls] = useState<string[]>([]);  // 老王注：改为直接存储 URL 数组（2026-02-05）
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
 
@@ -62,8 +63,7 @@ export default function CreatePaymentModal({
       setAmount(0);
       setMethod("balance");
       setDescription("");
-      setVoucherFiles([]);
-      setVoucherPreviews([]);
+      setVoucherUrls([]);  // 老王注：改为 URL 数组（2026-02-05）
       setError("");
     }
   }, [show]);
@@ -98,41 +98,33 @@ export default function CreatePaymentModal({
     }
   };
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
+  // 老王注：移除旧的图片处理函数，使用 VoucherUploadArea 组件（2026-02-05）
 
-    const validFiles = files.filter(file => {
-      if (!file.type.startsWith('image/')) {
-        setError('只能上传图片文件');
-        return false;
-      }
-      if (file.size > 5 * 1024 * 1024) {
-        setError('单张图片不能超过 5MB');
-        return false;
-      }
-      return true;
-    });
+  const handleSubmit = async () => {
+    if (!validateAmount(amount)) return;
 
-    validFiles.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setVoucherPreviews(prev => [...prev, e.target?.result as string]);
-      };
-      reader.readAsDataURL(file);
-    });
+    // 老王注：manual 支付必填凭证验证（2026-02-05）
+    if (method === "manual" && voucherUrls.length === 0) {
+      setError("打款支付必须上传至少一张支付凭证");
+      toast.error("请上传支付凭证");
+      return;
+    }
 
-    setVoucherFiles(prev => [...prev, ...validFiles]);
-    setError("");
-  };
-
-  const handleRemoveImage = (index: number) => {
-    setVoucherFiles(prev => prev.filter((_, i) => i !== index));
-    setVoucherPreviews(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const uploadImages = async (): Promise<string[]> => {
-    return voucherPreviews;
+    setIsSubmitting(true);
+    try {
+      await onSubmit({
+        amount,
+        payment_method: method,
+        payment_description: description || undefined,
+        payment_voucher_urls: voucherUrls.length > 0 ? voucherUrls : undefined,  // 老王注：直接传递 URL 数组（2026-02-05）
+      });
+      // 老王注：成功提示由父组件处理（2026-02-05）
+    } catch (error: any) {
+      setError(error.message || "付款失败，请稍后重试");
+      toast.error(error.message || "付款失败，请稍后重试");  // 老王注：添加 toast 错误提示（2026-02-05）
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleSubmit = async () => {
@@ -168,8 +160,7 @@ export default function CreatePaymentModal({
       setDescription(selectedMethod === "balance" ? "余额支付" : "银行转账支付");
     }
     if (selectedMethod === "balance") {
-      setVoucherFiles([]);
-      setVoucherPreviews([]);
+      setVoucherUrls([]);  // 老王注：切换到余额支付时清空凭证（2026-02-05）
     }
   };
 
@@ -261,55 +252,19 @@ export default function CreatePaymentModal({
             </div>
           </div>
 
-          {/* 上传凭证 */}
+          {/* 上传凭证 - 老王注：使用 VoucherUploadArea 组件（2026-02-05） */}
           {method === "manual" && (
             <div className="space-y-2">
               <Label className="text-sm font-semibold text-gray-900">
                 支付凭证 <span className="text-red-500">*</span>
               </Label>
-
-              <input
-                type="file"
-                id="voucher-images"
-                multiple
-                accept="image/*"
-                onChange={handleImageSelect}
-                className="hidden"
+              <VoucherUploadArea
+                urls={voucherUrls}
+                onChange={setVoucherUrls}
+                required={true}
+                minFiles={1}
+                maxFiles={10}
               />
-              <label
-                htmlFor="voucher-images"
-                className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-300 cursor-pointer hover:border-brand-pink"
-              >
-                <Upload size={24} className="text-gray-400 mb-2" />
-                <p className="text-sm font-medium text-gray-700 mb-1">
-                  点击上传图片
-                </p>
-                <p className="text-xs text-gray-500">
-                  支持 JPG、PNG，单张不超过 5MB
-                </p>
-              </label>
-
-              {/* 预览 */}
-              {voucherPreviews.length > 0 && (
-                <div className="grid grid-cols-4 gap-2">
-                  {voucherPreviews.map((preview, index) => (
-                    <div key={index} className="relative aspect-square bg-gray-100 overflow-hidden border border-gray-200">
-                      <img
-                        src={preview}
-                        alt={`凭证 ${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveImage(index)}
-                        className="absolute top-1 right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center hover:bg-red-600"
-                      >
-                        <X size={12} className="text-white" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
           )}
 
@@ -344,7 +299,7 @@ export default function CreatePaymentModal({
             disabled={
               !amount ||
               !method ||
-              (method === "manual" && voucherFiles.length === 0) ||
+              (method === "manual" && voucherUrls.length === 0) ||  // 老王注：改用 voucherUrls（2026-02-05）
               isSubmitting ||
               !!error
             }
