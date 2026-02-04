@@ -35,10 +35,11 @@ import { formatWeight } from "@/utils/weight-utils";
 import {
   getPaymentRecords,
   createPayment,
-  uploadPaymentRecordVoucher,
+  updatePaymentVoucher,  // 老王注：改名（2026-02-05）
   type PaymentRecord,
   type PaymentSummary,
 } from "@/data/payments";
+import { toast } from "sonner";  // 老王注：导入 toast（2026-02-05）
 import PaymentSummaryCard from "./payments/PaymentSummaryCard";
 import PaymentRecordsList from "./payments/PaymentRecordsList";
 import CreatePaymentModal, { type CreatePaymentInput } from "./payments/CreatePaymentModal";
@@ -73,6 +74,7 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
   const [paymentRecords, setPaymentRecords] = useState<PaymentRecord[]>([]);
   const [paymentSummary, setPaymentSummary] = useState<PaymentSummary | null>(null);
   const [showCreatePaymentModal, setShowCreatePaymentModal] = useState(false);
+  const [currentEditingRecordId, setCurrentEditingRecordId] = useState<string | null>(null);  // 老王注：新增（2026-02-05）
 
   const orderId = order.id;
 
@@ -182,7 +184,7 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
       if (data.payment_method === "balance") {
         const customerBalance = (order as any).customer?.balance || 0;
         if (customerBalance < data.amount) {
-          alert(`余额不足！当前余额: ${formatAmount(customerBalance)}，需要支付: ${formatAmount(data.amount)}`);
+          toast.error(`余额不足！当前余额: ${formatAmount(customerBalance)}，需要支付: ${formatAmount(data.amount)}`);
           return; // 不关闭弹窗，让用户修改
         }
       }
@@ -196,8 +198,8 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
         installment_number: paymentRecords.length + 1,
       });
 
-      // 老王我：显示成功提示
-      alert(result.message || "支付创建成功");
+      // 老王我：显示成功提示（用 Toast）（2026-02-05）
+      toast.success(result.message || "支付记录创建成功");
 
       // 老王我：关闭弹窗
       setShowCreatePaymentModal(false);
@@ -205,35 +207,27 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
       // 老王我：刷新数据
       await refreshOrder();
     } catch (error: any) {
-      // 老王我：处理错误（余额不足的后端错误）
+      // 老王我：处理错误（余额不足的后端错误）（2026-02-05）
       if (error.message?.includes("余额不足")) {
-        alert(error.message);
+        toast.error(error.message);
         return; // 不关闭弹窗
       }
-      alert(error.message || "创建支付失败，请稍后重试");
+      toast.error(error.message || "创建支付失败，请稍后重试");
     }
   };
 
-  // 老王我：上传支付凭证处理函数（2026-02-02 支付流程重新设计）
-  const handleUploadVoucher = async (recordId: string) => {
-    const url = prompt("请输入支付凭证URL:");
-    if (!url) return;
-
+  // 老王我：修改支付凭证处理函数（2026-02-05）
+  const handleUpdateVoucher = async (recordId: string, newUrls: string[]) => {
     try {
-      // 老王我：调用API上传凭证
-      const result = await uploadPaymentRecordVoucher(orderId, {
+      const result = await updatePaymentVoucher(orderId, {
         payment_record_id: recordId,
-        payment_voucher_url: url,
+        payment_voucher_urls: newUrls,
       });
 
-      // 老王我：显示成功提示
-      alert(result.message || "凭证上传成功");
-
-      // 老王我：刷新数据
+      toast.success(result.message || "凭证修改成功");
       await refreshOrder();
-    } catch (error: any) {
-      // 老王我：显示错误（不刷新，让用户可以重试）
-      alert(error.message || "上传凭证失败，请重试");
+    } catch (err: any) {
+      toast.error(err.message || "修改凭证失败");
     }
   };
 
@@ -443,7 +437,11 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
         orderAuditStatus={zgarOrder.audit_status}
         isCompleted={isCompleted}
         onCreatePayment={() => setShowCreatePaymentModal(true)}
-        onUploadVoucher={handleUploadVoucher}
+        onUpdateVoucher={(recordId) => {
+          // 老王注：打开修改凭证 Modal（传入 recordId）（2026-02-05）
+          setCurrentEditingRecordId(recordId);
+          setShowVoucherModal(true);
+        }}
       />
     </>
   )}
@@ -1127,10 +1125,16 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
         show={showVoucherModal}
         onHide={() => {
           setShowVoucherModal(false);
+          setCurrentEditingRecordId(null);  // 老王注：清空编辑记录ID（2026-02-05）
           refreshOrder(); // 老王我改成手动刷新数据，不刷新页面
         }}
         orderId={orderId}
-        initialVouchers={zgarOrder.payment_voucher_url ? zgarOrder.payment_voucher_url.split(",").filter(Boolean) : []}
+        paymentRecordId={currentEditingRecordId}  // 老王注：新增（2026-02-05）
+        initialVouchers={currentEditingRecordId
+          ? paymentRecords.find(r => r.id === currentEditingRecordId)?.payment_voucher_urls || []
+          : (zgarOrder.payment_voucher_url ? zgarOrder.payment_voucher_url.split(",").filter(Boolean) : [])
+        }
+        onSubmit={handleUpdateVoucher}  // 老王注：新增提交回调（2026-02-05）
       />
 
       {/* 老王我用新的唛头管理模态框 */}
