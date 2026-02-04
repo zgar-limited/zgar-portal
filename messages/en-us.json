@@ -389,5 +389,16 @@
     "previous": "Previous",
     "next": "Next",
     "page": "Page"
+  },
+  "CreatePaymentModal": {
+    "title": "Create Payment",
+    "amountRequired": "Please enter payment amount",
+    "voucherRequired": "Please upload payment voucher",
+    "insufficientBalance": "Insufficient balance, current: {balance}, required: {amount}",
+    "createSuccess": "Payment record created successfully",
+    "createFailed": "Failed to create payment, please try again",
+    "voucherUploadSuccess": "Voucher uploaded successfully",
+    "voucherUpdateSuccess": "Voucher updated successfully",
+    "uploadVoucherFailed": "Failed to upload voucher"
   }
 }
