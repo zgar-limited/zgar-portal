@@ -31,6 +31,8 @@ import { retrieveOrderWithZgarFields } from "@/data/orders";
 import { cn } from "@/lib/utils";
 // 老王我：导入重量格式化工具
 import { formatWeight } from "@/utils/weight-utils";
+// 老王我：导入支付状态计算工具函数（2026-02-05）
+import { calculatePaymentAuditStatus } from "@/utils/calculate-payment-audit-status";
 // 老王我：导入新支付功能相关（2026-02-02 支付流程重新设计）
 import {
   getPaymentRecords,
@@ -77,6 +79,28 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
   const [currentEditingRecordId, setCurrentEditingRecordId] = useState<string | null>(null);  // 老王注：新增（2026-02-05）
 
   const orderId = order.id;
+
+  // 老王我：计算支付审核状态（2026-02-05）
+  const getPaymentAuditStatus = () => {
+    if (!paymentRecords || paymentRecords.length === 0) {
+      return { label: "未上传凭证", variant: "secondary" as const };
+    }
+
+    const auditStatus = calculatePaymentAuditStatus(paymentRecords);
+
+    // 老王注：映射 Tailwind 类名到 Badge variant
+    let badgeVariant: "default" | "secondary" | "destructive" | "outline" = "secondary";
+    if (auditStatus.variant.includes("green")) {
+      badgeVariant = "default";  // 审核通过 → 绿色
+    } else if (auditStatus.variant.includes("red")) {
+      badgeVariant = "destructive";  // 审核拒绝 → 红色
+    } else if (auditStatus.variant.includes("yellow")) {
+      badgeVariant = "outline";  // 审核中 → 黄色边框
+    }
+
+    return { ...auditStatus, badgeVariant };
+  };
+
 
   // 老王我：首次加载时获取订单详情和支付记录
   useEffect(() => {
@@ -963,8 +987,8 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
       </>
     )}
 
-    {/* 支付审核状态 - 如果有的话，余额支付时不显示 */}
-    {zgarOrder.payment_audit_status && paymentMethod !== 'balance' && (
+    {/* 支付审核状态 - 实时计算（2026-02-05），余额支付时不显示 */}
+    {paymentMethod !== 'balance' && (
       <>
         <div className="h-px bg-gray-200"></div>
         <div className="flex items-center justify-between">
@@ -973,11 +997,11 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
             <span className="text-sm text-gray-600">{t('paymentAuditStatus')}</span>
           </div>
           <span className={`text-sm font-medium capitalize ${
-            zgarOrder.payment_audit_status.toLowerCase().includes('reject') || zgarOrder.payment_audit_status.includes('拒绝')
+            getPaymentAuditStatus().status === 'rejected'
               ? 'text-red-600'
               : 'text-gray-900'
           }`}>
-            {zgarOrder.payment_audit_status}
+            {getPaymentAuditStatus().label}
           </span>
         </div>
       </>
