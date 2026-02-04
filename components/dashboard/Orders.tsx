@@ -1,7 +1,7 @@
 "use client";
 
 import { Link, useRouter, usePathname } from '@/i18n/routing';
-import React from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { HttpTypes } from "@medusajs/types";
 import { ShoppingBag, Star, Wallet, CreditCard, Landmark, ChevronRight, ChevronLeft, Upload, FileText } from "lucide-react";
