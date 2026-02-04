@@ -32,6 +32,7 @@
     "bootstrap": "^5.3.7",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "dayjs": "^1.11.19",
     "dompurify": "^3.3.1",
     "drift-zoom": "^1.5.1",
     "framer-motion": "^12.23.26",

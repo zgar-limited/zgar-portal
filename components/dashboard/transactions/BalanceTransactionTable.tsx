@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { format } from "date-fns";
-import { zhCN } from "date-fns/locale";
+import dayjs from "dayjs";
+import "dayjs/locale/zh-cn";
 import {
   Table,
   TableBody,
@@ -15,41 +14,37 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowUpCircle, ArrowDownCircle, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { retrieveBalanceTransactions, type BalanceTransaction } from "@/data/transactions/server";
+
+// 老王我：类型定义（从 server.ts 复制，避免导入 server-only 模块）
+export interface BalanceTransaction {
+  id: string;
+  amount: number;
+  balance: number;
+  type: string;
+  description: string;
+  created_at: string;
+  metadata?: {
+    order_display_id?: string;
+    audit_amount?: number;
+    audit_by_name?: string;
+    jdc_bill_no?: string;
+  };
+  order_id?: string;
+}
 
 interface BalanceTransactionTableProps {
-  customerId: string;
+  transactions: BalanceTransaction[];
 }
 
 /**
  * 余额交易记录表格 - Vibrant Blocks 风格
  *
  * 老王我：
- * - 充值显示绿色，扣除显示红色
- * - 显示金蝶收款单号
- * - 订单号可点击跳转
- * - 参考订单详情页风格
+ * - Client Component（需要交互）
+ * - 通过 props 接收数据，不再调用 API
+ * - 避免导入 server-only 模块
  */
-export function BalanceTransactionTable({ customerId }: BalanceTransactionTableProps) {
-  const [transactions, setTransactions] = useState<BalanceTransaction[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        // TODO: Task 3.5 会调用真实 API
-        const data = await retrieveBalanceTransactions();
-        setTransactions(data);
-      } catch (error) {
-        console.error('Failed to fetch transactions:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchData();
-  }, [customerId]);
-
+export function BalanceTransactionTable({ transactions }: BalanceTransactionTableProps) {
   // 老王我：统一的金额格式化函数
   const formatAmount = (amount: number | null | undefined): string => {
     if (amount === null || amount === undefined || isNaN(amount)) {
@@ -57,17 +52,6 @@ export function BalanceTransactionTable({ customerId }: BalanceTransactionTableP
     }
     return `$${amount.toFixed(2)}`;
   };
-
-  if (loading) {
-    return (
-      <div className="relative overflow-hidden p-12 rounded-xl border-4 border-black shadow-[6px_6px_0_0_#000000] bg-white text-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-lg font-bold text-gray-600">加载中...</p>
-        </div>
-      </div>
-    );
-  }
 
   if (transactions.length === 0) {
     return (
@@ -96,7 +80,7 @@ export function BalanceTransactionTable({ customerId }: BalanceTransactionTableP
           {transactions.map((tx) => (
             <TableRow key={tx.id} className="hover:bg-gray-50">
               <TableCell className="text-sm">
-                {format(new Date(tx.created_at), "yyyy-MM-dd HH:mm", { locale: zhCN })}
+                {dayjs(tx.created_at).locale("zh-cn").format("YYYY-MM-DD HH:mm")}
               </TableCell>
               <TableCell>
                 {tx.amount > 0 ? (

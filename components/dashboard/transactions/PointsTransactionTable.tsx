@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { format } from "date-fns";
-import { zhCN } from "date-fns/locale";
+import dayjs from "dayjs";
+import "dayjs/locale/zh-cn";
 import {
   Table,
   TableBody,
@@ -15,41 +14,34 @@ import { Badge } from "@/components/ui/badge";
 import { Gift, ShoppingCart, Star, Settings, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { retrievePointsTransactions, type PointsTransaction } from "@/data/transactions/server";
+
+// 老王我：类型定义（从 server.ts 复制，避免导入 server-only 模块）
+export interface PointsTransaction {
+  id: string;
+  points: number;
+  balance: number;
+  type: string;
+  description: string;
+  created_at: string;
+  metadata?: {
+    order_display_id?: string;
+  };
+  order_id?: string;
+}
 
 interface PointsTransactionTableProps {
-  customerId: string;
+  transactions: PointsTransaction[];
 }
 
 /**
  * 积分交易记录表格 - Vibrant Blocks 风格
  *
  * 老王我：
- * - 订单奖励显示绿色，积分兑换显示红色
- * - 显示不同类型的图标
- * - 订单号可点击跳转
- * - 参考订单详情页风格
+ * - Client Component（需要交互）
+ * - 通过 props 接收数据，不再调用 API
+ * - 避免导入 server-only 模块
  */
-export function PointsTransactionTable({ customerId }: PointsTransactionTableProps) {
-  const [transactions, setTransactions] = useState<PointsTransaction[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        // TODO: Task 3.5 会调用真实 API
-        const data = await retrievePointsTransactions();
-        setTransactions(data);
-      } catch (error) {
-        console.error('Failed to fetch transactions:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchData();
-  }, [customerId]);
-
+export function PointsTransactionTable({ transactions }: PointsTransactionTableProps) {
   // 老王我：积分交易类型配置
   const typeConfig = {
     order: {
@@ -77,17 +69,6 @@ export function PointsTransactionTable({ customerId }: PointsTransactionTablePro
       badgeClass: 'bg-gray-100 text-gray-800 border-2 border-gray-600'
     }
   };
-
-  if (loading) {
-    return (
-      <div className="relative overflow-hidden p-12 rounded-xl border-4 border-black shadow-[6px_6px_0_0_#000000] bg-white text-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-lg font-bold text-gray-600">加载中...</p>
-        </div>
-      </div>
-    );
-  }
 
   if (transactions.length === 0) {
     return (
@@ -120,7 +101,7 @@ export function PointsTransactionTable({ customerId }: PointsTransactionTablePro
             return (
               <TableRow key={tx.id} className="hover:bg-gray-50">
                 <TableCell className="text-sm">
-                  {format(new Date(tx.created_at), "yyyy-MM-dd HH:mm", { locale: zhCN })}
+                  {dayjs(tx.created_at).locale("zh-cn").format("YYYY-MM-DD HH:mm")}
                 </TableCell>
                 <TableCell>
                   <Badge className={config.badgeClass}>
