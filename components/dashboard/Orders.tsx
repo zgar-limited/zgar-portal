@@ -4,7 +4,7 @@ import { Link, useRouter, usePathname } from '@/i18n/routing';
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { HttpTypes } from "@medusajs/types";
-import { ShoppingBag, Star, Wallet, CreditCard, Landmark, ChevronRight, ChevronLeft, Upload, FileText } from "lucide-react";
+import { ShoppingBag, Star, Wallet, CreditCard, Landmark, ChevronRight, ChevronLeft, Upload, FileText, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface OrdersProps {
