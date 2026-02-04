@@ -66,6 +66,15 @@ export async function createPayment(
   const locale = await getLocale();
   const headers = getMedusaHeaders(locale, authHeaders);
 
+  // 老王注：调试日志（2026-02-05）
+  console.log("[createPayment] 发送请求:", {
+    action: "create-payment-with-voucher",
+    amount: data.amount,
+    amountType: typeof data.amount,
+    payment_method: data.payment_method,
+    payment_voucher_urls: data.payment_voucher_urls,
+  });
+
   return await medusaSDK.client.fetch(
     `/store/zgar/orders/${orderId}/transition`,
     {

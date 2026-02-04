@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { Plus, Image as ImageIcon } from "lucide-react";
+import { Plus, Image as ImageIcon, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { uploadPaymentVoucherFiles } from "@/data/orders";  // 老王注：导入上传函数（2026-02-05）
 
 interface VoucherUploadAreaProps {
   urls: string[];
@@ -23,6 +24,7 @@ export default function VoucherUploadArea({
   disabled = false,
 }: VoucherUploadAreaProps) {
   const [error, setError] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);  // 老王注：上传状态（2026-02-05）
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const validateFile = (file: File): string | null => {
@@ -35,7 +37,7 @@ export default function VoucherUploadArea({
     return null;
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || []);
     setError(null);
 
@@ -47,24 +49,27 @@ export default function VoucherUploadArea({
       return;
     }
 
-    const newUrls: string[] = [...urls];
+    setIsUploading(true);  // 老王注：开始上传（2026-02-05）
     let hasError = false;
 
-    selectedFiles.forEach((file) => {
-      const error = validateFile(file);
-      if (error) {
-        setError(error);
-        hasError = true;
-        return;
-      }
+    try {
+      // 老王注：立即上传文件到服务器（2026-02-05）
+      const formData = new FormData();
+      selectedFiles.forEach((file) => {
+        formData.append("files", file);
+      });
 
-      // 老王注：创建本地预览 URL
-      const previewUrl = URL.createObjectURL(file);
-      newUrls.push(previewUrl);
-    });
+      const uploadedUrls = await uploadPaymentVoucherFiles(formData);
 
-    if (!hasError) {
+      // 老王注：合并已有URL和上传的URL
+      const newUrls = [...urls, ...uploadedUrls];
       onChange(newUrls);
+    } catch (err: any) {
+      console.error("Upload failed:", err);
+      setError(err.message || "上传失败，请重试");
+      hasError = true;
+    } finally {
+      setIsUploading(false);  // 老王注：上传结束（2026-02-05）
     }
 
     // Reset input
@@ -135,16 +140,19 @@ export default function VoucherUploadArea({
       {/* 初始上传区域 */}
       {urls.length === 0 && (
         <div
-          onClick={() => !disabled && fileInputRef.current?.click()}
-          className={`relative cursor-pointer ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+          onClick={() => !disabled && !isUploading && fileInputRef.current?.click()}
+          className={`relative cursor-pointer ${disabled || isUploading ? "opacity-50 cursor-not-allowed" : ""}`}
         >
           <div className="flex flex-col items-center justify-center gap-4 py-12 px-6 border-2 border-dashed border-gray-300 rounded-lg hover:border-gray-900 hover:bg-gray-50 transition-all duration-200">
-            <div className="flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full">
+            {/* 老王注：上传中图标（2026-02-05） */}
+            {isUploading ? (
+              <Loader2 className="w-8 h-8 text-gray-600 animate-spin" />
+            ) : (
               <ImageIcon className="w-8 h-8 text-gray-600" />
-            </div>
+            )}
             <div className="text-center space-y-1">
               <p className="text-base font-semibold text-gray-900">
-                点击或拖拽上传支付凭证
+                {isUploading ? "上传中..." : "点击或拖拽上传支付凭证"}
               </p>
               <p className="text-sm text-gray-500">
                 支持 JPG、PNG、WEBP 格式，最大 5MB，最多 {maxFiles} 张

@@ -180,7 +180,7 @@ export default function CreatePaymentModal({
               max={remainingAmount}
               step="0.01"
               placeholder="请输入支付金额"
-              value={amount || ""}
+              value={amount === 0 ? "" : amount}
               onChange={(e) => handleAmountChange(e.target.value)}
               className="h-10"
             />
