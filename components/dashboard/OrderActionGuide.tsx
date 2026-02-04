@@ -64,41 +64,23 @@ export default function OrderActionGuide({ order, onHighlightChange }: OrderActi
 
   const isDismissed = checkDismissed();
 
-  // 老王我：自动滚动到目标区域
-  const handleScroll = () => {
+  // 老王我：触发高亮效果（移除自动滚动，只保留高亮）
+  const handleHighlight = () => {
     if (!pendingAction) return;
 
-    const targetId = targetIds[pendingAction.type];
-    const element = document.getElementById(targetId);
-
-    if (element) {
-      // 先滚动到顶部
-      window.scrollTo({ top: 0, behavior: 'instant' as any });
-
-      // 延迟一点再滚动到目标元素（确保页面渲染完成）
-      setTimeout(() => {
-        element.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center'
-        });
-
-        // 触发高亮
-        setIsHighlighting(true);
-        if (onHighlightChange) {
-          onHighlightChange(pendingAction.type);
-        }
-
-        // 5秒后停止高亮
-        setTimeout(() => {
-          setIsHighlighting(false);
-          if (onHighlightChange) {
-            onHighlightChange(null);
-          }
-        }, 5000);
-      }, 100);
-    } else {
-      console.warn(`Target element not found: ${targetId}`);
+    // 触发高亮
+    setIsHighlighting(true);
+    if (onHighlightChange) {
+      onHighlightChange(pendingAction.type);
     }
+
+    // 5秒后停止高亮
+    setTimeout(() => {
+      setIsHighlighting(false);
+      if (onHighlightChange) {
+        onHighlightChange(null);
+      }
+    }, 5000);
   };
 
   // 老王我：关闭提示
@@ -110,19 +92,15 @@ export default function OrderActionGuide({ order, onHighlightChange }: OrderActi
     }
   };
 
-  // 老王我：页面加载后延迟 1.5 秒自动滚动
+  // 老王我：页面加载后立即触发高亮（移除延迟！）
   useEffect(() => {
     if (!pendingAction || isDismissed) return;
 
     // 显示 Alert
     setIsVisible(true);
 
-    // 延迟 1.5 秒后自动滚动
-    const timer = setTimeout(() => {
-      handleScroll();
-    }, 1500);
-
-    return () => clearTimeout(timer);
+    // 立即触发高亮效果，不延迟！
+    handleHighlight();
   }, [pendingAction, isDismissed]);
 
   // 老王我：监听订单刷新，清除 localStorage 记录
@@ -189,7 +167,7 @@ export default function OrderActionGuide({ order, onHighlightChange }: OrderActi
           <Button
             variant="secondary"
             size="sm"
-            onClick={handleScroll}
+            onClick={handleHighlight}
             className="bg-white text-brand-pink hover:bg-white/90 font-bold"
           >
             {tpa('completeNow')}

@@ -38,6 +38,14 @@ interface SidebarProps {
 export default function Sidebar({ customer, orders }: SidebarProps) {
   const pathname = usePathname();
 
+  // 老王我：统一的金额格式化函数
+  const formatAmount = (amount: number | null | undefined): string => {
+    if (amount === null || amount === undefined || isNaN(amount)) {
+      return "$0.00";
+    }
+    return `$${amount.toFixed(2)}`;
+  };
+
   const navItems = [
     {
       href: "/account-page",
@@ -101,7 +109,7 @@ export default function Sidebar({ customer, orders }: SidebarProps) {
             </div>
             <p className="text-xs font-bold text-white/90 mb-1">余额</p>
             <p className="text-base font-black text-white" style={{ fontFamily: 'sans-serif' }}>
-              ${customer?.zgar_customer?.balance?.toFixed(2) || "0.00"}
+              {formatAmount(customer?.zgar_customer?.balance)}
             </p>
           </div>
 

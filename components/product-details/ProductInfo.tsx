@@ -22,6 +22,14 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
   const t = useTranslations("Product");
   const { isLoggedIn } = useCustomer();
 
+  // 老王我：统一的金额格式化函数
+  const formatAmount = (amount: number | null | undefined): string => {
+    if (amount === null || amount === undefined || isNaN(amount)) {
+      return "$0.00";
+    }
+    return `$${amount.toFixed(2)}`;
+  };
+
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [quantity, setQuantity] = useState(50);
   const [isAdding, setIsAdding] = useState(false);
@@ -204,7 +212,7 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
                 <div className="relative z-10">
                   <div className="flex items-baseline gap-3">
                     <span className="text-5xl font-black text-gray-900 tracking-tight" style={{ fontFamily: 'sans-serif' }}>
-                      ${price.toFixed(2)}
+                      {formatAmount(price)}
                     </span>
                     <span className="text-base text-gray-600 font-semibold">{t("perPiece")}</span>
                   </div>

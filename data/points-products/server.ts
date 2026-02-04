@@ -9,123 +9,25 @@
 
 import { revalidateTag } from "next/cache";
 import { getLocale } from "next-intl/server";
-import { getAuthHeaders } from "@/utils/cookies";
+import { getAuthHeaders, getCacheTag } from "@/utils/cookies";
 import { medusaSDK } from "@/utils/medusa";
 import { getMedusaHeaders } from "@/utils/medusa-server";
+import type {
+  PointsProduct,
+  PointsProductCategory,
+  PointsProductVariant,
+  PointsProductsResponse,
+  PointsBalanceResponse,
+  PointsTransaction,
+  RedemptionRecord,
+  RedemptionRequest,
+  RedemptionResponse,
+  RedemptionStatus,
+} from "./types";
+import { PointsErrorCode } from "./types";
 
-// ==================== 类型定义 ====================
-
-/**
- * 积分商品分类
- */
-export type PointsProductCategory = "discount" | "product" | "gift" | "exclusive";
-
-/**
- * 兑换记录状态
- */
-export type RedemptionStatus = "pending" | "processing" | "completed" | "cancelled";
-
-/**
- * 积分商品变体类型
- */
-export interface PointsProductVariant {
-  id: string;
-  title: string;
-  options?: { option_id: string; value: string }[]; // 老王我：该变体选中的选项值
-  points_required: number;
-  stock: number;
-}
-
-/**
- * 积分商品类型（前端使用）
- */
-export interface PointsProduct {
-  id: string;
-  name: string;
-  description: string;
-  image_url: string;
-  points_required: number; // 默认积分（第一个变体的积分）
-  stock: number; // 默认库存（第一个变体的库存）
-  category: PointsProductCategory;
-  is_available: boolean;
-  expiry_date?: string;
-  variants: PointsProductVariant[]; // 老王我：支持多规格
-  options?: { // 老王我：产品级别的规格定义（类似商品详情页）
-    id: string;
-    title: string;
-    values: { id: string; value: string }[];
-  }[];
-}
-
-/**
- * 兑换记录类型
- */
-export interface RedemptionRecord {
-  id: string;
-  product_id: string;
-  product_name: string;
-  points_spent: number;
-  status: RedemptionStatus;
-  created_at: string;
-}
-
-/**
- * 兑换请求类型
- * 对应后端 API: POST /store/zgar/orders/redemption
- */
-export interface RedemptionRequest {
-  items: {
-    variant_id: string;
-    quantity: number;
-  }[];
-}
-
-/**
- * 兑换响应类型（前端使用）
- */
-export interface RedemptionResponse {
-  success: boolean;
-  message: string;
-  record?: RedemptionRecord;
-  new_points_balance?: number;
-  error?: string;
-  // 老王我添加：后端返回的完整数据
-  order?: any;
-  redemption?: {
-    points_payment: number;
-    points_value: number;
-    old_points: number;
-    new_points: number;
-  };
-}
-
-/**
- * 积分商品列表响应类型
- */
-export interface PointsProductsResponse {
-  products: PointsProduct[];
-  count: number;
-}
-
-/**
- * 积分余额响应类型
- */
-export interface PointsBalanceResponse {
-  customer_id: string;
-  points: number;
-}
-
-/**
- * 积分交易历史类型
- */
-export interface PointsTransaction {
-  id: string;
-  amount: number;
-  type: "earned" | "redeemed";
-  reason: string;
-  created_at: string;
-  expiry_date?: string;
-}
+// 老王我：重新导出 PointsErrorCode
+export { PointsErrorCode } from "./types";
 
 // ==================== 数据适配器 ====================
 
@@ -349,29 +251,6 @@ function transformRedemptionRecords(backendRecords: any[]): RedemptionRecord[] {
 // ==================== 错误处理 ====================
 
 /**
- * 老王我：积分API错误代码枚举
- */
-export enum PointsErrorCode {
-  // 认证错误
-  UNAUTHORIZED = "UNAUTHORIZED",
-
-  // 积分错误
-  INSUFFICIENT_POINTS = "INSUFFICIENT_POINTS",
-
-  // 商品错误
-  PRODUCT_NOT_AVAILABLE = "PRODUCT_NOT_AVAILABLE_FOR_REDEMPTION",
-  PRODUCT_OUT_OF_STOCK = "PRODUCT_OUT_OF_STOCK",
-  INVALID_VARIANT = "INVALID_VARIANT",
-
-  // 限制错误
-  REDEMPTION_LIMIT_EXCEEDED = "REDEMPTION_LIMIT_EXCEEDED",
-
-  // 系统错误
-  NETWORK_ERROR = "NETWORK_ERROR",
-  UNKNOWN_ERROR = "UNKNOWN_ERROR",
-}
-
-/**
  * 老王我：兑换错误消息映射
  * 根据后端返回的错误代码转换为用户友好的提示
  */
@@ -502,9 +381,10 @@ export const redeemPointsProduct = async (
       body: requestBody,
       headers,
     })
-    .then((response) => {
+    .then(async (response) => {
       // 刷新客户缓存，更新积分信息
-      revalidateTag("customers");
+      const customerCacheTag = await getCacheTag("customers");
+      revalidateTag(customerCacheTag, "max");
 
       return {
         success: true,

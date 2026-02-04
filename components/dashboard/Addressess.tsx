@@ -3,25 +3,20 @@
 import React, { useState } from "react";
 // 老王我移除 Sidebar import，因为已经在 layout 中了
 import AccountEditModal from "./AccountEditModal";
-import { useQuery } from "@tanstack/react-query";
-import { medusaSDK } from "@/utils/medusa";
-import { Spinner } from "react-bootstrap";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { StoreCustomerAddress } from "@medusajs/types";
-// import { toast } from "react-toastify";
-// import "react-toastify/dist/ReactToastify.css";
+import { getAddresses, createAddress, updateAddress, deleteAddress } from "@/data/addresses";
+import type { Address } from "@/data/addresses/types";
 
 export default function Addressess() {
   const [editing, setEditing] = useState<Partial<StoreCustomerAddress> | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const queryClient = useQueryClient();
 
-  const { data: addresses, isLoading, refetch } = useQuery({
+  // 老王我：直接调用 server 函数获取地址列表
+  const { data: addresses, isLoading } = useQuery({
     queryKey: ["addresses"],
-    queryFn: async () => {
-      const res = await medusaSDK.client.fetch(`/store/customers/me/addresses`, {
-        method: "GET",
-      });
-      return (res as any).addresses;
-    },
+    queryFn: () => getAddresses(),
     enabled: true,
   });
 
@@ -46,43 +41,48 @@ export default function Addressess() {
     setIsCreating(true);
   };
 
-  const saveAddress = async (form: any) => {
-    try {
-      if (isCreating) {
-        await medusaSDK.client.fetch(`/store/customers/me/addresses`, {
-          method: "POST",
-          body: form,
-        });
-        // toast.success("Address added successfully");
-      } else {
-        if (!form.id) return;
-        const { id, created_at, updated_at, customer_id, ...updateData } = form;
-        await medusaSDK.client.fetch(`/store/customers/me/addresses/${id}`, {
-          method: "POST",
-          body: updateData,
-        });
-        // toast.success("Address updated successfully");
-      }
+  // 老王我：创建地址mutation
+  const createMutation = useMutation({
+    mutationFn: (data: Address) => createAddress(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["addresses"] });
       setEditing(null);
-      refetch();
-    } catch (error) {
-      console.error("Error saving address:", error);
-      // toast.error("Failed to save address");
+    },
+  });
+
+  // 老王我：更新地址mutation
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Address }) =>
+      updateAddress(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["addresses"] });
+      setEditing(null);
+    },
+  });
+
+  // 老王我：删除地址mutation
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteAddress(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["addresses"] });
+    },
+  });
+
+  const saveAddress = async (form: any) => {
+    if (isCreating) {
+      // 老王我：创建地址
+      await createMutation.mutateAsync(form as Address);
+    } else {
+      // 老王我：更新地址
+      if (!form.id) return;
+      const { id, created_at, updated_at, customer_id, ...updateData } = form;
+      await updateMutation.mutateAsync({ id, data: updateData as Address });
     }
   };
 
   const deleteAddress = async (id: string) => {
     if (!confirm("Are you sure you want to delete this address?")) return;
-    try {
-      await medusaSDK.client.fetch(`/store/customers/me/addresses/${id}`, {
-        method: "DELETE",
-      });
-      // toast.success("Address deleted successfully");
-      refetch();
-    } catch (error) {
-      console.error("Error deleting address:", error);
-      // toast.error("Failed to delete address");
-    }
+    await deleteMutation.mutateAsync(id);
   };
 
   return (

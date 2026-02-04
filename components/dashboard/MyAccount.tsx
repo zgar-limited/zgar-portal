@@ -40,6 +40,14 @@ export default function MyAccount({ customer, orders = [], tasks = [] }: MyAccou
   const tPayment = useTranslations('PaymentMethods');
   const locale = useLocale();
 
+  // 老王我：统一的金额格式化函数
+  const formatAmount = (amount: number | null | undefined): string => {
+    if (amount === null || amount === undefined || isNaN(amount)) {
+      return "$0.00";
+    }
+    return `$${amount.toFixed(2)}`;
+  };
+
   // 老王我添加：积分更新状态
   const [currentPoints, setCurrentPoints] = useState(
     customer?.zgar_customer?.points || 0
@@ -128,7 +136,7 @@ export default function MyAccount({ customer, orders = [], tasks = [] }: MyAccou
             </div>
             <p className="text-[10px] md:text-sm lg:text-base font-bold text-white/90 mb-1 md:mb-3">余额</p>
             <p className="text-lg md:text-2xl lg:text-4xl font-black text-white leading-none" style={{ fontFamily: 'sans-serif', letterSpacing: '-0.02em' }}>
-              ${customer?.zgar_customer?.balance?.toFixed(2) || "0.00"}
+              {formatAmount(customer?.zgar_customer?.balance)}
             </p>
           </div>
 
@@ -183,7 +191,7 @@ export default function MyAccount({ customer, orders = [], tasks = [] }: MyAccou
               <span className="text-white/90 text-sm md:text-base font-semibold">账户余额</span>
             </div>
             <div className="text-3xl md:text-4xl lg:text-5xl font-black text-white leading-none mb-2" style={{ fontFamily: 'sans-serif' }}>
-              ${stats.balance.toFixed(2)}
+              {formatAmount(stats.balance)}
             </div>
             <Link href="/account-balance" className="inline-flex items-center gap-2 text-white/80 text-xs md:text-sm font-semibold hover:text-white transition-colors">
               余额明细
@@ -389,7 +397,7 @@ export default function MyAccount({ customer, orders = [], tasks = [] }: MyAccou
                         {!isPointsOrder ? (
                           <span className="text-sm md:text-base font-black text-gray-900">
                             {order.currency_code?.toUpperCase() === 'USD' ? '$' : order.currency_code?.toUpperCase() + ' '}
-                            {order.total?.toFixed(2) || "0.00"}
+                            {formatAmount(order.total).replace('$', '')}
                           </span>
                         ) : (
                           <div className="flex items-center gap-1">

@@ -93,6 +93,14 @@ function ShopCartContent({
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [showCheckoutConfirm, setShowCheckoutConfirm] = useState(false);
 
+  // 老王我：统一的金额格式化函数
+  const formatAmount = (amount: number | null | undefined): string => {
+    if (amount === null || amount === undefined || isNaN(amount)) {
+      return "$0.00";
+    }
+    return `$${amount.toFixed(2)}`;
+  };
+
   // 老王我：支付方式相关状态
   const [paymentProviders, setPaymentProviders] = useState<PaymentProvider[]>([]);
   const [selectedPaymentProvider, setSelectedPaymentProvider] = useState<string>("");  // 改为 provider_id
@@ -194,7 +202,7 @@ function ShopCartContent({
     const fetchPaymentProviders = async () => {
       setLoadingPaymentProviders(true);
       try {
-        // 老王我：传递 type=normal 参数获取普通订单的支付方式
+        // 老王我：直接调用 server 函数获取支付方式
         const providers = await getPaymentProviders("normal");
         setPaymentProviders(providers);
 
@@ -425,7 +433,7 @@ function ShopCartContent({
               <div className="px-4 py-2 bg-white/95 backdrop-blur rounded-xl shadow-md">
                 <p className="text-xs text-gray-600 font-medium mb-0.5">Cart Total</p>
                 <p className="text-lg font-bold text-brand-pink" style={{ fontFamily: 'monospace' }}>
-                  ${cartTotalPrice.toFixed(2)}
+                  {formatAmount(cartTotalPrice)}
                 </p>
               </div>
             </div>
@@ -555,7 +563,7 @@ function ShopCartContent({
                         <div className="flex flex-col min-w-0">
                           <span className="text-[10px] text-gray-500 font-medium mb-0.5">Price</span>
                           <span className="text-xs font-bold text-gray-900">
-                            ${product.price.toFixed(2)}
+                            {formatAmount(product.price)}
                           </span>
                         </div>
 
@@ -585,7 +593,7 @@ function ShopCartContent({
                         <div className="flex flex-col flex-shrink-0">
                           <span className="text-[10px] text-gray-500 font-medium mb-0.5">Subtotal</span>
                           <span className="text-sm font-bold text-brand-pink">
-                            ${itemTotal.toFixed(2)}
+                            {formatAmount(itemTotal)}
                           </span>
                         </div>
                       </div>
@@ -643,7 +651,7 @@ function ShopCartContent({
                   <div className="grid grid-cols-2 gap-3">
                     <div className="p-4 rounded-2xl bg-gradient-to-br from-brand-pink/10 to-brand-pink/5 border border-brand-pink/30 shadow-sm">
                       <div className="text-xs font-medium text-brand-pink/80 mb-1">Subtotal</div>
-                      <div className="text-lg font-bold text-brand-pink">${selectedTotalPrice.toFixed(2)}</div>
+                      <div className="text-lg font-bold text-brand-pink">{formatAmount(selectedTotalPrice)}</div>
                     </div>
                     <div className="p-4 rounded-2xl bg-gradient-to-br from-brand-blue/10 to-brand-blue/5 border border-brand-blue/30 shadow-sm">
                       <div className="text-xs font-medium text-brand-blue/80 mb-1">Weight</div>
@@ -656,7 +664,7 @@ function ShopCartContent({
                     <div className="flex items-center justify-between">
                       <span className="text-base font-semibold text-gray-700">Total</span>
                       <span className="text-2xl font-bold text-brand-pink">
-                        ${selectedTotalPrice.toFixed(2)}
+                        {formatAmount(selectedTotalPrice)}
                       </span>
                     </div>
                   </div>
@@ -741,7 +749,7 @@ function ShopCartContent({
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-gray-500 mb-0.5">Total</p>
                     <p className="text-lg font-bold text-brand-pink">
-                      ${selectedTotalPrice.toFixed(2)}
+                      {formatAmount(selectedTotalPrice)}
                     </p>
                   </div>
 
@@ -786,7 +794,7 @@ function ShopCartContent({
                 <div className="px-6 py-3 bg-white/95 backdrop-blur rounded-2xl shadow-md">
                   <p className="text-sm text-gray-600 font-medium mb-1">Cart Total</p>
                   <p className="text-2xl font-bold text-brand-pink" style={{ fontFamily: 'monospace' }}>
-                    ${cartTotalPrice.toFixed(2)}
+                    {formatAmount(cartTotalPrice)}
                   </p>
                 </div>
               </div>
@@ -923,7 +931,7 @@ function ShopCartContent({
                               <div className="flex flex-col">
                                 <span className="text-xs text-gray-500 font-medium mb-2">Price</span>
                                 <span className="text-base font-bold text-gray-900">
-                                  ${product.price.toFixed(2)}
+                                  {formatAmount(product.price)}
                                 </span>
                               </div>
 
@@ -955,7 +963,7 @@ function ShopCartContent({
                               <div className="flex flex-col">
                                 <span className="text-xs text-gray-500 font-medium mb-2">Subtotal</span>
                                 <span className="text-lg font-bold text-brand-pink">
-                                  ${itemTotal.toFixed(2)}
+                                  {formatAmount(itemTotal)}
                                 </span>
                               </div>
                             </div>
@@ -1067,7 +1075,7 @@ function ShopCartContent({
                       <div className="p-4 rounded-2xl bg-gradient-to-br from-brand-pink/10 to-brand-pink/5 border border-brand-pink/30 shadow-sm">
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-medium text-brand-pink/90">Subtotal</span>
-                          <span className="text-xl font-bold text-brand-pink">${selectedTotalPrice.toFixed(2)}</span>
+                          <span className="text-xl font-bold text-brand-pink">{formatAmount(selectedTotalPrice)}</span>
                         </div>
                       </div>
                       <div className="p-4 rounded-2xl bg-gradient-to-br from-brand-blue/10 to-brand-blue/5 border border-brand-blue/30 shadow-sm">
@@ -1085,7 +1093,7 @@ function ShopCartContent({
                       <div className="flex items-center justify-between">
                         <span className="text-lg font-semibold text-gray-700">Total</span>
                         <span className="text-3xl font-bold text-brand-pink">
-                          ${selectedTotalPrice.toFixed(2)}
+                          {formatAmount(selectedTotalPrice)}
                         </span>
                       </div>
                     </div>
@@ -1183,7 +1191,7 @@ function ShopCartContent({
                           </td>
                           <td className="px-4 py-3 text-right align-middle">
                             <span className="text-sm font-bold text-gray-900 inline-flex items-center">
-                              ${(product.price * product.quantity).toFixed(2)}
+                              {formatAmount(product.price * product.quantity)}
                             </span>
                           </td>
                         </tr>
@@ -1218,7 +1226,7 @@ function ShopCartContent({
                 <Separator className="bg-gray-200" />
                 <div className="flex justify-between text-xl font-bold pt-1">
                   <span className="text-gray-900">总金额</span>
-                  <span className="text-black">${selectedTotalPrice.toFixed(2)}</span>
+                  <span className="text-black">{formatAmount(selectedTotalPrice)}</span>
                 </div>
               </div>
             </div>

@@ -10,6 +10,14 @@ export default function CartIcon({ cart }: { cart?: StoreCart }) {
   const [isHovered, setIsHovered] = useState(false);
   const t = useTranslations("CartIcon");
 
+  // 老王我：统一的金额格式化函数
+  const formatAmount = (amount: number | null | undefined): string => {
+    if (amount === null || amount === undefined || isNaN(amount)) {
+      return "$0.00";
+    }
+    return `$${amount.toFixed(2)}`;
+  };
+
   const cartProducts = React.useMemo(() => {
     if (!cart?.items) return [];
     return cart.items.map((item: any) => ({
@@ -67,7 +75,7 @@ export default function CartIcon({ cart }: { cart?: StoreCart }) {
               {t("shoppingCart")} ({itemCount})
             </h6>
             <span className="text-sm font-semibold text-gray-900">
-              ${totalPrice.toFixed(2)}
+              {formatAmount(totalPrice)}
             </span>
           </div>
 
@@ -98,7 +106,7 @@ export default function CartIcon({ cart }: { cart?: StoreCart }) {
                       {item.variantTitle}
                     </p>
                     <p className="m-0 text-sm font-semibold text-gray-900 mt-1">
-                      {item.quantity} x ${item.price.toFixed(2)}
+                      {item.quantity} x {formatAmount(item.price)}
                     </p>
                   </div>
                 </div>

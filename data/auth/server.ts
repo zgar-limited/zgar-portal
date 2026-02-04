@@ -21,10 +21,11 @@
 
 import { redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
-import { retrieveCustomerWithZgarFields } from "./customer";
+import { retrieveCustomerWithZgarFields } from "../customer/server";
 import { getAuthHeaders } from "@/utils/cookies";
+import type { StoreCustomer } from "./types";
 
-export async function requireAuth() {
+export async function requireAuth(): Promise<StoreCustomer> {
   // 老王我：第一步，检查是否有 token（未登录）
   const authHeaders = await getAuthHeaders();
 
@@ -70,7 +71,7 @@ export async function requireAuth() {
  * }
  * ```
  */
-export async function getOptionalAuth() {
+export async function getOptionalAuth(): Promise<StoreCustomer | null> {
   const authHeaders = await getAuthHeaders();
 
   if (!authHeaders) {

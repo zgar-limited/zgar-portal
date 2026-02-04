@@ -27,6 +27,14 @@ export default function OrderCard({
   const tOrders = useTranslations('Orders'); // 老王我添加：订单翻译
   const tPayment = useTranslations('PaymentMethods'); // 老王我添加：支付方式翻译
 
+  // 老王我：统一的金额格式化函数
+  const formatAmount = (amount: number | null | undefined): string => {
+    if (amount === null || amount === undefined || isNaN(amount)) {
+      return "$0.00";
+    }
+    return `$${amount.toFixed(2)}`;
+  };
+
   // 老王我添加：判断是否是积分订单
   const isPointsOrder = (order as any).zgar_order?.payment_method === 'points'; // 老王我修复：数据值是 'points' 不是 'zgar_points'
 
@@ -109,7 +117,7 @@ export default function OrderCard({
             <div className="pt-1">
               <span className="text-2xl font-black text-gray-900">
                 {order.currency_code?.toUpperCase() === 'USD' ? '$' : order.currency_code?.toUpperCase() + ' '}
-                {order.total?.toFixed(2) || "0.00"}
+                {formatAmount(order.total).replace('$', '')}
               </span>
             </div>
             )}

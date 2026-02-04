@@ -7,6 +7,14 @@ export default function Checkout() {
   const cartProducts = []; // Mock empty cart
   const totalPrice = 0; // Mock total price
 
+  // 老王我：统一的金额格式化函数
+  const formatAmount = (amount: number | null | undefined): string => {
+    if (amount === null || amount === undefined || isNaN(amount)) {
+      return "$0.00";
+    }
+    return `$${amount.toFixed(2)}`;
+  };
+
   return (
     <section className="flat-spacing">
       <div className="container">
@@ -439,7 +447,7 @@ export default function Checkout() {
                           <div className="prd_select text-small">Size: XS</div>
                         </div>
                         <p className="price-prd h6">
-                          ${(product.quantity * product.price).toFixed(2)}
+                          {formatAmount(product.quantity * product.price)}
                         </p>
                       </li>
                     ))}
@@ -481,7 +489,7 @@ export default function Checkout() {
                 </ul>
                 <div className="text-black last-total h5 fw-medium">
                   <span>Total</span>
-                  <span>${totalPrice.toFixed(2)}</span>
+                  <span>{formatAmount(totalPrice)}</span>
                 </div>
               </div>
             </div>

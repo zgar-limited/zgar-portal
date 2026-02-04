@@ -1,11 +1,10 @@
 "use client";
 
 import { Link, useRouter, usePathname } from '@/i18n/routing';
-import React, { useState } from "react";
+import React from "react";
 import { useTranslations } from "next-intl";
 import { HttpTypes } from "@medusajs/types";
-import { retrieveOrders } from "@/data/orders";
-import { ShoppingBag, Star, Wallet, CreditCard, Landmark, Eye, ChevronRight, ChevronLeft, Upload, FileText } from "lucide-react";
+import { ShoppingBag, Star, Wallet, CreditCard, Landmark, ChevronRight, ChevronLeft, Upload, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface OrdersProps {
@@ -36,7 +35,6 @@ export default function Orders({ customer, orders: initialOrders, currentPage: i
 
   const [orders, setOrders] = useState(initialOrders);
   const [currentPage, setCurrentPage] = useState(initialPage);
-  const [isLoadingPage, setIsLoadingPage] = useState(false);
 
   const orderList = orders?.orders || [];
   const count = orders?.count || 0;
@@ -148,31 +146,18 @@ export default function Orders({ customer, orders: initialOrders, currentPage: i
   };
 
   /**
-   * 分页处理 - 老王我修复：真正从服务器获取数据
+   * 分页处理 - 老王我修复：只做URL导航，让服务端重新获取数据
+   * 注意：不使用 router.push() 的客户端导航，而是使用 window.location.href 触发服务端导航
    */
-  const handlePageChange = async (page: number) => {
-    if (page >= 1 && page <= totalPages && !isLoadingPage) {
-      setIsLoadingPage(true);
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      // 老王我：构建查询参数
+      const params = new URLSearchParams();
+      params.set('page', page.toString());
 
-      try {
-        // 老王我：构建查询参数并更新 URL
-        const params = new URLSearchParams();
-        params.set('page', page.toString());
-        router.push(`${pathname}?${params.toString()}`);
-
-        // 老王我：重新获取订单数据
-        const limit = 10;
-        const offset = (page - 1) * limit;
-        const newOrdersData = await retrieveOrders(limit, offset, "-created_at");
-
-        // 老王我：更新状态
-        setOrders(newOrdersData);
-        setCurrentPage(page);
-      } catch (error) {
-        console.error("Failed to fetch orders:", error);
-      } finally {
-        setIsLoadingPage(false);
-      }
+      // 老王我：使用 window.location.href 触发服务端导航
+      // 这会让整个页面重新加载，Server Component会重新获取数据
+      window.location.href = `${pathname}?${params.toString()}`;
     }
   };
 

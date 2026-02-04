@@ -5,6 +5,13 @@ import Image from "next/image";
 import React from "react";
 
 
+  // 老王我：统一的金额格式化函数
+  const formatAmount = (amount) => {
+    if (amount === null || amount === undefined || isNaN(amount)) {
+      return "$0.00";
+    }
+    return `{formatAmount(amount)}`;
+  };
 export default function BoughtTogether() {
   // Mock functions
   const addProductToCart = () => {};

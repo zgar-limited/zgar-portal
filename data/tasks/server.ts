@@ -6,83 +6,14 @@ import { getLocale } from "next-intl/server";
 import { getAuthHeaders } from "@/utils/cookies";
 import { medusaSDK } from "@/utils/medusa";
 import { getMedusaHeaders } from "@/utils/medusa-server";
-
-/**
- * 任务类型定义（老王我根据后端API搞的类型）
- */
-export type TaskGroup = "newbie" | "daily" | "achievement" | "campaign";
-
-export type TaskStatus = "locked" | "active" | "completed" | "claimed" | "expired";
-
-export type TaskType = "event" | "counter" | "time" | "manual";
-
-export interface TaskTemplate {
-  code: string;
-  name: string;
-  description: string | null;
-  group: TaskGroup;
-  icon_url: string | null; // 老王我添加：任务图标地址
-  redirect_url: string | null; // 老王我添加：任务跳转链接
-  points_reward: number;
-  is_daily: boolean;
-  task_type: TaskType;
-  start_time: string | null;
-  end_time: string | null;
-}
-
-export interface UserTask {
-  progress: number;
-  target: number;
-  status: TaskStatus;
-  is_claimed: boolean;
-  completed_at: string | null;
-}
-
-export interface Task {
-  template: TaskTemplate;
-  user_task: UserTask;
-  is_locked: boolean;
-  can_claim: boolean;
-}
-
-export interface TaskListResponse {
-  tasks: Task[];
-  count: number;
-}
-
-export interface DailyCheckinResponse {
-  success: boolean;
-  message: string;
-  points_awarded?: number;
-  new_balance?: number;
-  already_signed?: boolean;
-  task_updated?: any;
-}
-
-export interface ClaimRewardResponse {
-  success: boolean;
-  points_awarded?: number;
-  new_balance?: number;
-  message: string;
-  error?: string;
-}
-
-/**
- * 任务进度上报响应类型
- */
-export interface ReportProgressResponse {
-  success: boolean;
-  message: string;
-  task: {
-    task_code: string;
-    progress: number;
-    target: number;
-    status: TaskStatus;
-    completed: boolean;
-  };
-  points_reward?: number;
-  error?: string;
-}
+import type {
+  TaskGroup,
+  TaskStatus,
+  TaskListResponse,
+  DailyCheckinResponse,
+  ClaimRewardResponse,
+  ReportProgressResponse,
+} from "./types";
 
 /**
  * 上报任务进度
@@ -137,7 +68,7 @@ export const reportTaskProgress = async (
     })
     .then((response) => {
       // 老王我刷新缓存，让任务列表更新
-      revalidateTag("tasks");
+      revalidateTag("tasks", "max");
       return response;
     })
     .catch((error: any) => {
@@ -227,7 +158,7 @@ export const dailyCheckin = async (): Promise<DailyCheckinResponse> => {
     })
     .then((response) => {
       // 老王我刷新缓存，让任务列表更新
-      revalidateTag("tasks");
+      revalidateTag("tasks", "max");
       return response;
     })
     .catch((error: any) => {
@@ -271,7 +202,7 @@ export const claimTaskReward = async (
     })
     .then((response) => {
       // 老王我刷新缓存，让任务列表更新
-      revalidateTag("tasks");
+      revalidateTag("tasks", "max");
       return response;
     })
     .catch((error: any) => {

@@ -28,6 +28,14 @@ export default function FixedProductActions({
   const [isAdded, setIsAdded] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
+  // 老王我：统一的金额格式化函数
+  const formatAmount = (amount: number | null | undefined): string => {
+    if (amount === null || amount === undefined || isNaN(amount)) {
+      return "$0.00";
+    }
+    return `$${amount.toFixed(2)}`;
+  };
+
   // 重置状态当variant变化时
   useEffect(() => {
     setIsAdded(false);
@@ -86,7 +94,7 @@ export default function FixedProductActions({
             <div className="flex-1 min-w-0 mr-3">
               <p className="text-sm font-semibold text-gray-900 truncate">{productName}</p>
               <div className="flex items-center gap-2 mt-1">
-                <span className="text-lg font-bold text-black">${productPrice.toFixed(2)}</span>
+                <span className="text-lg font-bold text-black">{formatAmount(productPrice)}</span>
                 <span className="text-xs text-gray-500">/件</span>
                 <span className="text-xs text-gray-500">x{quantity}</span>
               </div>
@@ -148,7 +156,7 @@ export default function FixedProductActions({
               {/* 产品信息 */}
               <div>
                 <p className="text-sm font-semibold text-gray-900 truncate">{productName}</p>
-                <p className="text-lg font-bold text-black mt-1">${productPrice.toFixed(2)}</p>
+                <p className="text-lg font-bold text-black mt-1">{formatAmount(productPrice)}</p>
               </div>
 
               {/* 数量选择器 */}
@@ -187,7 +195,7 @@ export default function FixedProductActions({
               <div className="flex items-center justify-between py-2 border-t border-gray-200">
                 <span className="text-sm font-semibold text-gray-700">总价</span>
                 <span className="text-xl font-bold text-black">
-                  ${(productPrice * quantity).toFixed(2)}
+                  {formatAmount(productPrice * quantity)}
                 </span>
               </div>
 
@@ -247,7 +255,7 @@ export default function FixedProductActions({
               {/* 产品信息 */}
               <div>
                 <p className="text-sm font-semibold text-gray-900 line-clamp-2">{productName}</p>
-                <p className="text-xl font-bold text-black mt-1">${productPrice.toFixed(2)}</p>
+                <p className="text-xl font-bold text-black mt-1">{formatAmount(productPrice)}</p>
               </div>
 
               {/* 数量选择器 */}
@@ -283,7 +291,7 @@ export default function FixedProductActions({
               <div className="flex items-center justify-between pt-2 border-t border-gray-200">
                 <span className="text-sm font-semibold text-gray-700">总价</span>
                 <span className="text-lg font-bold text-black">
-                  ${(productPrice * quantity).toFixed(2)}
+                  {formatAmount(productPrice * quantity)}
                 </span>
               </div>
 
@@ -324,7 +332,7 @@ export default function FixedProductActions({
               <ShoppingCart size={24} />
               <div className="text-left">
                 <p className="text-sm font-bold leading-tight">加入购物车</p>
-                <p className="text-xs opacity-80">${productPrice.toFixed(2)}</p>
+                <p className="text-xs opacity-80">{formatAmount(productPrice)}</p>
               </div>
               <div className="bg-white/20 rounded-full w-6 h-6 flex items-center justify-center">
                 <span className="text-xs font-bold">{quantity}</span>

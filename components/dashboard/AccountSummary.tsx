@@ -42,6 +42,14 @@ export default function AccountSummary({ customer, orders = [] }: AccountSummary
   const tPayment = useTranslations('PaymentMethods');
   const locale = useLocale();
 
+  // 老王我：统一的金额格式化函数
+  const formatAmount = (amount: number | null | undefined): string => {
+    if (amount === null || amount === undefined || isNaN(amount)) {
+      return "$0.00";
+    }
+    return `$${amount.toFixed(2)}`;
+  };
+
   // 老王我添加：积分更新状态
   const [currentPoints, setCurrentPoints] = useState(
     customer?.zgar_customer?.points || 0
@@ -145,7 +153,7 @@ export default function AccountSummary({ customer, orders = [] }: AccountSummary
                 fontFamily: 'sans-serif',
                 textShadow: '1px_1px_0_#000000'
               }}>
-                ${stats.balance.toFixed(2)}
+                {formatAmount(stats.balance)}
               </p>
             </div>
 

@@ -240,4 +240,104 @@
   .animate-fade-slide-in {
     animation: fade-slide-in 0.6s ease-out both;
   }
+
+  /* 老王我：优雅的呼吸高亮动画 - 精致版 */
+  @keyframes highlight-breathe {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(244, 150, 211, 0.4);
+    }
+    50% {
+      box-shadow: 0 0 0 8px rgba(244, 150, 211, 0.1), 0 0 20px rgba(244, 150, 211, 0.3);
+    }
+  }
+
+  .animate-highlight-breathe {
+    animation: highlight-breathe 2s ease-in-out infinite;
+  }
+
+  /* 老王我：脉冲式 ring 放大缩小 */
+  @keyframes ring-pulse {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.02);
+      opacity: 0.9;
+    }
+  }
+
+  .animate-ring-pulse {
+    animation: ring-pulse 2s ease-in-out infinite;
+  }
+
+  /* 老王我：平滑淡入淡出 */
+  @keyframes gentle-fade {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.85;
+    }
+  }
+
+  .animate-gentle-fade {
+    animation: gentle-fade 2s ease-in-out infinite;
+  }
+
+  /* 老王我：超级醒目的高亮效果！！！多重光晕+脉冲边框+背景闪烁 */
+  @keyframes super-highlight {
+    0%, 100% {
+      /* 蓝色状态 - 超强视觉冲击 */
+      border-color: #0047c7;  /* 纯蓝色！ */
+      border-width: 6px;  /* 超粗边框！ */
+      box-shadow:
+        0 0 0 4px rgba(0, 71, 199, 0.3),    /* 内层光晕 */
+        0 0 0 8px rgba(0, 71, 199, 0.2),    /* 中层光晕 */
+        0 0 20px rgba(0, 71, 199, 0.6),     /* 外层发光 */
+        0 0 40px rgba(0, 71, 199, 0.4);     /* 扩散光晕 */
+      background: linear-gradient(135deg, rgba(0, 71, 199, 0.05) 0%, rgba(255, 255, 255, 1) 100%);
+      transform: scale(1.02);
+    }
+    50% {
+      /* 粉色状态 - 超强视觉冲击 */
+      border-color: #f496d3;  /* 纯粉色！ */
+      border-width: 6px;  /* 超粗边框！ */
+      box-shadow:
+        0 0 0 4px rgba(244, 150, 211, 0.3),    /* 内层光晕 */
+        0 0 0 8px rgba(244, 150, 211, 0.2),    /* 中层光晕 */
+        0 0 25px rgba(244, 150, 211, 0.7),     /* 外层发光 */
+        0 0 50px rgba(244, 150, 211, 0.5);     /* 扩散光晕 */
+      background: linear-gradient(135deg, rgba(244, 150, 211, 0.08) 0%, rgba(255, 255, 255, 1) 100%);
+      transform: scale(1.03);
+    }
+  }
+
+  .animate-super-highlight {
+    animation: super-highlight 2s ease-in-out infinite;
+  }
+
+  /* 老王我：快速闪烁效果（可选叠加） */
+  @keyframes quick-flash {
+    0%, 90%, 100% {
+      opacity: 1;
+    }
+    95% {
+      opacity: 0.7;
+    }
+  }
+
+  .animate-quick-flash {
+    animation: quick-flash 2s ease-in-out infinite;
+  }
+
+  /* 老王我：虚线流动动画（可选，让虚线动起来） */
+  @keyframes dashed-flow {
+    0% {
+      stroke-dashoffset: 0;
+    }
+    100% {
+      stroke-dashoffset: 20;
+    }
+  }
 }

@@ -25,6 +25,14 @@ export default function ProductCard({ product }: ProductCardProps) {
   const [isAdded, setIsAdded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
+  // 老王我：统一的金额格式化函数
+  const formatAmount = (amount: number | null | undefined): string => {
+    if (amount === null || amount === undefined || isNaN(amount)) {
+      return "$0.00";
+    }
+    return `$${amount.toFixed(2)}`;
+  };
+
   // 获取价格
   const calculatedPriceInfo = product.variants?.[0]?.calculated_price;
   const price = Number(calculatedPriceInfo?.calculated_amount || calculatedPriceInfo?.original_amount || 0);
@@ -231,7 +239,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           <div className="mb-3">
             <div className="flex items-baseline gap-2">
               <span className="text-xl sm:text-2xl font-black text-gray-900">
-                ${price.toFixed(2)}
+                {formatAmount(price)}
               </span>
               <span className="text-xs font-bold text-gray-600">/pcs</span>
             </div>

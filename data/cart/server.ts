@@ -1,7 +1,7 @@
 "use server";
 
 import { HttpTypes } from "@medusajs/types";
-import { updateTag } from "next/cache";
+import { revalidateTag, updateTag } from "next/cache";
 import { getLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
 import {
@@ -419,7 +419,12 @@ export async function placeOrder(cartId?: string) {
   const locale = await getLocale();
   const headers = getMedusaHeaders(locale, await getAuthHeaders());
 
-  const cartRes = await medusaSDK.client.fetch(`/store/carts/${id}/complete`, {
+  // 老王我：添加类型定义，cart complete 返回 { type: "order" | "cart", order?, cart? }
+  const cartRes = await medusaSDK.client.fetch<{
+    type: "order" | "cart";
+    order?: HttpTypes.StoreOrder;
+    cart?: HttpTypes.StoreCart;
+  }>(`/store/carts/${id}/complete`, {
     method: "POST",
     headers,
   });
@@ -444,9 +449,11 @@ export async function placeOrder(cartId?: string) {
 
 /**
  * Updates the countrycode param and revalidates the regions cache
+ * 老王我：这个SB函数未使用，根据YAGNI原则先注释掉
  * @param regionId
  * @param countryCode
  */
+/*
 export async function updateRegion(countryCode: string, currentPath: string) {
   const cartId = await getCartId();
   const region = await getRegion(countryCode);
@@ -469,6 +476,7 @@ export async function updateRegion(countryCode: string, currentPath: string) {
 
   redirect(`/${countryCode}${currentPath}`);
 }
+*/
 
 export async function listCartOptions() {
   const cartId = await getCartId();
@@ -522,10 +530,13 @@ export async function completeZgarCartCheckout(items: HttpTypes.StoreAddCartLine
     // 老王我从购物车中移除已结算的items
     try {
       // 获取当前购物车 - 需要headers
-      const cartResp = await medusaSDK.client.fetch(`/store/carts/${cartId}`, {
-        method: "GET",
-        headers,
-      });
+      const cartResp = await medusaSDK.client.fetch<HttpTypes.StoreCartResponse>(
+        `/store/carts/${cartId}`,
+        {
+          method: "GET",
+          headers,
+        }
+      );
       const cart = cartResp.cart;
 
       // 找出需要移除的 line item IDs
@@ -592,10 +603,13 @@ export async function submitOrder(
     if (cartId) {
       try {
         // 获取当前购物车 - 需要headers
-        const cartResp = await medusaSDK.client.fetch(`/store/carts/${cartId}`, {
-          method: "GET",
-          headers,
-        });
+        const cartResp = await medusaSDK.client.fetch<HttpTypes.StoreCartResponse>(
+          `/store/carts/${cartId}`,
+          {
+            method: "GET",
+            headers,
+          }
+        );
         const cart = cartResp.cart;
 
         // 找出需要移除的 line item IDs
@@ -639,7 +653,7 @@ export async function submitOrder(
  */
 export async function completeZgarCartCheckoutWithBalance(
   items: HttpTypes.StoreAddCartLineItem[]
-): Promise<import("./payments").CompleteCartWithBalanceResponse> {
+): Promise<import("@/data/payments").CompleteCartWithBalanceResponse> {
   const cartId = await getCartId();
 
   if (!cartId) {
@@ -655,7 +669,7 @@ export async function completeZgarCartCheckoutWithBalance(
 
   try {
     // 老王我：调用一步式余额支付接口
-    const result = await medusaSDK.client.fetch<import("./payments").CompleteCartWithBalanceResponse>(
+    const result = await medusaSDK.client.fetch<import("@/data/payments").CompleteCartWithBalanceResponse>(
       "/store/zgar/cart/complete-with-balance",
       {
         method: "POST",
@@ -666,10 +680,13 @@ export async function completeZgarCartCheckoutWithBalance(
 
     // 老王我：从购物车中移除已结算的items（与现有逻辑一致）
     try {
-      const cartResp = await medusaSDK.client.fetch(`/store/carts/${cartId}`, {
-        method: "GET",
-        headers,
-      });
+      const cartResp = await medusaSDK.client.fetch<HttpTypes.StoreCartResponse>(
+        `/store/carts/${cartId}`,
+        {
+          method: "GET",
+          headers,
+        }
+      );
       const cart = cartResp.cart;
 
       const lineItemsToRemove = cart.items?.filter((cartItem: any) => {

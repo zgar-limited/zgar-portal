@@ -52,6 +52,14 @@ const ProductsSelectModal = ({ show, onHide, cart, products }: Props) => {
   const sheetRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
 
+  // 老王我：统一的金额格式化函数
+  const formatAmount = (amount: number | null | undefined): string => {
+    if (amount === null || amount === undefined || isNaN(amount)) {
+      return "$0.00";
+    }
+    return `$${amount.toFixed(2)}`;
+  };
+
   // State management
   const [expandedProductIds, setExpandedProductIds] = useState<string[]>([]);
   const [selectedSkus, setSelectedSkus] = useState<string[]>([]);
@@ -470,7 +478,7 @@ const ProductsSelectModal = ({ show, onHide, cart, products }: Props) => {
                                 </div>
 
                                 <div className="text-right flex-shrink-0">
-                                  <div className="font-bold text-gray-800 text-sm">${price.toFixed(2)}</div>
+                                  <div className="font-bold text-gray-800 text-sm">{formatAmount(price)}</div>
                                   <div className="text-xs text-gray-500">单价</div>
                                 </div>
 
@@ -562,7 +570,7 @@ const ProductsSelectModal = ({ show, onHide, cart, products }: Props) => {
               <div className="text-right">
                 <div className="text-base font-semibold text-gray-700">总价</div>
                 <div className="text-3xl font-bold text-gray-900">
-                  ${summary.total.toFixed(2)}
+                  {formatAmount(summary.total)}
                 </div>
               </div>
             </div>

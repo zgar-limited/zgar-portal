@@ -13,6 +13,7 @@ import "../../public/css/harmonyos_sans_tc.css";
 
 import GlobalEffectsProvider from "@/components/common/GlobalEffectProvider";
 import BackToTop from "@/components/back-to-top/BackToTop";
+import QueryClientProvider from "@/components/providers/QueryClientProvider";
 
 export const metadata = {
   title: "Zgar Vape Website",
@@ -41,14 +42,16 @@ export default async function RootLayout({
     <html lang={locale}>
       <head></head>
       <body>
-        <NextIntlClientProvider messages={messages}>
-          <main id="wrapper">
+        <QueryClientProvider>
+          <NextIntlClientProvider messages={messages}>
+            <main id="wrapper">
             {children}
 
             <GlobalEffectsProvider />
             <BackToTop />
           </main>
-        </NextIntlClientProvider>
+          </NextIntlClientProvider>
+        </QueryClientProvider>
       </body>
     </html>
   );

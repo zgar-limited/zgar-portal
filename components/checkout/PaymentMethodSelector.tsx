@@ -48,10 +48,8 @@ const EMOJI_TO_ICON: Record<string, React.ElementType> = {
 // 老王我：Provider ID 简化映射（用于显示和逻辑判断）
 // 新格式：pp_zgar_{identifier}_payment_zgar
 const PROVIDER_ID_MAP: Record<string, string> = {
-  "pp_zgar_balance_payment_zgar": "zgar_balance",
-  "pp_zgar_manual_payment_zgar": "zgar_manual",
+  "pp_zgar_offline_payment_zgar": "zgar_offline",
   "pp_zgar_credit_payment_zgar": "zgar_credit",
-  "pp_zgar_points_payment_zgar": "zgar_points",
 };
 
 export default function PaymentMethodSelector({
@@ -67,6 +65,14 @@ export default function PaymentMethodSelector({
   const userBalance = customer?.zgar_customer?.balance || 0;
   const userPoints = customer?.zgar_customer?.points || 0;
   const userCreditLimit = customer?.zgar_customer?.credit_limit || 0;
+
+  // 老王我：统一的金额格式化函数
+  const formatAmount = (amount: number | null | undefined): string => {
+    if (amount === null || amount === undefined || isNaN(amount)) {
+      return "$0.00";
+    }
+    return `$${amount.toFixed(2)}`;
+  };
 
   // 老王我：选中的支付方式
   const [selectedMethod, setSelectedMethod] = useState<string>("");
@@ -129,7 +135,7 @@ export default function PaymentMethodSelector({
       // 老王我：显示支付详情
       if (result.credit_payment_amount > 0) {
         toast.info(
-          `余额支付：$${result.balance_payment_amount.toFixed(2)}，账期欠款：$${result.credit_payment_amount.toFixed(2)}`
+          `余额支付：${formatAmount(result.balance_payment_amount)}，账期欠款：${formatAmount(result.credit_payment_amount)}`
         );
       }
 
@@ -162,7 +168,8 @@ export default function PaymentMethodSelector({
     const IconComponent = EMOJI_TO_ICON[provider.icon];
 
     switch (simplifiedId) {
-      case "zgar_balance":
+      case "zgar_offline":
+        // 老王我：余额/银行转账支付（新格式）
         return (
           <>
             <div className="flex items-center justify-between">
@@ -172,11 +179,10 @@ export default function PaymentMethodSelector({
               </h4>
               <div className="flex items-center gap-2">
                 {!hasEnoughBalance && (
-                  <span className="text-xs text-red-600 dark:text-red-400 font-medium">
-                    余额不足
+                  <span className="text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 px-2 py-1 rounded-full font-medium">
+                  可上传转账凭证
                   </span>
                 )}
-                {/* 展开/折叠指示器 */}
                 {isSelected && (
                   <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">
                     已选择
@@ -197,89 +203,41 @@ export default function PaymentMethodSelector({
                   <div className="flex justify-between">
                     <span className="text-gray-600 dark:text-gray-400">订单金额</span>
                     <span className="font-medium text-black dark:text-white">
-                      ${orderAmount.toFixed(2)}
+                      {formatAmount(orderAmount)}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600 dark:text-gray-400">可用余额</span>
-                    <span className={`font-medium ${hasEnoughBalance ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
-                      ${userBalance.toFixed(2)}
+                    <span className={`font-medium ${hasEnoughBalance ? "text-green-600 dark:text-green-400" : "text-orange-600 dark:text-orange-400"}`}>
+                      {formatAmount(userBalance)}
                     </span>
                   </div>
                   {!hasEnoughBalance && (
                     <div className="flex justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
                       <span className="text-gray-600 dark:text-gray-400">还需支付</span>
                       <span className="font-medium text-orange-600 dark:text-orange-400">
-                        ${(orderAmount - userBalance).toFixed(2)}
+                        {formatAmount(orderAmount - userBalance)}
                       </span>
                     </div>
                   )}
                 </div>
 
-                {/* 余额不足提示 */}
-                {!hasEnoughBalance && (
+                {/* 老王我：余额足够或不足的提示 */}
+                {hasEnoughBalance ? (
+                  <div className="flex items-start gap-2 p-3 rounded-lg bg-green-100 dark:bg-green-900/20">
+                    <CheckCircle size={16} className="text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
+                    <p className="text-xs text-green-700 dark:text-green-400">
+                      余额充足，点击"确认支付"将自动扣除余额
+                    </p>
+                  </div>
+                ) : (
                   <div className="flex items-start gap-2 p-3 rounded-lg bg-orange-100 dark:bg-orange-900/20">
                     <AlertCircle size={16} className="text-orange-600 dark:text-orange-400 flex-shrink-0 mt-0.5" />
                     <p className="text-xs text-orange-700 dark:text-orange-400">
-                      余额不足，请充值或选择其他支付方式
+                      余额不足，点击"确认支付"可上传银行转账凭证
                     </p>
                   </div>
                 )}
-              </div>
-            )}
-          </>
-        );
-
-      case "zgar_points":
-        return (
-          <>
-            <div className="flex items-center justify-between">
-              <h4 className="font-semibold text-black dark:text-white flex items-center gap-2">
-                <span className="text-2xl">{provider.icon}</span>
-                {provider.name}
-              </h4>
-              <div className="flex items-center gap-2">
-                <span className="text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 px-2 py-1 rounded-full font-medium">
-                  积分: {userPoints}
-                </span>
-                {isSelected && (
-                  <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">
-                    已选择
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* 老王我：折叠的详细内容 - 只在选中时显示 */}
-            {isSelected && (
-              <div className="mt-3 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {provider.description}
-                </p>
-
-                {/* 积分明细 */}
-                <div className="rounded-lg bg-gray-50 dark:bg-white/5 p-3 space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">可用积分</span>
-                    <span className="font-medium text-yellow-600 dark:text-yellow-400">
-                      {userPoints} 积分
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">订单金额</span>
-                    <span className="font-medium text-black dark:text-white">
-                      ${orderAmount.toFixed(2)}
-                    </span>
-                  </div>
-                </div>
-
-                {/* 提示信息 */}
-                <div className="flex items-start gap-2 p-3 rounded-lg bg-blue-100 dark:bg-blue-900/20">
-                  <Info size={16} className="text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-                  <p className="text-xs text-blue-700 dark:text-blue-400">
-                    积分支付金额为0，积分在确认订单时扣除
-                  </p>
-                </div>
               </div>
             )}
           </>
@@ -295,7 +253,7 @@ export default function PaymentMethodSelector({
               </h4>
               <div className="flex items-center gap-2">
                 <span className="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 px-2 py-1 rounded-full font-medium">
-                  额度: ${userCreditLimit.toFixed(2)}
+                  额度: {formatAmount(userCreditLimit)}
                 </span>
                 {isSelected && (
                   <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">
@@ -317,50 +275,14 @@ export default function PaymentMethodSelector({
                   <div className="flex justify-between">
                     <span className="text-gray-600 dark:text-gray-400">账期额度</span>
                     <span className="font-medium text-purple-600 dark:text-purple-400">
-                      ${userCreditLimit.toFixed(2)}
+                      {formatAmount(userCreditLimit)}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600 dark:text-gray-400">订单金额</span>
                     <span className="font-medium text-black dark:text-white">
-                      ${orderAmount.toFixed(2)}
+                      {formatAmount(orderAmount)}
                     </span>
-                  </div>
-                </div>
-              </div>
-            )}
-          </>
-        );
-
-      case "zgar_manual":
-        return (
-          <>
-            <div className="flex items-center justify-between">
-              <h4 className="font-semibold text-black dark:text-white flex items-center gap-2">
-                <span className="text-2xl">{provider.icon}</span>
-                {provider.name}
-              </h4>
-              {isSelected && (
-                <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">
-                  已选择
-                </span>
-              )}
-            </div>
-
-            {/* 老王我：折叠的详细内容 - 只在选中时显示 */}
-            {isSelected && (
-              <div className="mt-3 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {provider.description}
-                </p>
-
-                {/* 转账提示 */}
-                <div className="rounded-lg bg-gray-50 dark:bg-white/5 p-3">
-                  <div className="flex items-start gap-2">
-                    <Info size={14} className="text-blue-500 flex-shrink-0 mt-0.5" />
-                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                      转账完成后请上传凭证，我们会尽快确认发货
-                    </p>
                   </div>
                 </div>
               </div>
@@ -390,11 +312,18 @@ export default function PaymentMethodSelector({
     const simplifiedId = PROVIDER_ID_MAP[selectedProvider.id] || selectedProvider.id;
 
     switch (simplifiedId) {
-      case "zgar_balance":
-        handleBalancePayment();
+      case "zgar_offline":
+        // 老王我：余额/银行转账支付
+        if (hasEnoughBalance) {
+          handleBalancePayment();
+        } else {
+          // 余额不足，上传转账凭证
+          handleManualTransfer();
+        }
         break;
-      case "zgar_manual":
-        handleManualTransfer();
+      case "zgar_credit":
+        // 老王我：账期支付
+        handleBalancePayment();
         break;
       default:
         handleOtherPayment();
@@ -425,7 +354,7 @@ export default function PaymentMethodSelector({
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-300 dark:border-yellow-700">
               <Wallet size={16} className="text-yellow-600 dark:text-yellow-400" />
               <span className="text-sm font-medium text-yellow-700 dark:text-yellow-400">
-                余额: ${userBalance.toFixed(2)}
+                余额: {formatAmount(userBalance)}
               </span>
             </div>
           )}
@@ -496,7 +425,7 @@ export default function PaymentMethodSelector({
             ) : (
               <span className="flex items-center justify-center gap-2">
                 <CheckCircle size={18} />
-                确认支付 (${orderAmount.toFixed(2)})
+                确认支付 ({formatAmount(orderAmount)})
               </span>
             )}
           </button>
