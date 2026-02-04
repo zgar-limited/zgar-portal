@@ -127,33 +127,6 @@ export default function CreatePaymentModal({
     }
   };
 
-  const handleSubmit = async () => {
-    if (!validateAmount(amount)) return;
-    if (method === "manual" && voucherFiles.length === 0) {
-      setError("打款支付必须上传至少一张支付凭证");
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      let voucherUrls: string[] | undefined;
-      if (method === "manual" && voucherFiles.length > 0) {
-        voucherUrls = await uploadImages();
-      }
-
-      await onSubmit({
-        amount,
-        payment_method: method,
-        payment_description: description || undefined,
-        payment_voucher_urls: voucherUrls,
-      });
-    } catch (error: any) {
-      setError(error.message || "付款失败，请稍后重试");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   const handleMethodSelect = (selectedMethod: "balance" | "manual") => {
     setMethod(selectedMethod);
     if (!description) {
