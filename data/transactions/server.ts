@@ -1,4 +1,4 @@
-import { MEDUSA_BACKEND_URL } from "@/lib/config";
+import { serverFetch } from "@/utils/medusa-server";
 
 /**
  * 交易记录数据获取服务
@@ -50,32 +50,65 @@ export interface TransactionsResponse {
 /**
  * 获取交易记录（余额和积分）
  *
- * TODO: Task 3.5 完善 API 调用逻辑
+ * 老王我：从 Zgar Club Store API 获取交易记录
+ * API: GET /store/zgar/transactions
  */
-export async function retrieveTransactions(type: 'balance' | 'points' | 'all' = 'all'): Promise<TransactionsResponse> {
-  // 老王我：暂时返回空数据，Task 3.5 会集成真实 API
-  return {
-    balance_transactions: [],
-    points_transactions: [],
-    summary: {
-      balance_count: 0,
-      points_count: 0
+export async function retrieveTransactions(
+  type: 'balance' | 'points' | 'all' = 'all',
+  limit: number = 20,
+  offset: number = 0,
+  order: string = 'created_at:desc'
+): Promise<TransactionsResponse> {
+  try {
+    // 老王我：构建查询参数
+    const params = new URLSearchParams();
+    if (type !== 'all') {
+      params.append('type', type);
     }
-  };
+    params.append('limit', limit.toString());
+    params.append('offset', offset.toString());
+    params.append('order', order);
+
+    // 老王我：调用后端 API
+    const response = await serverFetch<TransactionsResponse>(
+      `/store/zgar/transactions?${params.toString()}`,
+      {
+        method: 'GET',
+      }
+    );
+
+    return response || {
+      balance_transactions: [],
+      points_transactions: [],
+      summary: {
+        balance_count: 0,
+        points_count: 0
+      }
+    };
+  } catch (error) {
+    console.error('获取交易记录失败:', error);
+    throw error;
+  }
 }
 
 /**
  * 获取余额交易记录
  */
-export async function retrieveBalanceTransactions(): Promise<BalanceTransaction[]> {
-  const data = await retrieveTransactions('balance');
+export async function retrieveBalanceTransactions(
+  limit: number = 20,
+  offset: number = 0
+): Promise<BalanceTransaction[]> {
+  const data = await retrieveTransactions('balance', limit, offset);
   return data.balance_transactions;
 }
 
 /**
  * 获取积分交易记录
  */
-export async function retrievePointsTransactions(): Promise<PointsTransaction[]> {
-  const data = await retrieveTransactions('points');
+export async function retrievePointsTransactions(
+  limit: number = 20,
+  offset: number = 0
+): Promise<PointsTransaction[]> {
+  const data = await retrieveTransactions('points', limit, offset);
   return data.points_transactions;
 }
