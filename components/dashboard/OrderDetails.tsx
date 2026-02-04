@@ -31,6 +31,17 @@ import { retrieveOrderWithZgarFields } from "@/data/orders";
 import { cn } from "@/lib/utils";
 // 老王我：导入重量格式化工具
 import { formatWeight } from "@/utils/weight-utils";
+// 老王我：导入新支付功能相关（2026-02-02 支付流程重新设计）
+import {
+  getPaymentRecords,
+  createPayment,
+  uploadPaymentRecordVoucher,
+  type PaymentRecord,
+  type PaymentSummary,
+} from "@/data/payments";
+import PaymentSummaryCard from "./payments/PaymentSummaryCard";
+import PaymentRecordsList from "./payments/PaymentRecordsList";
+import CreatePaymentModal, { type CreatePaymentInput } from "./payments/CreatePaymentModal";
 
 const OrderStatus = {
   PENDING: "pending",
@@ -58,12 +69,31 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [highlightAction, setHighlightAction] = useState<string | null>(null); // 老王我：高亮状态
 
+  // 老王我：新支付功能状态（2026-02-02 支付流程重新设计）
+  const [paymentRecords, setPaymentRecords] = useState<PaymentRecord[]>([]);
+  const [paymentSummary, setPaymentSummary] = useState<PaymentSummary | null>(null);
+  const [showCreatePaymentModal, setShowCreatePaymentModal] = useState(false);
+
   const orderId = order.id;
+
+  // 老王我：首次加载时获取订单详情和支付记录
+  useEffect(() => {
+    refreshOrder();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orderId]);
 
   const zgarOrder = (order as any).zgar_order || {};
   // 老王我获取 packing_requirement，里面有 shipping_marks
   const packingRequirement = zgarOrder.packing_requirement || {};
   const shippingMarks = packingRequirement.shipping_marks || [];
+
+  // 老王我：统一的金额格式化函数
+  const formatAmount = (amount: number | null | undefined): string => {
+    if (amount === null || amount === undefined || isNaN(amount)) {
+      return "$0.00";
+    }
+    return `$${amount.toFixed(2)}`;
+  };
 
   // 老王我：获取支付方式
   const paymentMethod = zgarOrder.payment_method;
@@ -76,12 +106,134 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
   const refreshOrder = async () => {
     setIsRefreshing(true);
     try {
+      // 老王我：获取订单详情（现有逻辑）
       const updatedOrder = await retrieveOrderWithZgarFields(orderId);
       if (updatedOrder) {
         setOrder(updatedOrder);
       }
+
+      // 老王我：获取支付记录列表（2026-02-02 支付流程重新设计）
+      try {
+        const paymentData = await getPaymentRecords(orderId);
+        setPaymentRecords(paymentData.payment_records || []);
+
+        // 老王我：如果后端返回的 summary 数据不完整，从 order 中计算
+        const summary = paymentData.summary;
+        if (!summary || summary.total_payable_amount === null) {
+          // 从 order 中计算金额信息
+          const orderTotal = updatedOrder?.total || 0;
+          const paidRecords = paymentData.payment_records || [];
+          const totalPaid = paidRecords.reduce((sum, record) => sum + (record.amount || 0), 0);
+          const remaining = orderTotal - totalPaid;
+          const progress = orderTotal > 0 ? (totalPaid / orderTotal) * 100 : 0;
+
+          // 老王我：构造完整的 summary 对象
+          setPaymentSummary({
+            total_payable_amount: orderTotal,
+            total_paid_amount: totalPaid,
+            remaining_amount: remaining,
+            payment_progress: progress,
+            status_counts: summary?.status_counts || {
+              pending: 0,
+              reviewing: 0,
+              approved: 0,
+              rejected: 0,
+            },
+            method_counts: summary?.method_counts || {
+              balance: 0,
+              manual: 0,
+            },
+          });
+        } else {
+          setPaymentSummary(summary);
+        }
+      } catch (error) {
+        // 老王我：如果获取支付记录失败，不影响订单详情的显示
+        console.error("获取支付记录失败:", error);
+
+        // 老王我：即使获取支付记录失败，也尝试从 order 中创建基本 summary
+        const orderTotal = updatedOrder?.total || 0;
+        setPaymentSummary({
+          total_payable_amount: orderTotal,
+          total_paid_amount: 0,
+          remaining_amount: orderTotal,
+          payment_progress: 0,
+          status_counts: {
+            pending: 0,
+            reviewing: 0,
+            approved: 0,
+            rejected: 0,
+          },
+          method_counts: {
+            balance: 0,
+            manual: 0,
+          },
+        });
+      }
     } finally {
       setIsRefreshing(false);
+    }
+  };
+
+  // 老王我：创建支付处理函数（2026-02-02 支付流程重新设计）
+  const handleCreatePayment = async (data: CreatePaymentInput) => {
+    try {
+      // 老王我：前端验证（余额支付时检查余额）
+      if (data.payment_method === "balance") {
+        const customerBalance = (order as any).customer?.balance || 0;
+        if (customerBalance < data.amount) {
+          alert(`余额不足！当前余额: ${formatAmount(customerBalance)}，需要支付: ${formatAmount(data.amount)}`);
+          return; // 不关闭弹窗，让用户修改
+        }
+      }
+
+      // 老王我：调用API创建支付
+      const result = await createPayment(orderId, {
+        amount: data.amount,
+        payment_method: data.payment_method,
+        payment_description: data.payment_description,
+        payment_voucher_urls: data.payment_voucher_urls, // 老王我：支持多张凭证
+        installment_number: paymentRecords.length + 1,
+      });
+
+      // 老王我：显示成功提示
+      alert(result.message || "支付创建成功");
+
+      // 老王我：关闭弹窗
+      setShowCreatePaymentModal(false);
+
+      // 老王我：刷新数据
+      await refreshOrder();
+    } catch (error: any) {
+      // 老王我：处理错误（余额不足的后端错误）
+      if (error.message?.includes("余额不足")) {
+        alert(error.message);
+        return; // 不关闭弹窗
+      }
+      alert(error.message || "创建支付失败，请稍后重试");
+    }
+  };
+
+  // 老王我：上传支付凭证处理函数（2026-02-02 支付流程重新设计）
+  const handleUploadVoucher = async (recordId: string) => {
+    const url = prompt("请输入支付凭证URL:");
+    if (!url) return;
+
+    try {
+      // 老王我：调用API上传凭证
+      const result = await uploadPaymentRecordVoucher(orderId, {
+        payment_record_id: recordId,
+        payment_voucher_url: url,
+      });
+
+      // 老王我：显示成功提示
+      alert(result.message || "凭证上传成功");
+
+      // 老王我：刷新数据
+      await refreshOrder();
+    } catch (error: any) {
+      // 老王我：显示错误（不刷新，让用户可以重试）
+      alert(error.message || "上传凭证失败，请重试");
     }
   };
 
@@ -225,7 +377,7 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
                 <div>
                   <p className="text-xs text-gray-500 mb-1">{t('price')}</p>
                   <p className="text-sm font-semibold text-gray-900">
-                    ${item.unit_price?.toFixed(2) || "0.00"}
+                    {formatAmount(item.unit_price)}
                   </p>
                 </div>
                 <div>
@@ -237,7 +389,7 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
                 <div>
                   <p className="text-xs text-gray-500 mb-1">小计</p>
                   <p className="text-sm font-bold text-brand-pink">
-                    ${itemTotal.toFixed(2)}
+                    {formatAmount(itemTotal)}
                   </p>
                 </div>
                 <div>
@@ -269,7 +421,7 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
       <div className="text-right">
         <p className="text-sm text-gray-600">{t('total')}</p>
         <p className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'monospace' }}>
-          ${order.total?.toFixed(2) || "0.00"}
+          {formatAmount(order.total)}
         </p>
       </div>
     </div>
@@ -278,107 +430,30 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
 
 {/* Payment & Packing Cards */}
 <div className="space-y-6">
-  {/* 老王我：Payment Voucher Card - Minimalism 风格 */}
-  {!isCompleted && paymentMethod !== 'balance' && (
-  <div
-    id="payment-voucher-card"
-    className={cn(
-      "bg-white border border-gray-200",
-      highlightAction === 'payment' && "ring-2 ring-brand-pink"
-    )}
-  >
-    {/* 标题栏 */}
-    <div className="border-b border-gray-200 px-6 py-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <CreditCard size={18} className="text-gray-400" />
-          <div>
-            <h3 className="text-base font-bold text-gray-900">{t('paymentVoucher')}</h3>
-            <p className="text-xs text-gray-500">{t('uploadYourPaymentReceipt')}</p>
-          </div>
-        </div>
-        {zgarOrder.payment_voucher_uploaded_at ? (
-          <CheckCircle size={18} className="text-green-600" />
-        ) : (
-          <AlertCircle size={18} className="text-gray-400" />
-        )}
-      </div>
-    </div>
+  {/* 老王我：新支付管理区域（2026-02-02 支付流程重新设计 - 多次支付架构） */}
+  {paymentSummary && (
+    <>
+      {/* 支付汇总卡片 */}
+      <PaymentSummaryCard summary={paymentSummary} />
 
-    {/* 内容区 */}
-    <div className="p-6">
-      {zgarOrder.payment_voucher_uploaded_at ? (
-        <div className="space-y-4">
-          {/* 上传时间 */}
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <Calendar size={16} />
-            <span>
-              {new Date(zgarOrder.payment_voucher_uploaded_at).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </span>
-          </div>
-
-          {/* 凭证列表 - 简洁网格 */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {zgarOrder.payment_voucher_url?.split(",").filter(Boolean).map((url: string, idx: number) => (
-              <a
-                key={idx}
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group relative aspect-square border border-gray-200 hover:border-brand-pink transition-colors"
-              >
-                <img
-                  src={url}
-                  alt={`Voucher ${idx + 1}`}
-                  className="w-full h-full object-cover"
-                />
-                {/* 悬停遮罩 */}
-                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <FileText size={20} className="text-white" />
-                </div>
-                {/* 序号 */}
-                <div className="absolute top-2 left-2 bg-gray-900/80 text-white text-xs font-medium px-2 py-0.5 rounded backdrop-blur-sm">
-                  {idx + 1}
-                </div>
-              </a>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <div className="text-center py-8 px-4">
-          <div className="inline-flex items-center justify-center w-12 h-12 bg-gray-100 rounded-full mb-3">
-            <Upload size={24} className="text-gray-400" />
-          </div>
-          <p className="text-sm text-gray-600 font-medium mb-1">{t('noVoucherUploaded')}</p>
-          <p className="text-xs text-gray-500">{t('uploadVoucherDescription')}</p>
-        </div>
-      )}
-
-      {/* 上传按钮 */}
-      <Button
-        variant="outline"
-        onClick={() => setShowVoucherModal(true)}
-        className="w-full h-11 text-sm font-semibold mt-4 border-2 border-gray-900 text-gray-900 hover:bg-gray-50 transition-colors"
-      >
-        <Upload size={16} className="mr-2" />
-        {zgarOrder.payment_voucher_uploaded_at ? t('uploadNewVoucher') : t('uploadPaymentVoucher')}
-      </Button>
-    </div>
-  </div>
+      {/* 支付记录列表 */}
+      <PaymentRecordsList
+        records={paymentRecords}
+        summary={paymentSummary}
+        orderAuditStatus={zgarOrder.audit_status}
+        isCompleted={isCompleted}
+        onCreatePayment={() => setShowCreatePaymentModal(true)}
+        onUploadVoucher={handleUploadVoucher}
+      />
+    </>
   )}
 
   {/* Packing Requirements Card - Minimalism 风格 */}
   <div
     id="packing-requirements-card"
     className={cn(
-      "bg-white border border-gray-200",
-      highlightAction === 'packing' && "ring-2 ring-brand-pink"
+      "bg-white border-2 border-gray-200 transition-all duration-300",
+      highlightAction === 'packing' && "border-solid animate-super-highlight"
     )}
   >
     {/* 标题栏 */}
@@ -527,8 +602,8 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
   <div
     id="closing-info-card"
     className={cn(
-      "bg-white border border-gray-200",
-      highlightAction === 'closing' && "ring-2 ring-brand-pink"
+      "bg-white border-2 border-gray-200 transition-all duration-300",
+      highlightAction === 'closing' && "border-solid animate-super-highlight"
     )}
   >
     {/* 老王我：标题栏 - border-b 分隔 */}
@@ -1097,6 +1172,16 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
             : undefined
         }
       />
+
+      {/* 老王我：创建支付弹窗（2026-02-02 支付流程重新设计 - 多次支付架构） */}
+      {paymentSummary && (
+        <CreatePaymentModal
+          show={showCreatePaymentModal}
+          onHide={() => setShowCreatePaymentModal(false)}
+          remainingAmount={paymentSummary.remaining_amount}
+          onSubmit={handleCreatePayment}
+        />
+      )}
     </div>
     </>
   );
