@@ -31,8 +31,7 @@ import { retrieveOrderWithZgarFields } from "@/data/orders";
 import { cn } from "@/lib/utils";
 // 老王我：导入重量格式化工具
 import { formatWeight } from "@/utils/weight-utils";
-// 老王我：导入支付状态计算工具函数（2026-02-05）
-import { calculatePaymentAuditStatus } from "@/utils/calculate-payment-audit-status";
+// 老王注：移除实时计算工具函数，改用数据库字段（2026-02-05 回滚）
 // 老王我：导入新支付功能相关（2026-02-02 支付流程重新设计）
 import {
   getPaymentRecords,
@@ -80,25 +79,34 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
 
   const orderId = order.id;
 
-  // 老王我：计算支付审核状态（2026-02-05）
+  // 老王注：从数据库字段获取支付审核状态（2026-02-05 回滚）
   const getPaymentAuditStatus = () => {
-    if (!paymentRecords || paymentRecords.length === 0) {
-      return { label: "未上传凭证", variant: "secondary" as const };
-    }
+    const status = zgarOrder?.payment_audit_status;
 
-    const auditStatus = calculatePaymentAuditStatus(paymentRecords);
+    const statusMap = {
+      "not_uploaded": {
+        label: "未上传凭证",
+        variant: "bg-gray-100 text-gray-800 border border-gray-200",
+        status: "not_uploaded",
+      },
+      "uploaded": {
+        label: "已上传凭证",
+        variant: "bg-blue-100 text-blue-800 border border-blue-200",
+        status: "uploaded",
+      },
+      "partial": {
+        label: "审核中",
+        variant: "bg-yellow-100 text-yellow-800 border border-yellow-200",
+        status: "partial",
+      },
+      "completed": {
+        label: "审核完成",
+        variant: "bg-green-100 text-green-800 border border-green-200",
+        status: "completed",
+      },
+    };
 
-    // 老王注：映射 Tailwind 类名到 Badge variant
-    let badgeVariant: "default" | "secondary" | "destructive" | "outline" = "secondary";
-    if (auditStatus.variant.includes("green")) {
-      badgeVariant = "default";  // 审核通过 → 绿色
-    } else if (auditStatus.variant.includes("red")) {
-      badgeVariant = "destructive";  // 审核拒绝 → 红色
-    } else if (auditStatus.variant.includes("yellow")) {
-      badgeVariant = "outline";  // 审核中 → 黄色边框
-    }
-
-    return { ...auditStatus, badgeVariant };
+    return statusMap[status] || statusMap["not_uploaded"];
   };
 
 
@@ -987,7 +995,7 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
       </>
     )}
 
-    {/* 支付审核状态 - 实时计算（2026-02-05），余额支付时不显示 */}
+    {/* 支付审核状态 - 从数据库字段获取（2026-02-05 回滚），余额支付时不显示 */}
     {paymentMethod !== 'balance' && (
       <>
         <div className="h-px bg-gray-200"></div>
@@ -996,11 +1004,7 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
             <CheckCircle size={16} className="text-gray-400" />
             <span className="text-sm text-gray-600">{t('paymentAuditStatus')}</span>
           </div>
-          <span className={`text-sm font-medium capitalize ${
-            getPaymentAuditStatus().status === 'rejected'
-              ? 'text-red-600'
-              : 'text-gray-900'
-          }`}>
+          <span className="text-sm font-medium text-gray-900">
             {getPaymentAuditStatus().label}
           </span>
         </div>

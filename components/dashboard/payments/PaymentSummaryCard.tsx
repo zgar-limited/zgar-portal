@@ -52,6 +52,24 @@ export default function PaymentSummaryCard({ summary }: PaymentSummaryCardProps)
 
       {/* 统计数据 */}
       <div className="p-6">
+        {/* 老王注：审核中金额提示（2026-02-05） */}
+        {summary.reviewing_amount > 0 && (
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200">
+            <p className="text-sm text-blue-800 flex items-center gap-2">
+              ℹ️ 注意：已付金额中包含 ¥{summary.reviewing_amount.toFixed(2)} 还在审核中
+            </p>
+          </div>
+        )}
+
+        {/* 老王注：未通过审核金额警告提示（2026-02-05） */}
+        {summary.rejected_amount > 0 && (
+          <div className="mb-4 p-3 bg-orange-50 border border-orange-200">
+            <p className="text-sm text-orange-800 flex items-center gap-2">
+              ⚠️ 注意：您有 ¥{summary.rejected_amount.toFixed(2)} 的支付未通过审核，可以重新上传凭证或创建新的支付记录
+            </p>
+          </div>
+        )}
+
         {/* 已付清恭喜提示 */}
         {isFullyPaid && (
           <div className="mb-4 p-3 bg-green-50 border border-green-200">
@@ -72,12 +90,19 @@ export default function PaymentSummaryCard({ summary }: PaymentSummaryCardProps)
             </p>
           </div>
 
-          {/* 已付金额 */}
+          {/* 已付金额 - 老王注：显示审核中金额提示（2026-02-05） */}
           <div>
             <p className="text-xs text-gray-600 mb-1">已付金额</p>
-            <p className="text-lg font-bold text-brand-blue" style={{ fontFamily: 'monospace' }}>
-              {formatAmount(totalPaid)}
-            </p>
+            <div className="flex flex-col">
+              <p className="text-lg font-bold text-brand-blue" style={{ fontFamily: 'monospace' }}>
+                {formatAmount(totalPaid)}
+              </p>
+              {summary.reviewing_amount > 0 && (
+                <p className="text-xs text-blue-600 font-medium">
+                  其中 ¥{summary.reviewing_amount.toFixed(2)} 还在审核中
+                </p>
+              )}
+            </div>
           </div>
 
           {/* 剩余金额 */}

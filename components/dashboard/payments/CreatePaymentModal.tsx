@@ -139,15 +139,16 @@ export default function CreatePaymentModal({
 
   return (
     <Dialog open={show} onOpenChange={(open) => !open && onHide()}>
-      <DialogContent className="max-w-lg">
-        <DialogHeader className="border-b pb-4">
+      <DialogContent className="max-w-lg max-h-[90vh] flex flex-col p-0">
+        <DialogHeader className="border-b pb-4 px-6 pt-6">
           <DialogTitle className="flex items-center gap-2 text-lg font-bold">
             <Wallet size={18} className="text-brand-pink" />
             付款
           </DialogTitle>
         </DialogHeader>
 
-        <div className="py-6 space-y-4">
+        {/* 老王注：可滚动的内容区域（2026-02-05） */}
+        <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4">
           {/* 错误提示 */}
           {error && (
             <div className="p-3 bg-red-50 border border-red-200 flex items-center gap-2 text-sm text-red-700">
@@ -257,7 +258,7 @@ export default function CreatePaymentModal({
         </div>
 
         {/* 底部按钮 */}
-        <div className="border-t pt-4 flex gap-3">
+        <div className="border-t pt-4 px-6 pb-6 flex gap-3">
           <Button
             variant="outline"
             onClick={onHide}
@@ -268,11 +269,17 @@ export default function CreatePaymentModal({
           </Button>
           <Button
             onClick={handleSubmit}
-            className="flex-1 h-10 font-semibold bg-brand-pink text-white hover:bg-brand-pink/90"
+            className={`
+              flex-1 h-10 font-semibold
+              ${amount && method && (method !== "manual" || voucherUrls.length > 0) && !error && !isSubmitting
+                ? "bg-brand-pink text-white hover:bg-brand-pink/90"
+                : "bg-gray-200 text-gray-400 cursor-not-allowed"
+              }
+            `}
             disabled={
               !amount ||
               !method ||
-              (method === "manual" && voucherUrls.length === 0) ||  // 老王注：改用 voucherUrls（2026-02-05）
+              (method === "manual" && voucherUrls.length === 0) ||
               isSubmitting ||
               !!error
             }
