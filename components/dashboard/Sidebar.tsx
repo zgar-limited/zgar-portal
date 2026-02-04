@@ -13,6 +13,7 @@ import {
   Wallet,
   Star,
   ChevronRight,
+  Receipt,
 } from "lucide-react";
 import { HttpTypes } from "@medusajs/types";
 
@@ -56,6 +57,11 @@ export default function Sidebar({ customer, orders }: SidebarProps) {
       href: "/account-orders",
       label: "我的订单",
       icon: Package,
+    },
+    {
+      href: "/account-transactions",
+      label: "交易记录",
+      icon: Receipt,
     },
     {
       href: "/account-addresses",
