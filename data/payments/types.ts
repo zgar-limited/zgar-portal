@@ -13,7 +13,7 @@ export interface PaymentRecord {
   payment_status: "pending" | "reviewing" | "approved" | "rejected";
   description: string;
   installment_number: number;
-  payment_voucher_url: string | null;
+  payment_voucher_urls: string[];  // 老王注：改成数组类型（2026-02-05）
   voucher_uploaded_at: string | null;
   admin_audit_amount: number | null;
   cfo_audit_amount: number | null;
