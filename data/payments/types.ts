@@ -19,6 +19,8 @@ export interface PaymentRecord {
   cfo_audit_amount: number | null;
   admin_audited_at: string | null;
   cfo_audited_at: string | null;
+  admin_remark: string | null;  // 老王注：Admin 审核备注（2026-02-05）
+  cfo_remark: string | null;   // 老王注：CFO 审核备注（2026-02-05）
   created_at: string;
   updated_at: string;
 }
@@ -29,6 +31,8 @@ export interface PaymentRecord {
 export interface PaymentSummary {
   total_payable_amount: number | null;
   total_paid_amount: number | null;
+  reviewing_amount: number;  // 老王注：审核中的金额（2026-02-05）
+  rejected_amount: number;  // 老王注：已拒绝的金额（2026-02-05）
   remaining_amount: number | null;
   payment_progress: number | null; // 0-100
   status_counts: {

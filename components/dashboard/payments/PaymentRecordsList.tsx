@@ -216,6 +216,21 @@ export default function PaymentRecordsList({
                   </span>
                 </div>
 
+                {/* 老王我：拒绝原因提示（2026-02-05） */}
+                {record.payment_status === "rejected" && (
+                  <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <div className="flex items-start gap-2">
+                      <AlertCircle size={16} className="text-red-600 mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-red-900 mb-1">审核拒绝原因</p>
+                        <p className="text-sm text-red-700">
+                          {record.admin_remark || record.cfo_remark || "暂无拒绝原因，请联系管理员"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* 创建时间 */}
                 <div className="flex items-center gap-2 text-xs text-gray-500 mb-4">
                   <Calendar size={14} />
@@ -230,9 +245,33 @@ export default function PaymentRecordsList({
                   </span>
                 </div>
 
-                {/* 老王我：修改凭证按钮 - 仅打款支付且状态为 pending 或 reviewing 时显示（2026-02-05） */}
+                {/* 老王我：支付凭证预览 - 显示多张图片（2026-02-05） */}
+                {record.payment_voucher_urls && record.payment_voucher_urls.length > 0 && (
+                  <div className="mb-4">
+                    <div className="text-xs font-semibold text-gray-900 mb-2">支付凭证</div>
+                    <div className="flex gap-2 flex-wrap">
+                      {record.payment_voucher_urls.map((url, index) => (
+                        <a
+                          key={index}
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="relative group"
+                        >
+                          <img
+                            src={url}
+                            alt={`凭证${index + 1}`}
+                            className="w-20 h-20 object-cover rounded-lg border-2 border-gray-200 hover:border-brand-pink transition-colors cursor-pointer"
+                          />
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 老王我：修改凭证按钮 - manual 支付且状态为 pending/reviewing/rejected 时显示（2026-02-05） */}
                 {record.payment_method === "manual" &&
-                  ["pending", "reviewing"].includes(record.payment_status) && (
+                  ["pending", "reviewing", "rejected"].includes(record.payment_status) && (
                     <Button
                       variant="outline"
                       size="sm"
@@ -240,38 +279,14 @@ export default function PaymentRecordsList({
                       className="text-sm font-medium h-9 px-4"
                     >
                       <Upload size={14} className="mr-2" />
-                      {record.payment_voucher_urls && record.payment_voucher_urls.length > 0
-                        ? "修改凭证"
-                        : "上传凭证"}
+                      {record.payment_status === "rejected"
+                        ? "重新上传凭证"
+                        : (record.payment_voucher_urls && record.payment_voucher_urls.length > 0
+                          ? "修改凭证"
+                          : "上传凭证")
+                      }
                     </Button>
                   )}
-
-                {/* 老王我：审核信息 - 如果已审核 */}
-                {(record.admin_audit_amount || record.cfo_audit_amount) && (
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <div className="text-xs font-bold text-gray-900 mb-3">
-                      审核信息
-                    </div>
-                    <div className="space-y-2">
-                      {record.admin_audit_amount && (
-                        <div className="flex items-center justify-between p-3 bg-white border border-gray-200">
-                          <span className="text-sm font-medium text-gray-700">Admin 审核</span>
-                          <span className="text-sm font-bold text-gray-900" style={{ fontFamily: 'monospace' }}>
-                            {formatAmount(record.admin_audit_amount)}
-                          </span>
-                        </div>
-                      )}
-                      {record.cfo_audit_amount && (
-                        <div className="flex items-center justify-between p-3 bg-white border border-gray-200">
-                          <span className="text-sm font-medium text-gray-700">CFO 审核</span>
-                          <span className="text-sm font-bold text-gray-900" style={{ fontFamily: 'monospace' }}>
-                            {formatAmount(record.cfo_audit_amount)}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
               </div>
             ))}
           </div>
