@@ -11,6 +11,7 @@ import "../../public/scss/main.scss";
 import "../../public/css/harmonyos_sans.css";
 import "../../public/css/harmonyos_sans_tc.css";
 
+import { Toaster } from "sonner";
 import GlobalEffectsProvider from "@/components/common/GlobalEffectProvider";
 import BackToTop from "@/components/back-to-top/BackToTop";
 import QueryClientProvider from "@/components/providers/QueryClientProvider";
@@ -52,6 +53,7 @@ export default async function RootLayout({
           </main>
           </NextIntlClientProvider>
         </QueryClientProvider>
+        <Toaster position="top-right" duration={3000} richColors />
       </body>
     </html>
   );
