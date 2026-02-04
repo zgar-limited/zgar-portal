@@ -14,7 +14,7 @@ interface PaymentRecordsListProps {
   orderAuditStatus: string;
   isCompleted?: boolean;
   onCreatePayment: () => void;
-  onUploadVoucher: (recordId: string) => void;
+  onUpdateVoucher: (recordId: string) => void;  // 老王注：改名（2026-02-05）
 }
 
 /**
@@ -78,7 +78,7 @@ export default function PaymentRecordsList({
   orderAuditStatus,
   isCompleted = false,
   onCreatePayment,
-  onUploadVoucher,
+  onUpdateVoucher,
 }: PaymentRecordsListProps) {
   // 老王我：判断是否可以创建支付
   const canCreatePayment = () => {
@@ -230,17 +230,19 @@ export default function PaymentRecordsList({
                   </span>
                 </div>
 
-                {/* 老王我：上传凭证按钮 - 仅打款支付且状态为pending时显示 */}
+                {/* 老王我：修改凭证按钮 - 仅打款支付且状态为 pending 或 reviewing 时显示（2026-02-05） */}
                 {record.payment_method === "manual" &&
-                  record.payment_status === "pending" && (
+                  ["pending", "reviewing"].includes(record.payment_status) && (
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => onUploadVoucher(record.id)}
+                      onClick={() => onUpdateVoucher(record.id)}
                       className="text-sm font-medium h-9 px-4"
                     >
                       <Upload size={14} className="mr-2" />
-                      上传支付凭证
+                      {record.payment_voucher_urls && record.payment_voucher_urls.length > 0
+                        ? "修改凭证"
+                        : "上传凭证"}
                     </Button>
                   )}
 
