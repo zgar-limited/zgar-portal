@@ -53,6 +53,7 @@ export async function createPayment(
     amount: number;
     payment_method: "balance" | "manual";
     payment_description?: string;
+    payment_voucher_urls?: string[];  // 老王注：新增凭证数组（2026-02-05）
     installment_number?: number;
   }
 ) {
@@ -71,11 +72,11 @@ export async function createPayment(
       method: "POST",
       headers,
       body: {
-        action: "create-payment",
-        payment_amount: data.amount,
+        action: "create-payment-with-voucher",  // 老王注：改 action 名字（2026-02-05）
+        amount: data.amount,  // 老王注：统一用 amount（2026-02-05）
         payment_method: data.payment_method,
-        payment_description:
-          data.payment_description || `支付${data.amount}元`,
+        payment_description: data.payment_description || `支付${data.amount}元`,
+        payment_voucher_urls: data.payment_voucher_urls || [],  // 老王注：新增凭证数组（2026-02-05）
         installment_number: data.installment_number || 1,
       },
     }
@@ -83,17 +84,17 @@ export async function createPayment(
 }
 
 /**
- * 老王我：上传支付记录的凭证（新架构 - 多次支付）
+ * 老王我：修改支付记录的凭证（新架构 - 多次支付，2026-02-05 重构）
  *
  * @param orderId 订单ID
  * @param data 凭证数据
  * @returns 上传结果
  */
-export async function uploadPaymentRecordVoucher(
+export async function updatePaymentVoucher(
   orderId: string,
   data: {
     payment_record_id: string;
-    payment_voucher_url: string;
+    payment_voucher_urls: string[];  // 老王注：改成数组（2026-02-05）
   }
 ) {
   const authHeaders = await getAuthHeaders();
@@ -111,9 +112,9 @@ export async function uploadPaymentRecordVoucher(
       method: "POST",
       headers,
       body: {
-        action: "upload-payment-voucher",
+        action: "update-payment-voucher",  // 老王注：改 action 名字（2026-02-05）
         payment_record_id: data.payment_record_id,
-        payment_voucher_url: data.payment_voucher_url,
+        payment_voucher_urls: data.payment_voucher_urls,  // 老王注：改成数组（2026-02-05）
       },
     }
   );
