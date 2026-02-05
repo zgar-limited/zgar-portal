@@ -4,6 +4,7 @@
  * 这个 API Route 在服务端运行，可以读取请求头获取真实客户端 IP
  */
 
+import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { getClientIPFromHeaders } from '@/utils/client-ip';
 

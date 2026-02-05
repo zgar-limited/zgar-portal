@@ -400,5 +400,65 @@
     "voucherUploadSuccess": "Voucher uploaded successfully",
     "voucherUpdateSuccess": "Voucher updated successfully",
     "uploadVoucherFailed": "Failed to upload voucher"
+  },
+  "VerifyPage": {
+    "hero": {
+      "subtitle": "Scan the anti-counterfeit label to verify your ZGAR product",
+      "scanPrompt": "Please scan the anti-counterfeit label",
+      "viewTutorial": "View Tutorial"
+    },
+    "heroWithCode": {
+      "subtitle": "Enter the complete 14-digit code to verify your ZGAR product",
+      "progress": {
+        "scan": "Scan",
+        "input": "Input",
+        "complete": "Complete"
+      }
+    },
+    "form": {
+      "title": "Enter Verification Code",
+      "subtitle": "Please enter the last 6 digits",
+      "label": "14-digit Verification Code",
+      "prefix": "PREFIX",
+      "placeholder": "Enter 6 digits",
+      "progress": "Progress",
+      "verifying": "Verifying...",
+      "verifyButton": "Verify Now"
+    },
+    "demo": {
+      "title": "Code Example",
+      "altText": "VC Example",
+      "description": "Scratch off the coating to reveal the complete 14-digit code",
+      "hint": "Prefix is auto-filled by scanning, please enter the last 6 digits"
+    },
+    "steps": {
+      "only": "Only",
+      "steps": "Steps",
+      "title": "Quick Verification Guide",
+      "step1": "Step 1",
+      "step2": "Step 2",
+      "step3": "Step 3",
+      "step4": "Step 4",
+      "successTitle": "Congratulations! 🎉",
+      "successMessage": "You've mastered the verification process to ensure 100% authentic ZGAR products"
+    },
+    "result": {
+      "congratulations": "CONGRATULATIONS!",
+      "codeInfo": "Code Information",
+      "codeInfoHint": "Basic information for this anti-counterfeit code",
+      "serialNumber": "Serial Number",
+      "queryTimes": "Query Times",
+      "timesUnit": "times",
+      "firstQuery": "First Query",
+      "codeType": "Code Type",
+      "verifyAnother": "Verify Another",
+      "verificationFailed": "Verification Failed",
+      "tryAgain": "Try Again"
+    },
+    "validation": {
+      "incompleteCode": "Please enter the complete 6-digit code",
+      "verifySuccess": "Verification successful!",
+      "verifyFailed": "Verification failed, please try again"
+    }
   }
 }

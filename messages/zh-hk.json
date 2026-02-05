@@ -398,5 +398,65 @@
     "voucherUploadSuccess": "憑證上傳成功",
     "voucherUpdateSuccess": "憑證修改成功",
     "uploadVoucherFailed": "上傳憑證失敗"
+  },
+  "VerifyPage": {
+    "hero": {
+      "subtitle": "掃描防偽標籤，驗證您的ZGAR產品真偽",
+      "scanPrompt": "請掃描防偽標籤",
+      "viewTutorial": "查看教程"
+    },
+    "heroWithCode": {
+      "subtitle": "輸入完整的14位防偽碼，驗證您的ZGAR產品真偽",
+      "progress": {
+        "scan": "掃碼",
+        "input": "輸入",
+        "complete": "完成"
+      }
+    },
+    "form": {
+      "title": "輸入驗證碼",
+      "subtitle": "請輸入後6位驗證碼",
+      "label": "14位防偽驗證碼",
+      "prefix": "PREFIX",
+      "placeholder": "輸入6位",
+      "progress": "完成度",
+      "verifying": "驗證中...",
+      "verifyButton": "立即驗證"
+    },
+    "demo": {
+      "title": "驗證碼示例",
+      "altText": "VC 示例",
+      "description": "刮開塗層可見完整14位驗證碼",
+      "hint": "前綴由掃描自動填充，請輸入後6位"
+    },
+    "steps": {
+      "only": "只需",
+      "steps": "步",
+      "title": "快速驗證教程",
+      "step1": "步驟1",
+      "step2": "步驟2",
+      "step3": "步驟3",
+      "step4": "步驟4",
+      "successTitle": "恭喜完成！🎉",
+      "successMessage": "您已掌握防偽驗證流程，確保購買到100%正品ZGAR產品"
+    },
+    "result": {
+      "congratulations": "CONGRATULATIONS!",
+      "codeInfo": "防偽碼信息",
+      "codeInfoHint": "已查詢到此防偽碼的基本信息",
+      "serialNumber": "序列號",
+      "queryTimes": "查詢次數",
+      "timesUnit": "次",
+      "firstQuery": "首次查詢",
+      "codeType": "防偽碼類型",
+      "verifyAnother": "Verify Another",
+      "verificationFailed": "驗證失敗",
+      "tryAgain": "Try Again"
+    },
+    "validation": {
+      "incompleteCode": "請輸入完整的6位驗證碼",
+      "verifySuccess": "驗證通過！",
+      "verifyFailed": "驗證失敗，請重試"
+    }
   }
 }
