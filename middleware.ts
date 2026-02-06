@@ -113,6 +113,14 @@ export default function middleware(request: NextRequest) {
     return response;
   }
 
+  // 1.5 旧地址兼容：/verify 重定向到 /en-us/verify（302 临时重定向）
+  if (pathname === '/verify' || pathname === '/verify/') {
+    const url = request.nextUrl.clone();
+    url.pathname = '/en-us/verify';
+    // 保留所有查询参数（如 ?c=123123XX）
+    return NextResponse.redirect(url, 302);
+  }
+
   // 2. 移除 locale 前缀，获取实际路径
   const pathnameWithoutLocale = getPathnameWithoutLocale(pathname, routing.locales);
 

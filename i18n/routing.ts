@@ -6,7 +6,7 @@ export const routing = defineRouting({
   locales: ['zh-cn', 'en-us', 'zh-hk'],
 
   // Used when no locale matches
-  defaultLocale: 'zh-cn',
+  defaultLocale: 'en-us',
 
   // 老王我：SEO 最佳实践 - 所有 locale 都显示在 URL 中
   // 'always' = 所有 locale 都显示（SEO 最友好）✅
