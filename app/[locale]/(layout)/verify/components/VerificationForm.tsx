@@ -10,7 +10,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { CheckCircle, XCircle } from 'lucide-react';
 import { queryCodeInfo, verifyCode } from '@/data/anti-counterfeit';
 
@@ -23,6 +23,12 @@ interface VerificationFormProps {
  */
 export function VerificationForm({ codePrefix }: VerificationFormProps) {
   const t = useTranslations('VerifyPage');
+  const locale = useLocale();
+
+  // 老王我：根据语言选择图片后缀
+  // zh-hk 使用繁体中文版，其他使用英文版
+  const imageSuffix = locale === 'zh-hk' ? '--tr@2x' : '--en@2x';
+
   const [suffix, setSuffix] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [isQuerying, setIsQuerying] = useState(false);
@@ -47,10 +53,20 @@ export function VerificationForm({ codePrefix }: VerificationFormProps) {
           setCodeInfo(data.data);
           console.log('[Verification] 防伪码信息查询成功:', data.data);
         } else {
+          // 老王我：查询失败也要显示错误信息给用户
           console.error('[Verification] 防伪码信息查询失败:', data.msg);
+          setResult({
+            success: false,
+            message: data.msg || t('validation.queryFailed'),
+          });
         }
       } catch (error) {
+        // 老王我：查询异常也要显示错误信息给用户
         console.error('[Verification] 查询防伪码信息失败:', error);
+        setResult({
+          success: false,
+          message: t('validation.queryFailed'),
+        });
       } finally {
         setIsQuerying(false);
       }
@@ -511,7 +527,7 @@ export function VerificationForm({ codePrefix }: VerificationFormProps) {
               <div className="absolute -bottom-2 -left-2 w-6 h-6 bg-yellow-400 rounded-full border-4 border-gray-900"></div>
 
               <img
-                src="https://www.zgar.com/assets/img/mob/verify-demo.png"
+                src="/verify/verify-demo.png"
                 alt={t('demo.altText')}
                 className="w-28 h-auto mx-auto relative z-10"
               />
@@ -553,28 +569,28 @@ export function VerificationForm({ codePrefix }: VerificationFormProps) {
         <div className="space-y-4">
           <div className="bg-white border-4 border-gray-900 rounded-3xl shadow-[6px_6px_0px_rgba(0,0,0,1)] overflow-hidden">
             <img
-              src="https://www.zgar.com/assets/img/mob/verify-step-1--en@2x.png"
+              src={`/verify/verify-step-1${imageSuffix}.png`}
               alt={t('steps.step1')}
               className="w-full h-auto"
             />
           </div>
           <div className="bg-white border-4 border-gray-900 rounded-3xl shadow-[6px_6px_0px_rgba(0,0,0,1)] overflow-hidden">
             <img
-              src="https://www.zgar.com/assets/img/mob/verify-step-2--en@2x.png"
+              src={`/verify/verify-step-2${imageSuffix}.png`}
               alt={t('steps.step2')}
               className="w-full h-auto"
             />
           </div>
           <div className="bg-white border-4 border-gray-900 rounded-3xl shadow-[6px_6px_0px_rgba(0,0,0,1)] overflow-hidden">
             <img
-              src="https://www.zgar.com/assets/img/mob/verify-step-3--en@2x.png"
+              src={`/verify/verify-step-3${imageSuffix}.png`}
               alt={t('steps.step3')}
               className="w-full h-auto"
             />
           </div>
           <div className="bg-white border-4 border-gray-900 rounded-3xl shadow-[6px_6px_0px_rgba(0,0,0,1)] overflow-hidden">
             <img
-              src="https://www.zgar.com/assets/img/mob/verify-step-4--en@2x.png"
+              src={`/verify/verify-step-4${imageSuffix}.png`}
               alt={t('steps.step4')}
               className="w-full h-auto"
             />

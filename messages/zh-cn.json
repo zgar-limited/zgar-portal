@@ -456,7 +456,8 @@
     "validation": {
       "incompleteCode": "请输入完整的6位验证码",
       "verifySuccess": "验证通过！",
-      "verifyFailed": "验证失败，请重试"
+      "verifyFailed": "验证失败，请重试",
+      "queryFailed": "查询防伪码信息失败"
     }
   }
 }

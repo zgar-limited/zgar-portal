@@ -458,7 +458,8 @@
     "validation": {
       "incompleteCode": "Please enter the complete 6-digit code",
       "verifySuccess": "Verification successful!",
-      "verifyFailed": "Verification failed, please try again"
+      "verifyFailed": "Verification failed, please try again",
+      "queryFailed": "Failed to query code information"
     }
   }
 }

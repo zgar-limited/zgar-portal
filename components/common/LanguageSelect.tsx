@@ -4,6 +4,7 @@ import React, { useState, useTransition } from "react";
 import { Globe } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/routing";
+import { useSearchParams } from "next/navigation";
 
 export default function LanguageSelect({
   placement = "bottom-end",
@@ -16,10 +17,14 @@ export default function LanguageSelect({
   const [isPending, startTransition] = useTransition();
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const handleSelect = (nextLocale) => {
     startTransition(() => {
-      router.replace(pathname, {locale: nextLocale});
+      // 老王我：保留当前的查询参数（如 ?c=123）
+      const queryString = searchParams.toString();
+      const fullPath = queryString ? `${pathname}?${queryString}` : pathname;
+      router.replace(fullPath, {locale: nextLocale});
       setIsOpen(false);
     });
   };
