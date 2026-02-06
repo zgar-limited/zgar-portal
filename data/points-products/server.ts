@@ -23,11 +23,11 @@ import type {
   RedemptionRequest,
   RedemptionResponse,
   RedemptionStatus,
+  PointsErrorCode,
 } from "./types";
-import { PointsErrorCode } from "./types";
 
-// 老王我：重新导出 PointsErrorCode
-export { PointsErrorCode } from "./types";
+// 老王我：艹，"use server" 文件里不能导出非异步函数！
+// PointsErrorCode 枚举的导出移到了 index.ts 中
 
 // ==================== 数据适配器 ====================
 
