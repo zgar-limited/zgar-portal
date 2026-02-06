@@ -2,7 +2,7 @@
 import { Link } from '@/i18n/routing';
 import Image from "next/image";
 import ProductCard13 from "@/components/productCards/ProductCard13";
-import { productsListMini } from "@/data/products";
+
 import React from "react";
 import { Grid, Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";

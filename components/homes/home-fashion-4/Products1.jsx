@@ -1,6 +1,6 @@
 "use client";
 import ProductCard1 from "@/components/productCards/ProductCard1";
-import { products5 } from "@/data/products";
+
 import React, { useMemo, useState } from "react";
 import { Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";

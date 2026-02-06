@@ -12,18 +12,23 @@ export const metadata = {
   description: "",
 };
 export default async function page() {
+  // 老王我：检查用户是否已登录（token 有效）
   const customer = await retrieveCustomer();
   console.log('%c [ customer ]-16', 'font-size:13px; background:pink; color:#bf2c9f;', customer)
+
+  // 老王我：如果 customer 存在，说明 token 有效，重定向到账户页
   if (customer) {
-    redirect("/");
+    redirect("/account-page");
   }
+
+  // 老王我：如果 customer 为 null（token 无效或过期），显示登录表单
   return (
     <>
-      <HomeTips />
-      <HomeHeader parentClass="tf-header header-fix" customer={customer} />
+
+
 
       <Login />
-      <HomeFooter />
+
     </>
   );
 }

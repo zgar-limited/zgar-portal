@@ -118,12 +118,9 @@ export default function AddressesClient({ customer, addresses: initialAddresses 
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* 侧边栏 */}
-          <div className="lg:col-span-1">
-            <Sidebar customer={customer} />
-          </div>
+      <div className="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
+         
 
           {/* 主内容区 */}
           <div className="lg:col-span-3">
@@ -162,9 +159,9 @@ export default function AddressesClient({ customer, addresses: initialAddresses 
               {addresses.length === 0 ? (
                 <Card>
                   <CardContent className="p-12 text-center">
-                    <MapPin className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                    <h3 className="text-lg font-medium mb-2">暂无收货地址</h3>
-                    <p className="text-muted-foreground mb-4">
+                    <MapPin className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                    <h3 className="mb-2 text-lg font-medium">暂无收货地址</h3>
+                    <p className="mb-4 text-muted-foreground">
                       添加您的第一个收货地址，方便购物结算
                     </p>
                     <Button onClick={handleCreateAddress} variant="outline" className="gap-2">
@@ -174,12 +171,12 @@ export default function AddressesClient({ customer, addresses: initialAddresses 
                   </CardContent>
                 </Card>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   {addresses.map((address) => (
-                    <Card key={address.id} className="relative group hover:shadow-md transition-shadow">
+                    <Card key={address.id} className="relative transition-shadow group hover:shadow-md">
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between">
-                          <div className="space-y-1 flex-1 min-w-0">
+                          <div className="flex-1 min-w-0 space-y-1">
                             <CardTitle className="text-base truncate">
                               {address.company || `${address.first_name} ${address.last_name}`}
                             </CardTitle>
@@ -215,7 +212,7 @@ export default function AddressesClient({ customer, addresses: initialAddresses 
                           )}
                           <div className="flex items-start gap-2">
                             <MapPin size={14} className="text-muted-foreground mt-0.5 flex-shrink-0" />
-                            <div className="text-muted-foreground space-y-1">
+                            <div className="space-y-1 text-muted-foreground">
                               <div>{address.address_1}</div>
                               {address.address_2 && <div>{address.address_2}</div>}
                               <div>
@@ -283,7 +280,7 @@ export default function AddressesClient({ customer, addresses: initialAddresses 
             >
               {isPending ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   删除中...
                 </>
               ) : (

@@ -4,7 +4,7 @@ import FilterMeta from "./FilterMeta";
 import Pagination from "./Pagination";
 import ProductCard1 from "../productCards/ProductCard1";
 import { initialState, reducer } from "@/reducer/filterReducer";
-import { products } from "@/data/products";
+
 import Sorting from "./Sorting";
 import LayoutHandler from "./LayoutHandler";
 

@@ -2,13 +2,21 @@
 import React, { useState } from "react";
 import { Link } from '@/i18n/routing';
 import Image from "next/image";
-import { ShoppingCart, X } from "lucide-react";
+import { ShoppingCart, Package } from "lucide-react";
 import { StoreCart } from "@medusajs/types";
 import { useTranslations } from "next-intl";
 
 export default function CartIcon({ cart }: { cart?: StoreCart }) {
   const [isHovered, setIsHovered] = useState(false);
   const t = useTranslations("CartIcon");
+
+  // 老王我：统一的金额格式化函数
+  const formatAmount = (amount: number | null | undefined): string => {
+    if (amount === null || amount === undefined || isNaN(amount)) {
+      return "$0.00";
+    }
+    return `$${amount.toFixed(2)}`;
+  };
 
   const cartProducts = React.useMemo(() => {
     if (!cart?.items) return [];
@@ -39,115 +47,88 @@ export default function CartIcon({ cart }: { cart?: StoreCart }) {
 
   return (
     <div
-      className="position-relative d-flex align-items-center"
+      className="relative flex items-center"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <Link
         href="/view-cart"
-        className="p-0 link position-relative text-dark"
+        className="p-2.5 -m-2.5 link relative text-gray-600 hover:text-brand-pink transition-colors rounded-xl hover:bg-gray-100 group/icon"
       >
-        <ShoppingCart />
+        <ShoppingCart className="h-5 w-5 transition-transform group-hover/icon:scale-110" />
         {itemCount > 0 && (
-          <span
-            className="top-0 position-absolute start-100 translate-middle badge rounded-pill bg-danger"
-            style={{ fontSize: "0.6rem" }}
-          >
+          <span className="absolute -top-1 -right-1 bg-brand-pink text-white text-xs rounded-full h-5 min-w-[20px] flex items-center justify-center font-semibold shadow-sm">
             {itemCount}
           </span>
         )}
       </Link>
 
-      {/* Mini Cart Dropdown */}
+      {/* Mini Cart Dropdown - 简约白色 */}
       {isHovered && (
-        <div
-          className="p-3 bg-white border shadow-lg position-absolute end-0 rounded-3 dropdown-menu-custom"
-          style={{ width: "320px", zIndex: 1000, top: "25px" }}
-        >
-          {/* Arrow/Triangle */}
-          <div
-            className="bg-white position-absolute border-top border-start"
-            style={{
-              width: "12px",
-              height: "12px",
-              top: "-7px",
-              right: "10px",
-              transform: "rotate(45deg)",
-            }}
-          ></div>
+        <div className="absolute right-0 top-10 w-80 p-4 bg-white rounded-xl shadow-lg z-50 border border-gray-200">
+          {/* Arrow */}
+          <div className="absolute -top-1.5 right-4 w-3 h-3 bg-white border-l border-t border-gray-200 transform rotate-45" />
 
-          <div className="pb-2 mb-3 d-flex justify-content-between align-items-center border-bottom">
-            <h6 className="mb-0 fw-bold">{t("shoppingCart")} ({itemCount})</h6>
-            <span className="text-muted small">${totalPrice.toFixed(2)}</span>
+          <div className="flex items-center justify-between pb-3 mb-3 border-b border-gray-200">
+            <h6 className="m-0 text-sm font-semibold text-gray-900 flex items-center gap-2">
+              <ShoppingCart size={16} className="text-brand-pink" />
+              {t("shoppingCart")} ({itemCount})
+            </h6>
+            <span className="text-sm font-semibold text-gray-900">
+              {formatAmount(totalPrice)}
+            </span>
           </div>
 
           {cartProducts.length === 0 ? (
-            <p className="py-3 text-center text-muted small">
-              {t("emptyCart")}
-            </p>
+            <div className="py-8 text-center text-gray-500 text-sm">
+              <div className="w-16 h-16 mx-auto mb-3 rounded-xl bg-gray-100 flex items-center justify-center">
+                <Package className="h-8 w-8 text-gray-400" />
+              </div>
+              <p className="font-medium">{t("emptyCart")}</p>
+            </div>
           ) : (
-            <div
-              className="gap-3 mb-3 d-flex flex-column"
-              style={{ maxHeight: "300px", overflowY: "auto" }}
-            >
+            <div className="flex flex-col gap-2 mb-3 max-h-[300px] overflow-y-auto">
               {cartProducts.slice(0, 3).map((item) => (
-                <div key={item.id} className="gap-2 d-flex">
-                  <div
-                    className="overflow-hidden rounded-sm shrink-0 position-relative bg-light"
-                    style={{ width: "60px", height: "60px" }}
-                  >
+                <div key={item.id} className="flex gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors group/item">
+                  <div className="relative overflow-hidden rounded-lg bg-gray-100 shrink-0" style={{ width: "60px", height: "60px" }}>
                     <Image
                       src={item.imgSrc || "https://placehold.co/100x100"}
                       alt={item.title}
                       fill
-                      className="object-fit-cover"
+                      className="object-cover transition-transform group-hover/item:scale-110"
                     />
                   </div>
-                  <div className="overflow-hidden grow">
-                    <p className="mb-0 small fw-bold text-truncate">
+                  <div className="overflow-hidden flex-1 min-w-0">
+                    <p className="m-0 text-sm font-medium text-gray-900 truncate">
                       {item.title}
                     </p>
-                    <p className="mb-0 x-small text-muted text-truncate">
+                    <p className="m-0 text-xs text-gray-500 truncate">
                       {item.variantTitle}
                     </p>
-                    <p className="mb-0 small text-primary">
-                      {item.quantity} x ${item.price.toFixed(2)}
+                    <p className="m-0 text-sm font-semibold text-gray-900 mt-1">
+                      {item.quantity} x {formatAmount(item.price)}
                     </p>
                   </div>
                 </div>
               ))}
               {cartProducts.length > 3 && (
-                <p className="mb-0 text-center x-small text-muted">
+                <p className="m-0 text-center text-xs text-gray-500 bg-gray-100 rounded-lg py-2">
                   {t("moreItems", { count: cartProducts.length - 3 })}
                 </p>
               )}
             </div>
           )}
 
-          <div className="gap-2 d-grid">
+          <div className="grid gap-2">
             <Link
               href="/view-cart"
-              className="btn btn-dark btn-sm rounded-pill"
+              className="inline-flex items-center justify-center px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-brand-pink to-brand-blue rounded-lg hover:shadow-md transition-all duration-200"
             >
               {t("viewCart")}
             </Link>
-            {/* <Link href="/checkout" className="btn btn-outline-dark btn-sm rounded-pill">
-                    Checkout
-                </Link> */}
           </div>
         </div>
       )}
-      <style jsx>{`
-        .dropdown-menu-custom::before {
-          content: "";
-          position: absolute;
-          top: -20px;
-          left: 0;
-          width: 100%;
-          height: 20px;
-          background: transparent;
-        }
-      `}</style>
     </div>
   );
 }

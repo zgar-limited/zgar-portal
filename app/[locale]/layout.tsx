@@ -5,16 +5,16 @@ import { routing } from "@/i18n/routing";
 
 
 
+import "./globals.css";
 // import "../../public/css/tailwind.css";
 import "../../public/scss/main.scss";
 import "../../public/css/harmonyos_sans.css";
 import "../../public/css/harmonyos_sans_tc.css";
 
-import MobileMenu from "@/components/modals/MobileMenu";
-
+import { Toaster } from "sonner";
 import GlobalEffectsProvider from "@/components/common/GlobalEffectProvider";
-
-import ToastProvider from "@/components/common/ToastProvider";
+import BackToTop from "@/components/back-to-top/BackToTop";
+import QueryClientProvider from "@/components/providers/QueryClientProvider";
 
 export const metadata = {
   title: "Zgar Vape Website",
@@ -43,16 +43,17 @@ export default async function RootLayout({
     <html lang={locale}>
       <head></head>
       <body>
-        <NextIntlClientProvider messages={messages}>
-          <main id="wrapper">
-            <ToastProvider>
-              {children}
-              <MobileMenu />
-            </ToastProvider>
+        <QueryClientProvider>
+          <NextIntlClientProvider messages={messages}>
+            <main id="wrapper">
+            {children}
 
             <GlobalEffectsProvider />
+            <BackToTop />
           </main>
-        </NextIntlClientProvider>
+          </NextIntlClientProvider>
+        </QueryClientProvider>
+        <Toaster position="top-right" duration={3000} richColors />
       </body>
     </html>
   );

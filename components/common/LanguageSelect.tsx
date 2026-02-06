@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useTransition } from "react";
+import React, { useState, useTransition } from "react";
 import { Globe } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/routing";
+import { useSearchParams } from "next/navigation";
 
 export default function LanguageSelect({
   placement = "bottom-end",
@@ -14,45 +15,67 @@ export default function LanguageSelect({
   const locale = useLocale();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const handleSelect = (nextLocale) => {
     startTransition(() => {
-      router.replace(pathname, {locale: nextLocale});
+      // 老王我：保留当前的查询参数（如 ?c=123）
+      const queryString = searchParams.toString();
+      const fullPath = queryString ? `${pathname}?${queryString}` : pathname;
+      router.replace(fullPath, {locale: nextLocale});
+      setIsOpen(false);
     });
   };
 
+  const languages = [
+    { code: 'en-us', label: t('en-us'), flag: '🇺🇸' },
+    { code: 'zh-hk', label: t('zh-hk'), flag: '🇭🇰' },
+  ];
+
   return (
-    <div className="dropdown d-flex align-items-center">
+    <div className="relative flex items-center">
       <button
         type="button"
-        className="p-0 btn btn-link text-decoration-none d-flex align-items-center "
-        data-bs-toggle="dropdown"
-        aria-expanded="false"
-        style={{ color: textBlack ? "black" : textColor }}
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center justify-center p-0 text-gray-900 hover:text-gray-600 transition-colors bg-transparent border-0"
       >
         <Globe size={24} strokeWidth={1.5} />
       </button>
 
-      <ul
-        className={`dropdown-menu ${
-          placement === "bottom-end" ? "dropdown-menu-end" : ""
-        }`}
-        style={{ minWidth: "auto" }}
-      >
-        {['en-us', 'zh-hk'].map((cur) => (
-          <li key={cur}>
-            <button
-              className={`dropdown-item ${locale === cur ? "active" : ""}`}
-              type="button"
-              onClick={() => handleSelect(cur)}
-              disabled={isPending}
-            >
-              {t(cur)}
-            </button>
-          </li>
-        ))}
-      </ul>
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 z-40"
+            onClick={() => setIsOpen(false)}
+          />
+
+          {/* Dropdown Menu */}
+          <ul className={`absolute right-0 top-8 z-50 min-w-[110px] py-1 bg-white border border-gray-100 rounded-lg shadow-lg ${
+            placement === "bottom-end" ? "right-0" : ""
+          }`}>
+            {languages.map((lang) => (
+              <li key={lang.code}>
+                <button
+                  className={`w-full flex items-center gap-2 px-3 py-1.5 text-sm text-left transition-colors ${
+                    locale === lang.code
+                      ? "bg-gray-100 text-gray-900 font-medium"
+                      : "text-gray-700 hover:bg-gray-50"
+                  }`}
+                  type="button"
+                  onClick={() => handleSelect(lang.code)}
+                  disabled={isPending}
+                >
+                  <span className="text-base">{lang.flag}</span>
+                  <span className="whitespace-nowrap">{lang.label}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
     </div>
   );
 }

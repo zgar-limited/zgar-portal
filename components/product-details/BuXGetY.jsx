@@ -2,7 +2,7 @@
 import Image from "next/image";
 import React, { useState, Fragment } from "react";
 import QuantitySelect from "../common/QuantitySelect";
-import { getXproducts } from "@/data/products";
+
 
 const PlusCircle = () => (
   <svg width={40} height={40} viewBox="0 0 40 40" fill="none">

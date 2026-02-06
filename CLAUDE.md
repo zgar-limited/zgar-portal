@@ -98,6 +98,101 @@ pnpm dev:proxy    # 代理模式（用于API开发）
 pnpm build        # 生产构建
 ```
 
+## 设计系统
+
+### 品牌色彩
+
+简单、干净的两个主色 + 一个渐变。
+
+```css
+粉色: brand-pink  = #f496d3  (温暖、活力)
+蓝色: brand-blue  = #0047c7  (专业、可靠)
+
+渐变: brand-gradient = linear-gradient(90deg, #f496d3 0%, #0047c7 100%)
+```
+
+### 使用方式
+
+```jsx
+// 背景色
+<div className="bg-brand-pink">       // 粉色背景
+<div className="bg-brand-blue">       // 蓝色背景
+<div className="bg-brand-gradient">   // 渐变背景
+
+// 文字色
+<p className="text-brand-pink">       // 粉色文字
+<p className="text-brand-blue">       // 蓝色文字
+
+// 渐变文字
+<p className="text-transparent bg-clip-text bg-brand-gradient">  // 粉蓝渐变文字
+
+// 边框
+<div className="border-2 border-brand-pink">  // 粉色边框
+<div className="border-2 border-brand-blue">  // 蓝色边框
+```
+
+### 设计原则
+
+1. **简洁**: 只用这两个主色，不要搞太多色阶
+2. **渐变**: 粉蓝之间用渐变连接
+3. **大圆角**: `rounded-2xl` 或 `rounded-3xl`
+4. **柔和阴影**: `shadow-lg` 或 `shadow-xl`
+5. **克制动画**: 只用必要的过渡效果
+
+### 动画
+
+```jsx
+animate-float     // 上下浮动
+animate-fade-in   // 淡入效果
+```
+
+### 示例
+
+#### 按钮
+```jsx
+// 主按钮 - 渐变
+<button className="px-6 py-3 bg-brand-gradient text-white rounded-2xl font-semibold hover:shadow-lg transition-all">
+  按钮
+</button>
+
+// 次按钮 - 粉色
+<button className="px-6 py-3 bg-brand-pink text-white rounded-2xl font-semibold hover:opacity-90 transition-all">
+  按钮
+</button>
+```
+
+#### 徽章
+```jsx
+<div className="bg-brand-gradient text-white px-3 py-1 rounded-full text-xs font-bold">
+  NEW
+</div>
+```
+
+#### 卡片
+```jsx
+<div className="bg-white rounded-3xl shadow-lg hover:shadow-xl transition-all">
+  内容
+</div>
+```
+
+### 关键文件
+
+- `tailwind.config.js` - 简洁的颜色配置
+- `widgets/ShopBanner/index.jsx` - 主页横幅
+- `components/products/Categories.jsx` - 分类展示
+- `components/products/ProductGrid.tsx` - 产品网格
+- `components/products/ProductCard.tsx` - 产品卡片
+
+### 最佳实践
+
+1. **保持简单**: 不要过度设计
+2. **两个主色**: 粉色和蓝色足够了
+3. **白色背景**: 卡片和容器用白色
+4. **适度圆角**: rounded-2xl 或 rounded-3xl
+5. **柔和阴影**: 不要太夸张的阴影
+6. **克制动效**: 只在需要的地方用动画
+7. **留白充足**: 给元素足够的呼吸空间
+
 ### 环境变量
 项目支持通过 `.env` 文件配置环境变量，主要配置项包括：
 - Medusajs 后端 URL

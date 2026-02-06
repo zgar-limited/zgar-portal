@@ -1,5 +1,5 @@
 "use client";
-import { relatedProducts } from "@/data/products";
+
 import React from "react";
 import ProductCard1 from "../productCards/ProductCard1";
 import { Swiper, SwiperSlide } from "swiper/react";

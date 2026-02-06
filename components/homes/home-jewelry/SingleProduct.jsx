@@ -2,9 +2,9 @@
 import { Link } from '@/i18n/routing';
 import Image from "next/image";
 import React, { useState } from "react";
-import { singleStyleProducts } from "@/data/products";
+
 import Slider from "./Slider";
-import { useContextElement } from "@/context/Context";
+
 import QuantitySelect from "@/components/common/QuantitySelect";
 import WishlistButton from "@/components/productActionButtons/WishlistButton";
 import CompareButton from "@/components/productActionButtons/CompareButton";

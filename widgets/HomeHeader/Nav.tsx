@@ -1,190 +1,182 @@
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
-import { Box, Zap, Layers, Info, Newspaper, Handshake, UserPlus } from "lucide-react";
+import { Box, Zap, Layers, Info, Newspaper, Handshake, UserPlus, ChevronDown, Home, Heart, Shield, Star } from "lucide-react";
+import { useState, useRef } from "react";
 
 export default function Nav() {
   const t = useTranslations("Navigation");
-  
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // 老王我添加延迟关闭，防止鼠标稍微移动就关闭菜单
+  const handleMouseEnter = (menuKey: string) => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    setOpenMenu(menuKey);
+  };
+
+  const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => {
+      setOpenMenu(null);
+    }, 350); // 350ms延迟，给用户足够时间移动鼠标到下拉菜单
+  };
+
+  const menuItems = [
+    {
+      key: "products",
+      href: "/shop",
+      label: t("products"),
+      hasDropdown: true,
+      items: [
+        {
+          href: "/shop?category=close-pod",
+          label: t("products_sub.close_pod"),
+          icon: Box,
+        },
+        {
+          href: "/shop?category=disposable",
+          label: t("products_sub.disposable"),
+          icon: Zap,
+        },
+        {
+          href: "/shop?category=open-system",
+          label: t("products_sub.open_system"),
+          icon: Layers,
+        },
+      ],
+    },
+    {
+      key: "about",
+      href: "/about-us",
+      label: t("about"),
+      hasDropdown: true,
+      items: [
+        {
+          href: "/about-us",
+          label: t("about_sub.about_us"),
+          icon: Info,
+        },
+        {
+          href: "/partner",
+          label: t("about_sub.partners"),
+          icon: Handshake,
+        },
+      ],
+    },
+    {
+      key: "contact",
+      href: "https://docs.google.com/forms/d/e/1FAIpQLSfldYo7ddIAghTH67MDuuZAwV1fEP0aGcKz-L-kKRAaCctKZg/viewform",
+      label: t("contact"),
+      target: "_blank",
+      hasDropdown: true,
+      items: [
+        {
+          href: "https://docs.google.com/forms/d/e/1FAIpQLSfldYo7ddIAghTH67MDuuZAwV1fEP0aGcKz-L-kKRAaCctKZg/viewform",
+          label: t("contact_sub.wholesaler"),
+          icon: UserPlus,
+          target: "_blank",
+        },
+      ],
+    },
+  ];
+
   return (
     <>
+      {/* Home */}
       <li className="menu-item">
-        <Link href="/" className="item-link" style={{ fontSize: '17px', fontWeight: 'bold' }}>
-          {t("home")}
-          {/* <i className="icon icon-caret-down" /> */}
+        <Link
+          href="/"
+          className="item-link relative text-sm font-semibold text-gray-700 hover:text-brand-pink transition-all duration-200 rounded-xl px-4 py-2.5 flex items-center gap-2.5 group"
+        >
+          <Home size={18} className="text-gray-500 transition-colors group-hover:text-brand-pink" />
+          <span>{t("home")}</span>
         </Link>
-        {/* <div className="sub-menu mega-menu mega-home">
-          <div className="container">
-            <div className="row-demo">
-              {demoItems.slice(0, 12).map((item, index) => (
-                <div className="demo-item" key={index}>
-                  <Link href={item.href} className="demo-img">
-                    <Image
-                      alt="Demo"
-                      src={item.src}
-                      width={item.width || 401}
-                      height={item.height || 520}
-                      className="lazyload"
-                    />
-                    {item.isNew && (
-                      <div className="demo-label">
-                        <span>New</span>
-                      </div>
-                    )}
-                  </Link>
-                  <Link
-                    href={item.href}
-                    className={`demo-name ${item.isNew ? "link" : ""}`}
-                  >
-                    {item.label}
-                  </Link>
-                </div>
-              ))}
-            </div>
-            <div className="text-center">
-              <a
-                href="#modalDemo"
-                data-bs-toggle="modal"
-                className="tf-btn animate-btn"
-              >
-                View all demos (20)
-              </a>
-            </div>
-          </div>
-        </div> */}
       </li>
-      <li className="menu-item position-relative">
-        <Link href="/shop" className="item-link" style={{ fontSize: '17px', fontWeight: 'bold' }}>
-          {t("products")}
-          <i className="icon icon-caret-down" />
-        </Link>
-        <div className="sub-menu" style={{ left: '0', minWidth: '260px', borderRadius: '12px', padding: '12px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', border: '1px solid #f0f0f0' }}>
-          <ul className="sub-menu_list" style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '0' }}>
-            <li>
-              <Link href="/shop?category=close-pod" className="sub-menu_link" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', borderRadius: '8px', transition: 'all 0.2s', fontSize: '15px', fontWeight: '500' }}>
-                <Box size={18} color="black" />
-                {t("products_sub.close_pod")}
-              </Link>
-            </li>
-            <li>
-              <Link href="/shop?category=disposable" className="sub-menu_link" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', borderRadius: '8px', transition: 'all 0.2s', fontSize: '15px', fontWeight: '500' }}>
-                <Zap size={18} color="black" />
-                {t("products_sub.disposable")}
-              </Link>
-            </li>
-            <li>
-              <Link href="/shop?category=open-system" className="sub-menu_link" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', borderRadius: '8px', transition: 'all 0.2s', fontSize: '15px', fontWeight: '500' }}>
-                <Layers size={18} color="black" />
-                {t("products_sub.open_system")}
-              </Link>
-            </li>
-          </ul>
-        </div>
-        {/* <div className="sub-menu mega-menu">
-          <div className="container">
-            <div className="row">
-              {shopPages.map((col, index) => (
-                <div className="col-2" key={index}>
-                  <div className="mega-menu-item">
-                    <h4 className="menu-heading">{col.heading}</h4>
-                    <ul className="sub-menu_list">
-                      {col.items.map((item, i) => (
-                        <li key={i}>
-                          <Link href={item.href} className="sub-menu_link">
-                            {item.label}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              ))}
 
-              <div className="col-6">
-                <ul className="list-hor">
-                  {bannerItems.map((banner, i) => (
-                    <li className="wg-cls hover-img" key={i}>
-                      <Link href={banner.href} className="image img-style">
-                        <Image
-                          src={banner.imgSrc}
-                          alt="Collection"
-                          className="lazyload"
-                          width={672}
-                          height={952}
-                        />
-                      </Link>
-                      <div className="cls-content">
-                        <h4 className="tag_cls">{banner.tag}</h4>
-                        <span className="br-line type-vertical" />
-                        <Link href={banner.href} className="tf-btn-line">
-                          Shop now
+      {/* Menu Items with Dropdowns */}
+      {menuItems.map((menu) => (
+        <li
+          key={menu.key}
+          className="relative menu-item"
+        >
+          {/* 包装整个菜单区域 - 包括菜单项和下拉菜单 */}
+          <div
+            onMouseEnter={() => handleMouseEnter(menu.key)}
+            onMouseLeave={handleMouseLeave}
+          >
+            <Link
+              href={menu.href}
+              target={menu.target || "_self"}
+              className="item-link relative text-sm font-semibold text-gray-700 hover:text-brand-pink transition-all duration-200 rounded-xl px-4 py-2.5 flex items-center gap-2.5 group"
+            >
+              {menu.key === 'products' && <Box size={18} className="text-gray-500 transition-colors group-hover:text-brand-pink" />}
+              {menu.key === 'about' && <Info size={18} className="text-gray-500 transition-colors group-hover:text-brand-pink" />}
+              {menu.key === 'contact' && <Handshake size={18} className="text-gray-500 transition-colors group-hover:text-brand-pink" />}
+              <span>{menu.label}</span>
+              {menu.hasDropdown && <ChevronDown className="h-4 w-4 ml-0.5 text-gray-400 group-hover:text-brand-pink transition-transform group-hover:rotate-180" />}
+            </Link>
+
+            {/* Dropdown Menu - 简约白色 */}
+            {menu.hasDropdown && openMenu === menu.key && (
+              <div className="sub-menu absolute left-0 top-full mt-2 min-w-[240px] rounded-xl bg-white shadow-lg p-2 z-50 border border-gray-200">
+                <div className="absolute -top-1.5 left-6 w-3 h-3 bg-white border-l border-t border-gray-200 transform rotate-45"></div>
+                <ul className="flex flex-col gap-1 sub-menu_list">
+                  {menu.items.map((item, index) => {
+                    const Icon = item.icon;
+                    return (
+                      <li key={index}>
+                        <Link
+                          href={item.href}
+                          target={item.target || '_self'}
+                          className="sub-menu_link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-all duration-200 group/item"
+                        >
+                          <div className="flex items-center justify-center w-8 h-8 transition-colors bg-gray-100 rounded-lg group-hover/item:bg-brand-pink">
+                            <Icon size={16} className="text-gray-600 transition-colors group-hover/item:text-white" />
+                          </div>
+                          <span>{item.label}</span>
                         </Link>
-                      </div>
-                    </li>
-                  ))}
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
-            </div>
+            )}
           </div>
-        </div> */}
-      </li>
-      <li className="menu-item position-relative">
-        <Link href="/about-us" className="item-link" style={{ fontSize: '17px', fontWeight: 'bold' }}>
-          {t("about")}
-          <i className="icon icon-caret-down" />
-        </Link>
-        <div className="sub-menu" style={{ left: '0', minWidth: '240px', borderRadius: '12px', padding: '12px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', border: '1px solid #f0f0f0' }}>
-          <ul className="sub-menu_list" style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '0' }}>
-            <li>
-              <Link href="/about-us" className="sub-menu_link" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', borderRadius: '8px', transition: 'all 0.2s', fontSize: '15px', fontWeight: '500' }}>
-                <Info size={18} color="black" />
-                {t("about_sub.about_us")}
-              </Link>
-            </li>
-            {/* <li>
-              <Link href="/blog" className="sub-menu_link" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', borderRadius: '8px', transition: 'all 0.2s', fontSize: '15px', fontWeight: '500' }}>
-                <Newspaper size={18} color="black" />
-                {t("about_sub.blog_news")}
-              </Link>
-            </li> */}
-            <li>
-              <Link href="/partner" className="sub-menu_link" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', borderRadius: '8px', transition: 'all 0.2s', fontSize: '15px', fontWeight: '500' }}>
-                <Handshake size={18} color="black" />
-                {t("about_sub.partners")}
-              </Link>
-            </li>
-          </ul>
-        </div>
-      </li>
-      <li className="menu-item position-relative">
-        <Link href="/contact-us" className="item-link" style={{ fontSize: '17px', fontWeight: 'bold' }}>
-          {t("contact")}
-          <i className="icon icon-caret-down" />
-        </Link>
-        <div className="sub-menu" style={{ left: '0', minWidth: '300px', borderRadius: '12px', padding: '12px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', border: '1px solid #f0f0f0' }}>
-          <ul className="sub-menu_list" style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '0' }}>
-            <li>
-              <Link href="/register" className="sub-menu_link" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', borderRadius: '8px', transition: 'all 0.2s', fontSize: '15px', fontWeight: '500' }}>
-                <UserPlus size={18} color="black" />
-                {t("contact_sub.wholesaler")}
-              </Link>
-            </li>
-          </ul>
-        </div>
-      </li>
-      <li className="menu-item position-relative">
-        <Link href="/care" className="item-link" style={{ fontSize: '17px', fontWeight: 'bold' }}>
-          {t("care")}
-        </Link>
-      </li>
+        </li>
+      ))}
+
+      {/* Care */}
       <li className="menu-item">
-        <Link href="/verify-guide" className="item-link" style={{ fontSize: '17px', fontWeight: 'bold' }}>
-          {t("authentication")}
+        <Link
+          href="/care"
+          className="item-link relative text-sm font-semibold text-gray-700 hover:text-brand-pink transition-all duration-200 rounded-xl px-4 py-2.5 flex items-center gap-2.5 group"
+        >
+          <Heart size={18} className="text-gray-500 transition-colors group-hover:text-brand-pink" />
+          <span>{t("care")}</span>
         </Link>
       </li>
 
+      {/* Authentication */}
+      <li className="menu-item">
+        <Link
+          href="/verify-guide"
+          className="item-link relative text-sm font-semibold text-gray-700 hover:text-brand-pink transition-all duration-200 rounded-xl px-4 py-2.5 flex items-center gap-2.5 group"
+        >
+          <Shield size={18} className="text-gray-500 transition-colors group-hover:text-brand-pink" />
+          <span>{t("authentication")}</span>
+        </Link>
+      </li>
+
+      {/* Club Button - 简约风格 */}
       <li>
-        <div className="animated-border-box radius-style-2">
-          <Link className="tp-btn-gradient sm p-relative" href="/register">
+        <div>
+          <Link
+            className="inline-flex items-center justify-center px-5 py-2.5 bg-gradient-to-r from-brand-pink to-brand-blue text-white text-sm font-semibold rounded-xl hover:shadow-md transition-all duration-200 whitespace-nowrap"
+            href="/club"
+          >
+            <Star size={16} className="mr-1.5 fill-current" />
             {t("club")}
           </Link>
         </div>

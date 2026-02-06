@@ -1,8 +1,7 @@
 import { HttpTypes } from "@medusajs/types";
-import { retrieveCustomer } from "@/data/customer";
-import { retrieveOrders } from "@/data/orders";
+import { retrieveOrders, retrieveOrderStats } from "@/data/orders";
 import Orders from "@/components/dashboard/Orders";
-import { notFound } from "next/navigation";
+import { requireAuth } from "@/data/auth";
 
 export const metadata = {
   title: "Zgar Orders",
@@ -16,21 +15,19 @@ interface OrdersPageProps {
 }
 
 export default async function page({ searchParams }: OrdersPageProps) {
+  // 老王我：统一认证检查（处理未登录和 token 过期）
+  const customer = await requireAuth();
+
   // 获取页码参数，默认第1页
   const currentPage = parseInt(searchParams.page || "1");
   const limit = 10;
   const offset = (currentPage - 1) * limit;
 
-  // 并行获取用户和订单数据
-  const [customer, ordersData] = await Promise.all([
-    retrieveCustomer(),
-    retrieveOrders(limit, offset)
+  // 老王我：并行获取订单数据和统计数据，提高性能
+  const [ordersData, orderStats] = await Promise.all([
+    retrieveOrders(limit, offset, "-created_at"),
+    retrieveOrderStats()
   ]);
-
-  // 检查用户是否已登录
-  if (!customer) {
-    notFound();
-  }
 
   // 计算总页数
   const totalPages = ordersData ? Math.ceil(ordersData.count / limit) : 1;
@@ -39,6 +36,7 @@ export default async function page({ searchParams }: OrdersPageProps) {
     <Orders
       customer={customer}
       orders={ordersData}
+      orderStats={orderStats}
       currentPage={currentPage}
       totalPages={totalPages}
     />

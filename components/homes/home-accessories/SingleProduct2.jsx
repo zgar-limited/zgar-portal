@@ -1,7 +1,7 @@
 import { Link } from '@/i18n/routing';
 import Image from "next/image";
 import React from "react";
-import { singleStyleProducts } from "@/data/products";
+
 import WishlistButton from "@/components/productActionButtons/WishlistButton";
 import CompareButton from "@/components/productActionButtons/CompareButton";
 import QuickViewButton from "@/components/productActionButtons/QuickViewButton";

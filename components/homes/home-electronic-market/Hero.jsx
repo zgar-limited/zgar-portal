@@ -2,7 +2,7 @@
 import { Link } from '@/i18n/routing';
 import Image from "next/image";
 
-import { sliderProducts2 } from "@/data/products";
+
 import { Autoplay, EffectFade, Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 

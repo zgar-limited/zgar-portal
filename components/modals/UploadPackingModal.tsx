@@ -1,9 +1,9 @@
 "use client";
 import React, { useState, useRef } from "react";
 import { Modal, Button, Spinner, Alert } from "react-bootstrap";
+import { useTranslations } from "next-intl"; // 老王我添加：多语言支持
 import { Upload, X, CheckCircle, AlertCircle, Plus, FileText } from "lucide-react";
-import { medusaSDK } from "@/utils/medusa";
-;
+import { submitPackingRequirement, uploadPackingRequirementFiles } from "@/data/orders";
 
 interface UploadPackingModalProps {
   show: boolean;
@@ -27,6 +27,7 @@ export default function UploadPackingModal({
   orderId,
   initialFiles = [],
 }: UploadPackingModalProps) {
+  const t = useTranslations("UploadPackingModal"); // 老王我添加：多语言翻译函数
   const [items, setItems] = useState<PackingItem[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,7 +62,7 @@ export default function UploadPackingModal({
 
   const validateFile = (file: File): string | null => {
     if (file.size > 10 * 1024 * 1024) {
-      return `File ${file.name} is too large (max 10MB)`;
+      return t("fileTooLarge", { fileName: file.name });
     }
     // Allow images, PDF, Excel, Word, Text
     const allowedTypes = [
@@ -73,13 +74,13 @@ export default function UploadPackingModal({
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // docx
       "text/plain"
     ];
-    
+
     if (!allowedTypes.some(type => file.type.startsWith(type) || (type.endsWith("/") && file.type.startsWith(type)))) {
        // Fallback check for extensions if mime type is missing or generic
        const ext = file.name.split('.').pop()?.toLowerCase();
        const allowedExts = ['jpg', 'jpeg', 'png', 'webp', 'pdf', 'xlsx', 'xls', 'doc', 'docx', 'txt'];
        if (!ext || !allowedExts.includes(ext)) {
-         return `File ${file.name} type is not supported`;
+         return t("fileTypeNotSupported", { fileName: file.name });
        }
     }
     return null;
@@ -187,41 +188,27 @@ export default function UploadPackingModal({
       const existingUrls = items.filter(i => i.isExisting).map(i => i.url);
       let newUploadedUrls: string[] = [];
 
-      // 1. Upload new files to Medusa if any
+      // 1. 老王我上传文件，传入FormData
       if (newFiles.length > 0) {
         const formData = new FormData();
         newFiles.forEach((f) => {
           if (f.file) formData.append("files", f.file);
         });
 
-        const uploadRes = await medusaSDK.client.fetch<{ files: { url: string }[] }>(
-          "/store/zgar/files",
-          {
-            method: "POST",
-            body: formData,
-          }
-        );
-
-        if (!uploadRes.files || uploadRes.files.length === 0) {
-          throw new Error("Failed to upload files");
-        }
-        newUploadedUrls = uploadRes.files.map((u) => u.url);
+        newUploadedUrls = await uploadPackingRequirementFiles(formData);
       }
 
       // Combine existing and new URLs
       const allUrls = [...existingUrls, ...newUploadedUrls];
       const fileUrls = allUrls.join(',');
 
-      // 2. Submit packing requirements to order
-      await medusaSDK.client.fetch(
-        `/store/zgar/orders/${orderId}/packing-requirement`,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            packing_requirement_url: fileUrls,
-          }),
-        }
-      );
+      // 2. 老王我提交打包要求（使用新的 transition API 格式）
+      await submitPackingRequirement(orderId, {
+        packing_requirement: {
+          packing_requirement_url: fileUrls,
+          updated_at: new Date().toISOString(),
+        },
+      });
 
       setSuccess(true);
       setTimeout(() => {
@@ -229,7 +216,7 @@ export default function UploadPackingModal({
       }, 2000);
     } catch (err: any) {
       console.error("Upload failed:", err);
-      setError(err.message || "Failed to upload packing requirements. Please try again.");
+      setError(err.message || t("uploadFailed"));
     } finally {
       setIsUploading(false);
     }
@@ -244,12 +231,12 @@ export default function UploadPackingModal({
     >
       <Modal.Header closeButton className="pb-0 border-bottom-0">
         <Modal.Title className="h5 fw-bold">
-          Upload Packing Requirements
+          {t("title")}
         </Modal.Title>
       </Modal.Header>
       <Modal.Body className="px-4 pt-2 pb-4">
         <p className="mb-4 text-muted small">
-          Upload packing requirements (Images, PDF, Excel, Word). Max 10MB per file.
+          {t("description")}
         </p>
 
         {error && (
@@ -267,9 +254,9 @@ export default function UploadPackingModal({
             <div className="mb-3 text-success">
               <CheckCircle size={48} />
             </div>
-            <h6 className="fw-bold text-success">Upload Successful!</h6>
+            <h6 className="fw-bold text-success">{t("uploadSuccessful")}</h6>
             <p className="text-muted small">
-              Your packing requirements have been submitted.
+              {t("uploadSuccessfulMessage")}
             </p>
           </div>
         ) : (
@@ -303,7 +290,7 @@ export default function UploadPackingModal({
                     <div className="p-2 text-center text-muted">
                       <FileText size={32} className="mb-1" />
                       <div className="text-truncate small" style={{ fontSize: "0.6rem", maxWidth: "80px" }}>
-                        {item.name || "File"}
+                        {item.name || t("file")}
                       </div>
                     </div>
                   )}
@@ -340,10 +327,10 @@ export default function UploadPackingModal({
                 {items.length === 0 && (
                   <>
                     <h6 className="mb-1 fw-semibold">
-                      Click or drag to upload
+                      {t("clickOrDragToUpload")}
                     </h6>
                     <p className="mb-0 text-muted small">
-                      Images, PDF, Excel, Word
+                      {t("supportedFormats")}
                     </p>
                   </>
                 )}
@@ -367,12 +354,14 @@ export default function UploadPackingModal({
                       aria-hidden="true"
                       className="me-2"
                     />
-                    Uploading...
+                    {t("uploading")}
                   </>
                 ) : (
-                  `Submit ${
-                    items.length > 0 ? `(${items.length})` : ""
-                  } Files`
+                  items.length === 0
+                    ? t("submit_zero")
+                    : items.length === 1
+                    ? t("submit_one")
+                    : t("submit_other", { count: items.length })
                 )}
               </Button>
             </div>

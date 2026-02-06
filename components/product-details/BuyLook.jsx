@@ -2,8 +2,8 @@
 import { Link } from '@/i18n/routing';
 import Image from "next/image";
 import React, { useState } from "react";
-import { useContextElement } from "@/context/Context";
-import { buyTheLooksProducts } from "@/data/products";
+
+
 
 export default function BuyLook() {
   const { addProductToCart, isAddedToCartProducts } = useMockContextElement();
@@ -80,7 +80,7 @@ export default function BuyLook() {
                         <a href="#" className="link name h4">
                           {item.title}
                         </a>
-                        <p className="price h5 text-black">
+                        <p className="text-black price h5">
                           ${item.price.toFixed(2)}
                         </p>
                       </div>

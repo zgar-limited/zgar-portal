@@ -2,8 +2,8 @@
 import { Link } from '@/i18n/routing';
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
-import { singleStyleProducts } from "@/data/products";
-import { useContextElement } from "@/context/Context";
+
+
 import QuantitySelect from "@/components/common/QuantitySelect";
 
 export default function SingleProduct() {

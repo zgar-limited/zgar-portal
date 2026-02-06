@@ -1,6 +1,6 @@
 "use client";
 import ProductCard17 from "@/components/productCards/ProductCard17";
-import { watchProducts } from "@/data/products";
+
 import React from "react";
 import { Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";

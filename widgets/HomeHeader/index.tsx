@@ -6,6 +6,7 @@ import Nav from "./Nav";
 import LanguageSelect from "@/components/common/LanguageSelect";
 import CartIcon from "@/components/header/CartIcon";
 import UserIcon from "@/components/header/UserIcon";
+import MobileMenu from "@/components/modals/MobileMenu";
 import { StoreCart, StoreCustomer } from "@medusajs/types";
 
 export default function HomeHeader({
@@ -41,52 +42,49 @@ export default function HomeHeader({
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
+
   return (
     <header
-      className={`${parentClass} ${
-        lastScrollY > 200 && isScrollingUp ? "header-sticky" : ""
-      } ${lastScrollY > 100 ? "will-sticky" : ""}`}
+      className={`${parentClass} transition-all duration-300 relative bg-white border-b border-gray-200 ${
+        lastScrollY > 100 ? "shadow-md" : "shadow-sm"
+      }`}
     >
-      <div className="px-[6%]">
-        <div className="row align-items-center ">
-          <div className="col-md-4 col-3 d-xl-none">
-            <a
-              href="#mobileMenu"
-              data-bs-toggle="offcanvas"
-              className="btn-mobile-menu"
-            >
-              <span />
-            </a>
+      <div className="relative px-[6%]">
+        <div className="flex items-center gap-4 py-2">
+          {/* Mobile Menu */}
+          <div className="xl:hidden">
+            <MobileMenu />
           </div>
-          <div className="col-xl-3 col-md-4 col-6 d-flex justify-content-center justify-content-xl-start">
-            <Link href={`/`} className="py-2 logo-site">
+
+          {/* Logo */}
+          <div className="flex-shrink-0">
+            <Link href="/" className="logo-site inline-block hover:scale-105 transition-transform duration-300">
               <Image
                 alt="Logo"
                 src="/images/logo/logo-zgar.png"
                 width={133}
                 height={53}
+                className="drop-shadow-lg"
               />
             </Link>
           </div>
-          <div className="col-xl-6 d-none d-xl-block">
+
+          {/* Navigation Menu */}
+          <div className="hidden xl:block flex-1 ml-8">
             <nav className="box-navigation">
-              <ul className="box-nav-menu">
+              <ul className="box-nav-menu flex items-center justify-center gap-2">
                 <Nav />
               </ul>
             </nav>
           </div>
-          <div className="col-xl-3 col-md-4 col-3">
-            <ul className="nav-icon-list justify-content-end">
-              <li className="">
-                <UserIcon customer={customer} />
-              </li>
-              <li className="">
-                <LanguageSelect />
-              </li>
-              <li className=" d-none d-lg-flex">
-                <CartIcon cart={cart} />
-              </li>
-            </ul>
+
+          {/* Right Icons */}
+          <div className="flex items-center gap-3 flex-shrink-0 ml-auto">
+            <UserIcon customer={customer} />
+            <LanguageSelect />
+            <div className="hidden lg:flex">
+              <CartIcon cart={cart} />
+            </div>
           </div>
         </div>
       </div>

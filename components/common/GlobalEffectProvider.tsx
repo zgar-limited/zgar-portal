@@ -2,13 +2,22 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
+import { useGlobalTaskTracker } from "@/hooks/useGlobalTaskTracker"; // 老王我添加：全局任务追踪
+import type { StoreCustomer } from "@medusajs/types"; // 老王我添加：用户类型
 
-export default function GlobalEffectsProvider() {
+export default function GlobalEffectsProvider({
+  customer,
+}: {
+  customer?: StoreCustomer | null; // 老王我添加：用户信息
+}) {
   const hasLoadedBootstrap = useRef(false);
   const bootstrapRef = useRef(null);
   const wowRef = useRef(null); // Save WOW module (imported once)
 
   const pathname = usePathname();
+
+  // 老王我添加：全局任务追踪（传递登录状态）
+  useGlobalTaskTracker(!!customer);
 
   // Load Bootstrap JS only once on client
   useEffect(() => {

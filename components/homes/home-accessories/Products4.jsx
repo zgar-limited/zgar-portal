@@ -4,7 +4,7 @@ import Image from "next/image";
 
 import ProductCard19 from "@/components/productCards/ProductCard19";
 
-import { miniProductsAccreeories } from "@/data/products";
+
 import React from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import SingleProduct from "./SingleProduct";

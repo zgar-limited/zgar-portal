@@ -4,7 +4,7 @@ import React, { useMemo, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Grid, Pagination } from "swiper/modules";
 import ProductCard1 from "@/components/productCards/ProductCard1";
-import { products } from "@/data/products";
+
 
 const tabItems = ["TRENDING", "Best seller", "On sale"];
 

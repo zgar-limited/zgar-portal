@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useMemo, useCallback } from "react";
-import { volumeDiscounts } from "@/data/products";
-import { useContextElement } from "@/context/Context";
+
+
 
 export default function VolumeDiscount() {
   const [activeId, setActiveId] = useState(1); // default active is first

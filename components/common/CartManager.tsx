@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { medusaSDK } from "@/utils/medusa";
+import { getOrSetCart } from "@/data/cart";
 import { useRouter } from "next/navigation";
 
 export default function CartManager() {
@@ -9,16 +9,9 @@ export default function CartManager() {
 
   useEffect(() => {
     const manageCart = async () => {
-      const cartId = localStorage.getItem("cart_id");
-
       try {
-        const { cart } = await medusaSDK.store.cart.create({
-          // sales_channel_id: "sc_01K9KAK0MDCMSWCXRV0WH70EQK",
-          region_id: process.env.REGION_ID,
-          currency_code: "usd",
-        });
-
-        localStorage.setItem("cart_id", cart.id);
+        // 使用 server action - 老王我这个方法能读到登录信息并自动创建购物车
+        await getOrSetCart();
         router.refresh();
       } catch (error) {
         console.error("Error creating cart:", error);

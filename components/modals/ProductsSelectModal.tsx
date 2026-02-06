@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 import {
   Search,
   Package,
@@ -14,7 +15,9 @@ import {
   AlertCircle,
   Filter,
   Grid3X3,
-  List
+  List,
+  X,
+  GripVertical
 } from "lucide-react";
 
 // Import shadcn components
@@ -24,13 +27,17 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { InputNumber } from "@/components/ui/input-number";
 
 // Import other components
 import Image from "next/image";
-import { medusaSDK } from "@/utils/medusa";
 import { StoreCart, StoreProduct } from "@medusajs/types";
+
+// 老王我：导入 server actions
+import { batchAddCartItems, getOrSetCart } from "@/data/cart";
+
+// 老王我：导入多语言翻译工具
+import { getLocalizedVariantOptions } from "@/utils/product-localization";
 
 type Props = {
   show: boolean;
@@ -41,6 +48,17 @@ type Props = {
 
 const ProductsSelectModal = ({ show, onHide, cart, products }: Props) => {
   const router = useRouter();
+  const locale = useLocale();
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
+
+  // 老王我：统一的金额格式化函数
+  const formatAmount = (amount: number | null | undefined): string => {
+    if (amount === null || amount === undefined || isNaN(amount)) {
+      return "$0.00";
+    }
+    return `$${amount.toFixed(2)}`;
+  };
 
   // State management
   const [expandedProductIds, setExpandedProductIds] = useState<string[]>([]);
@@ -50,12 +68,14 @@ const ProductsSelectModal = ({ show, onHide, cart, products }: Props) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("list");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startY, setStartY] = useState(0);
+  const [currentY, setCurrentY] = useState(0);
 
   // Filter products based on search and categories
   const filteredProducts = useMemo(() => {
     let result = products;
 
-    // Filter by search query
     if (searchQuery) {
       result = result.filter((p) =>
         p.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -69,7 +89,6 @@ const ProductsSelectModal = ({ show, onHide, cart, products }: Props) => {
       );
     }
 
-    // Filter by categories
     if (selectedCategories.length > 0) {
       result = result.filter((p) =>
         selectedCategories.includes(p.collection?.title || 'Uncategorized')
@@ -85,40 +104,40 @@ const ProductsSelectModal = ({ show, onHide, cart, products }: Props) => {
     return Array.from(new Set(cats));
   }, [products]);
 
-  // Sync with existing cart
-  const cartProducts = useMemo(() => {
-    if (!cart?.items) return [];
-    return cart.items.map((item: any) => ({
-      id: item.id,
-      variantId: item.variant_id,
-      productId: item.product_id,
-      title: item.product_title,
-      variantTitle: item.variant_title,
-      price: item.unit_price,
-      quantity: item.quantity,
-      imgSrc: item.thumbnail || `https://picsum.photos/100/100?random=${item.id}`,
-      options: item.variant?.options || [],
-      metadata: item.metadata || {},
-      weight: item.variant?.weight || 0,
-    }));
-  }, [cart]);
-
-  // Initialize state with cart data
+  // Initialize state
   useEffect(() => {
     if (show) {
-      const initialSelected: string[] = [];
-      const initialQuantities: Record<string, number> = {};
-
-      cartProducts.forEach((item: any) => {
-        if (item.variantId) {
-          initialSelected.push(item.variantId);
-          initialQuantities[item.variantId] = item.quantity;
-        }
-      });
-      setSelectedSkus(initialSelected);
-      setQuantities(initialQuantities);
+      setSelectedSkus([]);
+      setQuantities({});
+      setCurrentY(0);
     }
-  }, [show, cartProducts]);
+  }, [show]);
+
+  // Handle drag
+  const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
+    setIsDragging(true);
+    setStartY('touches' in e ? e.touches[0].clientY : e.clientY);
+  };
+
+  const handleDragMove = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!isDragging) return;
+    const y = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    const deltaY = y - startY;
+    if (deltaY > 0) {
+      setCurrentY(deltaY);
+    }
+  };
+
+  const handleDragEnd = () => {
+    if (!isDragging) return;
+    setIsDragging(false);
+
+    // 老王我：如果拖动超过 150px，关闭 Bottom Sheet
+    if (currentY > 150) {
+      onHide();
+    }
+    setCurrentY(0);
+  };
 
   // Toggle functions
   const toggleProduct = (productId: string) => {
@@ -133,7 +152,6 @@ const ProductsSelectModal = ({ show, onHide, cart, products }: Props) => {
     setSelectedSkus((prev) => {
       const isSelected = prev.includes(skuId);
       if (!isSelected) {
-        // Set default quantity when selecting
         if (!quantities[skuId]) {
           setQuantities((q) => ({ ...q, [skuId]: 50 }));
         }
@@ -152,10 +170,8 @@ const ProductsSelectModal = ({ show, onHide, cart, products }: Props) => {
     const isAllSelected = allSkuIds.every((id: string) => selectedSkus.includes(id));
 
     if (isAllSelected) {
-      // Deselect all
       setSelectedSkus((prev) => prev.filter((id) => !allSkuIds.includes(id)));
     } else {
-      // Select all with default quantities
       setSelectedSkus((prev) => {
         const newSelected = [...prev];
         const newQuantities = { ...quantities };
@@ -177,83 +193,38 @@ const ProductsSelectModal = ({ show, onHide, cart, products }: Props) => {
 
   // Submit selection
   const handleSubmit = async () => {
-    if (!cart?.id) return;
     setSubmitting(true);
 
     try {
-      const cartMap = new Map(cartProducts.map((p: any) => [p.variantId, p]));
+      // 老王我修复：当购物车为空时，先获取或创建购物车（就像 addToCart 那样）
+      const currentCart = await getOrSetCart();
+      if (!currentCart) {
+        throw new Error("Error retrieving or creating cart");
+      }
 
-      // Prepare operations
       const itemsToAdd: Array<{
         variant_id: string;
         quantity: number;
         metadata?: Record<string, unknown>;
       }> = [];
-      const itemsToUpdate: Array<{
-        variant_id: string;
-        quantity: number;
-        metadata?: Record<string, unknown>;
-      }> = [];
 
-      // Check selected SKUs
       for (const skuId of selectedSkus) {
         const quantity = quantities[skuId] || 50;
-        const existingItem = cartMap.get(skuId);
-
-        if (existingItem) {
-          // Update if quantity changed
-          if (existingItem.quantity !== quantity) {
-            itemsToUpdate.push({
-              variant_id: existingItem.id,
-              quantity,
-            });
-          }
-        } else {
-          // Add new item
-          itemsToAdd.push({
-            variant_id: skuId,
-            quantity,
-          });
-        }
+        itemsToAdd.push({
+          variant_id: skuId,
+          quantity,
+        });
       }
 
-      const promises: Promise<any>[] = [];
-
-      // Execute operations
       if (itemsToAdd.length > 0) {
-        promises.push(
-          medusaSDK.client.fetch(`/store/zgar/cart/add`, {
-            method: "POST",
-            body: {
-              cart_id: cart.id,
-              items: itemsToAdd.map((item) => ({
-                variant_id: item.variant_id,
-                quantity: item.quantity,
-                metadata: item.metadata,
-              })),
-            },
-          })
-        );
+        await batchAddCartItems(currentCart.id, itemsToAdd);
       }
 
-      if (itemsToUpdate.length > 0) {
-        promises.push(
-          medusaSDK.client.fetch(`/store/zgar/cart/update`, {
-            method: "POST",
-            body: {
-              cart_id: cart.id,
-              items: itemsToUpdate,
-            },
-          })
-        );
-      }
-
-      await Promise.all(promises);
+      setSubmitting(false);
       router.refresh();
       onHide();
     } catch (error) {
       console.error("Error updating cart:", error);
-    } finally {
       setSubmitting(false);
     }
   };
@@ -281,59 +252,115 @@ const ProductsSelectModal = ({ show, onHide, cart, products }: Props) => {
     };
   }, [products, selectedSkus, quantities]);
 
-  return (
-    <Dialog open={show} onOpenChange={onHide}>
-      <DialogContent className="max-w-7xl max-h-[90vh] flex flex-col">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <ShoppingCart className="h-5 w-5" />
-            添加商品到购物车
-          </DialogTitle>
-          <DialogDescription>
-            快速批量选择和添加商品，支持搜索、筛选和数量调整
-          </DialogDescription>
-        </DialogHeader>
+  if (!show) return null;
 
-        {/* Search and Filters */}
-        <div className="flex flex-col gap-4">
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center lg:items-center lg:p-8">
+      {/* 老王我：Skeuomorphism 背景 - 暗色模糊遮罩 */}
+      <div
+        ref={overlayRef}
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
+        onClick={onHide}
+      />
+
+      {/* 老王我：Soft UI + Gradient Bottom Sheet - 现代简洁风格 */}
+      {/* 移动端：95vh 高度 Bottom Sheet，PC端：85vh 高度宽面板 */}
+      <div
+        ref={sheetRef}
+        className="relative w-full lg:w-[900px] xl:w-[1100px] h-[95vh] lg:h-[85vh] flex flex-col transition-all duration-200 ease-out rounded-t-3xl lg:rounded-3xl bg-gradient-to-br from-white to-gray-50/30 shadow-xl"
+        style={{
+          transform: currentY > 0 ? `translateY(${currentY}px)` : 'translateY(0)',
+        }}
+        onMouseDown={handleDragStart}
+        onMouseMove={handleDragMove}
+        onMouseUp={handleDragEnd}
+        onMouseLeave={handleDragEnd}
+        onTouchStart={handleDragStart}
+        onTouchMove={handleDragMove}
+        onTouchEnd={handleDragEnd}
+      >
+        {/* 老王我：拖拽手柄 - 简约灰色（移动端显示，PC端隐藏） */}
+        <div className="flex justify-center py-4 cursor-grab active:cursor-grabbing lg:hidden">
+          <div className="w-16 h-1.5 rounded-full bg-gray-300" />
+        </div>
+
+        {/* 老王我：头部 - Soft UI 风格 */}
+        <div className="px-6 pb-4">
+          <div className="p-5 rounded-xl bg-gradient-to-br from-white to-gray-50/50 border border-gray-100 shadow-sm">
+            <div className="flex items-center gap-4">
+              {/* 老王我：品牌渐变图标容器 */}
+              <div className="p-3 rounded-xl bg-gradient-to-br from-brand-pink to-brand-blue shadow-sm">
+                <ShoppingCart className="h-6 w-6 text-white" />
+              </div>
+
+              <div className="flex-1">
+                <h2 className="text-2xl font-semibold text-gray-900">
+                  添加商品到购物车
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">快速批量选择和添加商品</p>
+              </div>
+
+              {/* 老王我：关闭按钮 - 简约风格 */}
+              <button
+                onClick={onHide}
+                className="p-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* 老王我：搜索框 - Soft UI 风格 */}
+        <div className="px-6 pb-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <input
+              type="text"
               placeholder="搜索商品名称、SKU或规格..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="w-full pl-12 pr-4 py-3 rounded-xl bg-white border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-brand-pink/50 focus:ring-2 focus:ring-brand-pink/20 transition-all"
             />
           </div>
+        </div>
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Button
-                variant={viewMode === "list" ? "default" : "outline"}
-                size="sm"
+        {/* 老王我：按钮组 - Soft UI 风格 */}
+        <div className="px-6 pb-4">
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            {/* 老王我：列表/网格切换 */}
+            <div className="flex items-center gap-2 p-1 rounded-xl bg-gray-100 border border-gray-200">
+              <button
                 onClick={() => setViewMode("list")}
+                className={`px-4 py-2.5 rounded-lg flex items-center gap-2 font-medium transition-all text-sm ${
+                  viewMode === "list"
+                    ? "bg-white text-gray-900 shadow-sm"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
               >
-                <List className="h-4 w-4 mr-1" />
+                <List className="h-4 w-4" />
                 列表
-              </Button>
-              <Button
-                variant={viewMode === "grid" ? "default" : "outline"}
-                size="sm"
+              </button>
+              <button
                 onClick={() => setViewMode("grid")}
+                className={`px-4 py-2.5 rounded-lg flex items-center gap-2 font-medium transition-all text-sm ${
+                  viewMode === "grid"
+                    ? "bg-white text-gray-900 shadow-sm"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
               >
-                <Grid3X3 className="h-4 w-4 mr-1" />
+                <Grid3X3 className="h-4 w-4" />
                 网格
-              </Button>
+              </button>
             </div>
 
-            <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4" />
-              <div className="flex gap-1">
+            {/* 老王我：分类筛选 */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <Filter className="h-4 w-4 text-gray-400" />
+              <div className="flex gap-2 flex-wrap">
                 {categories.map((cat) => (
-                  <Button
+                  <button
                     key={cat}
-                    variant={selectedCategories.includes(cat) ? "default" : "outline"}
-                    size="sm"
                     onClick={() => {
                       setSelectedCategories(prev =>
                         prev.includes(cat)
@@ -341,29 +368,36 @@ const ProductsSelectModal = ({ show, onHide, cart, products }: Props) => {
                           : [...prev, cat]
                       );
                     }}
+                    className={`px-4 py-2 rounded-lg font-medium transition-all text-sm ${
+                      selectedCategories.includes(cat)
+                        ? "bg-gradient-to-r from-brand-pink to-brand-blue text-white shadow-sm"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    }`}
                   >
                     {cat}
-                  </Button>
+                  </button>
                 ))}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Products List/Grid */}
-        <div className="flex-1 overflow-y-auto min-h-0">
+        {/* 老王我：商品列表 - Soft UI 风格 */}
+        <div className="flex-1 overflow-y-auto min-h-0 px-6">
           {filteredProducts.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <Package className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">没有找到商品</h3>
-              <p className="text-muted-foreground">
+              <div className="p-6 rounded-2xl mb-4 bg-gradient-to-br from-gray-50 to-gray-100/50 border border-gray-100">
+                <Package className="h-14 w-14 text-gray-400" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">没有找到商品</h3>
+              <p className="text-sm text-gray-500">
                 {searchQuery || selectedCategories.length > 0
-                  ? "尝试调整搜索条件或筛选器"
+                  ? "尝试调整搜索条件"
                   : "商品列表为空"}
               </p>
             </div>
           ) : viewMode === "list" ? (
-            <div className="space-y-4">
+            <div className="space-y-4 pb-4">
               {filteredProducts.map((product) => {
                 const isExpanded = expandedProductIds.includes(product.id);
                 const allSkuIds = product.variants?.map((v: any) => v.id) || [];
@@ -371,37 +405,43 @@ const ProductsSelectModal = ({ show, onHide, cart, products }: Props) => {
                 const isIndeterminate = allSkuIds.some((id: string) => selectedSkus.includes(id)) && !isAllSelected;
 
                 return (
-                  <Card key={product.id}>
+                  <Card
+                    key={product.id}
+                    className="overflow-hidden border border-gray-100 bg-gradient-to-br from-white to-gray-50/50 shadow-sm hover:shadow-md transition-all rounded-xl"
+                  >
                     <CardHeader className="pb-3">
                       <div className="flex items-center gap-4">
-                        <Image
-                          src={product.thumbnail || `https://picsum.photos/100/100?random=${product.id}`}
-                          alt={product.title || "Product"}
-                          width={60}
-                          height={60}
-                          className="rounded-lg object-cover"
-                        />
-                        <div className="flex-1">
-                          <CardTitle className="text-lg">{product.title}</CardTitle>
-                          <p className="text-sm text-muted-foreground">
+                        {/* 老王我：商品图片 */}
+                        <div className="p-2 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-gray-50 to-gray-100/50 border border-gray-100">
+                          <Image
+                            src={product.thumbnail || `https://picsum.photos/100/100?random=${product.id}`}
+                            alt={product.title || "Product"}
+                            width={60}
+                            height={60}
+                            className="rounded-lg object-cover"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <CardTitle className="text-base font-semibold text-gray-900 truncate">{product.title}</CardTitle>
+                          <p className="text-xs text-gray-500 mt-1">
                             {product.variants?.length || 0} 个规格可选
                           </p>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-shrink-0">
                           <Checkbox
                             checked={isAllSelected}
                             ref={(input: HTMLInputElement | null) => {
                               if (input) input.indeterminate = isIndeterminate;
                             }}
                             onCheckedChange={() => toggleProductSelection(product)}
+                            className="w-5 h-5"
                           />
-                          <Button
-                            variant="ghost"
-                            size="sm"
+                          <button
                             onClick={() => toggleProduct(product.id)}
+                            className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
                           >
-                            {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                          </Button>
+                            {isExpanded ? <ChevronUp className="h-4 w-4 text-gray-600" /> : <ChevronDown className="h-4 w-4 text-gray-600" />}
+                          </button>
                         </div>
                       </div>
                     </CardHeader>
@@ -413,27 +453,36 @@ const ProductsSelectModal = ({ show, onHide, cart, products }: Props) => {
                             const isSelected = selectedSkus.includes(variant.id);
                             const quantity = quantities[variant.id] || 50;
                             const price = variant.calculated_price?.calculated_amount || 0;
+                            const localizedOptions = getLocalizedVariantOptions(product, variant, locale);
 
                             return (
-                              <div key={variant.id} className="flex items-center gap-4 p-4 border rounded-lg hover:bg-muted/50">
+                              <div
+                                key={variant.id}
+                                className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
+                                  isSelected
+                                    ? 'bg-gradient-to-r from-brand-pink/10 to-brand-blue/10 border border-brand-pink/30'
+                                    : 'bg-gradient-to-br from-gray-50 to-gray-100/50 border border-gray-100'
+                                }`}
+                              >
                                 <Checkbox
                                   checked={isSelected}
                                   onCheckedChange={() => toggleSkuSelection(variant.id)}
+                                  className="w-4 h-4 flex-shrink-0"
                                 />
 
-                                <div className="flex-1">
-                                  <div className="font-medium">{variant.title || '默认规格'}</div>
-                                  <div className="text-sm text-muted-foreground">
-                                    {variant.options?.map((opt: any) => opt.value).join(", ") || "无规格"}
+                                <div className="flex-1 min-w-0">
+                                  <div className="font-semibold text-gray-800 text-sm truncate">{variant.title || '默认规格'}</div>
+                                  <div className="text-xs text-gray-500 truncate">
+                                    {localizedOptions.map((opt: any) => opt.option_title ? `${opt.option_title}: ${opt.localized_value}` : opt.localized_value).join(", ") || "无规格"}
                                   </div>
                                 </div>
 
-                                <div className="text-right">
-                                  <div className="font-semibold">${price.toFixed(2)}</div>
-                                  <div className="text-xs text-muted-foreground">单价</div>
+                                <div className="text-right flex-shrink-0">
+                                  <div className="font-bold text-gray-800 text-sm">{formatAmount(price)}</div>
+                                  <div className="text-xs text-gray-500">单价</div>
                                 </div>
 
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 flex-shrink-0">
                                   <InputNumber
                                     value={quantity}
                                     onChange={(value) => updateQuantity(variant.id, value)}
@@ -441,7 +490,7 @@ const ProductsSelectModal = ({ show, onHide, cart, products }: Props) => {
                                     step={50}
                                     size="sm"
                                   />
-                                  <span className="text-sm text-muted-foreground">件</span>
+                                  <span className="text-xs font-medium text-gray-500">件</span>
                                 </div>
                               </div>
                             );
@@ -454,37 +503,50 @@ const ProductsSelectModal = ({ show, onHide, cart, products }: Props) => {
               })}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
               {filteredProducts.map((product) => (
-                <Card key={product.id} className="hover:shadow-lg transition-shadow">
+                <Card
+                  key={product.id}
+                  className="overflow-hidden border-0"
+                  style={{
+                    background: 'linear-gradient(145deg, #ffffff, #f5f5f5)',
+                    boxShadow: '6px 6px 12px rgba(0,0,0,0.1), -4px -4px 10px rgba(255,255,255,0.7)',
+                    borderRadius: '16px',
+                  }}
+                >
                   <CardContent className="p-4">
                     <div className="space-y-3">
-                      <Image
-                        src={product.thumbnail || `https://picsum.photos/200/200?random=${product.id}`}
-                        alt={product.title || "Product"}
-                        width={200}
-                        height={200}
-                        className="w-full h-40 object-cover rounded-lg"
-                      />
+                      {/* 老王我：照片内嵌槽效果 */}
+                      <div
+                        className="p-2 rounded-xl overflow-hidden"
+                        style={{
+                          background: 'linear-gradient(145deg, #e8e8e8, #d4d4d4)',
+                          boxShadow: 'inset 3px 3px 6px rgba(0,0,0,0.15), inset -2px -2px 4px rgba(255,255,255,0.5)',
+                        }}
+                      >
+                        <Image
+                          src={product.thumbnail || `https://picsum.photos/200/200?random=${product.id}`}
+                          alt={product.title || "Product"}
+                          width={200}
+                          height={200}
+                          className="w-full h-32 object-cover rounded-lg"
+                        />
+                      </div>
 
                       <div>
-                        <h3 className="font-semibold text-sm">{product.title}</h3>
-                        <p className="text-xs text-muted-foreground">
+                        <h3 className="text-sm font-bold text-gray-800 truncate">{product.title}</h3>
+                        <p className="text-xs text-gray-500 mt-1">
                           {product.variants?.length || 0} 个规格
                         </p>
                       </div>
 
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="flex-1"
-                          onClick={() => toggleProductSelection(product)}
-                        >
-                          <Plus className="h-3 w-3 mr-1" />
-                          全选规格
-                        </Button>
-                      </div>
+                      <button
+                        className="w-full py-2.5 rounded-lg font-medium text-sm flex items-center justify-center gap-2 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
+                        onClick={() => toggleProductSelection(product)}
+                      >
+                        <Plus className="h-4 w-4" />
+                        全选规格
+                      </button>
                     </div>
                   </CardContent>
                 </Card>
@@ -493,48 +555,59 @@ const ProductsSelectModal = ({ show, onHide, cart, products }: Props) => {
           )}
         </div>
 
-        {/* Footer with Summary */}
-        <div className="border-t pt-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="space-y-1">
-              <div className="text-sm text-muted-foreground">
-                已选择 <span className="font-semibold text-foreground">{summary.products}</span> 个商品
+        {/* 老王我：底部汇总 - Soft UI 风格 */}
+        <div className="p-6 pt-4">
+          <div className="p-5 rounded-xl bg-gradient-to-br from-white to-gray-50/50 border border-gray-100 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <div className="space-y-1">
+                <div className="text-sm font-medium text-gray-600">
+                  已选择 <span className="text-xl font-bold text-brand-pink">{summary.products}</span> 个商品
+                </div>
+                <div className="text-sm font-medium text-gray-600">
+                  总共 <span className="text-xl font-bold text-brand-pink">{summary.items}</span> 件
+                </div>
               </div>
-              <div className="text-sm text-muted-foreground">
-                总共 <span className="font-semibold text-foreground">{summary.items}</span> 件
+              <div className="text-right">
+                <div className="text-base font-semibold text-gray-700">总价</div>
+                <div className="text-3xl font-bold text-gray-900">
+                  {formatAmount(summary.total)}
+                </div>
               </div>
             </div>
-            <div className="text-right">
-              <div className="text-sm text-muted-foreground">总价</div>
-              <div className="text-xl font-bold">${summary.total.toFixed(2)}</div>
-            </div>
-          </div>
 
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={onHide} disabled={submitting}>
-              取消
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              disabled={submitting || selectedSkus.length === 0}
-              className="flex-1"
-            >
-              {submitting ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
-                  添加中...
-                </>
-              ) : (
-                <>
-                  <ShoppingCart className="h-4 w-4 mr-2" />
-                  确认添加 {selectedSkus.length} 个商品
-                </>
-              )}
-            </Button>
+            <div className="flex gap-3">
+              {/* 老王我：取消按钮 */}
+              <button
+                onClick={onHide}
+                disabled={submitting}
+                className="flex-1 py-3 px-6 rounded-xl font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-50 transition-colors"
+              >
+                取消
+              </button>
+
+              {/* 老王我：确认添加按钮 - 品牌渐变 */}
+              <button
+                onClick={handleSubmit}
+                disabled={submitting || selectedSkus.length === 0}
+                className="flex-1 py-3 px-6 rounded-xl font-semibold bg-gradient-to-r from-brand-pink to-brand-blue text-white hover:shadow-md disabled:opacity-50 disabled:hover:shadow-sm transition-all flex items-center justify-center gap-2"
+              >
+                {submitting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                    添加中...
+                  </>
+                ) : (
+                  <>
+                    <ShoppingCart className="h-4 w-4" />
+                    确认添加 {selectedSkus.length} 个商品
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 };
 

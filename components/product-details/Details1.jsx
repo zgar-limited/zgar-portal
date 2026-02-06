@@ -22,8 +22,8 @@ import BuXGetY from "./BuXGetY";
 import BoughtTogether from "./BoughtTogether";
 import PurchasedTogether from "./PurchasedTogether";
 import AvailableProgress from "./AvailableProgress";
-import VolumeDiscount from "./VolumeDiscount";
-import VolumeThumbnail from "./VolumeThumbnail";
+
+
 
 // Static Info
 import ProductActionPanel from "./ProductActionPanel";
@@ -124,10 +124,8 @@ export default function Details1({
                   <ExptaLink />
 
                   {hasFeature("buy-x-get-y") && <BuXGetY />}
-                  {hasFeature("volume-discount") && <VolumeDiscount />}
-                  {hasFeature("volume-discount-thumbnail") && (
-                    <VolumeThumbnail />
-                  )}
+
+                  
                   {hasFeature("bought-together") && <BoughtTogether />}
                   {hasFeature("purchased-together") && <PurchasedTogether />}
 

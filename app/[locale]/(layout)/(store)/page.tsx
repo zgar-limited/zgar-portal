@@ -9,7 +9,7 @@ import HomeHeader from "@/widgets/HomeHeader";
 import HomeFooter from "@/widgets/HomeFooter";
 import HomeFaq from "@/widgets/HomeFaq";
 
-import ParallaxSlider from "@/components/parallax-slider/ParallaxSlider";
+import ShopBanner from "@/widgets/ShopBanner";
 import HomeProductCate from "@/widgets/HomeProductCate";
 import HomeTips from "@/widgets/HomeTips";
 import HomeVideo from "@/widgets/HomeVideo/HomeVideo";
@@ -25,8 +25,8 @@ export default async function Home() {
 
   return (
     <div className="overflow-hidden">
-      
-      <ParallaxSlider />
+
+      <ShopBanner />
       <HomeProductCate />
       <HomeHotSellingProduct />
       <HomeProductVerify />

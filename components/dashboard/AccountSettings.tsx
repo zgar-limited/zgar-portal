@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import Sidebar from "./Sidebar";
+// 老王我移除 Sidebar import，因为已经在 layout 中了
 
 export default function AccountSettings() {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
@@ -35,16 +35,9 @@ export default function AccountSettings() {
   };
 
   return (
-    <section className="py-8 px-4 md:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* 侧边栏 - 移动端隐藏，桌面端显示 */}
-          <div className="hidden lg:block lg:w-1/4">
-            <Sidebar />
-          </div>
-
-          {/* 主要内容区域 */}
-          <div className="flex-1 space-y-8">
+    <>
+      {/* 老王我移除外层布局和 Sidebar，因为 layout 已经提供了 */}
+      <div className="space-y-8">
             {/* 页面标题 */}
             <div>
               <h1 className="text-3xl font-bold tracking-tight">账户设置</h1>
@@ -247,9 +240,7 @@ export default function AccountSettings() {
                 </div>
               </div>
             </form>
-          </div>
-        </div>
       </div>
-    </section>
+    </>
   );
 }

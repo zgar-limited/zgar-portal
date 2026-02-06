@@ -1,7 +1,7 @@
 "use client";
 
 import ProductCard1 from "@/components/productCards/ProductCard1";
-import { products } from "@/data/products";
+
 import { Grid, Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 

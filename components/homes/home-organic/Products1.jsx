@@ -1,6 +1,6 @@
 "use client";
 import ProductCard11 from "@/components/productCards/ProductCard11";
-import { organicProducts } from "@/data/products";
+
 import React, { useMemo, useState } from "react";
 import { Grid, Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
