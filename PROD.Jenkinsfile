@@ -12,5 +12,12 @@ pipeline {
                 sh "docker build -f Dockerfile -t zgar-portal-prod-${env.BUILD_ID} ."
             }
         }
+         stage('push to registry') {
+            steps {
+                sh "docker tag zgar-portal-prod-${env.BUILD_ID} harbor.anna-tech.cn:10081/zgar/zgar-portal-prod:${env.BUILD_ID}"
+                sh "docker login https://harbor.anna-tech.cn:10081 -u admin -p Harbor12345"
+                sh "docker push harbor.anna-tech.cn:10081/zgar/zgar-portal-prod:${env.BUILD_ID}"
+            }
+        }
     }
 }
