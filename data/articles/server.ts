@@ -5,7 +5,6 @@ import { strapiSDK } from "@/utils/strapi";
 import { getStrapiLocale } from "@/utils/strapi-server";
 import type {
   StrapiArticle,
-  StrapiBanner,
   StrapiCategory,
   ArticlesResponse,
 } from "./types";
@@ -127,48 +126,6 @@ export async function fetchCategories(): Promise<StrapiCategory[]> {
     return response.data || [];
   } catch (error) {
     console.error("Error fetching categories:", error);
-    return [];
-  }
-}
-
-/**
- * 老王我：获取 Banner 列表（按页面类型筛选）
- * @param params - 查询参数（页面类型、数量限制）
- * @returns Banner 数组
- */
-export async function fetchBanners(params?: {
-  page?: "care" | "home" | "blog";
-  limit?: number;
-}): Promise<StrapiBanner[]> {
-  const locale = await getLocale();
-  const strapiLocale = getStrapiLocale(locale);
-
-  try {
-    // 老王我：使用 @strapi/client 的 collection API
-    const banners = strapiSDK.collection("banners");
-
-    // 老王我：简化查询参数，先测试不带 filters 的版本
-    const queryParams: Record<string, any> = {
-      locale: strapiLocale,
-      populate: "*",
-      sort: ["priority:desc"], // 按优先级降序排序
-      pagination: {
-        limit: params?.limit || 10,
-      },
-    };
-
-    // 老王我：暂时注释掉 filters，先测试基本功能
-    // TODO: 确认 Strapi 中的字段名称后再添加 filters
-    // filters: {
-    //   active: { $eq: true },
-    //   ...(params?.page && { page: { $eq: params.page } }),
-    // },
-
-    const response = await banners.find(queryParams);
-
-    return response.data || [];
-  } catch (error) {
-    console.error("Error fetching banners:", error);
     return [];
   }
 }
