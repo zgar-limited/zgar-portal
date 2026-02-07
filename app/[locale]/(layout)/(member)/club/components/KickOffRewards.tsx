@@ -93,7 +93,7 @@ export default function KickOffRewards() {
             <h4 className="text-3xl font-black text-white mb-2">
               {t("kickOffTitle")}
             </h4>
-            <p className="text-gray-400">立即开始您的会员之旅</p>
+            <p className="text-gray-400">{t("kickOffDesc")}</p>
           </div>
 
           <button

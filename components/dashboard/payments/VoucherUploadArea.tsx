@@ -5,6 +5,7 @@ import { Plus, Image as ImageIcon, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { uploadPaymentVoucherFiles } from "@/data/orders";  // 老王注：导入上传函数（2026-02-05）
+import { useTranslations } from "next-intl";
 
 interface VoucherUploadAreaProps {
   urls: string[];
@@ -23,16 +24,17 @@ export default function VoucherUploadArea({
   maxFiles = 10,
   disabled = false,
 }: VoucherUploadAreaProps) {
+  const t = useTranslations("VoucherUpload");
   const [error, setError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);  // 老王注：上传状态（2026-02-05）
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const validateFile = (file: File): string | null => {
     if (file.size > 5 * 1024 * 1024) {
-      return `文件 "${file.name}" 太大，最大支持 5MB`;
+      return t("fileTooLarge", { name: file.name });
     }
     if (!file.type.startsWith("image/")) {
-      return `文件 "${file.name}" 不是图片格式`;
+      return t("notImage", { name: file.name });
     }
     return null;
   };
@@ -45,7 +47,7 @@ export default function VoucherUploadArea({
 
     // 检查数量限制
     if (urls.length + selectedFiles.length > maxFiles) {
-      setError(`最多只能上传 ${maxFiles} 张图片`);
+      setError(t("maxFilesError", { n: maxFiles }));
       return;
     }
 
@@ -66,7 +68,7 @@ export default function VoucherUploadArea({
       onChange(newUrls);
     } catch (err: any) {
       console.error("Upload failed:", err);
-      setError(err.message || "上传失败，请重试");
+      setError(err.message || t("uploadFailed"));
       hasError = true;
     } finally {
       setIsUploading(false);  // 老王注：上传结束（2026-02-05）
@@ -103,7 +105,7 @@ export default function VoucherUploadArea({
             >
               <img
                 src={url}
-                alt={`凭证 ${index + 1}`}
+                alt={t("voucherNumber", { n: index + 1 })}
                 className="w-full h-full object-cover"
               />
               {/* 删除按钮 */}
@@ -131,7 +133,7 @@ export default function VoucherUploadArea({
               className="aspect-square rounded-lg border-2 border-dashed border-gray-300 hover:border-gray-900 hover:bg-gray-50 transition-all duration-200 flex flex-col items-center justify-center gap-2"
             >
               <Plus className="w-8 h-8 text-gray-400" />
-              <span className="text-xs text-gray-500">添加</span>
+              <span className="text-xs text-gray-500">{t("add")}</span>
             </button>
           )}
         </div>
@@ -152,14 +154,14 @@ export default function VoucherUploadArea({
             )}
             <div className="text-center space-y-1">
               <p className="text-base font-semibold text-gray-900">
-                {isUploading ? "上传中..." : "点击或拖拽上传支付凭证"}
+                {isUploading ? t("uploading") : t("uploadPrompt")}
               </p>
               <p className="text-sm text-gray-500">
-                支持 JPG、PNG、WEBP 格式，最大 5MB，最多 {maxFiles} 张
+                {t("formatsHint", { n: maxFiles })}
               </p>
               {required && (
                 <p className="text-xs text-red-600 font-medium">
-                  * 必填项
+                  {t("required")}
                 </p>
               )}
             </div>

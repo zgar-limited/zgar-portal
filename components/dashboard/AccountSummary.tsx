@@ -40,6 +40,7 @@ interface AccountSummaryProps {
 export default function AccountSummary({ customer, orders = [] }: AccountSummaryProps) {
   const tOrders = useTranslations('Orders');
   const tPayment = useTranslations('PaymentMethods');
+  const t = useTranslations('AccountSummary');
   const locale = useLocale();
 
   // 老王我：统一的金额格式化函数
@@ -109,7 +110,7 @@ export default function AccountSummary({ customer, orders = [] }: AccountSummary
             {/* 用户名和欢迎语 - 老王我：超大字体 + 欢迎语 */}
             <div className="flex-1 text-center md:text-left">
               <p className="text-sm md:text-base lg:text-lg font-bold text-white/90 mb-1 md:mb-2">
-                欢迎回来 👋
+                {t('welcomeBack')}
               </p>
               <h2 className="text-xl md:text-3xl lg:text-5xl font-black text-white" style={{
                 fontFamily: 'sans-serif',
@@ -118,7 +119,7 @@ export default function AccountSummary({ customer, orders = [] }: AccountSummary
               }}>
                 {customer?.first_name && customer?.last_name
                   ? `${customer.first_name} ${customer.last_name}`
-                  : '用户'
+                  : t('user')
                 }
               </h2>
               <p className="text-xs md:text-sm lg:text-base font-semibold text-white/80 mt-1 md:mt-2 truncate">
@@ -148,7 +149,7 @@ export default function AccountSummary({ customer, orders = [] }: AccountSummary
                   <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path>
                 </svg>
               </div>
-              <p className="text-[10px] md:text-xs lg:text-sm font-bold text-white/90 mb-0.5 md:mb-1">余额</p>
+              <p className="text-[10px] md:text-xs lg:text-sm font-bold text-white/90 mb-0.5 md:mb-1">{t('balance')}</p>
               <p className="text-sm md:text-xl lg:text-2xl font-black text-white" style={{
                 fontFamily: 'sans-serif',
                 textShadow: '1px_1px_0_#000000'
@@ -174,7 +175,7 @@ export default function AccountSummary({ customer, orders = [] }: AccountSummary
                   <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                 </svg>
               </div>
-              <p className="text-[10px] md:text-xs lg:text-sm font-bold text-white/90 mb-0.5 md:mb-1">积分</p>
+              <p className="text-[10px] md:text-xs lg:text-sm font-bold text-white/90 mb-0.5 md:mb-1">{t('points')}</p>
               <p className="text-sm md:text-xl lg:text-2xl font-black text-white" style={{
                 fontFamily: 'sans-serif',
                 textShadow: '1px_1px_0_#000000'
@@ -203,7 +204,7 @@ export default function AccountSummary({ customer, orders = [] }: AccountSummary
                   <path d="M12 22V12"></path>
                 </svg>
               </div>
-              <p className="text-[10px] md:text-xs lg:text-sm font-bold text-white/90 mb-0.5 md:mb-1">订单</p>
+              <p className="text-[10px] md:text-xs lg:text-sm font-bold text-white/90 mb-0.5 md:mb-1">{t('orders')}</p>
               <p className="text-sm md:text-xl lg:text-2xl font-black text-white" style={{
                 fontFamily: 'sans-serif',
                 textShadow: '1px_1px_0_#000000'
@@ -220,7 +221,7 @@ export default function AccountSummary({ customer, orders = [] }: AccountSummary
               <div className="flex items-center gap-2 px-3 py-2 bg-white/20 backdrop-blur-sm rounded-lg border-2 border-white/30">
                 <Cake size={16} className="text-white flex-shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] md:text-xs text-white/80 font-medium">生日</p>
+                  <p className="text-[10px] md:text-xs text-white/80 font-medium">{t('birthday')}</p>
                   <p className="text-sm md:text-base font-bold text-white truncate">
                     {new Date(customer.metadata.birthday).toLocaleDateString('zh-CN', {
                       year: 'numeric',
@@ -237,7 +238,7 @@ export default function AccountSummary({ customer, orders = [] }: AccountSummary
               <div className={`flex items-center gap-2 px-3 py-2 bg-white/20 backdrop-blur-sm rounded-lg border-2 border-white/30 ${!customer?.metadata?.birthday ? 'col-span-2' : ''}`}>
                 <Calendar size={16} className="text-white flex-shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] md:text-xs text-white/80 font-medium">加入时间</p>
+                  <p className="text-[10px] md:text-xs text-white/80 font-medium">{t('joinedDate')}</p>
                   <p className="text-sm md:text-base font-bold text-white truncate">
                     {new Date(customer.created_at).toLocaleDateString('zh-CN', {
                       year: 'numeric',

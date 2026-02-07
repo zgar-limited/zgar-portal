@@ -2,8 +2,10 @@
 import { Link } from '@/i18n/routing';
 import Image from "next/image";
 import { useEffect, useRef } from "react";
+import { useTranslations } from 'next-intl';
 
 export default function HomeFooter({ parentClass = "tf-footer style-4" }) {
+  const t = useTranslations("Footer");
   const isBgDark = parentClass.includes("bg-deep-green");
   const footerRef = useRef(null);
 
@@ -46,7 +48,7 @@ export default function HomeFooter({ parentClass = "tf-footer style-4" }) {
             <div className="w-full xl:w-1/3 sm:w-1/2 mb-8 xl:mb-0 px-4">
               <div className="footer-col-block">
                 <p className="footer-heading footer-heading-mobile text-gray-900 font-semibold text-base mb-6">
-                  Contact us
+                  {t("contactUs")}
                 </p>
                 <div className="tf-collapse-content">
                   <ul className="footer-contact space-y-3">
@@ -105,27 +107,27 @@ export default function HomeFooter({ parentClass = "tf-footer style-4" }) {
 
             <div className="w-full xl:w-1/3 sm:w-1/2 mb-8 xl:mb-0 px-4">
               <div className="mx-auto footer-col-block footer-wrap-1">
-                <p className="footer-heading footer-heading-mobile text-gray-900 font-semibold text-base mb-6">Products</p>
+                <p className="footer-heading footer-heading-mobile text-gray-900 font-semibold text-base mb-6">{t("products")}</p>
                 <div className="tf-collapse-content">
                   <ul className="footer-menu-list space-y-3">
                     <li>
                       <Link href="/" className="text-gray-600 hover:text-brand-pink transition-colors text-sm">
-                        产品系列一
+                        {t("productSeries1")}
                       </Link>
                     </li>
                     <li>
                       <Link href="/" className="text-gray-600 hover:text-brand-pink transition-colors text-sm">
-                        产品系列二
+                        {t("productSeries2")}
                       </Link>
                     </li>
                     <li>
                       <Link href="/" className="text-gray-600 hover:text-brand-pink transition-colors text-sm">
-                        产品系列三
+                        {t("productSeries3")}
                       </Link>
                     </li>
                     <li>
                       <Link href="/" className="text-gray-600 hover:text-brand-pink transition-colors text-sm">
-                        产品系列四
+                        {t("productSeries4")}
                       </Link>
                     </li>
                   </ul>
@@ -136,7 +138,7 @@ export default function HomeFooter({ parentClass = "tf-footer style-4" }) {
             <div className="w-full xl:w-1/3 sm:w-1/2 mb-8 sm:mb-0 px-4">
               <div className="mx-auto footer-col-block footer-wrap-2">
                 <p className="footer-heading footer-heading-mobile text-gray-900 font-semibold text-base mb-6">
-                  Information
+                  {t("information")}
                 </p>
                 <div className="tf-collapse-content">
                   <ul className="footer-menu-list space-y-3">

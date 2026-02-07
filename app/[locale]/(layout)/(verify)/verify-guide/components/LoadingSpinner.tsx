@@ -6,6 +6,7 @@
 
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
 // ============================================
@@ -32,12 +33,14 @@ interface LoadingSpinnerProps {
  * ```
  */
 export function LoadingSpinner({ step, className }: LoadingSpinnerProps) {
+  const t = useTranslations('LoadingSpinner');
+
   // 颜色方案
   const colorClass =
     step === 'querying' ? 'border-brand-pink' : 'border-brand-blue';
 
   const text =
-    step === 'querying' ? '正在查询防伪码信息...' : '正在验证真伪...';
+    step === 'querying' ? t('querying') : t('verifying');
 
   return (
     <div className={cn('min-h-screen bg-brand-gradient py-8 px-4', className)}>
@@ -69,7 +72,7 @@ export function LoadingSpinner({ step, className }: LoadingSpinnerProps) {
 
             {/* 提示信息 */}
             <p className="mt-2 text-sm text-gray-400 text-center">
-              请稍候，正在处理...
+              {t('waiting')}
             </p>
           </div>
         </div>

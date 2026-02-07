@@ -7,6 +7,7 @@ import React from "react";
 import { Plus, Upload, Calendar, AlertCircle, CheckCircle, Wallet, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PaymentRecord, PaymentSummary } from "@/data/payments";
+import { useTranslations } from "next-intl";
 
 interface PaymentRecordsListProps {
   records: PaymentRecord[];
@@ -35,19 +36,19 @@ const getStatusBadgeClass = (status: string): string => {
 };
 
 /**
- * 老王我：返回支付状态的中文标签
+ * 老王我：返回支付状态的标签（使用国际化）
  */
-const getStatusLabel = (status: string): string => {
+const getStatusLabel = (status: string, t: (key: string) => string): string => {
   switch (status) {
     case "approved":
-      return "已批准";
+      return t("status.approved");
     case "reviewing":
-      return "审核中";
+      return t("status.reviewing");
     case "rejected":
-      return "已拒绝";
+      return t("status.rejected");
     case "pending":
     default:
-      return "待处理";
+      return t("status.pending");
   }
 };
 
@@ -80,6 +81,8 @@ export default function PaymentRecordsList({
   onCreatePayment,
   onUpdateVoucher,
 }: PaymentRecordsListProps) {
+  const t = useTranslations("PaymentRecords");
+
   // 老王我：判断是否可以创建支付
   const canCreatePayment = () => {
     if (orderAuditStatus !== "approved") return false;
@@ -100,11 +103,11 @@ export default function PaymentRecordsList({
         <div className="flex items-center justify-between">
           <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
             <Wallet size={18} className="text-brand-pink" />
-            支付记录
+            {t("title")}
           </h3>
           {records.length > 0 && (
             <span className="text-xs text-gray-500">
-              共 {records.length} 条
+              {t("totalRecords", { n: records.length })}
             </span>
           )}
         </div>
@@ -116,7 +119,7 @@ export default function PaymentRecordsList({
           <div className="p-3 bg-green-50 border border-green-200">
             <p className="text-sm text-green-800 flex items-center gap-2">
               <CheckCircle size={16} />
-              🎉 恭喜！您已付清全部订单金额
+              🎉 {t("fullyPaid")}
             </p>
           </div>
         )}
@@ -129,7 +132,7 @@ export default function PaymentRecordsList({
             onClick={onCreatePayment}
           >
             <Plus size={16} className="mr-2" />
-            付款
+            {t("paymentButton")}
           </Button>
         )}
 
@@ -138,7 +141,7 @@ export default function PaymentRecordsList({
           <div className="p-3 bg-yellow-50 border border-yellow-200">
             <p className="text-sm text-yellow-800 flex items-center gap-2">
               <AlertCircle size={16} />
-              ⚠️ 订单需要审核通过后才能创建支付
+              ⚠️ {t("needApproval")}
             </p>
           </div>
         )}
@@ -150,11 +153,11 @@ export default function PaymentRecordsList({
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-50 rounded-full mb-4">
               <Wallet size={32} className="text-gray-400" />
             </div>
-            <p className="text-gray-600 font-medium mb-1">暂无支付记录</p>
+            <p className="text-gray-600 font-medium mb-1">{t("noRecords")}</p>
             <p className="text-sm text-gray-500">
               {canCreatePayment()
-                ? "点击上方按钮创建支付"
-                : "订单审核通过后即可创建支付"}
+                ? t("createPaymentHint")
+                : t("waitApprovalHint")}
             </p>
           </div>
         ) : (
@@ -184,13 +187,13 @@ export default function PaymentRecordsList({
 
                       <div>
                         <div className="font-bold text-gray-900">
-                          {record.description || `第${record.installment_number}期付款`}
+                          {record.description || t("installment", { n: record.installment_number })}
                         </div>
                         <div className="text-xs text-gray-500 flex items-center gap-2 mt-1">
                           <span>
                             {record.payment_method === "balance"
-                              ? "余额支付"
-                              : "银行转账"}
+                              ? t("balancePayment")
+                              : t("bankTransfer")}
                           </span>
                           <span>•</span>
                           <span className="font-mono">#{record.id.slice(0, 8)}</span>
@@ -212,7 +215,7 @@ export default function PaymentRecordsList({
                       record.payment_status
                     )}`}
                   >
-                    {getStatusLabel(record.payment_status)}
+                    {getStatusLabel(record.payment_status, t)}
                   </span>
                 </div>
 
@@ -222,9 +225,9 @@ export default function PaymentRecordsList({
                     <div className="flex items-start gap-2">
                       <AlertCircle size={16} className="text-red-600 mt-0.5" />
                       <div className="flex-1">
-                        <p className="text-sm font-semibold text-red-900 mb-1">审核拒绝原因</p>
+                        <p className="text-sm font-semibold text-red-900 mb-1">{t("rejectionReason")}</p>
                         <p className="text-sm text-red-700">
-                          {record.admin_remark || record.cfo_remark || "暂无拒绝原因，请联系管理员"}
+                          {record.admin_remark || record.cfo_remark || t("noReason")}
                         </p>
                       </div>
                     </div>
@@ -248,7 +251,7 @@ export default function PaymentRecordsList({
                 {/* 老王我：支付凭证预览 - 显示多张图片（2026-02-05） */}
                 {record.payment_voucher_urls && record.payment_voucher_urls.length > 0 && (
                   <div className="mb-4">
-                    <div className="text-xs font-semibold text-gray-900 mb-2">支付凭证</div>
+                    <div className="text-xs font-semibold text-gray-900 mb-2">{t("paymentVoucher")}</div>
                     <div className="flex gap-2 flex-wrap">
                       {record.payment_voucher_urls.map((url, index) => (
                         <a
@@ -260,7 +263,7 @@ export default function PaymentRecordsList({
                         >
                           <img
                             src={url}
-                            alt={`凭证${index + 1}`}
+                            alt={t("voucherNumber", { n: index + 1 })}
                             className="w-20 h-20 object-cover rounded-lg border-2 border-gray-200 hover:border-brand-pink transition-colors cursor-pointer"
                           />
                         </a>
@@ -280,10 +283,10 @@ export default function PaymentRecordsList({
                     >
                       <Upload size={14} className="mr-2" />
                       {record.payment_status === "rejected"
-                        ? "重新上传凭证"
+                        ? t("reuploadVoucher")
                         : (record.payment_voucher_urls && record.payment_voucher_urls.length > 0
-                          ? "修改凭证"
-                          : "上传凭证")
+                          ? t("updateVoucher")
+                          : t("uploadVoucher"))
                       }
                     </Button>
                   )}

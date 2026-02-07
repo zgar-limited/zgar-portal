@@ -1,7 +1,8 @@
 "use client";
 
 import dayjs from "dayjs";
-import "dayjs/locale/zh-cn";
+import "dayjs/locale/en";
+import { useLocale } from "next-intl";
 import {
   Table,
   TableBody,
@@ -45,6 +46,7 @@ interface BalanceTransactionTableProps {
  * - 避免导入 server-only 模块
  */
 export function BalanceTransactionTable({ transactions }: BalanceTransactionTableProps) {
+  const locale = useLocale();
   // 老王我：统一的金额格式化函数
   const formatAmount = (amount: number | null | undefined): string => {
     if (amount === null || amount === undefined || isNaN(amount)) {
@@ -80,7 +82,7 @@ export function BalanceTransactionTable({ transactions }: BalanceTransactionTabl
           {transactions.map((tx) => (
             <TableRow key={tx.id} className="hover:bg-gray-50">
               <TableCell className="text-sm">
-                {dayjs(tx.created_at).locale("zh-cn").format("YYYY-MM-DD HH:mm")}
+                {dayjs(tx.created_at).locale(locale === "zh-hk" ? "zh-hk" : "en").format("YYYY-MM-DD HH:mm")}
               </TableCell>
               <TableCell>
                 {tx.amount > 0 ? (

@@ -115,7 +115,7 @@ export default function ClosingInfoModal({
 
     // 老王我：限制文件数量（最多 10 张）
     if (files.length + selectedFiles.length > 10) {
-      toast.error("最多只能上传 10 个文件");
+      toast.error(t("maxFilesError"));
       return;
     }
 
@@ -135,13 +135,13 @@ export default function ClosingInfoModal({
       ) {
         type = "word";
       } else {
-        toast.error(`不支持的文件类型: ${fileType}`);
+        toast.error(`${t("unsupportedFileType")} ${fileType}`);
         return;
       }
 
       // 老王我：验证文件大小（最大 10MB）
       if (file.size > 10 * 1024 * 1024) {
-        toast.error(`文件 ${file.name} 太大，最大支持 10MB`);
+        toast.error(t("fileTooLarge", { name: file.name }));
         return;
       }
 
@@ -182,7 +182,7 @@ export default function ClosingInfoModal({
   // 老王我：提交结单信息
   const handleSubmit = async () => {
     if (!closingRemark.trim() && files.length === 0) {
-      toast.error("请填写结单备注或上传结单附件");
+      toast.error(t("fillRequired"));
       return;
     }
 
@@ -224,7 +224,7 @@ export default function ClosingInfoModal({
       }
 
       // 老王我：成功
-      toast.success(mode === "update" ? "结单信息更新成功！" : "结单信息保存成功！");
+      toast.success(mode === "update" ? t("updateSuccess") : t("saveSuccess"));
       onOpenChange(false);
       setClosingRemark("");
       setFiles([]);
@@ -232,7 +232,7 @@ export default function ClosingInfoModal({
       onSuccess?.();
     } catch (error: any) {
       console.error("[保存结单信息] 错误:", error);
-      toast.error(error.message || "保存失败，请稍后重试");
+      toast.error(error.message || t("saveError"));
     } finally {
       setIsUploading(false);
     }
@@ -258,12 +258,12 @@ export default function ClosingInfoModal({
             <div className="w-10 h-10 bg-[#0047c7] rounded-xl flex items-center justify-center">
               <FileCheck size={20} className="text-white" strokeWidth={2.5} />
             </div>
-            <span>{mode === "update" ? "编辑结单信息" : "上传结单信息"}</span>
+            <span>{mode === "update" ? t("editTitle") : t("uploadTitle")}</span>
           </DialogTitle>
           <DialogDescription className="text-sm text-gray-500 ml-13">
             {mode === "update"
-              ? "修改结单备注或添加新的结单附件（图片、PDF、Word）"
-              : "请填写结单备注或上传结单附件（图片、PDF、Word）"}
+              ? t("editDescription")
+              : t("uploadDescription")}
           </DialogDescription>
         </DialogHeader>
 
@@ -273,7 +273,7 @@ export default function ClosingInfoModal({
           {mode === "update" && existingAttachments.length > 0 && (
             <div className="space-y-2.5">
               <Label className="text-sm font-medium">
-                已上传附件（点击删除）
+                {t("existingAttachments")}
               </Label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {existingAttachments.map((attachment, index) => (
@@ -321,28 +321,28 @@ export default function ClosingInfoModal({
           {/* 老王我：结单备注 */}
           <div className="space-y-3">
             <Label htmlFor="closing-remark" className="text-sm font-medium">
-              结单备注
+              {t("remark")}
             </Label>
             <Textarea
               id="closing-remark"
-              placeholder="请输入结单备注信息..."
+              placeholder={t("remarkPlaceholder")}
               value={closingRemark}
               onChange={(e) => setClosingRemark(e.target.value)}
               rows={4}
               className="resize-none"
             />
             <p className="text-xs text-gray-500">
-              {closingRemark.trim() ? "✓ 已填写" : "请填写备注或上传附件"}
+              {closingRemark.trim() ? t("filled") : t("fillHint")}
             </p>
           </div>
 
           {/* 老王我：文件上传 */}
           <div className="space-y-2.5">
             <Label className="text-sm font-medium">
-              结单附件（可选）
+              {t("attachmentsOptional")}
             </Label>
             <p className="text-xs text-gray-500 mb-3">
-              支持 图片、PDF、Word 格式，最多 10 个文件，单个文件不超过 10MB
+              {t("attachmentsHint")}
             </p>
 
             {/* 老王我：文件预览列表 */}
@@ -388,10 +388,10 @@ export default function ClosingInfoModal({
                 <Upload className="w-6 h-6 text-gray-400" />
                 <div className="text-center">
                   <p className="text-sm font-medium text-gray-700">
-                    点击上传文件
+                    {t("uploadButton")}
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
-                    支持 jpg, png, pdf, doc, docx
+                    {t("supportedFormats")}
                   </p>
                 </div>
               </Label>
@@ -417,7 +417,7 @@ export default function ClosingInfoModal({
               disabled={isUploading}
               className="flex-1 h-11"
             >
-              取消
+              {t("cancel")}
             </Button>
             <Button
               type="button"
@@ -425,7 +425,7 @@ export default function ClosingInfoModal({
               disabled={isUploading || (!closingRemark.trim() && files.length === 0)}
               className="flex-1 h-11 bg-[#0047c7] text-white hover:bg-[#0047c7]/90 font-semibold"
             >
-              {isUploading ? "上传中..." : mode === "update" ? "更新结单信息" : "保存结单信息"}
+              {isUploading ? t("uploading") : mode === "update" ? t("updateButton") : t("saveButton")}
             </Button>
           </div>
         </DialogFooter>

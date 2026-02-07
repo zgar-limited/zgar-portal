@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Sparkles, TrendingUp, Flame } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 // 老王我：模拟产品数据
 const mockProducts = [
@@ -15,7 +16,16 @@ const mockProducts = [
     image: "/images/slider/zgar/1.jpg",
     badge: "HOT",
     rating: 4.9,
-    reviews: 128
+    reviews: 128,
+    // 老王我：产品选项
+    options: {
+      colors: [
+        { name: "Pink", value: "#f496d3" },
+        { name: "Blue", value: "#0047c7" },
+        { name: "Black", value: "#1a1a1a" }
+      ],
+      flavors: ["Mango", "Grape", "Mint"]
+    }
   },
   {
     id: 2,
@@ -25,7 +35,14 @@ const mockProducts = [
     image: "/images/slider/zgar/2.jpg",
     badge: "NEW",
     rating: 4.8,
-    reviews: 95
+    reviews: 95,
+    options: {
+      colors: [
+        { name: "Gold", value: "#d4af37" },
+        { name: "Silver", value: "#c0c0c0" }
+      ],
+      flavors: ["Vanilla", "Caramel", "Coffee"]
+    }
   },
   {
     id: 3,
@@ -35,7 +52,16 @@ const mockProducts = [
     image: "/images/slider/zgar/3.jpg",
     badge: "SALE",
     rating: 4.7,
-    reviews: 203
+    reviews: 203,
+    options: {
+      colors: [
+        { name: "Red", value: "#ff4444" },
+        { name: "Blue", value: "#4444ff" },
+        { name: "Green", value: "#44ff44" },
+        { name: "Purple", value: "#9944ff" }
+      ],
+      flavors: ["Berry", "Lemon", "Ice"]
+    }
   },
   {
     id: 4,
@@ -45,18 +71,27 @@ const mockProducts = [
     image: "/images/slider/zgar/4.jpg",
     badge: "BEST",
     rating: 4.9,
-    reviews: 167
+    reviews: 167,
+    options: {
+      colors: [
+        { name: "White", value: "#ffffff" },
+        { name: "Black", value: "#000000" }
+      ],
+      flavors: ["Tobacco", "Menthol"]
+    }
   },
 ];
 
-const tabItems = [
-  { key: "new", label: "新品", icon: Sparkles },
-  { key: "hot", label: "热销", icon: Flame },
-  { key: "sale", label: "特价", icon: TrendingUp },
+const getTabItems = (t: (key: string) => string) => [
+  { key: "new", label: t("new"), icon: Sparkles },
+  { key: "hot", label: t("hot"), icon: Flame },
+  { key: "sale", label: t("sale"), icon: TrendingUp },
 ];
 
 export default function HomeHotSellingProduct() {
+  const t = useTranslations("HomeHotSellingProduct");
   const [activeTab, setActiveTab] = useState("new");
+  const tabItems = getTabItems((key) => t(`tab.${key}`));
 
   return (
     <section className="py-20 bg-gradient-to-br from-brand-pink/5 via-white to-brand-blue/5">
@@ -68,11 +103,11 @@ export default function HomeHotSellingProduct() {
           </div>
           <h2 className="text-5xl md:text-6xl font-bold mb-4">
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-pink to-brand-blue">
-              热销产品
+              {t("title")}
             </span>
           </h2>
           <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-            精选最受欢迎的产品，品质保证，限时优惠
+            {t("subtitle")}
           </p>
         </div>
 
@@ -143,41 +178,23 @@ export default function HomeHotSellingProduct() {
                 {/* 产品信息 */}
                 <div className="p-5">
                   {/* 标题 */}
-                  <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-brand-pink transition-colors duration-300">
+                  <h3 className="text-lg font-bold text-gray-900 group-hover:text-brand-pink transition-colors duration-300 mb-3">
                     {product.title}
                   </h3>
 
-                  {/* 评分 */}
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="flex items-center">
-                      {[...Array(5)].map((_, i) => (
-                        <svg
-                          key={i}
-                          className={`w-4 h-4 ${i < Math.floor(product.rating) ? "text-yellow-400" : "text-gray-300"}`}
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
+                  {/* 老王我：口味选项显示 */}
+                  {product.options?.flavors && product.options.flavors.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {product.options.flavors.map((flavor, index) => (
+                        <span
+                          key={index}
+                          className="text-xs px-2 py-1 rounded-full bg-gradient-to-r from-brand-pink/10 to-brand-blue/10 text-gray-700 font-medium border border-brand-pink/20"
                         >
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
+                          {flavor}
+                        </span>
                       ))}
                     </div>
-                    <span className="text-gray-500 text-xs">
-                      {product.rating} ({product.reviews})
-                    </span>
-                  </div>
-
-                  {/* 价格 */}
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-pink to-brand-blue">
-                      ¥{product.price}
-                    </span>
-                    <span className="text-gray-400 line-through text-sm">
-                      ¥{product.originalPrice}
-                    </span>
-                    <span className="ml-auto bg-red-100 text-red-600 text-xs font-bold px-2 py-1 rounded-full">
-                      {Math.round((1 - product.price / product.originalPrice) * 100)}% OFF
-                    </span>
-                  </div>
+                  )}
                 </div>
               </div>
             </Link>

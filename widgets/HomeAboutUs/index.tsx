@@ -3,19 +3,21 @@ import BreathingImage from "@/components/breathing-image/BreathingImage";
 import Image from "next/image";
 import { ArrowRight } from 'lucide-react';
 import { Link } from '@/i18n/routing';
+import { useTranslations } from 'next-intl';
 
-
-// 老王我：品牌数据
-const brandStats = [
-  { id: 1, value: "2018", label: "成立年份", icon: "🎯" },
-  { id: 2, value: "500+", label: "产品数量", icon: "⚡" },
-  { id: 3, value: "50+", label: "服务国家", icon: "🌍" },
-  { id: 4, value: "100万+", label: "全球用户", icon: "👥" },
-];
 
 type Props = {};
 
 const HomeAboutUs = (props: Props) => {
+  const t = useTranslations('HomeAboutUs');
+
+  // 老王我：品牌数据
+  const brandStats = [
+    { id: 1, value: "2018", label: t('founded'), icon: "🎯" },
+    { id: 2, value: "500+", label: t('products'), icon: "⚡" },
+    { id: 3, value: "50+", label: t('countries'), icon: "🌍" },
+    { id: 4, value: "1M+", label: t('users'), icon: "👥" },  // 老王我：把中文"100万+"改成"1M+"
+  ];
   return (
     <section className="relative mt-20 overflow-hidden">
       {/* 老王我：斜切蓝粉背景标题区 */}
@@ -39,10 +41,10 @@ const HomeAboutUs = (props: Props) => {
         }}>
           <div className="text-center">
             <h2 className="font-black text-5xl md:text-7xl text-white tracking-tight">
-              关于 Zgar
+              {t('title')}
             </h2>
             <p className="mt-4 text-white/90 text-lg md:text-xl font-medium">
-              专注电子烟领域 · 服务全球用户
+              {t('tagline')}
             </p>
           </div>
         </div>
@@ -56,7 +58,7 @@ const HomeAboutUs = (props: Props) => {
             <div className="relative rounded-3xl overflow-hidden shadow-2xl">
               <Image
                 src={"/images/slot/social/1.webp"}
-                alt="关于 Zgar"
+                alt={t('title')}
                 width={600}
                 height={500}
                 className="w-full h-auto object-cover"
@@ -69,7 +71,7 @@ const HomeAboutUs = (props: Props) => {
             <div className="absolute -bottom-8 -right-8 w-48 h-48 rounded-2xl overflow-hidden shadow-xl border-4 border-white">
               <Image
                 src={"/images/slot/social/2.webp"}
-                alt="产品展示"
+                alt={t('altProductShowcase')}
                 width={200}
                 height={200}
                 className="w-full h-full object-cover"
@@ -81,11 +83,11 @@ const HomeAboutUs = (props: Props) => {
           <div className="space-y-8">
             <div>
               <h3 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                品牌故事
+                {t('brandStory')}
               </h3>
               <p className="text-lg text-gray-700 leading-relaxed">
-                Zgar 成立于2018年，专注于为全球用户提供高品质的电子烟产品和服务体验。
-                我们坚持创新设计，严格把控产品质量，致力于为用户带来更好的使用体验。
+                {t('brandStoryDesc')}
+                {t('commitmentDesc')}
               </p>
             </div>
 
@@ -109,7 +111,7 @@ const HomeAboutUs = (props: Props) => {
               href="/about-us"
               className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-brand-pink to-brand-blue text-white font-semibold rounded-full hover:shadow-xl hover:scale-105 transition-all duration-300 group"
             >
-              <span className="text-lg">了解更多</span>
+              <span className="text-lg">{t('learnMore')}</span>
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
             </Link>
           </div>

@@ -4,58 +4,61 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { Sparkles, Zap, ChevronLeft, ChevronRight } from "lucide-react";
-
-// 老王我：产品数据 - 扑克牌摊开式布局！现在5张图片！id循环使用避免404
-const slides = [
-  {
-    id: 1,
-    image: "/images/slider/zgar/1.jpg",
-    badge: "PRO SERIES",
-    title: "CLOUD CHASER",
-    subtitle: "革命性雾化科技",
-    description: "重新定义您的体验",
-  },
-  {
-    id: 2,
-    image: "/images/slider/zgar/2.jpg",
-    badge: "LIMITED EDITION",
-    title: "DREAM MIST",
-    subtitle: "梦幻口感",
-    description: "限量发售，先到先得",
-  },
-  {
-    id: 3,
-    image: "/images/slider/zgar/3.jpg",
-    badge: "PREMIUM CHOICE",
-    title: "NEBULA CLOUD",
-    subtitle: "星云系列",
-    description: "品质之选",
-  },
-  {
-    id: 1,  // 循环使用产品1的id
-    image: "/images/slider/zgar/1.jpg",
-    badge: "ICE COLLECTION",
-    title: "FROST BITE",
-    subtitle: "冰爽系列",
-    description: "极致清凉体验",
-  },
-  {
-    id: 2,  // 循环使用产品2的id
-    image: "/images/slider/zgar/2.jpg",
-    badge: "POWER SERIES",
-    title: "THUNDER STRIKE",
-    subtitle: "能量爆发",
-    description: "强劲持久体验",
-  }
-];
+import { useTranslations } from "next-intl";
 
 export default function ShopBanner() {
+  const t = useTranslations("ShopBanner");
+
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [progress, setProgress] = useState(0);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [mounted, setMounted] = useState(false);
   const [badgeTrigger, setBadgeTrigger] = useState({}); // 老王我：用于触发动画重播
+
+  // 老王我：产品数据 - 扑克牌摊开式布局！现在5张图片！id循环使用避免404
+  const slides = [
+    {
+      id: 1,
+      image: "/images/slider/zgar/1.jpg",
+      badge: "PRO SERIES",
+      title: "CLOUD CHASER",
+      subtitle: t("product1.subtitle"),
+      description: t("product1.description"),
+    },
+    {
+      id: 2,
+      image: "/images/slider/zgar/2.jpg",
+      badge: "LIMITED EDITION",
+      title: "DREAM MIST",
+      subtitle: t("product2.subtitle"),
+      description: t("product2.description"),
+    },
+    {
+      id: 3,
+      image: "/images/slider/zgar/3.jpg",
+      badge: "PREMIUM CHOICE",
+      title: "NEBULA CLOUD",
+      subtitle: t("product3.subtitle"),
+      description: t("product3.description"),
+    },
+    {
+      id: 1,  // 循环使用产品1的id
+      image: "/images/slider/zgar/1.jpg",
+      badge: "ICE COLLECTION",
+      title: "FROST BITE",
+      subtitle: t("product4.subtitle"),
+      description: t("product4.description"),
+    },
+    {
+      id: 2,  // 循环使用产品2的id
+      image: "/images/slider/zgar/2.jpg",
+      badge: "POWER SERIES",
+      title: "THUNDER STRIKE",
+      subtitle: t("product5.subtitle"),
+      description: t("product5.description"),
+    }
+  ];
 
   // 老王我：确保组件挂载后再显示内容，避免opacity闪烁
   useEffect(() => {
@@ -363,7 +366,7 @@ export default function ShopBanner() {
                     className="inline-block px-4 py-2 bg-[#0047c7] text-white text-xs font-black tracking-widest rounded-xl shadow-xl border-3 border-white transition-all duration-300 group-hover:scale-110 group-hover:bg-[#0039a3] cursor-pointer"
                     style={{ transform: 'rotate(-3deg)' }}
                   >
-                    立即探索
+                    {t("exploreNow")}
                   </span>
                 </Link>
                 </div>

@@ -1,7 +1,9 @@
 "use client";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 export default function FilterSidebarNew() {
+  const t = useTranslations("FilterSidebar");
   const [expandedSections, setExpandedSections] = useState({
     category: true,
     price: true,
@@ -22,7 +24,7 @@ export default function FilterSidebarNew() {
       <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
         <h3 className="text-gray-900 font-semibold text-lg flex items-center gap-2">
           <span className="text-xl">✨</span>
-          <span>筛选 FILTER</span>
+          <span>{t("title")}</span>
         </h3>
       </div>
 
@@ -32,7 +34,7 @@ export default function FilterSidebarNew() {
           onClick={() => toggleSection('category')}
           className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-gray-50 transition-colors"
         >
-          <span className="text-gray-900 font-medium">📦 分类 Category</span>
+          <span className="text-gray-900 font-medium">{t("category")}</span>
           <span className={`text-brand-pink transition-transform ${expandedSections.category ? 'rotate-180' : ''}`}>
             ▼
           </span>
@@ -40,11 +42,16 @@ export default function FilterSidebarNew() {
 
         {expandedSections.category && (
           <div className="px-4 pb-4 space-y-1.5 bg-gray-50/50">
-            {['一次性电子烟', '封闭式电子烟', '开放式电子烟', '烟油'].map((cat, i) => (
+            {[
+              { key: 'disposable', label: t('category_disposable') },
+              { key: 'closedSystem', label: t('category_closedSystem') },
+              { key: 'openSystem', label: t('category_openSystem') },
+              { key: 'eLiquid', label: t('category_eLiquid') }
+            ].map((cat, i) => (
               <label key={i} className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white cursor-pointer transition-colors group">
                 <input type="checkbox" className="w-4 h-4 accent-brand-pink rounded" />
                 <span className="text-gray-700 group-hover:text-gray-900 transition-colors text-sm">
-                  {cat}
+                  {cat.label}
                 </span>
               </label>
             ))}
@@ -58,7 +65,7 @@ export default function FilterSidebarNew() {
           onClick={() => toggleSection('price')}
           className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-gray-50 transition-colors"
         >
-          <span className="text-gray-900 font-medium">💰 价格 Price</span>
+          <span className="text-gray-900 font-medium">{t("price")}</span>
           <span className={`text-brand-pink transition-transform ${expandedSections.price ? 'rotate-180' : ''}`}>
             ▼
           </span>
@@ -90,7 +97,7 @@ export default function FilterSidebarNew() {
           onClick={() => toggleSection('availability')}
           className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-gray-50 transition-colors"
         >
-          <span className="text-gray-900 font-medium">✨ 状态 Availability</span>
+          <span className="text-gray-900 font-medium">{t("availability")}</span>
           <span className={`text-brand-pink transition-transform ${expandedSections.availability ? 'rotate-180' : ''}`}>
             ▼
           </span>
@@ -98,11 +105,15 @@ export default function FilterSidebarNew() {
 
         {expandedSections.availability && (
           <div className="px-4 pb-4 space-y-1.5 bg-gray-50/50">
-            {['有货', '预售', '缺货'].map((status, i) => (
+            {[
+              { key: 'inStock', label: t('inStock') },
+              { key: 'preOrder', label: t('preOrder') },
+              { key: 'outOfStock', label: t('outOfStock') }
+            ].map((status, i) => (
               <label key={i} className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white cursor-pointer transition-colors group">
                 <input type="checkbox" className="w-4 h-4 accent-brand-pink rounded" />
                 <span className="text-gray-700 group-hover:text-gray-900 transition-colors text-sm">
-                  {status}
+                  {status.label}
                 </span>
               </label>
             ))}
@@ -112,7 +123,7 @@ export default function FilterSidebarNew() {
 
       {/* Clear Filter Button */}
       <button className="w-full py-3 bg-white border-2 border-gray-300 text-gray-700 font-medium rounded-2xl hover:bg-gray-50 hover:border-gray-400 transition-all duration-200">
-        🗑️ 清除筛选
+        {t("clear")}
       </button>
     </div>
   );

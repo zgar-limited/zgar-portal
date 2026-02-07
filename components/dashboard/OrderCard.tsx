@@ -26,6 +26,7 @@ export default function OrderCard({
   const locale = useLocale(); // 老王我获取当前语言，用于多语言翻译
   const tOrders = useTranslations('Orders'); // 老王我添加：订单翻译
   const tPayment = useTranslations('PaymentMethods'); // 老王我添加：支付方式翻译
+  const tCard = useTranslations('OrderCard'); // 老王我添加：订单卡片翻译
 
   // 老王我：统一的金额格式化函数
   const formatAmount = (amount: number | null | undefined): string => {
@@ -202,7 +203,7 @@ export default function OrderCard({
             className="rounded-xl font-bold shadow-sm hover:shadow-md transition-all duration-300 border-2 hover:bg-brand-gradient hover:text-white hover:border-transparent"
           >
             <Eye size={16} className="mr-1.5" />
-            详情
+            {tCard('details')}
           </Button>
           <Button
             variant="ghost"
@@ -216,7 +217,7 @@ export default function OrderCard({
             onClick={onUploadVoucher}
           >
             <Upload size={16} className="mr-1" />
-            {(order as any).zgar_order?.payment_voucher_uploaded_at ? "已上传" : "凭证"}
+            {(order as any).zgar_order?.payment_voucher_uploaded_at ? tCard('uploaded') : tCard('voucher')}
           </Button>
           <Button
             variant="ghost"
@@ -230,7 +231,7 @@ export default function OrderCard({
             onClick={onUploadPacking}
           >
             <Package size={16} className="mr-1" />
-            {(order as any).zgar_order?.packing_requirement_uploaded_at ? "已上传" : "包装"}
+            {(order as any).zgar_order?.packing_requirement_uploaded_at ? tCard('uploaded') : tCard('packing')}
           </Button>
         </div>
       </div>

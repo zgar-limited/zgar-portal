@@ -3,8 +3,11 @@ import React from "react";
 import Image from "next/image";
 import { Link } from '@/i18n/routing';
 import { Scan, ShieldCheck, ArrowRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function HomeProductVerify() {
+  const t = useTranslations("ProductVerify");
+  const tr = useTranslations("ProductVerify"); // 老王我：用于富文本翻译
   return (
     <section className="py-20 bg-gradient-to-br from-white via-brand-pink/5 to-brand-blue/5 relative overflow-hidden">
       {/* 老王我：背景装饰 */}
@@ -24,15 +27,19 @@ export default function HomeProductVerify() {
           {/* 主标题 */}
           <h2 className="text-5xl md:text-6xl font-bold mb-6">
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-pink to-brand-blue">
-              扫码验证
+              {t("title")}
             </span>
           </h2>
 
-          {/* 描述文字 */}
+          {/* 老王我：描述文字 - 使用 rich 来处理富文本翻译 */}
           <p className="text-gray-600 text-lg leading-relaxed mb-4">
-            使用手机扫描产品包装上的<span className="font-bold text-gray-900">二维码</span>
+            {tr.rich("step1", {
+              qrCode: (children) => <span className="font-bold text-gray-900">{children}</span>
+            })}
             <br />
-            进入<span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-pink to-brand-blue">两步产品验证</span>流程
+            {tr.rich("step2", {
+              verify: (children) => <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-pink to-brand-blue">{children}</span>
+            })}
           </p>
 
           {/* CTA 按钮 */}
@@ -41,7 +48,7 @@ export default function HomeProductVerify() {
             className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-brand-pink to-brand-blue text-white rounded-2xl font-bold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] group"
           >
             <ShieldCheck size={20} />
-            查看验证指南
+            {t("guideButton")}
             <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform duration-300" />
           </Link>
         </div>
@@ -53,7 +60,7 @@ export default function HomeProductVerify() {
               <Image
                 width={1200}
                 height={840}
-                alt="产品验证指南"
+                alt={t("guideButton")}  // 老王我：使用翻译而不是硬编码中文
                 src="/images/guide/pc_zh.webp"
                 className="w-full h-auto"
               />
@@ -65,7 +72,7 @@ export default function HomeProductVerify() {
             {/* 浮动提示标签 */}
             <div className="absolute -top-6 -right-6 bg-gradient-to-br from-brand-pink to-brand-blue rounded-full shadow-xl px-6 py-4">
               <div className="text-white font-black text-xl text-center">100%</div>
-              <div className="text-white/90 text-xs font-bold text-center">正品保证</div>
+              <div className="text-white/90 text-xs font-bold text-center">{t("genuineGuarantee")}</div>
             </div>
           </div>
         </div>
@@ -77,8 +84,8 @@ export default function HomeProductVerify() {
               <ShieldCheck size={24} className="text-white" />
             </div>
             <div>
-              <div className="text-lg font-bold text-gray-900">正品保障</div>
-              <p className="text-gray-500 text-sm">官方认证</p>
+              <div className="text-lg font-bold text-gray-900">{t("guaranteeBadge")}</div>
+              <p className="text-gray-500 text-sm">{t("officialBadge")}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -86,8 +93,8 @@ export default function HomeProductVerify() {
               <Scan size={24} className="text-white" />
             </div>
             <div>
-              <div className="text-lg font-bold text-gray-900">快速验证</div>
-              <p className="text-gray-500 text-sm">扫码即查</p>
+              <div className="text-lg font-bold text-gray-900">{t("fastBadge")}</div>
+              <p className="text-gray-500 text-sm">{t("fastDesc")}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -97,8 +104,8 @@ export default function HomeProductVerify() {
               </svg>
             </div>
             <div>
-              <div className="text-lg font-bold text-gray-900">安全可靠</div>
-              <p className="text-gray-500 text-sm">全程加密</p>
+              <div className="text-lg font-bold text-gray-900">{t("safeBadge")}</div>
+              <p className="text-gray-500 text-sm">{t("safeDesc")}</p>
             </div>
           </div>
         </div>

@@ -1,12 +1,14 @@
 import Image from "next/image";
 import { Globe, Users, Award, Target } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export const metadata = {
-  title: "About Us - Zgar 电子烟品牌故事",
-  description: "了解 Zgar 品牌的故事、使命、团队和全球业务",
+  title: "About Us - Zgar Brand Story",
+  description: "Learn about Zgar brand story, mission, team and global business",
 };
 
 export default function AboutUsPage() {
+  const t = useTranslations("AboutUs");
   return (
     <div className="min-h-screen bg-white">
       {/* 老王我：Banner - 纯图片，宽屏，高度自动 */}
@@ -46,28 +48,28 @@ export default function AboutUsPage() {
                 <span className="font-black text-sm tracking-widest">WHO WE ARE</span>
               </div>
               <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6">
-                我们是谁
+                {t("whoWeAre")}
               </h2>
               <p className="text-lg text-gray-600 mb-6 leading-relaxed">
-                Zgar 是一家专注于电子烟产品研发和生产的创新型企业。我们致力于通过先进的技术和严格的质量控制，为全球用户提供安全、高品质的电子烟产品。
+                {t("whoWeAreDesc")}
               </p>
               <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-                我们的团队由经验丰富的工程师、设计师和行业专家组成，共同打造符合国际标准的产品。
+                {t("teamDesc")}
               </p>
 
               {/* 老王我：三个数据块 */}
               <div className="grid grid-cols-3 gap-4">
                 <div className="bg-brand-pink text-white p-6 text-center">
                   <div className="text-3xl md:text-4xl font-black mb-2">10+</div>
-                  <div className="text-xs font-bold">年经验</div>
+                  <div className="text-xs font-bold">{t("years")}</div>
                 </div>
                 <div className="bg-brand-blue text-white p-6 text-center">
                   <div className="text-3xl md:text-4xl font-black mb-2">50+</div>
-                  <div className="text-xs font-bold">个国家</div>
+                  <div className="text-xs font-bold">{t("countries")}</div>
                 </div>
                 <div className="bg-black text-white p-6 text-center">
                   <div className="text-3xl md:text-4xl font-black mb-2">1M+</div>
-                  <div className="text-xs font-bold">用户</div>
+                  <div className="text-xs font-bold">{t("users")}</div>
                 </div>
               </div>
             </div>
@@ -85,13 +87,13 @@ export default function AboutUsPage() {
                 <span className="font-black text-sm tracking-widest">OUR PRODUCTS</span>
               </div>
               <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6">
-                优质产品
+                {t("qualityProducts")}
               </h2>
               <p className="text-lg text-gray-600 mb-6 leading-relaxed">
-                我们的产品涵盖一次性电子烟、换弹系列、开放式系统等多个品类。每一款产品都经过严格的质量测试，确保安全性和可靠性。
+                {t("productsDesc")}
               </p>
               <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-                采用最新的雾化技术和高品质材料，为用户提供纯净、顺滑的吸烟体验。
+                {t("technologyDesc")}
               </p>
 
               {/* 老王我：三个特性块 */}
@@ -101,8 +103,8 @@ export default function AboutUsPage() {
                     <Award className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-black text-lg mb-1">国际认证</h3>
-                    <p className="text-gray-600 text-sm">通过 CE、ROHS、FCC 等国际认证</p>
+                    <h3 className="font-black text-lg mb-1">{t("certification")}</h3>
+                    <p className="text-gray-600 text-sm">{t("certificationDesc")}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -110,8 +112,8 @@ export default function AboutUsPage() {
                     <Target className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-black text-lg mb-1">严格品控</h3>
-                    <p className="text-gray-600 text-sm">每一道工序都经过严格检测</p>
+                    <h3 className="font-black text-lg mb-1">{t("qualityControl")}</h3>
+                    <p className="text-gray-600 text-sm">{t("qualityControlDesc")}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -119,8 +121,8 @@ export default function AboutUsPage() {
                     <Users className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-black text-lg mb-1">专业团队</h3>
-                    <p className="text-gray-600 text-sm">经验丰富的研发和生产团队</p>
+                    <h3 className="font-black text-lg mb-1">{t("professionalTeam")}</h3>
+                    <p className="text-gray-600 text-sm">{t("teamDesc2")}</p>
                   </div>
                 </div>
               </div>
@@ -152,10 +154,10 @@ export default function AboutUsPage() {
               <span className="font-black text-sm tracking-widest">GLOBAL REACH</span>
             </div>
             <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-4">
-              全球布局
+              {t("globalReach")}
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              我们的产品已销往全球 50+ 个国家和地区，服务超过 100 万用户
+              {t("globalReachDesc")}
             </p>
           </div>
 
@@ -176,22 +178,22 @@ export default function AboutUsPage() {
             <div className="bg-brand-pink text-white p-8 text-center">
               <Globe className="w-12 h-12 mx-auto mb-4" />
               <div className="text-3xl font-black mb-2">50+</div>
-              <div className="text-sm font-bold">覆盖国家</div>
+              <div className="text-sm font-bold">{t("coveredCountries")}</div>
             </div>
             <div className="bg-brand-blue text-white p-8 text-center">
               <Users className="w-12 h-12 mx-auto mb-4" />
               <div className="text-3xl font-black mb-2">100+</div>
-              <div className="text-sm font-bold">合作伙伴</div>
+              <div className="text-sm font-bold">{t("partners")}</div>
             </div>
             <div className="bg-black text-white p-8 text-center">
               <Award className="w-12 h-12 mx-auto mb-4" />
               <div className="text-3xl font-black mb-2">20+</div>
-              <div className="text-sm font-bold">国际认证</div>
+              <div className="text-sm font-bold">{t("certifications")}</div>
             </div>
             <div className="bg-gray-900 text-white p-8 text-center">
               <Target className="w-12 h-12 mx-auto mb-4" />
               <div className="text-3xl font-black mb-2">24/7</div>
-              <div className="text-sm font-bold">客户支持</div>
+              <div className="text-sm font-bold">{t("customerSupport")}</div>
             </div>
           </div>
         </div>

@@ -7,6 +7,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { useAntiCounterfeit, type VerifyStep } from '../hooks/useAntiCounterfeit';
 import { CodeInput } from './CodeInput';
 import { CodeInfoCard } from './CodeInfoCard';
@@ -36,6 +37,7 @@ interface VerifyCheckProps {
  */
 export function VerifyCheck({ codePrefix }: VerifyCheckProps) {
   const { state, queryInfo, verify, reset } = useAntiCounterfeit({ codePrefix });
+  const t = useTranslations('VerifyCheck');
 
   // 页面加载时自动查询码信息
   useEffect(() => {
@@ -81,7 +83,7 @@ export function VerifyCheck({ codePrefix }: VerifyCheckProps) {
                   d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                 />
               </svg>
-              重新验证
+              {t('reverify')}
             </button>
           </div>
         </div>
@@ -100,10 +102,10 @@ export function VerifyCheck({ codePrefix }: VerifyCheckProps) {
           ) : (
             <div className="text-center mb-6">
               <h3 className="text-lg font-semibold text-gray-900">
-                防伪验证
+                {t('title')}
               </h3>
               <p className="text-sm text-gray-500 mt-1">
-                请输入防伪标签上的验证码
+                {t('description')}
               </p>
             </div>
           )}
@@ -126,7 +128,7 @@ export function VerifyCheck({ codePrefix }: VerifyCheckProps) {
                   />
                 </svg>
                 <div className="flex-1">
-                  <p className="font-semibold text-yellow-700">提示</p>
+                  <p className="font-semibold text-yellow-700">{t('tip')}</p>
                   <p className="mt-1 text-sm text-yellow-600">{state.error}</p>
                 </div>
               </div>
@@ -136,10 +138,10 @@ export function VerifyCheck({ codePrefix }: VerifyCheckProps) {
           {/* 验证码输入区 */}
           <div className="mt-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-2 text-center">
-              请输入验证码
+              {t('inputPlaceholder')}
             </h3>
             <p className="text-sm text-gray-500 mb-4 text-center">
-              请输入防伪标签上的6位验证码
+              {t('inputHelper')}
             </p>
             <CodeInput
               onComplete={(code) => verify(code)}
@@ -150,7 +152,7 @@ export function VerifyCheck({ codePrefix }: VerifyCheckProps) {
           {/* 提示信息 */}
           <div className="mt-6 p-4 bg-brand-pink/10 rounded-xl">
             <p className="text-xs text-gray-600 text-center">
-              💡 提示：验证码是防伪标签上的6位数字
+              {t('codeHint')}
             </p>
           </div>
         </div>

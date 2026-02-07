@@ -6,6 +6,7 @@
 
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { type CodeInfoData } from '@/data/anti-counterfeit';
 
 // ============================================
@@ -155,6 +156,8 @@ export function CodeInfoCard({
   loading = false,
   className,
 }: CodeInfoCardProps) {
+  const t = useTranslations('VerifyCodeInfo');
+
   if (loading) {
     return (
       <div className={`bg-gray-50 rounded-2xl p-6 space-y-4 ${className || ''}`}>
@@ -175,24 +178,24 @@ export function CodeInfoCard({
     <div className={`space-y-3 ${className || ''}`}>
       {/* 标题 */}
       <div className="text-center">
-        <h3 className="text-lg font-semibold text-gray-900">防伪码信息</h3>
-        <p className="text-sm text-gray-500 mt-1">请输入标签上的6位验证码</p>
+        <h3 className="text-lg font-semibold text-gray-900">{t('title')}</h3>
+        <p className="text-sm text-gray-500 mt-1">{t('subtitle')}</p>
       </div>
 
       {/* 信息项列表 */}
       <InfoItem
         icon={<HashtagIcon />}
-        label="序列号"
+        label={t('serialNumber')}
         value={codeInfo.IndexCode}
       />
       <InfoItem
         icon={<EyeIcon />}
-        label="查询次数"
-        value={`${codeInfo.QueryTimes} 次`}
+        label={t('queryTimes')}
+        value={`${codeInfo.QueryTimes} ${t('times')}`}
       />
       <InfoItem
         icon={<ClockIcon />}
-        label="首次查询时间"
+        label={t('firstQueryTime')}
         value={codeInfo.FirstTime}
       />
     </div>

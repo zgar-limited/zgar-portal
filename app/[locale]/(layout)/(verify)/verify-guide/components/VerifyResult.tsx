@@ -6,6 +6,7 @@
 
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { type VerifyResultData } from '@/data/anti-counterfeit';
 import { cn } from '@/lib/utils';
 
@@ -249,6 +250,8 @@ export function VerifyResult({
   success,
   className,
 }: VerifyResultProps) {
+  const t = useTranslations('VerifyResult');
+
   // 验证失败状态
   if (!success) {
     return (
@@ -261,7 +264,7 @@ export function VerifyResult({
         {/* 失败图标 */}
         <div className="flex flex-col items-center">
           <ErrorIcon />
-          <h3 className="mt-4 text-2xl font-bold text-red-600">验证失败</h3>
+          <h3 className="mt-4 text-2xl font-bold text-red-600">{t('failed')}</h3>
         </div>
 
         {/* 错误信息 */}
@@ -289,36 +292,36 @@ export function VerifyResult({
       {/* 成功图标 */}
       <div className="flex flex-col items-center">
         <SuccessIcon />
-        <h3 className="mt-4 text-2xl font-bold text-green-600">验证通过</h3>
-        <p className="mt-2 text-sm text-gray-600">您购买的是正品</p>
+        <h3 className="mt-4 text-2xl font-bold text-green-600">{t('success')}</h3>
+        <p className="mt-2 text-sm text-gray-600">{t('genuine')}</p>
       </div>
 
       {/* 详细信息 */}
       <div className="mt-6 space-y-3">
         <ResultInfoItem
           icon={<HashtagIcon />}
-          label="序列号"
+          label={t('serialNumber')}
           value={result.IndexCode}
         />
         <ResultInfoItem
           icon={<ShieldCheckIcon />}
-          label="防伪码类型"
+          label={t('codeType')}
           value={result.TypeStr}
           highlight
         />
         <ResultInfoItem
           icon={<EyeIcon />}
-          label="查询次数"
-          value={`${result.QueryTimes} 次`}
+          label={t('queryTimes')}
+          value={`${result.QueryTimes} ${t('times')}`}
         />
         <ResultInfoItem
           icon={<ClockIcon />}
-          label="首次查询时间"
+          label={t('firstQueryTime')}
           value={result.FirstTime}
         />
         <ResultInfoItem
           icon={<CalendarIcon />}
-          label="最近查询时间"
+          label={t('lastQueryTime')}
           value={result.RecentTime}
         />
       </div>

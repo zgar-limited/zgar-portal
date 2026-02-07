@@ -1,7 +1,6 @@
 {
   "LocaleSwitcher": {
     "label": "切換語言",
-    "zh-cn": "简体中文",
     "en-us": "英文",
     "zh-hk": "繁體中文"
   },
@@ -81,6 +80,13 @@
     "spec_shipment_box_size": "裝運箱尺寸",
     "spec_shipment_box_weight": "裝運箱重量"
   },
+  "ProductCard": {
+    "unknown": "未知",
+    "loginToViewPrice": "登錄查看價格",
+    "adding": "添加中...",
+    "added": "已添加 ✓",
+    "buyNow": "立即購買"
+  },
   "Club": {
     "title": "積分商城",
     "subtitle": "用積分兌換您喜愛的產品",
@@ -142,6 +148,8 @@
     "slide3PrimaryCta": "立即探索",
     "slide3SecondaryCta": "查看權益",
     "goToSlide": "切換到第 {number} 張",
+    "memberBenefitsTitle": "會員專享權益",
+    "memberBenefitsDesc": "加入ZGAR Club，享受積分獎勵、專屬優惠、生日福利等超多會員權益",
     "rewardsSectionTitle": "ZGAR Club 獎勵能為您做什麼？",
     "earnRedeem": "賺取 & 兌換",
     "loyaltyRewards": "您的忠誠獎勵",
@@ -154,11 +162,40 @@
     "startNow": "立即開始",
     "joinBonusPoints": "立即加入並獲得 100 積分獎勵",
     "kickOffTitle": "讓我們為您開啟積分之旅！",
+    "kickOffDesc": "立即開始您的會員之旅",
+    "kickOffStep1Title": "註冊成為 ZGAR Club 會員",
+    "kickOffStep1Desc": "創建您的賬戶，解鎖專屬會員權益、獎勵和特別優惠",
+    "kickOffStep2Title": "通過活動賺取積分",
+    "kickOffStep2Desc": "驗證 Zgar 產品、推薦朋友、每日簽到來快速累積積分",
+    "kickOffStep3Title": "使用積分兌換獎勵",
+    "kickOffStep3Desc": "使用賺取的積分兌換專屬產品、折扣和特別禮品",
     "step1Title": "註冊並成為 ZGAR Club 會員。",
     "step2Title": "通過驗證 Zgar 產品、推薦朋友和每日簽到累積積分。",
     "step3Title": "使用您的積分兌換獎勵。",
     "defaultUserName": "用戶",
     "memberLevel": "會員等級"
+  },
+  "Partner": {
+    "title": "全球合作夥伴",
+    "subtitle": "我們與全球頂尖企業建立戰略合作關係，共同開拓電子煙市場，實現共贏發展",
+    "statPartners": "合作夥伴",
+    "statCountries": "覆蓋國家",
+    "statYears": "年合作",
+    "statSatisfaction": "滿意度",
+    "regionAsia": "亞洲",
+    "becomePartner": "成為合作夥伴",
+    "becomePartnerDesc": "加入我們的全球合作夥伴網絡，共享資源，共同成長",
+    "benefit1": "獨家產品代理權",
+    "benefit2": "市場支持與培訓",
+    "benefit3": "品牌聯合營銷",
+    "benefit4": "長期利潤分成",
+    "contactUsTitle": "立即聯繫我們",
+    "contactUsDesc": "提交您的合作意向，我們會在 24 小時內回復",
+    "contactUsButton": "聯繫合作",
+    "malaysia": "馬來西亞",
+    "indonesia": "印度尼西亞",
+    "japan": "日本",
+    "hongKong": "香港"
   },
   "order-details": {
     "backToOrders": "返回訂單列表",
@@ -201,7 +238,12 @@
     "shipping": "運費",
     "orderSummary": "訂單摘要",
     "orderDate": "訂單日期",
-    "payment": "支付",
+    "payment": {
+      "createSuccess": "支付記錄創建成功",
+      "createFailed": "創建支付失敗，請稍後重試",
+      "voucherUpdateSuccess": "憑證修改成功",
+      "voucherUpdateFailed": "修改憑證失敗"
+    },
     "paymentMethod": "支付方式",
     "fulfillment": "履行",
     "shippingAddress": "收貨地址",
@@ -209,7 +251,40 @@
     "auditStatus": "審核狀態",
     "paymentAuditStatus": "支付審核狀態",
     "closingAuditStatus": "結單審核狀態",
-    "rejectionReason": "拒絕理由"
+    "rejectionReason": "拒絕理由",
+    "orderNumber": "訂單號",
+    "orderStatus": "訂單狀態",
+    "weight": "重量",
+    "totalWeight": "總重量",
+    "paymentAuditStatus_title": "支付審核狀態",
+    "closingAuditStatus_title": "結單審核狀態",
+    "paymentAuditStatusObj": {
+      "notUploaded": "未上傳憑證",
+      "uploaded": "已上傳憑證",
+      "partial": "審核中",
+      "completed": "審核完成"
+    },
+    "statusObj": {
+      "completed": "已完成",
+      "pending": "進行中",
+      "canceled": "已取消"
+    },
+    "tracking": {
+      "title": "訂單追蹤",
+      "created": "訂單已創建",
+      "payment": "支付確認",
+      "completed": "已完成",
+      "pending": "待處理",
+      "packing": "商品打包",
+      "inProgress": "進行中",
+      "shipped": "已發貨",
+      "pendingShipment": "待發貨"
+    },
+    "errors": {
+      "insufficientBalance": "餘額不足",
+      "required": "需要支付"
+    },
+    "rejectKeyword": "拒絕"
   },
   "pendingAction": {
     "title": {
@@ -223,8 +298,7 @@
       "closing": "請上傳結單附件和備註信息"
     },
     "completeNow": "立即完成",
-    "close": "關閉",
-    "goto": "前往"
+    "close": "關閉"
   },
   "packing-requirements": {
     "title": "打包要求管理",
@@ -357,31 +431,31 @@
     "status": "狀態",
     "orderType": "訂單類型",
     "paymentMethod": "支付方式",
+    "paymentMethodLabel": "支付方式",
     "typePayment": "付款訂單",
     "typePoints": "積分訂單",
     "completed": "已完成",
     "pending": "處理中",
     "canceled": "已取消",
+    "returned": "已退貨",
     "noOrders": "暫無訂單",
-    "noOrdersDesc": "快去選購心儀的商品吧",
+    "noOrdersDesc": "您還沒有任何訂單，快去商場逛逛吧~",
     "startShopping": "開始購物",
+    "goToShop": "前往商場",
     "pieces": "件",
     "unpaidVoucher": "未上傳憑證",
-    "pendingClosing": "待結單"
-  },
-  "pendingAction": {
-    "title": {
-      "payment": "上傳支付憑證",
-      "packing": "填寫打包要求",
-      "closing": "填寫結單信息"
-    },
-    "description": {
-      "payment": "請上傳您的支付收款以確認訂單",
-      "packing": "請創建嘜頭分組以便安排發貨",
-      "closing": "請上傳結單附件和備註信息"
-    },
-    "completeNow": "立即完成",
-    "close": "關閉"
+    "pendingClosing": "待結單",
+    "totalOrders": "總訂單數",
+    "inProgress": "進行中",
+    "viewDetails": "查看詳情",
+    "moreItems": "等 {n} 件商品",
+    "totalItems": "共 {n} 件商品",
+    "methods": {
+      "balance": "餘額支付",
+      "points": "積分支付",
+      "credit": "賬期積分",
+      "manual": "手動支付"
+    }
   },
   "Pagination": {
     "previous": "上一頁",
@@ -389,9 +463,28 @@
     "page": "第"
   },
   "CreatePaymentModal": {
-    "title": "創建支付",
+    "title": "付款",
+    "invalidAmount": "請輸入有效的支付金額",
+    "amountExceeds": "支付金額不能超過剩餘應付金額 {amount}",
+    "voucherRequired": "打款支付必須上傳至少一張支付憑證",
+    "uploadVoucher": "請上傳支付憑證",
+    "paymentFailed": "付款失敗，請稍後重試",
+    "balancePayment": "餘額支付",
+    "bankTransfer": "銀行轉賬",
+    "bankTransferPayment": "銀行轉賬支付",
+    "remainingAmount": "剩餘應付金額",
+    "paymentAmount": "支付金額",
+    "amountPlaceholder": "請輸入支付金額",
+    "paymentMethod": "支付方式",
+    "balancePayment_option": "餘額支付",
+    "bankTransfer_option": "銀行轉賬",
+    "paymentVoucher": "支付憑證",
+    "paymentDescription": "支付說明（可選）",
+    "descriptionPlaceholder": "如：首期付款、第二期付款",
+    "cancel": "取消",
+    "processing": "處理中...",
+    "confirmPayment": "確認付款",
     "amountRequired": "請輸入支付金額",
-    "voucherRequired": "請上傳支付憑證",
     "insufficientBalance": "餘額不足，當前餘額: {balance}，需要支付: {amount}",
     "createSuccess": "支付記錄創建成功",
     "createFailed": "創建支付失敗，請重試",
@@ -458,6 +551,427 @@
       "verifySuccess": "驗證通過！",
       "verifyFailed": "驗證失敗，請重試",
       "queryFailed": "查詢防偽碼信息失敗"
+    }
+  },
+  "ShopBanner": {
+    "product1": {
+      "subtitle": "革命性霧化科技",
+      "description": "重新定義您的體驗"
+    },
+    "product2": {
+      "subtitle": "夢幻口感",
+      "description": "限量發售，先到先得"
+    },
+    "product3": {
+      "subtitle": "星雲系列",
+      "description": "品質之選"
+    },
+    "product4": {
+      "subtitle": "冰爽系列",
+      "description": "極致清涼體驗"
+    },
+    "product5": {
+      "subtitle": "能量爆發",
+      "description": "強勁持久體驗"
+    },
+    "exploreNow": "立即探索"
+  },
+  "PaymentRecords": {
+    "status": {
+      "approved": "已批准",
+      "reviewing": "審核中",
+      "rejected": "已拒絕",
+      "pending": "待處理"
+    },
+    "title": "支付記錄",
+    "totalRecords": "共 {n} 條",
+    "fullyPaid": "恭喜！您已付清全部訂單金額",
+    "paymentButton": "付款",
+    "needApproval": "訂單需要審核通過後才能創建支付",
+    "noRecords": "暫無支付記錄",
+    "createPaymentHint": "點擊上方按鈕創建支付",
+    "waitApprovalHint": "訂單審核通過後即可創建支付",
+    "installment": "第{n}期付款",
+    "balancePayment": "餘額支付",
+    "bankTransfer": "銀行轉賬",
+    "rejectionReason": "審核拒絕原因",
+    "noReason": "暫無拒絕原因，請聯繫管理員",
+    "paymentVoucher": "支付憑證",
+    "voucherNumber": "憑證{n}",
+    "reuploadVoucher": "重新上傳憑證",
+    "updateVoucher": "修改憑證",
+    "uploadVoucher": "上傳憑證"
+  },
+  "AboutUs": {
+    "whoWeAre": "我們是誰",
+    "whoWeAreDesc": "Zgar 是一家專注於電子煙產品研發和生產的創新型企業。我們致力於通過先進的技術和嚴格的質量控制，為全球用戶提供安全、高品質的電子煙產品。",
+    "teamDesc": "我們的團隊由經驗豐富的工程師、設計師和行業專家組成，共同打造符合國際標準的產品。",
+    "years": "年經驗",
+    "countries": "個國家",
+    "users": "用戶",
+    "qualityProducts": "優質產品",
+    "productsDesc": "我們的產品涵蓋一次性電子煙、換彈系列、開放式系統等多個品類。每一款產品都經過嚴格的質量測試，確保安全性和可靠性。",
+    "technologyDesc": "採用最新的霧化技術和高品質材料，為用戶提供純淨、順滑的吸煙體驗。",
+    "certification": "國際認證",
+    "certificationDesc": "通過 CE、ROHS、FCC 等國際認證",
+    "qualityControl": "嚴格品控",
+    "qualityControlDesc": "每一道工序都經過嚴格檢測",
+    "professionalTeam": "專業團隊",
+    "teamDesc2": "經驗豐富的研發和生產團隊",
+    "globalReach": "全球佈局",
+    "globalReachDesc": "我們的產品已銷往全球 50+ 個國家和地區，服務超過 100 萬用戶",
+    "coveredCountries": "覆蓋國家",
+    "partners": "合作夥伴",
+    "certifications": "國際認證",
+    "customerSupport": "客戶支持"
+  },
+  "AccountSummary": {
+    "welcomeBack": "歡迎回來 👋",
+    "user": "用戶",
+    "balance": "餘額",
+    "points": "積分",
+    "orders": "訂單",
+    "birthday": "生日",
+    "joinedDate": "加入時間"
+  },
+  "AccountSettings": {
+    "title": "賬戶設置",
+    "description": "管理您的個人信息和賬戶安全設置",
+    "personalInfo": "個人信息",
+    "personalInfoDesc": "更新您的個人資料信息，這些信息將用於您的訂單和通信",
+    "firstName": "名字 *",
+    "firstNamePlaceholder": "請輸入您的名字",
+    "lastName": "姓氏 *",
+    "lastNamePlaceholder": "請輸入您的姓氏",
+    "email": "電子郵箱 *",
+    "emailHint": "我們將使用此郵箱與您聯繫訂單相關事宜",
+    "changePassword": "修改密碼",
+    "changePasswordDesc": "定期更新密碼有助於保護您的賬戶安全",
+    "currentPassword": "當前密碼 *",
+    "currentPasswordPlaceholder": "請輸入當前密碼",
+    "newPassword": "新密碼 *",
+    "newPasswordPlaceholder": "請輸入新密碼",
+    "passwordHint": "密碼至少包含8個字符，建議使用字母、數字和符號的組合",
+    "confirmPassword": "確認新密碼 *",
+    "confirmPasswordPlaceholder": "請再次輸入新密碼",
+    "requiredFieldsHint": "所有標記為 * 的字段都是必填項",
+    "cancel": "取消",
+    "saveChanges": "保存更改"
+  },
+  "PaymentSummary": {
+    "title": "支付匯總",
+    "reviewingNote": "注意：已付金額中包含 {amount} 還在審核中",
+    "rejectedNote": "注意：您有 {amount} 的支付未通過審核，可以重新上傳憑證或創建新的支付記錄",
+    "fullyPaid": "恭喜！您已付清全部訂單金額",
+    "totalPayable": "總應付金額",
+    "totalPaid": "已付金額",
+    "reviewingAmount": "其中 {amount} 還在審核中",
+    "remaining": "剩餘金額",
+    "paymentProgress": "支付進度",
+    "progressDescription": "已完成 {n}% 的支付，還剩 {amount} 待支付"
+  },
+  "closing-info": {
+    "maxFilesError": "最多只能上傳 10 個文件",
+    "unsupportedFileType": "不支持的文件類型:",
+    "fileTooLarge": "文件 {name} 太大，最大支持 10MB",
+    "fillRequired": "請填寫結單備註或上傳結單附件",
+    "updateSuccess": "結單信息更新成功！",
+    "saveSuccess": "結單信息保存成功！",
+    "saveError": "保存失敗，請稍後重試",
+    "editTitle": "編輯結單信息",
+    "uploadTitle": "上傳結單信息",
+    "editDescription": "修改結單備註或添加新的結單附件（圖片、PDF、Word）",
+    "uploadDescription": "請填寫結單備註或上傳結單附件（圖片、PDF、Word）",
+    "existingAttachments": "已上傳附件（點擊刪除）",
+    "remark": "結單備註",
+    "remarkPlaceholder": "請輸入結單備註信息...",
+    "filled": "✓ 已填寫",
+    "fillHint": "請填寫備註或上傳附件",
+    "attachmentsOptional": "結單附件（可選）",
+    "attachmentsHint": "支持 圖片、PDF、Word 格式，最多 10 個文件，單個文件不超過 10MB",
+    "uploadButton": "點擊上傳文件",
+    "supportedFormats": "支持 jpg, png, pdf, doc, docx",
+    "cancel": "取消",
+    "uploading": "上傳中...",
+    "updateButton": "更新結單信息",
+    "saveButton": "保存結單信息"
+  },
+  "HomeHotSellingProduct": {
+    "title": "熱銷產品",
+    "subtitle": "精選最受歡迎的產品，品質保證，限時優惠",
+    "tab": {
+      "new": "新品",
+      "hot": "熱銷",
+      "sale": "特價"
+    }
+  },
+  "HomeAboutUs": {
+    "founded": "成立年份",
+    "products": "產品數量",
+    "countries": "服務國家",
+    "users": "全球用戶",
+    "title": "關於 Zgar",
+    "tagline": "專注電子煙領域 · 服務全球用戶",
+    "altProductShowcase": "產品展示",
+    "brandStory": "品牌故事",
+    "brandStoryDesc": "Zgar 成立於2018年，專注於為全球用戶提供高品質的電子煙產品和服務體驗。",
+    "commitmentDesc": "我們堅持創新設計，嚴格把控產品質量，致力於為用戶帶來更好的使用體驗。",
+    "learnMore": "了解更多"
+  },
+  "ProductGrid": {
+    "sortDefault": "排序 ▼",
+    "sortPriceAsc": "價格：低到高",
+    "sortPriceDesc": "價格：高到低",
+    "noProducts": "未找到產品",
+    "adjustFilters": "試著調整篩選條件",
+    "clearFilters": "清除篩選"
+  },
+  "CategoryTabs": {
+    "all": "全部"
+  },
+  "Tasks": {
+    "newbie": "新手任務",
+    "daily": "日常任務",
+    "achievement": "成就任務",
+    "campaign": "活動任務",
+    "status": {
+      "locked": "已鎖定",
+      "active": "進行中",
+      "completed": "已完成",
+      "claimed": "已領取",
+      "expired": "已過期"
+    },
+    "alreadySignedToday": "今天已經簽到過了哦~",
+    "signinSuccess": "簽到成功！獲得 {n} 積分",
+    "signinError": "簽到失敗，請稍後重試",
+    "claimSuccess": "領取成功！獲得 {n} 積分 🎉",
+    "claimError": "領取失敗，請稍後重試",
+    "limitedTime": "限時",
+    "noTasks": "暫無任務",
+    "noTasksDesc": "敬請期待更多精彩任務",
+    "progress": "進度: {n}/{m}",
+    "signingIn": "簽到中...",
+    "signedToday": "今日已簽到",
+    "dailySignin": "每日簽到",
+    "claiming": "領取中...",
+    "claimReward": "領取獎勵",
+    "goToComplete": "前往完成",
+    "taskLocked": "任務鎖定",
+    "viewDetails": "查看詳情"
+  },
+  "FilterSidebar": {
+    "title": "篩選 FILTER",
+    "category": "📦 分類 Category",
+    "category_disposable": "一次性電子煙",
+    "category_closedSystem": "封閉式電子煙",
+    "category_openSystem": "開放式電子煙",
+    "category_eLiquid": "煙油",
+    "price": "💰 價格 Price",
+    "availability": "✨ 狀態 Availability",
+    "inStock": "有貨",
+    "preOrder": "預售",
+    "outOfStock": "缺貨",
+    "clear": "🗑️ 清除篩選"
+  },
+  "MyAccount": {
+    "user": "用戶",
+    "balance": "餘額",
+    "points": "積分",
+    "orders": "訂單",
+    "accountBalance": "賬戶餘額",
+    "balanceDetails": "餘額明細",
+    "availablePoints": "可用積分",
+    "pointsMall": "積分商城",
+    "recentOrders": "最近訂單",
+    "viewAll": "查看全部",
+    "noOrders": "還沒有訂單",
+    "noOrdersDesc": "快去選購心儀的商品吧",
+    "startShopping": "開始購物",
+    "moreItems": "等{n}件商品"
+  },
+  "Sidebar": {
+    "accountOverview": "賬戶概覽",
+    "myOrders": "我的訂單",
+    "transactions": "交易記錄",
+    "addressManagement": "地址管理",
+    "accountSettings": "賬戶設置",
+    "user": "用戶",
+    "balance": "餘額",
+    "points": "積分",
+    "orders": "訂單",
+    "logout": "退出登錄"
+  },
+  "OrderCard": {
+    "details": "詳情",
+    "uploaded": "已上傳",
+    "voucher": "憑證",
+    "packing": "包裝"
+  },
+  "VoucherUpload": {
+    "fileTooLarge": "文件 {name} 太大，最大支持 5MB",
+    "notImage": "文件 {name} 不是图片格式",
+    "maxFilesError": "最多只能上传 {n} 张图片",
+    "uploadFailed": "上传失败，请重试",
+    "voucherNumber": "凭证 {n}",
+    "add": "添加",
+    "uploading": "上传中...",
+    "uploadPrompt": "点击或拖拽上传支付凭证",
+    "formatsHint": "支持 JPG、PNG、WEBP 格式，最大 5MB，最多 {n} 张",
+    "required": "* 必填项"
+  },
+  "Footer": {
+    "contactUs": "聯繫我們",
+    "products": "產品",
+    "productSeries1": "產品系列一",
+    "productSeries2": "產品系列二",
+    "productSeries3": "產品系列三",
+    "productSeries4": "產品系列四",
+    "information": "資訊"
+  },
+  "VerifyCodeInfo": {
+    "title": "防偽碼信息",
+    "subtitle": "請輸入標籤上的6位驗證碼",
+    "serialNumber": "序列號",
+    "queryTimes": "查詢次數",
+    "firstQueryTime": "首次查詢時間",
+    "times": "次"
+  },
+  "VerifyResult": {
+    "failed": "驗證失敗",
+    "success": "驗證通過",
+    "genuine": "您購買的是正品",
+    "serialNumber": "序列號",
+    "codeType": "防偽碼類型",
+    "queryTimes": "查詢次數",
+    "firstQueryTime": "首次查詢時間",
+    "lastQueryTime": "最近查詢時間",
+    "times": "次"
+  },
+  "LoadingSpinner": {
+    "querying": "正在查詢防偽碼信息...",
+    "verifying": "正在驗證真偽...",
+    "waiting": "請稍候，正在處理..."
+  },
+  "VerifyCheck": {
+    "reverify": "重新驗證",
+    "title": "防偽驗證",
+    "description": "請輸入防偽標籤上的驗證碼",
+    "tip": "提示",
+    "inputPlaceholder": "請輸入驗證碼",
+    "inputHelper": "請輸入防偽標籤上的6位驗證碼",
+    "codeHint": "💡 提示：驗證碼是防偽標籤上的6位數字"
+  },
+  "HomeProductCate": {
+    "title": "精選產品分類",
+    "subtitle": "探索我們的全系列產品，滿足您的不同需求",
+    "disposable": "一次性電子煙",
+    "pod": "換彈系列",
+    "eLiquid": "煙油系列",
+    "accessories": "配件專區",
+    "limited": "限量版"
+  },
+  "ProductVerify": {
+    "title": "掃碼驗證",
+    "step1": "使用手機掃描產品包裝上的<qrCode>二維碼</qrCode>",
+    "step2": "進入<verify>兩步產品驗證</verify>流程",
+    "guideButton": "查看驗證指南",
+    "genuineGuarantee": "正品保證",
+    "guaranteeBadge": "正品保障",
+    "officialBadge": "官方認證",
+    "fastBadge": "快速驗證",
+    "fastDesc": "掃碼即查",
+    "safeBadge": "安全可靠",
+    "safeDesc": "全程加密"
+  },
+  "Subscription": {
+    "title": "訂閱我們",
+    "desc1": "獲取最新產品發布、促銷活動和優惠信息",
+    "desc2": "免費直接送到您的收件箱！",
+    "emailPlaceholder": "輸入您的郵箱地址",
+    "subscribeButton": "立即訂閱",
+    "privacy": "我們尊重您的隱私，絕不發送垃圾郵件"
+  },
+  "Video": {
+    "video1Title": "一次性電子煙使用指南",
+    "video1Category": "產品教程",
+    "video2Title": "換彈系列快速上手",
+    "video2Category": "產品教程",
+    "video3Title": "煙油口味推薦",
+    "video3Category": "使用技巧",
+    "video4Title": "產品配件安裝教程",
+    "video4Category": "使用技巧",
+    "video5Title": "限量版產品介紹",
+    "video5Category": "產品展示"
+  },
+  "VideoGallery": {
+    "title": "精彩視頻教程",
+    "subtitle": "觀看產品使用教程，快速掌握使用技巧",
+    "watchButton": "立即觀看"
+  },
+  "PortfolioSlicerElegant": {
+    "explore": "立即探索"
+  },
+  "ShopPage": {
+    "newProductLine": "全新產品系列",
+    "exploreZgar": "探索",
+    "zgarBrand": "ZGAR",
+    "products": "產品",
+    "productCategories": "一次性電子煙 · 換彈系列 · 開放式系統",
+    "productsCount": "款產品可選",
+    "allProducts": "全部產品",
+    "needHelp": "需要幫助？",
+    "contactSupport": "聯繫我們的客服團隊獲取專業建議",
+    "contactUs": "聯繫我們"
+  },
+  "VerifyGuide": {
+    "title": "產品驗證指南",
+    "step": "驗證步驟 {number}"
+  },
+  "CarePage": {
+    "hero": {
+      "newKnowledgeHub": "全新知識中心",
+      "exploreZgar": "探索",
+      "zgar": "ZGAR",
+      "knowledge": "知識",
+      "categories": "產品知識 · 健康指南 · 企業文化",
+      "articlesCount": "篇文章"
+    },
+    "filters": {
+      "all": "全部",
+      "productKnowledge": "產品知識",
+      "healthGuide": "健康指南",
+      "companyCulture": "企業文化",
+      "title": "文章分類"
+    },
+    "articles": {
+      "noArticles": "該分類暫無文章",
+      "stayTuned": "敬請期待更多精彩內容",
+      "readMore": "閱讀更多",
+      "minRead": "分鐘閱讀"
+    },
+    "article1": {
+      "title": "電子煙產品完全指南：從入門到精通",
+      "description": "深入了解電子煙的工作原理、產品類型、使用方法和保養技巧。無論你是新手還是經驗豐富的用戶，這篇文章都會為你提供全面的知識。"
+    },
+    "article2": {
+      "title": "如何選擇適合你的電子煙設備？",
+      "description": "面對市面上琳琅滿目的電子煙產品，如何選擇最適合自己的一款？本文將從使用場景、口感偏好、預算等多個維度為你提供選購建議。"
+    },
+    "article3": {
+      "title": "電子煙霧化器技術解析",
+      "description": "霧化器是電子煙的核心部件，了解它的工作原理和技術特點，能幫助你更好地使用和維護你的電子煙設備。"
+    },
+    "article4": {
+      "title": "電子煙與健康：科學認知與理性使用",
+      "description": "關於電子煙對健康的影響，有哪些科學研究和結論？如何正確使用電子煙以降低潛在風險？本文為你提供客觀、科學的分析。"
+    },
+    "article5": {
+      "title": "尼古丁替代療法：電子煙的角色",
+      "description": "電子煙作為尼古丁替代療法的一種形式，在戒煙過程中發揮著怎樣的作用？本文將從醫學角度分析其有效性和注意事項。"
+    },
+    "article6": {
+      "title": "Zgar 品牌故事：從創立到全球",
+      "description": "了解 Zgar 品牌的發展歷程、核心價值觀和未來願景。從一個小團隊到服務全球用戶，我們始終堅持品質第一。"
     }
   }
 }

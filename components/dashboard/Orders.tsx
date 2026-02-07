@@ -35,6 +35,7 @@ export default function Orders({ customer, orders: initialOrders, currentPage: i
 
   const [orders, setOrders] = useState(initialOrders);
   const [currentPage, setCurrentPage] = useState(initialPage);
+  const [isLoadingPage, setIsLoadingPage] = useState(false);
 
   const orderList = orders?.orders || [];
   const count = orders?.count || 0;
@@ -68,7 +69,7 @@ export default function Orders({ customer, orders: initialOrders, currentPage: i
         };
       case "returned":
         return {
-          label: '已退货',
+          label: tOrders('returned'),
           bgColor: 'bg-[#FFFB00]/10',      // 淡黄色背景
           textColor: 'text-[#FFFB00]',      // 黄色文字
           dotColor: 'bg-[#FFFB00]'         // 黄色圆点
@@ -100,14 +101,14 @@ export default function Orders({ customer, orders: initialOrders, currentPage: i
       case 'balance':
         return {
           icon: <Wallet size={14} className="text-[#0047c7]" />,
-          text: '余额支付',
+          text: tOrders('methods.balance'),
           bgColor: 'bg-[#0047c7]/10',
           textColor: 'text-[#0047c7]'
         };
       case 'points':
         return {
           icon: <Star size={14} className="text-[#FF71CE] fill-[#FF71CE]" />,
-          text: '积分支付',
+          text: tOrders('methods.points'),
           bgColor: 'bg-[#FF71CE]/10',
           textColor: 'text-[#FF71CE]'
         };
@@ -115,14 +116,14 @@ export default function Orders({ customer, orders: initialOrders, currentPage: i
         // 老王我修复：credit 是账期积分，用粉蓝渐变特殊提醒！
         return {
           icon: <CreditCard size={14} className="text-white" />,
-          text: '账期积分',
+          text: tOrders('methods.credit'),
           bgColor: 'bg-gradient-to-r from-[#FF71CE] to-[#0047c7]',
           textColor: 'text-white'
         };
       default:
         return {
           icon: <Landmark size={14} className="text-gray-600" />,
-          text: '手动支付',
+          text: tOrders('methods.manual'),
           bgColor: 'bg-gray-100',
           textColor: 'text-gray-600'
         };
@@ -180,7 +181,7 @@ export default function Orders({ customer, orders: initialOrders, currentPage: i
         {/* 总订单数 */}
         <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-600">总订单数</span>
+            <span className="text-sm text-gray-600">{tOrders('totalOrders')}</span>
             <ShoppingBag size={20} className="text-[#FF71CE]" />
           </div>
           <p className="text-3xl font-black text-gray-900">{count}</p>
@@ -189,7 +190,7 @@ export default function Orders({ customer, orders: initialOrders, currentPage: i
         {/* 已完成 */}
         <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-600">已完成</span>
+            <span className="text-sm text-gray-600">{tOrders('completed')}</span>
             <div className="w-5 h-5 rounded-full bg-[#0047c7]/10 flex items-center justify-center">
               <div className="w-2 h-2 rounded-full bg-[#0047c7]" />
             </div>
@@ -202,7 +203,7 @@ export default function Orders({ customer, orders: initialOrders, currentPage: i
         {/* 进行中 */}
         <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-600">进行中</span>
+            <span className="text-sm text-gray-600">{tOrders('inProgress')}</span>
             <div className="w-5 h-5 rounded-full bg-[#FF71CE]/10 flex items-center justify-center">
               <div className="w-2 h-2 rounded-full bg-[#FF71CE]" />
             </div>
@@ -237,13 +238,13 @@ export default function Orders({ customer, orders: initialOrders, currentPage: i
           /* 空状态 */
           <div className="text-center py-16 bg-white rounded-xl border border-gray-200">
             <ShoppingBag size={48} className="mx-auto mb-4 text-gray-300" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">暂无订单</h3>
-            <p className="text-gray-600 mb-6">您还没有任何订单，快去商城逛逛吧~</p>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">{tOrders('noOrders')}</h3>
+            <p className="text-gray-600 mb-6">{tOrders('noOrdersDesc')}</p>
             <Link
               href="/shop"
               className="inline-flex items-center gap-2 px-6 py-3 bg-[#FF71CE] text-white font-semibold rounded-xl hover:bg-[#FF71CE]/90 transition-colors"
             >
-              前往商城
+              {tOrders('goToShop')}
               <ChevronRight size={18} />
             </Link>
           </div>
@@ -291,7 +292,7 @@ export default function Orders({ customer, orders: initialOrders, currentPage: i
                       className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-gray-700 hover:text-[#0047c7] hover:bg-[#0047c7]/5 rounded-lg transition-colors"
                     >
                       <Eye size={16} />
-                      查看详情
+                      {tOrders('viewDetails')}
                     </Link>
                   </div>
 
@@ -329,7 +330,7 @@ export default function Orders({ customer, orders: initialOrders, currentPage: i
                     {/* 商品信息 */}
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-gray-900 font-medium truncate">
-                        {order.items?.[0]?.title} {order.items && order.items.length > 1 ? `等 ${order.items.length} 件商品` : ''}
+                        {order.items?.[0]?.title} {order.items && order.items.length > 1 ? tOrders('moreItems', { n: order.items.length }) : ''}
                       </p>
                     </div>
 
@@ -354,14 +355,14 @@ export default function Orders({ customer, orders: initialOrders, currentPage: i
                   {/* 老王我：订单底部 - 操作按钮 */}
                   <div className="flex items-center justify-between">
                     <div className="text-sm text-gray-500">
-                      共 {order.items?.length || 0} 件商品
+                      {tOrders('totalItems', { n: order.items?.length || 0 })}
                     </div>
 
                     <Link
                       href={`/account-orders-detail/${order.id}`}
                       className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors group-hover:bg-[#0047c7]/10 group-hover:text-[#0047c7]"
                     >
-                      查看详情
+                      {tOrders('viewDetails')}
                       <ChevronRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
                     </Link>
                   </div>
