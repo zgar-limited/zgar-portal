@@ -332,75 +332,38 @@ export function VerificationForm({ codePrefix }: VerificationFormProps) {
               </div>
             )}
 
-            {/* 验证结果 - 胶囊 popover 显示在输入框上方 */}
+            {/* 验证结果 - 移动端友好的紧凑布局 */}
             {result && (
-              <div className="mb-3 relative z-40">
-                {/* 胶囊形状的 Popover */}
+              <div className="mb-4 relative z-40">
+                {/* 胶囊形状的结果卡片 */}
                 <div className={`relative rounded-2xl border-4 border-gray-900 shadow-[6px_6px_0px_rgba(0,0,0,0.25)] overflow-hidden animation-fade-in ${
                   result.success ? 'bg-gradient-to-r from-green-400 to-emerald-500' : 'bg-gradient-to-r from-red-400 to-pink-500'
                 }`}>
 
                   {/* 内容区 - 白色背景 */}
                   <div className="bg-white rounded-xl p-3 m-1">
-                    <div className="flex items-center gap-3">
+                    {/* 第一行：图标 + 状态 + 按钮 */}
+                    <div className="flex items-center gap-2 mb-2">
                       {/* 图标 */}
-                      <div className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center border-3 border-gray-900 ${
+                      <div className={`flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center border-3 border-gray-900 ${
                         result.success ? 'bg-green-500' : 'bg-red-500'
                       }`}>
                         {result.success ? (
-                          <CheckCircle className="w-5 h-5 text-white" strokeWidth={3} />
+                          <CheckCircle className="w-4 h-4 text-white" strokeWidth={3} />
                         ) : (
-                          <XCircle className="w-5 h-5 text-white" strokeWidth={3} />
+                          <XCircle className="w-4 h-4 text-white" strokeWidth={3} />
                         )}
                       </div>
 
                       {/* 状态文字 */}
-                      <div className="flex-shrink-0">
-                        <p className={`text-sm font-black ${result.success ? 'text-green-700' : 'text-red-700'} leading-tight`}>
-                          {result.success ? t('result.congratulations') : t('result.verificationFailed')}
-                        </p>
-                      </div>
-
-                      {/* 分隔线 */}
-                      <div className={`w-px h-8 flex-shrink-0 ${result.success ? 'bg-green-300' : 'bg-red-300'}`}></div>
-
-                      {/* 三个信息 - 一行展示 */}
-                      {result.success && result.data && (
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                          {/* 序列号 */}
-                          <div className="flex items-center gap-1.5 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg px-2 py-1 border-2 border-gray-900 flex-1">
-                            <div className="w-1.5 h-1.5 bg-blue-500 rounded-full flex-shrink-0"></div>
-                            <span className="text-[8px] font-bold text-gray-600 uppercase tracking-wider flex-shrink-0">{t('result.serialNumber')}</span>
-                            <span className="text-[10px] font-black text-gray-900 font-mono truncate">{result.data.IndexCode}</span>
-                          </div>
-
-                          {/* 查询次数 */}
-                          <div className="flex items-center gap-1.5 bg-gradient-to-br from-amber-50 to-yellow-50 rounded-lg px-2 py-1 border-2 border-gray-900 flex-1">
-                            <div className="w-1.5 h-1.5 bg-amber-500 rounded-full flex-shrink-0"></div>
-                            <span className="text-[8px] font-bold text-gray-600 uppercase tracking-wider flex-shrink-0">{t('result.queryTimes')}</span>
-                            <span className="text-sm font-black text-amber-600">{result.data.QueryTimes}</span>
-                          </div>
-
-                          {/* 防伪码类型 */}
-                          <div className="flex items-center gap-1.5 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg px-2 py-1 border-2 border-gray-900 flex-1">
-                            <div className="w-1.5 h-1.5 bg-purple-500 rounded-full flex-shrink-0"></div>
-                            <span className="text-[8px] font-bold text-gray-600 uppercase tracking-wider flex-shrink-0">{t('result.codeType')}</span>
-                            <span className="text-xs font-black text-gray-900">{result.data.TypeStr}</span>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* 失败时只显示消息 */}
-                      {!result.success && (
-                        <div className="flex-1">
-                          <p className="text-xs font-medium text-red-600">{result.message}</p>
-                        </div>
-                      )}
+                      <p className={`text-xs font-black flex-1 ${result.success ? 'text-green-700' : 'text-red-700'} leading-tight`}>
+                        {result.success ? t('result.congratulations') : t('result.verificationFailed')}
+                      </p>
 
                       {/* 重置按钮 */}
                       <button
                         onClick={handleReset}
-                        className={`flex-shrink-0 px-3 py-1 text-xs font-bold rounded-lg border-3 border-gray-900 transition-all cursor-pointer ${
+                        className={`flex-shrink-0 px-2 py-1 text-[10px] font-bold rounded-lg border-3 border-gray-900 transition-all cursor-pointer ${
                           result.success ? 'bg-green-500 text-white hover:bg-green-600' : 'bg-red-500 text-white hover:bg-red-600'
                         }`}
                         style={{ boxShadow: '2px_2px_0px_rgba(0,0,0,1)' }}
@@ -408,6 +371,39 @@ export function VerificationForm({ codePrefix }: VerificationFormProps) {
                         {result.success ? t('result.verifyAnother') : t('result.tryAgain')}
                       </button>
                     </div>
+
+                    {/* 失败时显示错误消息 */}
+                    {!result.success && result.message && (
+                      <div className="bg-red-50 rounded-lg p-2 border-2 border-red-200">
+                        <p className="text-[10px] font-medium text-red-700 leading-tight">{result.message}</p>
+                      </div>
+                    )}
+
+                    {/* 成功时显示三个信息 - 移动端响应式布局 */}
+                    {result.success && result.data && (
+                      <div className="grid grid-cols-3 gap-2">
+                        {/* 序列号 */}
+                        <div className="flex flex-col items-center gap-1 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg px-2 py-2 border-2 border-gray-900">
+                          <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                          <span className="text-[8px] font-bold text-gray-600 uppercase tracking-wider text-center">{t('result.serialNumber')}</span>
+                          <span className="text-[9px] font-black text-gray-900 font-mono text-center break-all leading-tight">{result.data.IndexCode}</span>
+                        </div>
+
+                        {/* 查询次数 */}
+                        <div className="flex flex-col items-center gap-1 bg-gradient-to-br from-amber-50 to-yellow-50 rounded-lg px-2 py-2 border-2 border-gray-900">
+                          <div className="w-1.5 h-1.5 bg-amber-500 rounded-full"></div>
+                          <span className="text-[8px] font-bold text-gray-600 uppercase tracking-wider text-center">{t('result.queryTimes')}</span>
+                          <span className="text-sm font-black text-amber-600 leading-none">{result.data.QueryTimes}</span>
+                        </div>
+
+                        {/* 防伪码类型 */}
+                        <div className="flex flex-col items-center gap-1 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg px-2 py-2 border-2 border-gray-900">
+                          <div className="w-1.5 h-1.5 bg-purple-500 rounded-full"></div>
+                          <span className="text-[8px] font-bold text-gray-600 uppercase tracking-wider text-center">{t('result.codeType')}</span>
+                          <span className="text-[10px] font-black text-gray-900 text-center leading-tight">{result.data.TypeStr}</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* 装饰元素 */}
@@ -435,15 +431,16 @@ export function VerificationForm({ codePrefix }: VerificationFormProps) {
                 </div>
               </div>
 
-              {/* 待输入的6位 */}
+              {/* 待输入的6位 - 支持字母和数字 */}
               <div className="flex-[1.5]">
                 <input
-                  type="tel"
-                  inputMode="numeric"
+                  type="text"
+                  inputMode="text"
                   maxLength={6}
                   value={suffix}
                   onChange={(e) => {
-                    const value = e.target.value.replace(/\D/g, '');
+                    // 老王我：只允许字母和数字，自动转大写
+                    const value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
                     setSuffix(value);
                   }}
                   placeholder={t('form.placeholder')}
@@ -452,6 +449,7 @@ export function VerificationForm({ codePrefix }: VerificationFormProps) {
                   style={{
                     boxShadow: '4px_4px_0px_rgba(0,0,0,1)'
                   }}
+                  autoCapitalize="characters"
                 />
               </div>
             </div>

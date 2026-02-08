@@ -1,0 +1,71 @@
+[    1536ms] [WARNING] Image with src "http://localhost:3000/images/logo/logo-zgar.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ http://localhost:3000/_next/static/chunks/e07b3_next_dist_c486d14f._.js:2287
+[   10496ms] [WARNING] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior @ http://localhost:3000/_next/static/chunks/e07b3_next_dist_c486d14f._.js:2287
+[   31971ms] [ERROR] ./app/[locale]/(layout)/(store)/shop/page.tsx:11:14
+Ecmascript file had an error
+   9 | import { useTranslations } from "next-intl";
+  10 |
+> 11 | export const metadata = {
+     |              ^^^^^^^^
+  12 |   title: "Shop - Zgar电子烟产品",
+  13 |   description: "探索Zgar全系列电子烟产品，一次性电子烟、换弹系列、开放式系统",
+  14 | };
+
+You are attempting to export "metadata" from a component marked with "use client", which is disallowed. Either remove the export, or the "use client" directive. Read more: https://nextjs.org/docs/app/api-reference/directives/use-client
+
+Import traces:
+  Client Component Browser:
+    ./app/[locale]/(layout)/(store)/shop/page.tsx [Client Component Browser]
+    ./app/[locale]/(layout)/(store)/shop/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/[locale]/(layout)/(store)/shop/page.tsx [Client Component SSR]
+    ./app/[locale]/(layout)/(store)/shop/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/e07b3_next_dist_c486d14f._.js:3117
+[   51805ms] [ERROR] ./app/[locale]/(layout)/(store)/shop/page.tsx:11:14
+Ecmascript file had an error
+   9 | import { useTranslations } from "next-intl";
+  10 |
+> 11 | export const metadata = {
+     |              ^^^^^^^^
+  12 |   title: "Shop - Zgar电子烟产品",
+  13 |   description: "探索Zgar全系列电子烟产品，一次性电子烟、换弹系列、开放式系统",
+  14 | };
+
+You are attempting to export "metadata" from a component marked with "use client", which is disallowed. Either remove the export, or the "use client" directive. Read more: https://nextjs.org/docs/app/api-reference/directives/use-client
+
+Import traces:
+  Client Component Browser:
+    ./app/[locale]/(layout)/(store)/shop/page.tsx [Client Component Browser]
+    ./app/[locale]/(layout)/(store)/shop/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/[locale]/(layout)/(store)/shop/page.tsx [Client Component SSR]
+    ./app/[locale]/(layout)/(store)/shop/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/e07b3_next_dist_c486d14f._.js:3117
+[   55775ms] [WARNING] [HMR] Invalid message: {"isTrusted":true}
+TypeError: Cannot convert undefined or null to object
+    at Object.keys (<anonymous>)
+    at extractModulesFromTurbopackMessage (http://localhost:3000/_next/static/chunks/e07b3_next_dist_client_781741e4._.js:10440:39)
+    at TurbopackHmr.onTurbopackMessage (http://localhost:3000/_next/static/chunks/e07b3_next_dist_client_781741e4._.js:10387:32)
+    at processMessage (http://localhost:3000/_next/static/chunks/e07b3_next_dist_client_781741e4._.js:10816:30)
+    at WebSocket.handleMessage (http://localhost:3000/_next/static/chunks/e07b3_next_dist_client_781741e4._.js:10152:52) @ http://localhost:3000/_next/static/chunks/e07b3_next_dist_c486d14f._.js:2287
+[   56659ms] ReferenceError: useTranslations is not defined
+    at Page (about://React/Server/file:///Users/rain/project/zgar/zgar-portal/.next/dev/server/chunks/ssr/%5Broot-of-the-server%5D__5b466a69._.js?108:143:15)
+    at resolveErrorDev (http://localhost:3000/_next/static/chunks/e07b3_next_dist_compiled_react-server-dom-turbopack_a9f36c52._.js:1864:148)
+    at processFullStringRow (http://localhost:3000/_next/static/chunks/e07b3_next_dist_compiled_react-server-dom-turbopack_a9f36c52._.js:2372:29)
+    at processFullBinaryRow (http://localhost:3000/_next/static/chunks/e07b3_next_dist_compiled_react-server-dom-turbopack_a9f36c52._.js:2331:9)
+    at processBinaryChunk (http://localhost:3000/_next/static/chunks/e07b3_next_dist_compiled_react-server-dom-turbopack_a9f36c52._.js:2441:98)
+    at progress (http://localhost:3000/_next/static/chunks/e07b3_next_dist_compiled_react-server-dom-turbopack_a9f36c52._.js:2610:13)
+[   66128ms] [ERROR] ./app/[locale]/(layout)/(store)/shop/page.tsx:4:1
+Module not found: Can't resolve './ShopPageContent'
+  2 | import CategoryTabs from "@/components/products/CategoryTabs";
+  3 | import ShopPageBanner from "@/widgets/ShopPageBanner";
+> 4 | import ShopPageContent from "./ShopPageContent";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 |
+  6 | import { fetchProducts } from "@/data/products";
+  7 |
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/e07b3_next_dist_c486d14f._.js:3117
+[   74874ms] [WARNING] [Fast Refresh] performing full reload because your application had an unrecoverable error @ http://localhost:3000/_next/static/chunks/e07b3_next_dist_c486d14f._.js:2287
+[   74906ms] [WARNING] [Fast Refresh] performing full reload because your application had an unrecoverable error @ http://localhost:3000/_next/static/chunks/e07b3_next_dist_c486d14f._.js:2287
+[   75701ms] [WARNING] [Fast Refresh] performing full reload because your application had an unrecoverable error @ http://localhost:3000/_next/static/chunks/e07b3_next_dist_c486d14f._.js:2287
+[   76561ms] [WARNING] Image with src "http://localhost:3000/images/logo/logo-zgar.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio. @ http://localhost:3000/_next/static/chunks/e07b3_next_dist_c486d14f._.js:2287
