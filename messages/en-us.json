@@ -552,7 +552,10 @@
       "incompleteCode": "Please enter the complete 6-digit code",
       "verifySuccess": "Verification successful!",
       "verifyFailed": "Verification failed, please try again",
-      "queryFailed": "Failed to query code information"
+      "queryFailed": "Failed to query code information",
+      "codeNotExist": "The verification code does not exist. Beware of counterfeits!",
+      "invalidCode": "Invalid verification code format",
+      "serverError": "Server error, please try again later"
     }
   },
   "ShopBanner": {
