@@ -53,19 +53,26 @@ export function VerificationForm({ codePrefix }: VerificationFormProps) {
           setCodeInfo(data.data);
           console.log('[Verification] 防伪码信息查询成功:', data.data);
         } else {
-          // 老王我：查询失败也要显示错误信息给用户
-          console.error('[Verification] 防伪码信息查询失败:', data.msg);
+          // 老王我：查询失败 - 使用多语言错误消息
+          console.error('[Verification] 防伪码信息查询失败:', data.code, data.msg);
+
+          // 根据错误code映射到多语言消息
+          let errorMessage = t('validation.queryFailed');
+          if (data.code === '1') {
+            errorMessage = t('validation.codeNotExist');
+          }
+
           setResult({
             success: false,
-            message: data.msg || t('validation.queryFailed'),
+            message: errorMessage,
           });
         }
       } catch (error) {
-        // 老王我：查询异常也要显示错误信息给用户
+        // 老王我：查询异常 - 使用多语言错误消息
         console.error('[Verification] 查询防伪码信息失败:', error);
         setResult({
           success: false,
-          message: t('validation.queryFailed'),
+          message: t('validation.serverError'),
         });
       } finally {
         setIsQuerying(false);
@@ -91,7 +98,7 @@ export function VerificationForm({ codePrefix }: VerificationFormProps) {
       // 调用 Server Action
       const data = await verifyCode(fullCode);
 
-      // 根据返回结果显示结果
+      // 老王我：根据返回的code映射到多语言消息
       if (data.code === '0') {
         // 验证成功
         setResult({
@@ -100,10 +107,24 @@ export function VerificationForm({ codePrefix }: VerificationFormProps) {
           data: data.data,
         });
       } else {
-        // 验证失败
+        // 老王我：验证失败 - 根据不同的错误code显示不同的多语言消息
+        let errorMessage = t('validation.verifyFailed');
+
+        // 根据接口返回的code判断错误类型
+        if (data.code === '1') {
+          // code=1: 防伪码不存在
+          errorMessage = t('validation.codeNotExist');
+        } else if (data.code === '2') {
+          // code=2: 可能是其他错误（根据实际情况调整）
+          errorMessage = t('validation.invalidCode');
+        } else {
+          // 其他错误码：使用通用错误消息
+          errorMessage = t('validation.serverError');
+        }
+
         setResult({
           success: false,
-          message: data.msg || t('validation.verifyFailed'),
+          message: errorMessage,
           data: data.data,
         });
       }
@@ -111,7 +132,7 @@ export function VerificationForm({ codePrefix }: VerificationFormProps) {
       console.error('[Verification] 验证失败:', error);
       setResult({
         success: false,
-        message: t('validation.verifyFailed'),
+        message: t('validation.serverError'),
       });
     } finally {
       setIsVerifying(false);
@@ -269,64 +290,42 @@ export function VerificationForm({ codePrefix }: VerificationFormProps) {
 
           {/* 卡片内容 */}
           <div className="p-6">
-            {/* 三个信息区域 - 上面标题，下面值 */}
+            {/* 三个信息区域 - 超紧凑列表式布局 */}
             {codeInfo && !result && !isQuerying && (
-              <div className="mb-4 grid grid-cols-3 gap-3 animation-fade-in">
-                {/* 区域1: 序列号 */}
-                <div className="relative bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border-4 border-gray-900 shadow-[4px_4px_0px_rgba(59,130,246,0.25)] overflow-hidden">
-                  {/* 装饰元素 */}
-                  <div className="absolute top-2 right-2 w-2 h-2 bg-blue-400 rounded-full"></div>
-                  <div className="p-3">
-                    {/* 标题 */}
-                    <div className="flex items-center gap-1.5 mb-2">
-                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-sm"></div>
-                      <span className="text-[10px] font-bold text-gray-600 uppercase tracking-wider">{t('result.serialNumber')}</span>
+              <div className="mb-4 bg-gray-50 rounded-2xl p-3 border-2 border-gray-200 animation-fade-in">
+                {/* 紧凑列表：每行一个信息 */}
+                <div className="space-y-2">
+                  {/* 序列号 */}
+                  <div className="flex items-center justify-between gap-2 py-1">
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                      <span className="text-[10px] font-bold text-gray-600 uppercase">{t('result.serialNumber')}</span>
                     </div>
-                    {/* 值 */}
-                    <div className="bg-white rounded-xl px-2.5 py-2 border-3 border-gray-900">
-                      <div className="text-sm font-black text-gray-900 font-mono text-center break-all" title={codeInfo.IndexCode}>
-                        {codeInfo.IndexCode}
-                      </div>
-                    </div>
+                    <span className="text-xs font-black text-gray-900 font-mono truncate text-right" title={codeInfo.IndexCode}>
+                      {codeInfo.IndexCode}
+                    </span>
                   </div>
-                </div>
 
-                {/* 区域2: 查询次数 */}
-                <div className="relative bg-gradient-to-br from-amber-50 to-yellow-50 rounded-2xl border-4 border-gray-900 shadow-[4px_4px_0px_rgba(245,158,11,0.25)] overflow-hidden">
-                  {/* 装饰元素 */}
-                  <div className="absolute top-2 right-2 w-2 h-2 bg-amber-400 rounded-full"></div>
-                  <div className="p-3">
-                    {/* 标题 */}
-                    <div className="flex items-center gap-1.5 mb-2">
-                      <div className="w-1.5 h-1.5 bg-amber-500 rounded-sm"></div>
-                      <span className="text-[10px] font-bold text-gray-600 uppercase tracking-wider">{t('result.queryTimes')}</span>
+                  {/* 查询次数 */}
+                  <div className="flex items-center justify-between gap-2 py-1">
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                      <div className="w-1.5 h-1.5 bg-amber-500 rounded-full"></div>
+                      <span className="text-[10px] font-bold text-gray-600 uppercase">{t('result.queryTimes')}</span>
                     </div>
-                    {/* 值 */}
-                    <div className="bg-white rounded-xl px-2.5 py-2 border-3 border-gray-900">
-                      <div className="text-2xl font-black text-amber-600 text-center leading-none">
-                        {codeInfo.QueryTimes}
-                        <span className="text-xs font-bold text-gray-500 ml-1">{t('result.timesUnit')}</span>
-                      </div>
-                    </div>
+                    <span className="text-sm font-black text-amber-600">
+                      {codeInfo.QueryTimes} <span className="text-[10px] font-bold text-gray-500">{t('result.timesUnit')}</span>
+                    </span>
                   </div>
-                </div>
 
-                {/* 区域3: 首次查询时间 */}
-                <div className="relative bg-gradient-to-br from-emerald-50 to-green-50 rounded-2xl border-4 border-gray-900 shadow-[4px_4px_0px_rgba(16,185,129,0.25)] overflow-hidden">
-                  {/* 装饰元素 */}
-                  <div className="absolute top-2 right-2 w-2 h-2 bg-emerald-400 rounded-full"></div>
-                  <div className="p-3">
-                    {/* 标题 */}
-                    <div className="flex items-center gap-1.5 mb-2">
-                      <div className="w-1.5 h-1.5 bg-emerald-500 rounded-sm"></div>
-                      <span className="text-[10px] font-bold text-gray-600 uppercase tracking-wider">{t('result.firstQuery')}</span>
+                  {/* 首次查询时间 */}
+                  <div className="flex items-center justify-between gap-2 py-1">
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                      <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
+                      <span className="text-[10px] font-bold text-gray-600 uppercase">{t('result.firstQuery')}</span>
                     </div>
-                    {/* 值 */}
-                    <div className="bg-white rounded-xl px-2.5 py-2 border-3 border-gray-900">
-                      <div className="text-xs font-black text-gray-900 text-center leading-tight" title={codeInfo.FirstTime}>
-                        {codeInfo.FirstTime}
-                      </div>
-                    </div>
+                    <span className="text-xs font-black text-gray-900 text-right" title={codeInfo.FirstTime}>
+                      {codeInfo.FirstTime}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -413,61 +412,59 @@ export function VerificationForm({ codePrefix }: VerificationFormProps) {
               </div>
             )}
 
-            {/* Memphis 风格输入框组合 */}
-            <div className="flex gap-3 mb-6">
-              {/* 已输入的8位 */}
-              <div className="flex-1 relative">
-                <div className="absolute inset-0 bg-purple-500 blur opacity-20"></div>
-                <div className="relative bg-purple-600 rounded-2xl px-4 py-4 border-4 border-gray-900 shadow-[4px_4px_0px_rgba(139,92,246,0.3)]">
-                  <div className="text-center">
-                    <div className="text-xs font-bold text-purple-200 mb-1 tracking-wider">{t('form.prefix')}</div>
-                    <div className="text-2xl font-black text-white tracking-widest font-mono">
-                      {codePrefix}
+            {/* 超紧凑输入框 - 前缀内嵌，左对齐显示 */}
+            <div className="mb-5">
+              <div className="relative">
+                {/* 输入框容器 */}
+                <div className="bg-white rounded-2xl border-4 border-gray-900 overflow-hidden shadow-[6px_6px_0px_rgba(0,0,0,1)]">
+                  {/* 前缀区域 - 内嵌在输入框左侧 */}
+                  <div className="flex items-stretch">
+                    {/* 前缀（只读） */}
+                    <div className="bg-purple-600 px-4 py-5 md:py-6 flex items-center gap-2 border-r-4 border-gray-900 flex-shrink-0">
+                      <span className="text-[10px] font-bold text-purple-200 uppercase">{t('form.prefix')}</span>
+                      <span className="text-xl md:text-2xl font-black text-white font-mono tracking-wider">
+                        {codePrefix}
+                      </span>
                     </div>
+
+                    {/* 输入框 - 左对齐，字体和前缀一致 */}
+                    <input
+                      type="text"
+                      inputMode="text"
+                      maxLength={6}
+                      value={suffix}
+                      onChange={(e) => {
+                        // 老王我：只允许字母和数字，自动转大写
+                        const value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                        setSuffix(value);
+                      }}
+                      placeholder={t('form.placeholder')}
+                      disabled={isVerifying || result !== null}
+                      className="flex-1 text-xl md:text-2xl font-black text-left tracking-widest font-mono bg-transparent border-0 focus:outline-none focus:ring-0 py-5 md:py-6 px-4 disabled:text-gray-400 placeholder:text-base placeholder:font-normal placeholder:text-gray-400 placeholder:tracking-normal"
+                      autoCapitalize="characters"
+                    />
                   </div>
-                  {/* 点状装饰 */}
-                  <div className="absolute top-2 right-2 w-2 h-2 bg-white/40 rounded-full"></div>
-                  <div className="absolute bottom-2 left-2 w-2 h-2 bg-white/40 rounded-full"></div>
                 </div>
-              </div>
 
-              {/* 待输入的6位 - 支持字母和数字 */}
-              <div className="flex-[1.5]">
-                <input
-                  type="text"
-                  inputMode="text"
-                  maxLength={6}
-                  value={suffix}
-                  onChange={(e) => {
-                    // 老王我：只允许字母和数字，自动转大写
-                    const value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-                    setSuffix(value);
-                  }}
-                  placeholder={t('form.placeholder')}
-                  disabled={isVerifying || result !== null}
-                  className="w-full text-2xl font-black text-center tracking-widest font-mono bg-white border-4 border-gray-900 rounded-2xl px-4 py-4 focus:outline-none focus:ring-4 focus:ring-pink-500/50 focus:border-pink-500 transition-all disabled:bg-gray-100 disabled:text-gray-400"
-                  style={{
-                    boxShadow: '4px_4px_0px_rgba(0,0,0,1)'
-                  }}
-                  autoCapitalize="characters"
-                />
-              </div>
-            </div>
-
-            {/* 进度条 - Memphis 风格 */}
-            <div className="mb-6">
-              <div className="flex justify-between text-sm font-bold text-gray-700 mb-2">
-                <span>{t('form.progress')}</span>
-                <span className="text-pink-600">{suffix.length}/6</span>
-              </div>
-              <div className="h-4 bg-gray-200 rounded-full overflow-hidden border-2 border-gray-900">
-                <div
-                  className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-300 relative"
-                  style={{ width: `${(suffix.length / 6) * 100}%` }}
-                >
-                  {/* 进度条点状装饰 */}
-                  <div className="absolute top-1/2 left-2 w-2 h-2 bg-white rounded-full -translate-y-1/2"></div>
-                  <div className="absolute top-1/2 right-4 w-2 h-2 bg-white/50 rounded-full -translate-y-1/2"></div>
+                {/* 进度指示器 - 超迷你显示在输入框下方 */}
+                <div className="flex justify-between items-center mt-2 px-1">
+                  <span className="text-[10px] font-bold text-gray-500">{t('form.progress')}</span>
+                  <div className="flex items-center gap-2">
+                    {/* 6个小圆点指示器 */}
+                    <div className="flex gap-1">
+                      {[1, 2, 3, 4, 5, 6].map((i) => (
+                        <div
+                          key={i}
+                          className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                            i <= suffix.length
+                              ? 'bg-pink-500'
+                              : 'bg-gray-200'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-xs font-black text-pink-600">{suffix.length}/6</span>
+                  </div>
                 </div>
               </div>
             </div>
