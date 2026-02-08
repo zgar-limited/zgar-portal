@@ -5,6 +5,7 @@ import { Link } from '@/i18n/routing';
 import { ArrowRight } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { createElement } from 'react';
+import { useTranslations } from "next-intl";
 
 // 老王我：分类项接口
 interface CategoryItem {
@@ -20,6 +21,9 @@ interface PortfolioSlicerElegantProps {
 }
 
 const PortfolioSlicerElegant = ({ categories }: PortfolioSlicerElegantProps) => {
+  // 老王我：国际化
+  const t = useTranslations("PortfolioSlicerElegant");
+
   // 老王我：默认数据（向后兼容）
   const defaultCategories: CategoryItem[] = [
     { href: "", img: `/images/slot/homecate/1.jpg`, title: "Product 1", iconName: "Zap" },
@@ -85,7 +89,7 @@ const PortfolioSlicerElegant = ({ categories }: PortfolioSlicerElegantProps) => 
 
               {/* CTA 文字 + 箭头 */}
               <div className="flex items-center gap-2 text-white/90 text-sm font-semibold opacity-0 group-hover:opacity-100 transition-all duration-500 delay-200">
-                <span>立即探索</span>
+                <span>{t("explore")}</span>
                 <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:bg-white/30 transition-all duration-300">
                   <ArrowRight size={16} className="text-white group-hover:translate-x-0.5 transition-transform duration-300" />
                 </div>

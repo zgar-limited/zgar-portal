@@ -2,10 +2,12 @@ import React from "react";
 import SubmitButton from "./SubmitButton";
 import { EmailIconThree } from "@/svg";
 import { Mail } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 type Props = {};
 
 const HomeSubscription = (props: Props) => {
+  const t = useTranslations("Subscription");
   return (
     <section className="py-16 bg-white relative overflow-hidden">
       {/* 老王我：白色背景主体 */}
@@ -41,14 +43,14 @@ const HomeSubscription = (props: Props) => {
 
                   {/* 主标题 - 黑色文字 */}
                   <h2 className="text-4xl md:text-6xl font-black text-gray-900 mb-4 tracking-tight">
-                    订阅我们
+                    {t("title")}
                   </h2>
 
                   {/* 描述文字 - 灰色 */}
                   <p className="text-gray-600 text-lg leading-relaxed">
-                    获取最新产品发布、促销活动和优惠信息
+                    {t("desc1")}
                     <br />
-                    免费直接送到您的收件箱！
+                    {t("desc2")}
                   </p>
                 </div>
 
@@ -70,11 +72,11 @@ const HomeSubscription = (props: Props) => {
                         <input
                           className="w-full h-14 pl-12 pr-4 rounded-l-xl bg-white text-gray-900 placeholder-gray-400 border-2 border-gray-200 focus:outline-none focus:border-brand-pink focus:ring-4 focus:ring-brand-pink/10 transition-all duration-300 text-base"
                           type="email"
-                          placeholder="输入您的邮箱地址"
+                          placeholder={t("emailPlaceholder")}
                         />
 
                         {/* 提交按钮 */}
-                        <SubmitButton text="立即订阅" />
+                        <SubmitButton text={t("subscribeButton")} />
                       </div>
 
                       {/* 隐私提示 */}
@@ -86,7 +88,7 @@ const HomeSubscription = (props: Props) => {
                             clipRule="evenodd"
                           />
                         </svg>
-                        我们尊重您的隐私，绝不发送垃圾邮件
+                        {t("privacy")}
                       </p>
                     </div>
                   </div>

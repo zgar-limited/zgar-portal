@@ -7,6 +7,7 @@
 'use client';
 
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
 /**
  * 防伪查询指南组件
@@ -14,13 +15,15 @@ import Image from 'next/image';
  * 展示防伪查询的步骤说明图片
  */
 export function VerifyGuide() {
+  const t = useTranslations('VerifyGuide');
+
   return (
     <>
       {/* 标题图片 */}
       <Image
         className="w-full h-auto"
         src="/images/guide/detail_pc_zh/title.webp"
-        alt="防伪查询指南"
+        alt={t('title')}
         width={2880}
         height={290}
         priority
@@ -34,7 +37,7 @@ export function VerifyGuide() {
               key={step}
               className="block w-[calc(100%-24px)] h-auto mx-auto"
               src={`/images/guide/detail_pc_zh/${step}.webp`}
-              alt={`防伪查询步骤 ${step}`}
+              alt={t('step', { number: step })}
               width={1442}
               height={684}
             />
@@ -46,7 +49,7 @@ export function VerifyGuide() {
       <Image
         className="w-full h-auto mt-[24px]"
         src="/images/guide/detail_pc_zh/end.webp"
-        alt="防伪查询指南"
+        alt={t('title')}
         width={2880}
         height={290}
       />

@@ -19,25 +19,16 @@ import type {
   Task,
   TaskGroup,
 } from "@/data/tasks";
+import { useTranslations } from 'next-intl';
 
 /**
  * 任务分组图标映射
  */
 const TASK_GROUP_ICONS: Record<TaskGroup, React.ElementType> = {
-  newbie: Trophy,      // 新手任务
-  daily: Calendar,     // 日常任务
-  achievement: Star,   // 成就任务
-  campaign: Gift,      // 活动任务
-};
-
-/**
- * 任务分组名称映射（中文）
- */
-const TASK_GROUP_NAMES: Record<TaskGroup, string> = {
-  newbie: "新手任务",
-  daily: "日常任务",
-  achievement: "成就任务",
-  campaign: "活动任务",
+  newbie: Trophy,
+  daily: Calendar,
+  achievement: Star,
+  campaign: Gift,
 };
 
 /**
@@ -50,16 +41,6 @@ const TASK_GROUP_COLORS: Record<TaskGroup, { bg: string; accent: string }> = {
   campaign: { bg: '#FF6B35', accent: '#FFFB00' },    // 橙色 + 黄色（活动特殊）
 };
 
-/**
- * 任务状态名称映射（中文）
- */
-const TASK_STATUS_NAMES: Record<string, string> = {
-  locked: "已锁定",
-  active: "进行中",
-  completed: "已完成",
-  claimed: "已领取",
-  expired: "已过期",
-};
 
 interface TasksProps {
   initialTasks: Task[];
@@ -75,6 +56,9 @@ export default function Tasks({
   initialTasks,
   onPointsUpdate,
 }: TasksProps) {
+  const t = useTranslations('Tasks');
+  const tStatus = useTranslations('Tasks.status');
+
   const [tasks, setTasks] = useState<Task[]>(Array.isArray(initialTasks) ? initialTasks : []);
   const [loading, setLoading] = useState<string | null>(null);
   const [message, setMessage] = useState<{
@@ -120,8 +104,8 @@ export default function Tasks({
         setMessage({
           type: "success",
           text: result.already_signed
-            ? "今天已经签到过了哦~"
-            : `签到成功！获得 ${result.points_awarded} 积分`,
+            ? t('alreadySignedToday')
+            : t('signinSuccess', { n: result.points_awarded }),
         });
       } else {
         setMessage({
@@ -132,7 +116,7 @@ export default function Tasks({
     } catch (error: any) {
       setMessage({
         type: "error",
-        text: error.message || "签到失败，请稍后重试",
+        text: error.message || t('signinError'),
       });
     } finally {
       setLoading(null);
@@ -174,7 +158,7 @@ export default function Tasks({
 
         setMessage({
           type: "success",
-          text: `领取成功！获得 ${result.points_awarded} 积分 🎉`,
+          text: t('claimSuccess', { n: result.points_awarded }),
         });
       } else {
         setMessage({
@@ -185,7 +169,7 @@ export default function Tasks({
     } catch (error: any) {
       setMessage({
         type: "error",
-        text: error.message || "领取失败，请稍后重试",
+        text: error.message || t('claimError'),
       });
     } finally {
       setLoading(null);
@@ -234,7 +218,7 @@ export default function Tasks({
                 <>
                   <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 bg-black rounded-lg">
                     <Clock size={12} className="text-[#FFFB00]" />
-                    <span className="text-xs font-bold text-[#FFFB00]">限时</span>
+                    <span className="text-xs font-bold text-[#FFFB00]">{t('limitedTime')}</span>
                   </div>
                   <div className="absolute bottom-0 left-0 right-0 h-2 opacity-30"
                        style={{ background: 'repeating-linear-gradient(45deg, transparent, transparent 10px, #000 10px, #000 12px)' }}>
@@ -253,7 +237,7 @@ export default function Tasks({
                     fontFamily: 'sans-serif',
                     textShadow: '2px_2px_0_#000000'
                   }}>
-                    {TASK_GROUP_NAMES[groupKey as TaskGroup]}
+                    {t(groupKey as TaskGroup)}
                   </h2>
                 </div>
                 {/* 任务数量 */}
@@ -297,10 +281,10 @@ export default function Tasks({
               <Trophy size={40} className="text-gray-400" />
             </div>
             <h3 className="text-xl font-black text-gray-900 mb-3" style={{ fontFamily: 'sans-serif' }}>
-              暂无任务
+              {t('noTasks')}
             </h3>
             <p className="text-gray-600">
-              敬请期待更多精彩任务
+              {t('noTasksDesc')}
             </p>
           </div>
         </div>
@@ -387,7 +371,7 @@ function TaskCard({ task, loading, onDailyCheckin, onClaimReward }: TaskCardProp
         <div className="relative z-10 mb-4">
           <div className="flex items-center justify-between text-xs mb-2">
             <span className="font-bold text-gray-700">
-              进度: {task.user_task.progress}/{task.user_task.target}
+              {t('progress', { n: task.user_task.progress, m: task.user_task.target })}
             </span>
             <span className="font-bold" style={{ color: colors.bg }}>
               {Math.round(progress)}%
@@ -425,7 +409,7 @@ function TaskCard({ task, loading, onDailyCheckin, onClaimReward }: TaskCardProp
             ? 'bg-gray-300 text-gray-700'
             : 'bg-gray-200 text-gray-700'
         }`}>
-          {TASK_STATUS_NAMES[task.user_task.status] || task.user_task.status}
+          {tStatus(task.user_task.status) || task.user_task.status}
         </div>
       </div>
 
@@ -442,7 +426,7 @@ function TaskCard({ task, loading, onDailyCheckin, onClaimReward }: TaskCardProp
               boxShadow: '6px_6px_0_0_#000000'
             }}
           >
-            {loading === "daily_checkin" ? "签到中..." : task.user_task.status === 'claimed' ? "今日已签到" : "每日签到"}
+            {loading === "daily_checkin" ? t('signingIn') : task.user_task.status === 'claimed' ? t('signedToday') : t('dailySignin')}
           </button>
         ) : task.can_claim ? (
           // 领取奖励按钮
@@ -455,7 +439,7 @@ function TaskCard({ task, loading, onDailyCheckin, onClaimReward }: TaskCardProp
               boxShadow: '6px_6px_0_0_#000000'
             }}
           >
-            {loading === task.template.code ? "领取中..." : "领取奖励"}
+            {loading === task.template.code ? t('claiming') : t('claimReward')}
           </button>
         ) : canNavigate ? (
           // 前往任务按钮
@@ -467,7 +451,7 @@ function TaskCard({ task, loading, onDailyCheckin, onClaimReward }: TaskCardProp
               boxShadow: '6px_6px_0_0_#000000'
             }}
           >
-            前往完成
+            {t('goToComplete')}
           </Link>
         ) : (
           // 查看详情按钮（锁定或无法跳转）
@@ -478,7 +462,7 @@ function TaskCard({ task, loading, onDailyCheckin, onClaimReward }: TaskCardProp
               boxShadow: '6px_6px_0_0_#000000'
             }}
           >
-            {task.is_locked ? "任务锁定" : "查看详情"}
+            {task.is_locked ? t('taskLocked') : t('viewDetails')}
           </button>
         )}
       </div>

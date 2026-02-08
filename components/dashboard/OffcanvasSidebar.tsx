@@ -3,6 +3,7 @@
 import React from "react";
 import { Link } from '@/i18n/routing';
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import {
   LayoutDashboard,
   Package,
@@ -43,6 +44,7 @@ interface OffcanvasSidebarProps {
 export default function OffcanvasSidebar({ customer, orders }: OffcanvasSidebarProps) {
   const { open, setOpen } = useMobileSidebar();
   const pathname = usePathname();
+  const t = useTranslations("Sidebar");
 
   // 老王我：统一的金额格式化函数
   const formatAmount = (amount: number | null | undefined): string => {
@@ -55,22 +57,22 @@ export default function OffcanvasSidebar({ customer, orders }: OffcanvasSidebarP
   const navItems = [
     {
       href: "/account-page",
-      label: "账户概览",
+      label: t("accountOverview"),
       icon: LayoutDashboard,
     },
     {
       href: "/account-orders",
-      label: "我的订单",
+      label: t("myOrders"),
       icon: Package,
     },
     {
       href: "/account-addresses",
-      label: "地址管理",
+      label: t("addressManagement"),
       icon: MapPin,
     },
     {
       href: "/account-setting",
-      label: "账户设置",
+      label: t("accountSettings"),
       icon: Settings,
     },
   ];
@@ -95,7 +97,7 @@ export default function OffcanvasSidebar({ customer, orders }: OffcanvasSidebarP
             <h3 className="text-xl font-black text-white mb-1 text-center" style={{ fontFamily: 'sans-serif', letterSpacing: '-0.02em' }}>
               {customer?.first_name && customer?.last_name
                 ? `${customer.first_name} ${customer.last_name}`
-                : '用户'
+                : t("user")
               }
             </h3>
             <p className="text-sm font-semibold text-white/90 text-center truncate">{customer?.email || 'user@example.com'}</p>
@@ -114,7 +116,7 @@ export default function OffcanvasSidebar({ customer, orders }: OffcanvasSidebarP
                   <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path>
                 </svg>
               </div>
-              <p className="text-[10px] font-bold text-white/90 mb-1">余额</p>
+              <p className="text-[10px] font-bold text-white/90 mb-1">{t("balance")}</p>
               <p className="text-sm font-black text-white" style={{ fontFamily: 'sans-serif' }}>
                 {formatAmount(customer?.zgar_customer?.balance)}
               </p>
@@ -127,7 +129,7 @@ export default function OffcanvasSidebar({ customer, orders }: OffcanvasSidebarP
                   <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                 </svg>
               </div>
-              <p className="text-[10px] font-bold text-white/90 mb-1">积分</p>
+              <p className="text-[10px] font-bold text-white/90 mb-1">{t("points")}</p>
               <p className="text-sm font-black text-white" style={{ fontFamily: 'sans-serif' }}>
                 {customer?.zgar_customer?.points || 0}
               </p>
@@ -143,7 +145,7 @@ export default function OffcanvasSidebar({ customer, orders }: OffcanvasSidebarP
                   <path d="M12 22V12"></path>
                 </svg>
               </div>
-              <p className="text-[10px] font-bold text-white/90 mb-1">订单</p>
+              <p className="text-[10px] font-bold text-white/90 mb-1">{t("orders")}</p>
               <p className="text-sm font-black text-white" style={{ fontFamily: 'sans-serif' }}>
                 {orders?.length || 0}
               </p>
@@ -229,7 +231,7 @@ export default function OffcanvasSidebar({ customer, orders }: OffcanvasSidebarP
           >
             <LogOut size={18} className="text-white" />
             <span className="text-sm font-black text-white" style={{ fontFamily: 'sans-serif' }}>
-              退出登录
+              {t("logout")}
             </span>
           </button>
         </div>

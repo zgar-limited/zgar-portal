@@ -137,10 +137,10 @@ export default function HeroCarousel() {
                 <div className="text-6xl">👑</div>
               </div>
               <h2 className="text-4xl font-black text-white mb-4">
-                会员专享权益
+                {t("memberBenefitsTitle")}
               </h2>
               <p className="text-lg text-white/80 max-w-md mx-auto leading-relaxed">
-                加入ZGAR Club，享受积分奖励、专属优惠、生日福利等超多会员权益
+                {t("memberBenefitsDesc")}
               </p>
             </div>
 

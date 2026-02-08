@@ -1,7 +1,6 @@
 {
   "LocaleSwitcher": {
     "label": "Change language",
-    "zh-cn": "Simplified Chinese",
     "en-us": "English",
     "zh-hk": "Traditional Chinese"
   },
@@ -81,6 +80,13 @@
     "spec_shipment_box_size": "Shipment Box Size",
     "spec_shipment_box_weight": "Shipment Box Weight"
   },
+  "ProductCard": {
+    "unknown": "Unknown",
+    "loginToViewPrice": "Login to view price",
+    "adding": "Adding...",
+    "added": "Added ✓",
+    "buyNow": "Buy Now"
+  },
   "Club": {
     "title": "Points Mall",
     "subtitle": "Redeem your favorite products with points",
@@ -142,6 +148,8 @@
     "slide3PrimaryCta": "Explore Now",
     "slide3SecondaryCta": "View Benefits",
     "goToSlide": "Go to slide {number}",
+    "memberBenefitsTitle": "Exclusive Member Benefits",
+    "memberBenefitsDesc": "Join ZGAR Club to enjoy points rewards, exclusive offers, birthday benefits and more",
     "rewardsSectionTitle": "What can ZGAR Club rewards do for you?",
     "earnRedeem": "Earn & Redeem",
     "loyaltyRewards": "Your loyalty rewards",
@@ -154,11 +162,40 @@
     "startNow": "Start Now",
     "joinBonusPoints": "Join now and get 100 bonus points",
     "kickOffTitle": "Let's kick things off for you!",
+    "kickOffDesc": "Start your membership journey now",
+    "kickOffStep1Title": "Sign up and become a ZGAR Club member",
+    "kickOffStep1Desc": "Create your account and unlock exclusive member benefits, rewards, and special offers",
+    "kickOffStep2Title": "Earn points through activities",
+    "kickOffStep2Desc": "Verify Zgar products, refer friends, and check in daily to accumulate points quickly",
+    "kickOffStep3Title": "Redeem rewards with your points",
+    "kickOffStep3Desc": "Use your earned points to redeem exclusive products, discounts, and special gifts",
     "step1Title": "Sign up and become a ZGAR Club member.",
     "step2Title": "Accumulate points by verifying Zgar products, referring friends, and checking in daily.",
     "step3Title": "Use your points to redeem rewards.",
     "defaultUserName": "User",
     "memberLevel": "Member Level"
+  },
+  "Partner": {
+    "title": "Global Partners",
+    "subtitle": "We establish strategic partnerships with top global enterprises to jointly develop the e-cigarette market and achieve win-win development",
+    "statPartners": "Partners",
+    "statCountries": "Countries Covered",
+    "statYears": "Years of Cooperation",
+    "statSatisfaction": "Satisfaction",
+    "regionAsia": "Asia",
+    "becomePartner": "Become a Partner",
+    "becomePartnerDesc": "Join our global partner network, share resources, and grow together",
+    "benefit1": "Exclusive product agency rights",
+    "benefit2": "Market support and training",
+    "benefit3": "Brand co-marketing",
+    "benefit4": "Long-term profit sharing",
+    "contactUsTitle": "Contact Us Now",
+    "contactUsDesc": "Submit your cooperation intent and we will reply within 24 hours",
+    "contactUsButton": "Contact for Cooperation",
+    "malaysia": "Malaysia",
+    "indonesia": "Indonesia",
+    "japan": "Japan",
+    "hongKong": "Hong Kong"
   },
   "order-details": {
     "backToOrders": "Back to Orders",
@@ -201,7 +238,12 @@
     "shipping": "Shipping",
     "orderSummary": "Order Summary",
     "orderDate": "Order Date",
-    "payment": "Payment",
+    "payment": {
+      "createSuccess": "Payment record created successfully",
+      "createFailed": "Failed to create payment, please try again",
+      "voucherUpdateSuccess": "Voucher updated successfully",
+      "voucherUpdateFailed": "Failed to update voucher"
+    },
     "paymentMethod": "Payment Method",
     "fulfillment": "Fulfillment",
     "shippingAddress": "Shipping Address",
@@ -209,7 +251,40 @@
     "auditStatus": "Audit Status",
     "paymentAuditStatus": "Payment Audit Status",
     "closingAuditStatus": "Closing Audit Status",
-    "rejectionReason": "Rejection Reason"
+    "rejectionReason": "Rejection Reason",
+    "orderNumber": "Order No.",
+    "orderStatus": "Order Status",
+    "weight": "Weight",
+    "totalWeight": "Total Weight",
+    "paymentAuditStatus_title": "Payment Audit Status",
+    "closingAuditStatus_title": "Closing Audit Status",
+    "paymentAuditStatusObj": {
+      "notUploaded": "Voucher Not Uploaded",
+      "uploaded": "Voucher Uploaded",
+      "partial": "Under Review",
+      "completed": "Review Completed"
+    },
+    "statusObj": {
+      "completed": "Completed",
+      "pending": "In Progress",
+      "canceled": "Canceled"
+    },
+    "tracking": {
+      "title": "Order Tracking",
+      "created": "Order Created",
+      "payment": "Payment Confirmation",
+      "completed": "Completed",
+      "pending": "Pending",
+      "packing": "Packing",
+      "inProgress": "In Progress",
+      "shipped": "Shipped",
+      "pendingShipment": "Pending Shipment"
+    },
+    "errors": {
+      "insufficientBalance": "Insufficient balance",
+      "required": "required"
+    },
+    "rejectKeyword": "reject"
   },
   "pendingAction": {
     "title": {
@@ -218,13 +293,12 @@
       "closing": "Fill Closing Information"
     },
     "description": {
-      "payment": "Please upload your payment receipt to confirm your order",
-      "packing": "Please create shipping marks to arrange shipment",
+      "payment": "Please upload payment receipt to confirm your order",
+      "packing": "Please create shipping marks to arrange shipping",
       "closing": "Please upload closing attachments and remarks"
     },
     "completeNow": "Complete Now",
-    "close": "Close",
-    "goto": "Go to"
+    "close": "Close"
   },
   "packing-requirements": {
     "title": "Packing Requirements Management",
@@ -359,31 +433,31 @@
     "status": "Status",
     "orderType": "Order Type",
     "paymentMethod": "Payment Method",
+    "paymentMethodLabel": "Payment Method",
     "typePayment": "Payment Order",
     "typePoints": "Points Order",
     "completed": "Completed",
     "pending": "Pending",
     "canceled": "Canceled",
+    "returned": "Returned",
     "noOrders": "No orders",
-    "noOrdersDesc": "Go shop for your favorite products",
+    "noOrdersDesc": "You don't have any orders yet, go shopping~",
     "startShopping": "Start Shopping",
+    "goToShop": "Go to Shop",
     "pieces": "items",
     "unpaidVoucher": "Unpaid Voucher",
-    "pendingClosing": "Pending Closing"
-  },
-  "pendingAction": {
-    "title": {
-      "payment": "Upload Payment Voucher",
-      "packing": "Fill Packing Requirements",
-      "closing": "Fill Closing Information"
-    },
-    "description": {
-      "payment": "Please upload payment receipt to confirm your order",
-      "packing": "Please create shipping marks to arrange shipping",
-      "closing": "Please upload closing attachments and remarks"
-    },
-    "completeNow": "Complete Now",
-    "close": "Close"
+    "pendingClosing": "Pending Closing",
+    "totalOrders": "Total Orders",
+    "inProgress": "In Progress",
+    "viewDetails": "View Details",
+    "moreItems": "and {n} more items",
+    "totalItems": "Total {n} items",
+    "methods": {
+      "balance": "Balance Payment",
+      "points": "Points Payment",
+      "credit": "Credit Payment",
+      "manual": "Manual Payment"
+    }
   },
   "Pagination": {
     "previous": "Previous",
@@ -391,9 +465,28 @@
     "page": "Page"
   },
   "CreatePaymentModal": {
-    "title": "Create Payment",
+    "title": "Payment",
+    "invalidAmount": "Please enter a valid payment amount",
+    "amountExceeds": "Payment amount cannot exceed the remaining amount {amount}",
+    "voucherRequired": "Bank transfer payment requires at least one payment voucher",
+    "uploadVoucher": "Please upload payment voucher",
+    "paymentFailed": "Payment failed, please try again later",
+    "balancePayment": "Balance Payment",
+    "bankTransfer": "Bank Transfer",
+    "bankTransferPayment": "Bank Transfer Payment",
+    "remainingAmount": "Remaining Amount",
+    "paymentAmount": "Payment Amount",
+    "amountPlaceholder": "Please enter payment amount",
+    "paymentMethod": "Payment Method",
+    "balancePayment_option": "Balance Payment",
+    "bankTransfer_option": "Bank Transfer",
+    "paymentVoucher": "Payment Voucher",
+    "paymentDescription": "Payment Description (Optional)",
+    "descriptionPlaceholder": "e.g., First payment, Second payment",
+    "cancel": "Cancel",
+    "processing": "Processing...",
+    "confirmPayment": "Confirm Payment",
     "amountRequired": "Please enter payment amount",
-    "voucherRequired": "Please upload payment voucher",
     "insufficientBalance": "Insufficient balance, current: {balance}, required: {amount}",
     "createSuccess": "Payment record created successfully",
     "createFailed": "Failed to create payment, please try again",
@@ -460,6 +553,427 @@
       "verifySuccess": "Verification successful!",
       "verifyFailed": "Verification failed, please try again",
       "queryFailed": "Failed to query code information"
+    }
+  },
+  "ShopBanner": {
+    "product1": {
+      "subtitle": "Revolutionary Atomization Technology",
+      "description": "Redefine Your Experience"
+    },
+    "product2": {
+      "subtitle": "Dreamy Taste",
+      "description": "Limited Edition, First Come First Served"
+    },
+    "product3": {
+      "subtitle": "Nebula Series",
+      "description": "Premium Choice"
+    },
+    "product4": {
+      "subtitle": "Ice Cool Series",
+      "description": "Ultimate Cool Experience"
+    },
+    "product5": {
+      "subtitle": "Energy Burst",
+      "description": "Powerful Enduring Experience"
+    },
+    "exploreNow": "Explore Now"
+  },
+  "PaymentRecords": {
+    "status": {
+      "approved": "Approved",
+      "reviewing": "Under Review",
+      "rejected": "Rejected",
+      "pending": "Pending"
+    },
+    "title": "Payment Records",
+    "totalRecords": "Total {n} records",
+    "fullyPaid": "Congratulations! You have paid the full order amount",
+    "paymentButton": "Make Payment",
+    "needApproval": "Payment can only be created after order approval",
+    "noRecords": "No payment records",
+    "createPaymentHint": "Click the button above to create payment",
+    "waitApprovalHint": "Payment can be created after order approval",
+    "installment": "Installment {n}",
+    "balancePayment": "Balance Payment",
+    "bankTransfer": "Bank Transfer",
+    "rejectionReason": "Rejection Reason",
+    "noReason": "No rejection reason, please contact administrator",
+    "paymentVoucher": "Payment Voucher",
+    "voucherNumber": "Voucher {n}",
+    "reuploadVoucher": "Re-upload Voucher",
+    "updateVoucher": "Update Voucher",
+    "uploadVoucher": "Upload Voucher"
+  },
+  "AboutUs": {
+    "whoWeAre": "Who We Are",
+    "whoWeAreDesc": "Zgar is an innovative enterprise focused on the R&D and production of e-cigarette products. We are committed to providing safe, high-quality e-cigarette products to global users through advanced technology and strict quality control.",
+    "teamDesc": "Our team consists of experienced engineers, designers, and industry experts working together to create products that meet international standards.",
+    "years": "Years Experience",
+    "countries": "Countries",
+    "users": "Users",
+    "qualityProducts": "Quality Products",
+    "productsDesc": "Our products cover disposable e-cigarettes, pod systems, open systems, and other categories. Each product undergoes rigorous quality testing to ensure safety and reliability.",
+    "technologyDesc": "Using the latest atomization technology and high-quality materials to provide users with a pure, smooth smoking experience.",
+    "certification": "International Certifications",
+    "certificationDesc": "Certified by CE, ROHS, FCC and other international standards",
+    "qualityControl": "Strict Quality Control",
+    "qualityControlDesc": "Every process undergoes strict testing",
+    "professionalTeam": "Professional Team",
+    "teamDesc2": "Experienced R&D and production team",
+    "globalReach": "Global Reach",
+    "globalReachDesc": "Our products have been sold to 50+ countries and regions worldwide, serving over 1 million users",
+    "coveredCountries": "Countries Covered",
+    "partners": "Partners",
+    "certifications": "Certifications",
+    "customerSupport": "Customer Support"
+  },
+  "AccountSummary": {
+    "welcomeBack": "Welcome back 👋",
+    "user": "User",
+    "balance": "Balance",
+    "points": "Points",
+    "orders": "Orders",
+    "birthday": "Birthday",
+    "joinedDate": "Joined Date"
+  },
+  "AccountSettings": {
+    "title": "Account Settings",
+    "description": "Manage your personal information and account security settings",
+    "personalInfo": "Personal Information",
+    "personalInfoDesc": "Update your profile information, which will be used for your orders and communications",
+    "firstName": "First Name *",
+    "firstNamePlaceholder": "Enter your first name",
+    "lastName": "Last Name *",
+    "lastNamePlaceholder": "Enter your last name",
+    "email": "Email Address *",
+    "emailHint": "We will use this email to contact you about your orders",
+    "changePassword": "Change Password",
+    "changePasswordDesc": "Regular password updates help protect your account security",
+    "currentPassword": "Current Password *",
+    "currentPasswordPlaceholder": "Enter current password",
+    "newPassword": "New Password *",
+    "newPasswordPlaceholder": "Enter new password",
+    "passwordHint": "Password must be at least 8 characters, recommended to use a combination of letters, numbers and symbols",
+    "confirmPassword": "Confirm New Password *",
+    "confirmPasswordPlaceholder": "Enter new password again",
+    "requiredFieldsHint": "All fields marked with * are required",
+    "cancel": "Cancel",
+    "saveChanges": "Save Changes"
+  },
+  "PaymentSummary": {
+    "title": "Payment Summary",
+    "reviewingNote": "Note: Paid amount includes {amount} under review",
+    "rejectedNote": "Note: You have {amount} in payments that were not approved. You can re-upload vouchers or create new payment records",
+    "fullyPaid": "Congratulations! You have paid the full order amount",
+    "totalPayable": "Total Payable Amount",
+    "totalPaid": "Amount Paid",
+    "reviewingAmount": "Including {amount} under review",
+    "remaining": "Remaining Amount",
+    "paymentProgress": "Payment Progress",
+    "progressDescription": "{n}% payment completed, {amount} remaining"
+  },
+  "closing-info": {
+    "maxFilesError": "Maximum 10 files allowed",
+    "unsupportedFileType": "Unsupported file type:",
+    "fileTooLarge": "File {name} is too large, maximum 10MB",
+    "fillRequired": "Please fill in closing remarks or upload attachments",
+    "updateSuccess": "Closing information updated successfully!",
+    "saveSuccess": "Closing information saved successfully!",
+    "saveError": "Save failed, please try again later",
+    "editTitle": "Edit Closing Information",
+    "uploadTitle": "Upload Closing Information",
+    "editDescription": "Modify closing remarks or add new attachments (Images, PDF, Word)",
+    "uploadDescription": "Please fill in closing remarks or upload attachments (Images, PDF, Word)",
+    "existingAttachments": "Uploaded attachments (click to delete)",
+    "remark": "Closing Remarks",
+    "remarkPlaceholder": "Please enter closing remarks...",
+    "filled": "✓ Filled",
+    "fillHint": "Please fill in remarks or upload attachments",
+    "attachmentsOptional": "Attachments (Optional)",
+    "attachmentsHint": "Supports Images, PDF, Word formats, up to 10 files, max 10MB per file",
+    "uploadButton": "Click to Upload Files",
+    "supportedFormats": "Supports jpg, png, pdf, doc, docx",
+    "cancel": "Cancel",
+    "uploading": "Uploading...",
+    "updateButton": "Update Closing Information",
+    "saveButton": "Save Closing Information"
+  },
+  "HomeHotSellingProduct": {
+    "title": "Hot Selling Products",
+    "subtitle": "Featured popular products, quality guaranteed, limited time offers",
+    "tab": {
+      "new": "New",
+      "hot": "Hot",
+      "sale": "Sale"
+    }
+  },
+  "HomeAboutUs": {
+    "founded": "Founded",
+    "products": "Products",
+    "countries": "Countries Served",
+    "users": "Global Users",
+    "title": "About Zgar",
+    "tagline": "Focused on E-Cigarette · Serving Global Users",
+    "altProductShowcase": "Product Showcase",
+    "brandStory": "Brand Story",
+    "brandStoryDesc": "Zgar was founded in 2018, dedicated to providing high-quality e-cigarette products and service experience to global users.",
+    "commitmentDesc": "We adhere to innovative design, strictly control product quality, and strive to bring better user experience.",
+    "learnMore": "Learn More"
+  },
+  "ProductGrid": {
+    "sortDefault": "Sort ▼",
+    "sortPriceAsc": "Price: Low to High",
+    "sortPriceDesc": "Price: High to Low",
+    "noProducts": "No Products Found",
+    "adjustFilters": "Try adjusting your filters",
+    "clearFilters": "Clear Filters"
+  },
+  "CategoryTabs": {
+    "all": "All"
+  },
+  "Tasks": {
+    "newbie": "Newbie Tasks",
+    "daily": "Daily Tasks",
+    "achievement": "Achievement Tasks",
+    "campaign": "Campaign Tasks",
+    "status": {
+      "locked": "Locked",
+      "active": "In Progress",
+      "completed": "Completed",
+      "claimed": "Claimed",
+      "expired": "Expired"
+    },
+    "alreadySignedToday": "You've already checked in today~",
+    "signinSuccess": "Check-in successful! Earned {n} points",
+    "signinError": "Check-in failed, please try again later",
+    "claimSuccess": "Claimed successfully! Earned {n} points 🎉",
+    "claimError": "Claim failed, please try again later",
+    "limitedTime": "Limited",
+    "noTasks": "No Tasks",
+    "noTasksDesc": "Stay tuned for more exciting tasks",
+    "progress": "Progress: {n}/{m}",
+    "signingIn": "Checking in...",
+    "signedToday": "Checked in Today",
+    "dailySignin": "Daily Check-in",
+    "claiming": "Claiming...",
+    "claimReward": "Claim Reward",
+    "goToComplete": "Go to Complete",
+    "taskLocked": "Task Locked",
+    "viewDetails": "View Details"
+  },
+  "MyAccount": {
+    "user": "User",
+    "balance": "Balance",
+    "points": "Points",
+    "orders": "Orders",
+    "accountBalance": "Account Balance",
+    "balanceDetails": "Balance Details",
+    "availablePoints": "Available Points",
+    "pointsMall": "Points Mall",
+    "recentOrders": "Recent Orders",
+    "viewAll": "View All",
+    "noOrders": "No Orders Yet",
+    "noOrdersDesc": "Go shop for your favorite products",
+    "startShopping": "Start Shopping",
+    "moreItems": "and {n} more items"
+  },
+  "FilterSidebar": {
+    "title": "FILTER 筛选",
+    "category": "📦 Category 分类",
+    "category_disposable": "Disposable Vape",
+    "category_closedSystem": "Closed System",
+    "category_openSystem": "Open System",
+    "category_eLiquid": "E-Liquid",
+    "price": "💰 Price 价格",
+    "availability": "✨ Availability 状态",
+    "inStock": "In Stock",
+    "preOrder": "Pre-Order",
+    "outOfStock": "Out of Stock",
+    "clear": "🗑️ Clear Filters"
+  },
+  "Sidebar": {
+    "accountOverview": "Account Overview",
+    "myOrders": "My Orders",
+    "transactions": "Transactions",
+    "addressManagement": "Address Management",
+    "accountSettings": "Account Settings",
+    "user": "User",
+    "balance": "Balance",
+    "points": "Points",
+    "orders": "Orders",
+    "logout": "Logout"
+  },
+  "Footer": {
+    "contactUs": "Contact us",
+    "products": "Products",
+    "productSeries1": "Product Series 1",
+    "productSeries2": "Product Series 2",
+    "productSeries3": "Product Series 3",
+    "productSeries4": "Product Series 4",
+    "information": "Information"
+  },
+  "OrderCard": {
+    "details": "Details",
+    "uploaded": "Uploaded",
+    "voucher": "Voucher",
+    "packing": "Packing"
+  },
+  "VoucherUpload": {
+    "fileTooLarge": "File {name} is too large, maximum 5MB",
+    "notImage": "File {name} is not an image format",
+    "maxFilesError": "Maximum {n} images can be uploaded",
+    "uploadFailed": "Upload failed, please try again",
+    "voucherNumber": "Voucher {n}",
+    "add": "Add",
+    "uploading": "Uploading...",
+    "uploadPrompt": "Click or drag to upload payment voucher",
+    "formatsHint": "Supports JPG, PNG, WEBP formats, maximum 5MB, up to {n} images",
+    "required": "* Required"
+  },
+  "VerifyCodeInfo": {
+    "title": "Anti-Counterfeit Code Information",
+    "subtitle": "Please enter the 6-digit verification code from the label",
+    "serialNumber": "Serial Number",
+    "queryTimes": "Query Times",
+    "firstQueryTime": "First Query Time",
+    "times": "times"
+  },
+  "VerifyResult": {
+    "failed": "Verification Failed",
+    "success": "Verification Successful",
+    "genuine": "You have purchased an authentic product",
+    "serialNumber": "Serial Number",
+    "codeType": "Code Type",
+    "queryTimes": "Query Times",
+    "firstQueryTime": "First Query Time",
+    "lastQueryTime": "Last Query Time",
+    "times": "times"
+  },
+  "LoadingSpinner": {
+    "querying": "Querying code information...",
+    "verifying": "Verifying authenticity...",
+    "waiting": "Please wait, processing..."
+  },
+  "VerifyCheck": {
+    "reverify": "Verify Again",
+    "title": "Anti-Counterfeit Verification",
+    "description": "Please enter the verification code from the anti-counterfeit label",
+    "tip": "Tip",
+    "inputPlaceholder": "Please enter verification code",
+    "inputHelper": "Please enter the 6-digit verification code from the anti-counterfeit label",
+    "codeHint": "💡 Tip: The verification code is the 6-digit number on the anti-counterfeit label"
+  },
+  "HomeProductCate": {
+    "title": "Featured Product Categories",
+    "subtitle": "Explore our full range of products to meet your different needs",
+    "disposable": "Disposable Vape",
+    "pod": "Pod System",
+    "eLiquid": "E-Liquid Series",
+    "accessories": "Accessories Zone",
+    "limited": "Limited Edition"
+  },
+  "ProductVerify": {
+    "title": "Scan to Verify",
+    "step1": "Use your phone to scan the <qrCode>QR code</qrCode> on the product packaging",
+    "step2": "Enter the <verify>two-step product verification</verify> process",
+    "guideButton": "View Verification Guide",
+    "genuineGuarantee": "Authenticity Guaranteed",
+    "guaranteeBadge": "Quality Guarantee",
+    "officialBadge": "Official Certified",
+    "fastBadge": "Quick Verify",
+    "fastDesc": "Scan to Check",
+    "safeBadge": "Secure & Reliable",
+    "safeDesc": "End-to-End Encryption"
+  },
+  "Subscription": {
+    "title": "Subscribe to Us",
+    "desc1": "Get the latest product releases, promotions and offers",
+    "desc2": "Delivered free to your inbox!",
+    "emailPlaceholder": "Enter your email address",
+    "subscribeButton": "Subscribe Now",
+    "privacy": "We respect your privacy, no spam ever"
+  },
+  "Video": {
+    "video1Title": "Disposable Vape User Guide",
+    "video1Category": "Product Tutorial",
+    "video2Title": "Pod System Quick Start",
+    "video2Category": "Product Tutorial",
+    "video3Title": "E-Liquid Flavor Recommendations",
+    "video3Category": "Usage Tips",
+    "video4Title": "Product Accessories Installation Tutorial",
+    "video4Category": "Usage Tips",
+    "video5Title": "Limited Edition Product Introduction",
+    "video5Category": "Product Showcase"
+  },
+  "VideoGallery": {
+    "title": "Amazing Video Tutorials",
+    "subtitle": "Watch product tutorials to quickly master usage tips",
+    "watchButton": "Watch Now"
+  },
+  "PortfolioSlicerElegant": {
+    "explore": "Explore Now"
+  },
+  "ShopPage": {
+    "newProductLine": "NEW PRODUCT COLLECTION",
+    "exploreZgar": "EXPLORE",
+    "zgarBrand": "ZGAR",
+    "products": "PRODUCTS",
+    "productCategories": "Disposable Vape · Pod System · Open System",
+    "productsCount": "Products Available",
+    "allProducts": "All Products",
+    "needHelp": "Need Help?",
+    "contactSupport": "Contact our support team for professional advice",
+    "contactUs": "Contact Us"
+  },
+  "VerifyGuide": {
+    "title": "Product Verification Guide",
+    "step": "Verification Step {number}"
+  },
+  "CarePage": {
+    "hero": {
+      "newKnowledgeHub": "NEW KNOWLEDGE HUB",
+      "exploreZgar": "EXPLORE",
+      "zgar": "ZGAR",
+      "knowledge": "KNOWLEDGE",
+      "categories": "Product Knowledge · Health Guide · Company Culture",
+      "articlesCount": "Articles"
+    },
+    "filters": {
+      "all": "All",
+      "productKnowledge": "Product Knowledge",
+      "healthGuide": "Health Guide",
+      "companyCulture": "Company Culture",
+      "title": "Article Categories"
+    },
+    "articles": {
+      "noArticles": "No articles in this category",
+      "stayTuned": "Stay tuned for more exciting content",
+      "readMore": "Read More",
+      "minRead": "min read"
+    },
+    "article1": {
+      "title": "Complete Guide to E-Cigarettes: From Beginner to Expert",
+      "description": "Deep understanding of how e-cigarettes work, product types, usage methods and maintenance tips. Whether you're a beginner or an experienced user, this article will provide you with comprehensive knowledge."
+    },
+    "article2": {
+      "title": "How to Choose the Right E-Cigarette Device for You?",
+      "description": "Facing the dazzling array of e-cigarette products on the market, how do you choose the one that suits you best? This article will provide purchasing advice from multiple dimensions such as usage scenarios, taste preferences, and budget."
+    },
+    "article3": {
+      "title": "E-Cigarette Atomizer Technology Analysis",
+      "description": "The atomizer is the core component of an e-cigarette. Understanding its working principle and technical characteristics can help you better use and maintain your e-cigarette device."
+    },
+    "article4": {
+      "title": "E-Cigarettes and Health: Scientific Understanding and Rational Use",
+      "description": "What are the scientific research and conclusions on the health effects of e-cigarettes? How to use e-cigarettes correctly to reduce potential risks? This article provides you with an objective and scientific analysis."
+    },
+    "article5": {
+      "title": "Nicotine Replacement Therapy: The Role of E-Cigarettes",
+      "description": "As a form of nicotine replacement therapy, what role do e-cigarettes play in the smoking cessation process? This article analyzes its effectiveness and precautions from a medical perspective."
+    },
+    "article6": {
+      "title": "Zgar Brand Story: From Inception to Global",
+      "description": "Learn about Zgar's development journey, core values, and future vision. From a small team to serving global users, we always adhere to quality first."
     }
   }
 }

@@ -18,6 +18,7 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   const router = useRouter();
   const t = useTranslations("Product");
+  const tc = useTranslations("ProductCard");
   const cardRef = React.useRef<HTMLDivElement>(null);
   const { isLoggedIn } = useCustomer();
 
@@ -49,8 +50,8 @@ export default function ProductCard({ product }: ProductCardProps) {
   const hasMultipleImages = productImages.length > 1;
 
   // 电子烟产品信息
-  const puffCount = product.metadata?.puff_count || "未知";
-  const batteryCapacity = product.metadata?.battery || "未知";
+  const puffCount = product.metadata?.puff_count || tc("unknown");
+  const batteryCapacity = product.metadata?.battery || tc("unknown");
   const isNew = product.isNew || false;
 
   // GSAP 动画
@@ -179,7 +180,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         <div className="absolute bottom-0 left-0 right-0 z-10 bg-black p-3 sm:p-4">
           <div className="flex items-center justify-center gap-2 text-white font-black">
             <Lock size={14} className="sm:w-3.5 sm:h-3.5 w-3 h-3" />
-            <span className="text-xs sm:text-sm">登录查看价格</span>
+            <span className="text-xs sm:text-sm">{tc("loginToViewPrice")}</span>
           </div>
         </div>
       )}
@@ -216,12 +217,12 @@ export default function ProductCard({ product }: ProductCardProps) {
                 {title}
               </h3>
               <div className="flex gap-1.5 flex-wrap">
-                {puffCount !== "未知" && (
+                {puffCount !== tc("unknown") && (
                   <span className="text-[10px] sm:text-xs bg-[#f496d3] px-2.5 py-1 text-white font-black">
                     💨 {puffCount}
                   </span>
                 )}
-                {batteryCapacity !== "未知" && (
+                {batteryCapacity !== tc("unknown") && (
                   <span className="text-[10px] sm:text-xs bg-[#0047c7] px-2.5 py-1 text-white font-black">
                     🔋 {batteryCapacity}
                   </span>
@@ -264,17 +265,17 @@ export default function ProductCard({ product }: ProductCardProps) {
             {adding ? (
               <>
                 <Loader2 size={16} className="animate-spin" />
-                <span className="hidden sm:inline">添加中...</span>
+                <span className="hidden sm:inline">{tc("adding")}</span>
               </>
             ) : isAdded ? (
               <>
                 <Check size={16} />
-                <span>已添加 ✓</span>
+                <span>{tc("added")}</span>
               </>
             ) : (
               <>
                 <ShoppingCart size={16} />
-                <span>立即购买</span>
+                <span>{tc("buyNow")}</span>
               </>
             )}
           </button>

@@ -38,6 +38,7 @@ interface MyAccountProps {
 export default function MyAccount({ customer, orders = [], tasks = [] }: MyAccountProps) {
   const tOrders = useTranslations('Orders');
   const tPayment = useTranslations('PaymentMethods');
+  const t = useTranslations('MyAccount');
   const locale = useLocale();
 
   // 老王我：统一的金额格式化函数
@@ -116,7 +117,7 @@ export default function MyAccount({ customer, orders = [], tasks = [] }: MyAccou
             <h2 className="text-xl md:text-3xl lg:text-5xl font-black text-white mb-1 md:mb-2" style={{ fontFamily: 'sans-serif', letterSpacing: '-0.02em' }}>
               {customer?.first_name && customer?.last_name
                 ? `${customer.first_name} ${customer.last_name}`
-                : '用户'
+                : t('user')
               }
             </h2>
             <p className="text-xs md:text-base lg:text-lg font-semibold text-white/90 truncate">{customer?.email || 'user@example.com'}</p>
@@ -134,7 +135,7 @@ export default function MyAccount({ customer, orders = [], tasks = [] }: MyAccou
                 <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path>
               </svg>
             </div>
-            <p className="text-[10px] md:text-sm lg:text-base font-bold text-white/90 mb-1 md:mb-3">余额</p>
+            <p className="text-[10px] md:text-sm lg:text-base font-bold text-white/90 mb-1 md:mb-3">{t('balance')}</p>
             <p className="text-lg md:text-2xl lg:text-4xl font-black text-white leading-none" style={{ fontFamily: 'sans-serif', letterSpacing: '-0.02em' }}>
               {formatAmount(customer?.zgar_customer?.balance)}
             </p>
@@ -147,7 +148,7 @@ export default function MyAccount({ customer, orders = [], tasks = [] }: MyAccou
                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
               </svg>
             </div>
-            <p className="text-[10px] md:text-sm lg:text-base font-bold text-white/90 mb-1 md:mb-3">积分</p>
+            <p className="text-[10px] md:text-sm lg:text-base font-bold text-white/90 mb-1 md:mb-3">{t('points')}</p>
             <p className="text-lg md:text-2xl lg:text-4xl font-black text-white leading-none" style={{ fontFamily: 'sans-serif', letterSpacing: '-0.02em' }}>
               {customer?.zgar_customer?.points || 0}
             </p>
@@ -163,7 +164,7 @@ export default function MyAccount({ customer, orders = [], tasks = [] }: MyAccou
                 <path d="M12 22V12"></path>
               </svg>
             </div>
-            <p className="text-[10px] md:text-sm lg:text-base font-bold text-white/90 mb-1 md:mb-3">订单</p>
+            <p className="text-[10px] md:text-sm lg:text-base font-bold text-white/90 mb-1 md:mb-3">{t('orders')}</p>
             <p className="text-lg md:text-2xl lg:text-4xl font-black text-white leading-none" style={{ fontFamily: 'sans-serif', letterSpacing: '-0.02em' }}>
               {orders.length || 0}
             </p>
@@ -188,13 +189,13 @@ export default function MyAccount({ customer, orders = [], tasks = [] }: MyAccou
                 <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path>
                 <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path>
               </svg>
-              <span className="text-white/90 text-sm md:text-base font-semibold">账户余额</span>
+              <span className="text-white/90 text-sm md:text-base font-semibold">{t('accountBalance')}</span>
             </div>
             <div className="text-3xl md:text-4xl lg:text-5xl font-black text-white leading-none mb-2" style={{ fontFamily: 'sans-serif' }}>
               {formatAmount(stats.balance)}
             </div>
             <Link href="/account-balance" className="inline-flex items-center gap-2 text-white/80 text-xs md:text-sm font-semibold hover:text-white transition-colors">
-              余额明细
+              {t('balanceDetails')}
               <ChevronRight size={14} />
             </Link>
           </div>
@@ -218,13 +219,13 @@ export default function MyAccount({ customer, orders = [], tasks = [] }: MyAccou
               <svg width={24} height={24} viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-yellow-300 md:w-7 md:h-7">
                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
               </svg>
-              <span className="text-white/90 text-sm md:text-base font-semibold">可用积分</span>
+              <span className="text-white/90 text-sm md:text-base font-semibold">{t('availablePoints')}</span>
             </div>
             <div className="text-3xl md:text-4xl lg:text-5xl font-black text-white leading-none mb-2" style={{ fontFamily: 'sans-serif' }}>
               {stats.points.toLocaleString()}
             </div>
             <Link href="/club" className="inline-flex items-center gap-2 text-white/80 text-xs md:text-sm font-semibold hover:text-white transition-colors">
-              积分商城
+              {t('pointsMall')}
               <ChevronRight size={14} />
             </Link>
           </div>
@@ -259,7 +260,7 @@ export default function MyAccount({ customer, orders = [], tasks = [] }: MyAccou
 
               {/* 标题 */}
               <h2 className="text-sm font-black text-white" style={{ fontFamily: 'sans-serif', textShadow: '2px 2px 0 rgba(0,0,0,0.1)' }}>
-                最近订单
+                {t('recentOrders')}
               </h2>
             </div>
 
@@ -268,7 +269,7 @@ export default function MyAccount({ customer, orders = [], tasks = [] }: MyAccou
               href="/account-orders"
               className="px-3 py-2 bg-white text-gray-900 text-sm font-bold rounded hover:bg-white/90 transition-colors flex items-center gap-2 shadow-[3px_3px_0_0_rgba(0,0,0,0.2)]"
             >
-              查看全部
+              {t('viewAll')}
               <ChevronRight size={16} />
             </Link>
           </div>
@@ -281,16 +282,16 @@ export default function MyAccount({ customer, orders = [], tasks = [] }: MyAccou
               <Package size={32} className="text-gray-400 md:size-10" />
             </div>
             <h3 className="text-lg md:text-xl font-black text-gray-900 mb-2 md:mb-3" style={{ fontFamily: 'sans-serif' }}>
-              还没有订单
+              {t('noOrders')}
             </h3>
-            <p className="text-gray-500 mb-4 md:mb-6 text-sm md:text-base">快去选购心仪的商品吧</p>
+            <p className="text-gray-500 mb-4 md:mb-6 text-sm md:text-base">{t('noOrdersDesc')}</p>
             <Link
               href="/shop"
               className="inline-flex items-center gap-2 px-6 md:px-8 py-3 md:py-4 text-white font-black text-sm md:text-base hover:shadow-xl transition-all duration-300 rounded-lg"
               style={{ background: 'linear-gradient(135deg, #f496d3 0%, #0047c7 100%)' }}
             >
               <ShoppingBag size={18} />
-              开始购物
+              {t('startShopping')}
             </Link>
           </div>
         ) : (
@@ -353,7 +354,7 @@ export default function MyAccount({ customer, orders = [], tasks = [] }: MyAccou
                           ) : (
                             <span className="text-xs md:text-sm font-medium text-gray-900">
                               {order.items.slice(0, 2).map(item => item.variant_title || item.title).join(", ")}
-                              {order.items.length > 2 && ` 等${order.items.length}件商品`}
+                              {order.items.length > 2 && ` ${t('moreItems', { n: order.items.length })}`}
                             </span>
                           )}
                         </div>

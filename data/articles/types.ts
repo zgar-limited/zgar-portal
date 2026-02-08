@@ -1,22 +1,8 @@
 // 老王我：文章模块类型定义
 // 创建时间：2026-02-02
+// 更新时间：2026-02-08
 // 作者：老王
-// 说明：Strapi CMS 相关类型定义
-
-/**
- * 老王我：Strapi 图片类型
- */
-export interface StrapiImage {
-  id: number;
-  name: string;
-  url: string;
-  formats?: {
-    thumbnail?: { url: string };
-    small?: { url: string };
-    medium?: { url: string };
-    large?: { url: string };
-  };
-}
+// 说明：Strapi CMS 文章和分类相关类型定义（Banner类型已迁移到 data/banners/types.ts）
 
 /**
  * 老王我：Strapi 分类类型
@@ -59,25 +45,6 @@ export interface StrapiArticle {
   publishedAt: string;
   locale: string;
   blocks?: StrapiBlock[]; // Strapi Dynamic Zones (blocks)
-}
-
-/**
- * 老王我：Strapi Banner 类型
- */
-export interface StrapiBanner {
-  id: number;
-  documentId: string;
-  title: string;
-  description: string;
-  image: StrapiImage;
-  link: {
-    url: string;
-    label: string;
-  } | null;
-  priority: number;
-  active: boolean;
-  page: string;
-  locale: string;
 }
 
 /**

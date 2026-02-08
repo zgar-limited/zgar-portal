@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import Image from "next/image";
 import { Link } from '@/i18n/routing';
+import { useTranslations } from 'next-intl';
 
 // Import Swiper components and modules
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -15,36 +16,36 @@ import TextUnderline from "@/components/text-underline/TextUnderline";
 const productVideos = [
   {
     id: 1,
-    title: "一次性电子烟使用指南",
-    category: "产品教程",
+    titleKey: "video1Title",
+    categoryKey: "video1Category",
     videoUrl: "https://cdn.shopify.com/videos/c/o/v/a83ad0e9827442c7b0ea3d9032916e33.mp4",
     link: "/products",
   },
   {
     id: 2,
-    title: "换弹系列快速上手",
-    category: "产品教程",
+    titleKey: "video2Title",
+    categoryKey: "video2Category",
     videoUrl: "https://cdn.shopify.com/videos/c/o/v/a83ad0e9827442c7b0ea3d9032916e33.mp4",
     link: "/products",
   },
   {
     id: 3,
-    title: "烟油口味推荐",
-    category: "使用技巧",
+    titleKey: "video3Title",
+    categoryKey: "video3Category",
     videoUrl: "https://cdn.shopify.com/videos/c/o/v/a83ad0e9827442c7b0ea3d9032916e33.mp4",
     link: "/products",
   },
   {
     id: 4,
-    title: "产品配件安装教程",
-    category: "使用技巧",
+    titleKey: "video4Title",
+    categoryKey: "video4Category",
     videoUrl: "https://cdn.shopify.com/videos/c/o/v/a83ad0e9827442c7b0ea3d9032916e33.mp4",
     link: "/products",
   },
   {
     id: 5,
-    title: "限量版产品介绍",
-    category: "产品展示",
+    titleKey: "video5Title",
+    categoryKey: "video5Category",
     videoUrl: "https://cdn.shopify.com/videos/c/o/v/a83ad0e9827442c7b0ea3d9032916e33.mp4",
     link: "/products",
   },
@@ -78,6 +79,9 @@ const videoSwiperParams = {
 };
 
 const HomeVideo = () => {
+  const t = useTranslations('VideoGallery');
+  const tVideo = useTranslations('Video');
+
   return (
     <section className="container-full py-20">
       {/* 老王我：粉蓝渐变标题 */}
@@ -89,14 +93,14 @@ const HomeVideo = () => {
           colors={["#f496d3", "#0047c7", "#f496d3", "#0047c7", "#f496d3"]}
         >
           <h2 className="font-bold text-5xl md:text-6xl text-inherit">
-            精彩视频教程
+            {t('title')}
             <span className="absolute bottom-[-0.5rem] left-1/2 transform -translate-x-1/2">
               <TextUnderline />
             </span>
           </h2>
         </GradientText>
         <p className="mt-6 text-gray-600 text-lg max-w-2xl mx-auto">
-          观看产品使用教程，快速掌握使用技巧
+          {t('subtitle')}
         </p>
       </div>
 
@@ -111,12 +115,12 @@ const HomeVideo = () => {
                   <div className="absolute bottom-0 left-0 right-0 p-8">
                     {/* 老王我：分类标签 */}
                     <div className="inline-block mb-3 px-4 py-1.5 bg-white/20 backdrop-blur-sm rounded-full">
-                      <span className="text-white text-sm font-semibold">{video.category}</span>
+                      <span className="text-white text-sm font-semibold">{tVideo(video.categoryKey)}</span>
                     </div>
                     {/* 老王我：标题 */}
                     <h4 className="text-white text-2xl font-bold mb-2 drop-shadow-lg">
                       <Link className="text-white hover:text-brand-pink transition-colors duration-300" href={video.link}>
-                        {video.title}
+                        {tVideo(video.titleKey)}
                       </Link>
                     </h4>
                     {/* 老王我：观看按钮 */}
@@ -124,7 +128,7 @@ const HomeVideo = () => {
                       href={video.link}
                       className="inline-flex items-center gap-2 mt-4 px-6 py-3 bg-white text-brand-blue rounded-full font-semibold hover:bg-brand-pink hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl group-hover:translate-y-0 translate-y-2 opacity-0 group-hover:opacity-100"
                     >
-                      立即观看
+                      {t('watchButton')}
                       <ChevronRight className="w-4 h-4" />
                     </Link>
                   </div>

@@ -3,6 +3,7 @@ import React, { useState, useMemo } from "react";
 import ProductCard from "./ProductCard";
 import { StoreProduct } from "@medusajs/types";
 import { ArrowUpDown, Package } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface ProductGridProps {
   initialProducts: StoreProduct[];
@@ -19,6 +20,7 @@ interface ProductGridProps {
  * - 流畅的动画效果
  */
 export default function ProductGrid({ initialProducts = [] }: ProductGridProps) {
+  const t = useTranslations("ProductGrid");
   const [sortOption, setSortOption] = useState("default");
 
   // 客户端排序
@@ -65,9 +67,9 @@ export default function ProductGrid({ initialProducts = [] }: ProductGridProps) 
                 transition-all duration-200 cursor-pointer
               "
             >
-              <option value="default">排序 ▼</option>
-              <option value="price-asc">价格：低到高</option>
-              <option value="price-desc">价格：高到低</option>
+              <option value="default">{t("sortDefault")}</option>
+              <option value="price-asc">{t("sortPriceAsc")}</option>
+              <option value="price-desc">{t("sortPriceDesc")}</option>
             </select>
             <ArrowUpDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white pointer-events-none" />
           </div>
@@ -102,8 +104,8 @@ export default function ProductGrid({ initialProducts = [] }: ProductGridProps) 
                 {/* 右上色块 - 蓝色 */}
                 <div className="bg-[#0047c7] p-8 flex items-center justify-center">
                   <div className="text-white text-center">
-                    <h3 className="text-4xl font-black mb-2">未找到产品</h3>
-                    <p className="text-sm font-bold opacity-90">试着调整筛选条件</p>
+                    <h3 className="text-4xl font-black mb-2">{t("noProducts")}</h3>
+                    <p className="text-sm font-bold opacity-90">{t("adjustFilters")}</p>
                   </div>
                 </div>
 
@@ -118,7 +120,7 @@ export default function ProductGrid({ initialProducts = [] }: ProductGridProps) 
                       transition-all duration-200
                     "
                   >
-                    清除筛选
+                    {t("clearFilters")}
                   </button>
                 </div>
               </div>

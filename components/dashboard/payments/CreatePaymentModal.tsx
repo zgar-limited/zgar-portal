@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Wallet, CreditCard, Loader2, AlertCircle } from "lucide-react";
 import VoucherUploadArea from "./VoucherUploadArea";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 interface CreatePaymentModalProps {
   show: boolean;
@@ -51,6 +52,7 @@ export default function CreatePaymentModal({
   remainingAmount,
   onSubmit,
 }: CreatePaymentModalProps) {
+  const t = useTranslations("CreatePaymentModal");
   const [amount, setAmount] = useState<number>(0);
   const [method, setMethod] = useState<"balance" | "manual">("balance");
   const [description, setDescription] = useState<string>("");
@@ -77,11 +79,11 @@ export default function CreatePaymentModal({
 
   const validateAmount = (value: number): boolean => {
     if (!value || value <= 0) {
-      setError("请输入有效的支付金额");
+      setError(t("invalidAmount"));
       return false;
     }
     if (value > remainingAmount) {
-      setError(`支付金额不能超过剩余应付金额 ${formatAmount(remainingAmount)}`);
+      setError(t("amountExceeds", { amount: formatAmount(remainingAmount) }));
       return false;
     }
     setError("");
@@ -105,8 +107,8 @@ export default function CreatePaymentModal({
 
     // 老王注：manual 支付必填凭证验证（2026-02-05）
     if (method === "manual" && voucherUrls.length === 0) {
-      setError("打款支付必须上传至少一张支付凭证");
-      toast.error("请上传支付凭证");
+      setError(t("voucherRequired"));
+      toast.error(t("uploadVoucher"));
       return;
     }
 
@@ -120,8 +122,8 @@ export default function CreatePaymentModal({
       });
       // 老王注：成功提示由父组件处理（2026-02-05）
     } catch (error: any) {
-      setError(error.message || "付款失败，请稍后重试");
-      toast.error(error.message || "付款失败，请稍后重试");  // 老王注：添加 toast 错误提示（2026-02-05）
+      setError(error.message || t("paymentFailed"));
+      toast.error(error.message || t("paymentFailed"));  // 老王注：添加 toast 错误提示（2026-02-05）
     } finally {
       setIsSubmitting(false);
     }
@@ -130,7 +132,7 @@ export default function CreatePaymentModal({
   const handleMethodSelect = (selectedMethod: "balance" | "manual") => {
     setMethod(selectedMethod);
     if (!description) {
-      setDescription(selectedMethod === "balance" ? "余额支付" : "银行转账支付");
+      setDescription(selectedMethod === "balance" ? t("balancePayment") : t("bankTransferPayment"));
     }
     if (selectedMethod === "balance") {
       setVoucherUrls([]);  // 老王注：切换到余额支付时清空凭证（2026-02-05）
@@ -143,7 +145,7 @@ export default function CreatePaymentModal({
         <DialogHeader className="border-b pb-4 px-6 pt-6">
           <DialogTitle className="flex items-center gap-2 text-lg font-bold">
             <Wallet size={18} className="text-brand-pink" />
-            付款
+            {t("title")}
           </DialogTitle>
         </DialogHeader>
 
@@ -161,7 +163,7 @@ export default function CreatePaymentModal({
           <div className="p-4 bg-gray-50 border border-gray-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-gray-600 mb-1">剩余应付金额</p>
+                <p className="text-xs text-gray-600 mb-1">{t("remainingAmount")}</p>
                 <p className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'monospace' }}>
                   {formatAmount(remainingAmount)}
                 </p>
@@ -173,14 +175,14 @@ export default function CreatePaymentModal({
           {/* 支付金额 */}
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-gray-900">
-              支付金额 <span className="text-red-500">*</span>
+              {t("paymentAmount")} <span className="text-red-500">*</span>
             </Label>
             <Input
               type="number"
               min={0}
               max={remainingAmount}
               step="0.01"
-              placeholder="请输入支付金额"
+              placeholder={t("amountPlaceholder")}
               value={amount === 0 ? "" : amount}
               onChange={(e) => handleAmountChange(e.target.value)}
               className="h-10"
@@ -190,7 +192,7 @@ export default function CreatePaymentModal({
           {/* 支付方式 */}
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-gray-900">
-              支付方式 <span className="text-red-500">*</span>
+              {t("paymentMethod")} <span className="text-red-500">*</span>
             </Label>
             <div className="grid grid-cols-2 gap-3">
               <Button
@@ -206,7 +208,7 @@ export default function CreatePaymentModal({
                 `}
               >
                 <Wallet size={20} />
-                <span className="text-xs font-semibold">余额支付</span>
+                <span className="text-xs font-semibold">{t("balancePayment_option")}</span>
               </Button>
               <Button
                 type="button"
@@ -221,7 +223,7 @@ export default function CreatePaymentModal({
                 `}
               >
                 <CreditCard size={20} />
-                <span className="text-xs font-semibold">银行转账</span>
+                <span className="text-xs font-semibold">{t("bankTransfer_option")}</span>
               </Button>
             </div>
           </div>
@@ -230,7 +232,7 @@ export default function CreatePaymentModal({
           {method === "manual" && (
             <div className="space-y-2">
               <Label className="text-sm font-semibold text-gray-900">
-                支付凭证 <span className="text-red-500">*</span>
+                {t("paymentVoucher")} <span className="text-red-500">*</span>
               </Label>
               <VoucherUploadArea
                 urls={voucherUrls}
@@ -245,11 +247,11 @@ export default function CreatePaymentModal({
           {/* 支付说明 */}
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-gray-900">
-              支付说明（可选）
+              {t("paymentDescription")}
             </Label>
             <Input
               type="text"
-              placeholder="如：首期付款、第二期付款"
+              placeholder={t("descriptionPlaceholder")}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="h-10"
@@ -265,7 +267,7 @@ export default function CreatePaymentModal({
             className="flex-1 h-10 font-semibold"
             disabled={isSubmitting}
           >
-            取消
+            {t("cancel")}
           </Button>
           <Button
             onClick={handleSubmit}
@@ -287,10 +289,10 @@ export default function CreatePaymentModal({
             {isSubmitting ? (
               <span className="flex items-center justify-center">
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                处理中...
+                {t("processing")}
               </span>
             ) : (
-              "确认付款"
+              t("confirmPayment")
             )}
           </Button>
         </div>

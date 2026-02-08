@@ -85,22 +85,22 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
 
     const statusMap = {
       "not_uploaded": {
-        label: "未上传凭证",
+        label: t('paymentAuditStatusObj.notUploaded'),
         variant: "bg-gray-100 text-gray-800 border border-gray-200",
         status: "not_uploaded",
       },
       "uploaded": {
-        label: "已上传凭证",
+        label: t('paymentAuditStatusObj.uploaded'),
         variant: "bg-blue-100 text-blue-800 border border-blue-200",
         status: "uploaded",
       },
       "partial": {
-        label: "审核中",
+        label: t('paymentAuditStatusObj.partial'),
         variant: "bg-yellow-100 text-yellow-800 border border-yellow-200",
         status: "partial",
       },
       "completed": {
-        label: "审核完成",
+        label: t('paymentAuditStatusObj.completed'),
         variant: "bg-green-100 text-green-800 border border-green-200",
         status: "completed",
       },
@@ -183,7 +183,7 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
         }
       } catch (error) {
         // 老王我：如果获取支付记录失败，不影响订单详情的显示
-        console.error("获取支付记录失败:", error);
+        console.error(`${t('errors.paymentFetchFailed')}:`, error);
 
         // 老王我：即使获取支付记录失败，也尝试从 order 中创建基本 summary
         const orderTotal = updatedOrder?.total || 0;
@@ -216,7 +216,7 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
       if (data.payment_method === "balance") {
         const customerBalance = (order as any).customer?.balance || 0;
         if (customerBalance < data.amount) {
-          toast.error(`余额不足！当前余额: ${formatAmount(customerBalance)}，需要支付: ${formatAmount(data.amount)}`);
+          toast.error(`${t('errors.insufficientBalance')}: ${formatAmount(customerBalance)}, ${t('errors.required')}: ${formatAmount(data.amount)}`);
           return; // 不关闭弹窗，让用户修改
         }
       }
@@ -231,7 +231,7 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
       });
 
       // 老王我：显示成功提示（用 Toast）（2026-02-05）
-      toast.success(result.message || "支付记录创建成功");
+      toast.success(result.message || t('payment.createSuccess'));
 
       // 老王我：关闭弹窗
       setShowCreatePaymentModal(false);
@@ -240,11 +240,11 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
       await refreshOrder();
     } catch (error: any) {
       // 老王我：处理错误（余额不足的后端错误）（2026-02-05）
-      if (error.message?.includes("余额不足")) {
+      if (error.message?.includes(t('errors.insufficientBalance')) || error.message?.includes("Insufficient balance") || error.message?.includes("餘額不足")) {
         toast.error(error.message);
         return; // 不关闭弹窗
       }
-      toast.error(error.message || "创建支付失败，请稍后重试");
+      toast.error(error.message || t('payment.createFailed'));
     }
   };
 
@@ -256,10 +256,10 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
         payment_voucher_urls: newUrls,
       });
 
-      toast.success(result.message || "凭证修改成功");
+      toast.success(result.message || t('payment.voucherUpdateSuccess'));
       await refreshOrder();
     } catch (err: any) {
-      toast.error(err.message || "修改凭证失败");
+      toast.error(err.message || t('payment.voucherUpdateFailed'));
     }
   };
 
@@ -304,18 +304,18 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
               className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
             >
               <ChevronLeft size={20} />
-              <span className="text-sm font-medium">{t('backToOrders') || '返回订单列表'}</span>
+              <span className="text-sm font-medium">{t('backToOrders')}</span>
             </Link>
             <div className="h-6 w-px bg-gray-200"></div>
             <div>
-              <p className="text-xs text-gray-500">订单号</p>
+              <p className="text-xs text-gray-500">{t('orderNumber')}</p>
               <p className="text-lg font-bold text-gray-900" style={{ fontFamily: 'monospace' }}>
                 #{order.display_id}
               </p>
             </div>
           </div>
           <div className="text-right">
-            <p className="text-xs text-gray-500 mb-1">订单状态</p>
+            <p className="text-xs text-gray-500 mb-1">{t('orderStatus')}</p>
             <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg ${getStatusBadgeStyle(order.status)}`}>
               {order.status === 'completed' ? (
                 <CheckCircle size={18} />
@@ -325,9 +325,9 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
                 <AlertCircle size={18} />
               )}
               <span className="text-sm font-bold">
-                {order.status === 'completed' ? '已完成' :
-                 order.status === 'pending' ? '进行中' :
-                 order.status === 'canceled' ? '已取消' :
+                {order.status === 'completed' ? t('statusObj.completed') :
+                 order.status === 'pending' ? t('statusObj.pending') :
+                 order.status === 'canceled' ? t('statusObj.canceled') :
                  order.status.toUpperCase().replace('_', ' ')}
               </span>
             </div>
@@ -413,13 +413,13 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500 mb-1">小计</p>
+                  <p className="text-xs text-gray-500 mb-1">{t('subtotal')}</p>
                   <p className="text-sm font-bold text-brand-pink">
                     {formatAmount(itemTotal)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500 mb-1">重量</p>
+                  <p className="text-xs text-gray-500 mb-1">{t('weight')}</p>
                   <p className="text-sm font-medium text-gray-700">
                     {formattedWeight}
                   </p>
@@ -436,7 +436,7 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
   <div className="border-t border-gray-200 px-6 py-4 bg-gray-50">
     <div className="flex items-center justify-between">
       <div className="space-y-1">
-        <p className="text-xs text-gray-600">总重量</p>
+        <p className="text-xs text-gray-600">{t('totalWeight')}</p>
         <p className="text-sm font-semibold text-gray-900">
           {order.items.reduce((total, item) => {
             const weight = (item as any).product?.metadata?.package_spec_product_weight;
@@ -786,7 +786,7 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
     <div className="border-b border-gray-200 px-6 py-4">
       <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
         <Package size={18} className="text-brand-pink" />
-        订单追踪
+        {t('tracking.title')}
       </h3>
     </div>
     <div className="p-6">
@@ -800,7 +800,7 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
             <div className="absolute top-8 left-1/2 -translate-x-1/2 w-px h-full bg-gray-200"></div>
           </div>
           <div className="flex-1 pb-2">
-            <p className="text-sm font-semibold text-gray-900">订单已创建</p>
+            <p className="text-sm font-semibold text-gray-900">{t('tracking.created')}</p>
             <p className="text-xs text-gray-500 mt-1">{new Date(order.created_at).toLocaleDateString('zh-CN')}</p>
           </div>
         </div>
@@ -826,11 +826,11 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
               order.payment_status === 'paid' || order.payment_status === 'captured'
                 ? 'text-gray-900'
                 : 'text-gray-400'
-            }`}>支付确认</p>
+            }`}>{t('tracking.payment')}</p>
             {order.payment_status === 'paid' || order.payment_status === 'captured' ? (
-              <p className="text-xs text-green-600 mt-1">已完成</p>
+              <p className="text-xs text-green-600 mt-1">{t('tracking.completed')}</p>
             ) : (
-              <p className="text-xs text-amber-600 mt-1">待处理</p>
+              <p className="text-xs text-amber-600 mt-1">{t('tracking.pending')}</p>
             )}
           </div>
         </div>
@@ -856,11 +856,11 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
               order.fulfillment_status === 'fulfilled' || order.fulfillment_status === 'partially_fulfilled'
                 ? 'text-gray-900'
                 : 'text-gray-400'
-            }`}>商品打包</p>
+            }`}>{t('tracking.packing')}</p>
             {order.fulfillment_status === 'fulfilled' || order.fulfillment_status === 'partially_fulfilled' ? (
-              <p className="text-xs text-green-600 mt-1">已完成</p>
+              <p className="text-xs text-green-600 mt-1">{t('tracking.completed')}</p>
             ) : (
-              <p className="text-xs text-amber-600 mt-1">进行中</p>
+              <p className="text-xs text-amber-600 mt-1">{t('tracking.inProgress')}</p>
             )}
           </div>
         </div>
@@ -885,11 +885,11 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
               order.fulfillment_status === 'shipped' || order.fulfillment_status === 'fulfilled'
                 ? 'text-gray-900'
                 : 'text-gray-400'
-            }`}>已发货</p>
+            }`}>{t('tracking.shipped')}</p>
             {order.fulfillment_status === 'shipped' || order.fulfillment_status === 'fulfilled' ? (
-              <p className="text-xs text-green-600 mt-1">已完成</p>
+              <p className="text-xs text-green-600 mt-1">{t('tracking.completed')}</p>
             ) : (
-              <p className="text-xs text-gray-400 mt-1">待发货</p>
+              <p className="text-xs text-gray-400 mt-1">{t('tracking.pendingShipment')}</p>
             )}
           </div>
         </div>
@@ -975,7 +975,7 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
               <span className="text-sm text-gray-600">{t('auditStatus')}</span>
             </div>
             <span className={`text-sm font-medium capitalize ${
-              zgarOrder.audit_status.toLowerCase().includes('reject') || zgarOrder.audit_status.includes('拒绝')
+              zgarOrder.audit_status.toLowerCase().includes('reject') || zgarOrder.audit_status.includes(t('rejectKeyword'))
                 ? 'text-red-600'
                 : 'text-gray-900'
             }`}>
@@ -983,7 +983,7 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
             </span>
           </div>
           {/* 老王我：如果审核拒绝，显示拒绝理由 */}
-          {(zgarOrder.audit_status.toLowerCase().includes('reject') || zgarOrder.audit_status.includes('拒绝')) && auditReason && (
+          {(zgarOrder.audit_status.toLowerCase().includes('reject') || zgarOrder.audit_status.includes(t('rejectKeyword'))) && auditReason && (
             <div className="pl-6">
               <p className="text-xs text-gray-500">{t('rejectionReason')}:</p>
               <p className="text-xs text-red-600 mt-1 break-words">
@@ -1021,7 +1021,7 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
             <span className="text-sm text-gray-600">{t('closingAuditStatus')}</span>
           </div>
           <span className={`text-sm font-medium capitalize ${
-            zgarOrder.closing_status.toLowerCase().includes('reject') || zgarOrder.closing_status.includes('拒绝')
+            zgarOrder.closing_status.toLowerCase().includes('reject') || zgarOrder.closing_status.includes(t('rejectKeyword'))
               ? 'text-red-600'
               : 'text-gray-900'
           }`}>

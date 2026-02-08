@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Package, Zap, Droplet, Sparkles } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface CategoryTabsProps {
   onCategoryChange?: (category: string) => void;
@@ -18,13 +19,14 @@ interface CategoryTabsProps {
  * - 点状、虚线纹理
  */
 export default function CategoryTabs({ onCategoryChange }: CategoryTabsProps) {
-  const [selectedCategory, setSelectedCategory] = useState<string>("全部");
+  const t = useTranslations("CategoryTabs");
+  const [selectedCategory, setSelectedCategory] = useState<string>(t("all"));
 
   // 老王我：分类配置 - Vibrant Blocks配色（大胆色块）
   const categoryConfig = [
     {
       id: "all",
-      label: "全部",
+      label: t("all"),
       icon: Sparkles,
       bgColor: "bg-[#f496d3]",  // 粉色
       textColor: "text-white",
@@ -63,7 +65,7 @@ export default function CategoryTabs({ onCategoryChange }: CategoryTabsProps) {
     setSelectedCategory(category);
     // 触发分类变化回调
     if (onCategoryChange) {
-      onCategoryChange(category === "全部" ? "" : category);
+      onCategoryChange(category === t("all") ? "" : category);
     }
   };
 

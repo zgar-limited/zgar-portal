@@ -1,24 +1,24 @@
+"use client";
+
 import Image from "next/image";
 import { Handshake, Globe, Users, Target, Mail } from "lucide-react";
-
-export const metadata = {
-  title: "Partner - Zgar 全球合作伙伴",
-  description: "成为 Zgar 的合作伙伴，共同开拓全球电子烟市场",
-};
+import { useTranslations } from "next-intl";
 
 export default function PartnerPage() {
+  const t = useTranslations("Partner");
+
   // 老王我：合作伙伴数据 - 按地区分组
   const partnerRegions = [
     {
       region: "Asia",
-      label: "亚洲",
+      label: t("regionAsia"),
       color: "bg-brand-pink",
       textColor: "text-white",
       countries: [
-        { code: "my", name: "Malaysia", nameZh: "马来西亚" },
-        { code: "id", name: "Indonesia", nameZh: "印度尼西亚" },
-        { code: "jp", name: "Japan", nameZh: "日本" },
-        { code: "hk", name: "Hong Kong", nameZh: "香港" },
+        { code: "my", name: "Malaysia", nameZh: t("malaysia") },
+        { code: "id", name: "Indonesia", nameZh: t("indonesia") },
+        { code: "jp", name: "Japan", nameZh: t("japan") },
+        { code: "hk", name: "Hong Kong", nameZh: t("hongKong") },
       ],
     },
   ];
@@ -46,10 +46,10 @@ export default function PartnerPage() {
               <span className="font-black text-sm tracking-widest">GLOBAL PARTNERS</span>
             </div>
             <h1 className="text-4xl md:text-6xl font-black text-gray-900 mb-6">
-              全球合作伙伴
+              {t("title")}
             </h1>
             <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
-              我们与全球顶尖企业建立战略合作关系，共同开拓电子烟市场，实现共赢发展
+              {t("subtitle")}
             </p>
           </div>
 
@@ -58,22 +58,22 @@ export default function PartnerPage() {
             <div className="bg-brand-pink text-white p-8 text-center">
               <Handshake className="w-12 h-12 mx-auto mb-4" />
               <div className="text-3xl font-black mb-2">50+</div>
-              <div className="text-sm font-bold">合作伙伴</div>
+              <div className="text-sm font-bold">{t("statPartners")}</div>
             </div>
             <div className="bg-brand-blue text-white p-8 text-center">
               <Globe className="w-12 h-12 mx-auto mb-4" />
               <div className="text-3xl font-black mb-2">20+</div>
-              <div className="text-sm font-bold">覆盖国家</div>
+              <div className="text-sm font-bold">{t("statCountries")}</div>
             </div>
             <div className="bg-black text-white p-8 text-center">
               <Users className="w-12 h-12 mx-auto mb-4" />
               <div className="text-3xl font-black mb-2">10+</div>
-              <div className="text-sm font-bold">年合作</div>
+              <div className="text-sm font-bold">{t("statYears")}</div>
             </div>
             <div className="bg-gray-900 text-white p-8 text-center">
               <Target className="w-12 h-12 mx-auto mb-4" />
               <div className="text-3xl font-black mb-2">100%</div>
-              <div className="text-sm font-bold">满意度</div>
+              <div className="text-sm font-bold">{t("statSatisfaction")}</div>
             </div>
           </div>
 
@@ -131,27 +131,27 @@ export default function PartnerPage() {
               <div className="text-center text-white max-w-md">
                 <Handshake className="w-16 h-16 mx-auto mb-6" />
                 <h2 className="text-4xl md:text-5xl font-black mb-6">
-                  成为合作伙伴
+                  {t("becomePartner")}
                 </h2>
                 <p className="text-lg md:text-xl font-bold mb-8 opacity-90">
-                  加入我们的全球合作伙伴网络，共享资源，共同成长
+                  {t("becomePartnerDesc")}
                 </p>
                 <div className="space-y-4 text-left">
                   <div className="flex items-start gap-3">
                     <div className="w-2 h-2 bg-white rounded-full mt-2 flex-shrink-0"></div>
-                    <p className="font-bold">独家产品代理权</p>
+                    <p className="font-bold">{t("benefit1")}</p>
                   </div>
                   <div className="flex items-start gap-3">
                     <div className="w-2 h-2 bg-white rounded-full mt-2 flex-shrink-0"></div>
-                    <p className="font-bold">市场支持与培训</p>
+                    <p className="font-bold">{t("benefit2")}</p>
                   </div>
                   <div className="flex items-start gap-3">
                     <div className="w-2 h-2 bg-white rounded-full mt-2 flex-shrink-0"></div>
-                    <p className="font-bold">品牌联合营销</p>
+                    <p className="font-bold">{t("benefit3")}</p>
                   </div>
                   <div className="flex items-start gap-3">
                     <div className="w-2 h-2 bg-white rounded-full mt-2 flex-shrink-0"></div>
-                    <p className="font-bold">长期利润分成</p>
+                    <p className="font-bold">{t("benefit4")}</p>
                   </div>
                 </div>
               </div>
@@ -161,16 +161,16 @@ export default function PartnerPage() {
             <div className="bg-brand-pink p-12 md:p-16 flex flex-col items-center justify-center text-white">
               <Mail className="w-16 h-16 mb-6" />
               <h3 className="text-2xl md:text-3xl font-black mb-6 text-center">
-                立即联系我们
+                {t("contactUsTitle")}
               </h3>
               <p className="text-lg font-bold mb-8 text-center opacity-90">
-                提交您的合作意向，我们会在 24 小时内回复
+                {t("contactUsDesc")}
               </p>
               <a
                 href="/contact-us"
                 className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-white text-black font-black text-lg hover:bg-black hover:text-white transition-all duration-200 w-full md:w-auto"
               >
-                <span>联系合作</span>
+                <span>{t("contactUsButton")}</span>
                 <Mail className="w-5 h-5" />
               </a>
             </div>

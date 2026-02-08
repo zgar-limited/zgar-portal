@@ -1,7 +1,8 @@
 "use client";
 
 import dayjs from "dayjs";
-import "dayjs/locale/zh-cn";
+import "dayjs/locale/en";
+import { useLocale } from "next-intl";
 import {
   Table,
   TableBody,
@@ -42,6 +43,7 @@ interface PointsTransactionTableProps {
  * - 避免导入 server-only 模块
  */
 export function PointsTransactionTable({ transactions }: PointsTransactionTableProps) {
+  const locale = useLocale();
   // 老王我：积分交易类型配置
   const typeConfig = {
     order: {
@@ -101,7 +103,7 @@ export function PointsTransactionTable({ transactions }: PointsTransactionTableP
             return (
               <TableRow key={tx.id} className="hover:bg-gray-50">
                 <TableCell className="text-sm">
-                  {dayjs(tx.created_at).locale("zh-cn").format("YYYY-MM-DD HH:mm")}
+                  {dayjs(tx.created_at).locale(locale === "zh-hk" ? "zh-hk" : "en").format("YYYY-MM-DD HH:mm")}
                 </TableCell>
                 <TableCell>
                   <Badge className={config.badgeClass}>
