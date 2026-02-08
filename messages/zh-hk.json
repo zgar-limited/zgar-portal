@@ -550,7 +550,10 @@
       "incompleteCode": "請輸入完整的6位驗證碼",
       "verifySuccess": "驗證通過！",
       "verifyFailed": "驗證失敗，請重試",
-      "queryFailed": "查詢防偽碼信息失敗"
+      "queryFailed": "查詢防偽碼信息失敗",
+      "codeNotExist": "您查詢的密碼不存在，謹防假冒，歡迎舉報！",
+      "invalidCode": "無效的驗證碼格式",
+      "serverError": "服務器錯誤，請稍後再試"
     }
   },
   "ShopBanner": {
