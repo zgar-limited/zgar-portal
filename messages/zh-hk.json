@@ -542,6 +542,8 @@
       "timesUnit": "次",
       "firstQuery": "首次查詢",
       "codeType": "防偽碼類型",
+      "antiCounterfeitCode": "防偽碼",
+      "pointsCode": "積分碼",
       "verifyAnother": "Verify Another",
       "verificationFailed": "驗證失敗",
       "tryAgain": "Try Again"

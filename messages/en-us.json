@@ -544,6 +544,8 @@
       "timesUnit": "times",
       "firstQuery": "First Query",
       "codeType": "Code Type",
+      "antiCounterfeitCode": "Anti-counterfeit Code",
+      "pointsCode": "Points Code",
       "verifyAnother": "Verify Another",
       "verificationFailed": "Verification Failed",
       "tryAgain": "Try Again"
