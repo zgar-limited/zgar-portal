@@ -41,10 +41,10 @@ export default async function Home() {
     <div className="overflow-hidden">
 
       <ShopBanner />
-      <HomeProductCate />
+      {/* <HomeProductCate /> - 暂时隐藏 Featured Product Categories */}
       <HomeHotSellingProduct />
       <HomeProductVerify />
-      <HomeVideo />
+      {/* <HomeVideo /> - 暂时隐藏 Amazing Video Tutorials */}
       <HomeAboutUs />
 
 
