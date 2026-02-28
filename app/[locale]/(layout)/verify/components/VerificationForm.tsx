@@ -9,10 +9,11 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { CheckCircle, XCircle } from 'lucide-react';
 import { queryCodeInfo, verifyCode } from '@/data/anti-counterfeit';
+import { getCodeType, type CodeType } from '@/data/anti-counterfeit/types';
 
 interface VerificationFormProps {
   codePrefix: string;
@@ -25,7 +26,7 @@ export function VerificationForm({ codePrefix }: VerificationFormProps) {
   const t = useTranslations('VerifyPage');
   const locale = useLocale();
 
-  // 老王我：根据语言选择图片后缀
+  // 根据语言选择图片后缀
   // zh-hk 使用繁体中文版，其他使用英文版
   const imageSuffix = locale === 'zh-hk' ? '--tr@2x' : '--en@2x';
 
@@ -39,24 +40,68 @@ export function VerificationForm({ codePrefix }: VerificationFormProps) {
     data?: any;
   } | null>(null);
 
-  // 组件挂载时调用 Server Action 查询防伪码信息
+  // 判断防伪码类型
+  const codeType: CodeType = useMemo(() => getCodeType(codePrefix), [codePrefix]);
+  const isPointsCode = codeType === 'B/C'; // 16位积分码
+
+  // 组件挂载时的处理逻辑
   useEffect(() => {
     if (!codePrefix) return;
 
+    // 在 useEffect 内部重新判断码类型（避免依赖外部状态）
+    const currentCodeType = getCodeType(codePrefix);
+
+    // 14位积分码：自动验证
+    if (currentCodeType === 'B/C') {
+      const verifyPointsCode = async () => {
+        setIsVerifying(true);
+        try {
+          const data = await verifyCode(codePrefix);
+
+          if (data.code === '0') {
+            setResult({
+              success: true,
+              message: t('validation.verifySuccess'),
+              data: data.data,
+            });
+          } else {
+            let errorMessage = t('validation.verifyFailed');
+            if (data.code === '1') {
+              errorMessage = t('validation.codeNotExist');
+            } else if (data.code === '2') {
+              errorMessage = t('validation.invalidCode');
+            } else {
+              errorMessage = t('validation.serverError');
+            }
+            setResult({
+              success: false,
+              message: errorMessage,
+              data: data.data,
+            });
+          }
+        } catch (error) {
+          setResult({
+            success: false,
+            message: t('validation.serverError'),
+          });
+        } finally {
+          setIsVerifying(false);
+        }
+      };
+
+      verifyPointsCode();
+      return;
+    }
+
+    // 8位防伪码：查询码信息
     const queryCodeInfoOnMount = async () => {
       setIsQuerying(true);
       try {
-        // 调用 Server Action
         const data = await queryCodeInfo(codePrefix);
 
         if (data.code === '0') {
           setCodeInfo(data.data);
-          console.log('[Verification] 防伪码信息查询成功:', data.data);
         } else {
-          // 老王我：查询失败 - 使用多语言错误消息
-          console.error('[Verification] 防伪码信息查询失败:', data.code, data.msg);
-
-          // 根据错误code映射到多语言消息
           let errorMessage = t('validation.queryFailed');
           if (data.code === '1') {
             errorMessage = t('validation.codeNotExist');
@@ -68,8 +113,6 @@ export function VerificationForm({ codePrefix }: VerificationFormProps) {
           });
         }
       } catch (error) {
-        // 老王我：查询异常 - 使用多语言错误消息
-        console.error('[Verification] 查询防伪码信息失败:', error);
         setResult({
           success: false,
           message: t('validation.serverError'),
@@ -80,10 +123,49 @@ export function VerificationForm({ codePrefix }: VerificationFormProps) {
     };
 
     queryCodeInfoOnMount();
-  }, [codePrefix]);
+  }, [codePrefix, t]);
 
   // 验证处理
   const handleVerify = async () => {
+    // 16位积分码：直接验证
+    if (isPointsCode) {
+      setIsVerifying(true);
+      try {
+        const data = await verifyCode(codePrefix);
+
+        if (data.code === '0') {
+          setResult({
+            success: true,
+            message: t('validation.verifySuccess'),
+            data: data.data,
+          });
+        } else {
+          let errorMessage = t('validation.verifyFailed');
+          if (data.code === '1') {
+            errorMessage = t('validation.codeNotExist');
+          } else if (data.code === '2') {
+            errorMessage = t('validation.invalidCode');
+          } else {
+            errorMessage = t('validation.serverError');
+          }
+          setResult({
+            success: false,
+            message: errorMessage,
+            data: data.data,
+          });
+        }
+      } catch (error) {
+        setResult({
+          success: false,
+          message: t('validation.serverError'),
+        });
+      } finally {
+        setIsVerifying(false);
+      }
+      return;
+    }
+
+    // 8位防伪码：需要输入6位后缀
     if (suffix.length !== 6) {
       alert(t('validation.incompleteCode'));
       return;
@@ -129,7 +211,6 @@ export function VerificationForm({ codePrefix }: VerificationFormProps) {
         });
       }
     } catch (error) {
-      console.error('[Verification] 验证失败:', error);
       setResult({
         success: false,
         message: t('validation.serverError'),
@@ -399,7 +480,9 @@ export function VerificationForm({ codePrefix }: VerificationFormProps) {
                         <div className="flex flex-col items-center gap-1 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg px-2 py-2 border-2 border-gray-900">
                           <div className="w-1.5 h-1.5 bg-purple-500 rounded-full"></div>
                           <span className="text-[8px] font-bold text-gray-600 uppercase tracking-wider text-center">{t('result.codeType')}</span>
-                          <span className="text-[10px] font-black text-gray-900 text-center leading-tight">{result.data.TypeStr}</span>
+                          <span className="text-[10px] font-black text-gray-900 text-center leading-tight">
+                            {result.data.TypeStr === 'A类' ? t('result.antiCounterfeitCode') : t('result.pointsCode')}
+                          </span>
                         </div>
                       </div>
                     )}
@@ -412,69 +495,85 @@ export function VerificationForm({ codePrefix }: VerificationFormProps) {
               </div>
             )}
 
-            {/* 超紧凑输入框 - 前缀内嵌，左对齐显示 */}
-            <div className="mb-5">
-              <div className="relative">
-                {/* 输入框容器 */}
-                <div className="bg-white rounded-2xl border-4 border-gray-900 overflow-hidden shadow-[6px_6px_0px_rgba(0,0,0,1)]">
-                  {/* 前缀区域 - 内嵌在输入框左侧 */}
-                  <div className="flex items-stretch">
-                    {/* 前缀（只读） */}
-                    <div className="bg-purple-600 px-4 py-5 md:py-6 flex items-center gap-2 border-r-4 border-gray-900 flex-shrink-0">
-                      <span className="text-[10px] font-bold text-purple-200 uppercase">{t('form.prefix')}</span>
-                      <span className="text-xl md:text-2xl font-black text-white font-mono tracking-wider">
-                        {codePrefix}
-                      </span>
-                    </div>
-
-                    {/* 输入框 - 左对齐，字体和前缀一致 */}
-                    <input
-                      type="text"
-                      inputMode="text"
-                      maxLength={6}
-                      value={suffix}
-                      onChange={(e) => {
-                        // 老王我：只允许字母和数字，自动转大写
-                        const value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-                        setSuffix(value);
-                      }}
-                      placeholder={t('form.placeholder')}
-                      disabled={isVerifying || result !== null}
-                      className="flex-1 text-xl md:text-2xl font-black text-left tracking-widest font-mono bg-transparent border-0 focus:outline-none focus:ring-0 py-5 md:py-6 px-4 disabled:text-gray-400 placeholder:text-base placeholder:font-normal placeholder:text-gray-400 placeholder:tracking-normal"
-                      autoCapitalize="characters"
-                    />
-                  </div>
+            {/* 积分码自动验证加载状态 */}
+            {isPointsCode && isVerifying && !result && (
+              <div className="mb-5 p-6 text-center">
+                <div className="flex flex-col items-center gap-3">
+                  <svg className="animate-spin h-10 w-10 text-purple-600" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  <span className="text-lg font-bold text-gray-700">{t('form.verifying')}</span>
                 </div>
+              </div>
+            )}
 
-                {/* 进度指示器 - 超迷你显示在输入框下方 */}
-                <div className="flex justify-between items-center mt-2 px-1">
-                  <span className="text-[10px] font-bold text-gray-500">{t('form.progress')}</span>
-                  <div className="flex items-center gap-2">
-                    {/* 6个小圆点指示器 */}
-                    <div className="flex gap-1">
-                      {[1, 2, 3, 4, 5, 6].map((i) => (
-                        <div
-                          key={i}
-                          className={`w-2 h-2 rounded-full transition-all duration-200 ${
-                            i <= suffix.length
-                              ? 'bg-pink-500'
-                              : 'bg-gray-200'
-                          }`}
-                        />
-                      ))}
+            {/* 防伪码输入框 - 仅 A 类码需要输入 */}
+            {!isPointsCode && (
+              <div className="mb-5">
+                <div className="relative">
+                  {/* 输入框容器 */}
+                  <div className="bg-white rounded-2xl border-4 border-gray-900 overflow-hidden shadow-[6px_6px_0px_rgba(0,0,0,1)]">
+                    {/* 前缀区域 - 内嵌在输入框左侧 */}
+                    <div className="flex items-stretch">
+                      {/* 前缀（只读） */}
+                      <div className="bg-purple-600 px-4 py-5 md:py-6 flex items-center gap-2 border-r-4 border-gray-900 flex-shrink-0">
+                        <span className="text-[10px] font-bold text-purple-200 uppercase">{t('form.prefix')}</span>
+                        <span className="text-xl md:text-2xl font-black text-white font-mono tracking-wider">
+                          {codePrefix}
+                        </span>
+                      </div>
+
+                      {/* 输入框 - 左对齐，字体和前缀一致 */}
+                      <input
+                        type="text"
+                        inputMode="text"
+                        maxLength={6}
+                        value={suffix}
+                        onChange={(e) => {
+                          // 老王我：只允许字母和数字，自动转大写
+                          const value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                          setSuffix(value);
+                        }}
+                        placeholder={t('form.placeholder')}
+                        disabled={isVerifying || result !== null}
+                        className="flex-1 text-xl md:text-2xl font-black text-left tracking-widest font-mono bg-transparent border-0 focus:outline-none focus:ring-0 py-5 md:py-6 px-4 disabled:text-gray-400 placeholder:text-base placeholder:font-normal placeholder:text-gray-400 placeholder:tracking-normal"
+                        autoCapitalize="characters"
+                      />
                     </div>
-                    <span className="text-xs font-black text-pink-600">{suffix.length}/6</span>
+                  </div>
+
+                  {/* 进度指示器 - 超迷你显示在输入框下方 */}
+                  <div className="flex justify-between items-center mt-2 px-1">
+                    <span className="text-[10px] font-bold text-gray-500">{t('form.progress')}</span>
+                    <div className="flex items-center gap-2">
+                      {/* 6个小圆点指示器 */}
+                      <div className="flex gap-1">
+                        {[1, 2, 3, 4, 5, 6].map((i) => (
+                          <div
+                            key={i}
+                            className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                              i <= suffix.length
+                                ? 'bg-pink-500'
+                                : 'bg-gray-200'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <span className="text-xs font-black text-pink-600">{suffix.length}/6</span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* Memphis 风格验证按钮 */}
-            <button
-              onClick={handleVerify}
-              disabled={suffix.length !== 6 || isVerifying || result !== null}
-              className="w-full relative overflow-hidden bg-gradient-to-r from-pink-500 to-purple-600 text-white font-black text-xl py-4 px-6 rounded-2xl border-4 border-gray-900 shadow-[6px_6px_0px_rgba(236,72,153,0.4)] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:shadow-[8px_8px_0px_rgba(236,72,153,0.6)] hover:-translate-y-1 active:translate-y-0 cursor-pointer"
-            >
+            {/* 验证按钮 - 仅 A 类码需要 */}
+            {!isPointsCode && (
+              <button
+                onClick={handleVerify}
+                disabled={suffix.length !== 6 || isVerifying || result !== null}
+                className="w-full relative overflow-hidden bg-gradient-to-r from-pink-500 to-purple-600 text-white font-black text-xl py-4 px-6 rounded-2xl border-4 border-gray-900 shadow-[6px_6px_0px_rgba(236,72,153,0.4)] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:shadow-[8px_8px_0px_rgba(236,72,153,0.6)] hover:-translate-y-1 active:translate-y-0 cursor-pointer"
+              >
               {/* 波点装饰 */}
               <div className="absolute inset-0 opacity-0">
                 <div className="absolute top-0 left-0 w-full h-full bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjAiPjxjaXJjbGUgY3g9Ik0gOTAgMCAwIDAgOCAwIiBmaWxsPSJub25lIiBzdHJva2U9IiMCI+PC9jaXJjbGU+PC9zdmc+')] bg-[length:4px_4px]"></div>
@@ -500,6 +599,7 @@ export function VerificationForm({ codePrefix }: VerificationFormProps) {
                 )}
               </div>
             </button>
+            )}
           </div>
         </div>
       </div>
@@ -532,7 +632,7 @@ export function VerificationForm({ codePrefix }: VerificationFormProps) {
             <div className="bg-gray-100 rounded-2xl p-4 border-4 border-gray-900">
               <div className="font-mono text-2xl font-black text-center tracking-widest">
                 <span className="text-purple-600">{codePrefix}</span>
-                <span className="text-pink-600">XXXXXX</span>
+                {!isPointsCode && <span className="text-pink-600">XXXXXX</span>}
               </div>
             </div>
           </div>
