@@ -102,6 +102,9 @@ function ShopCartContent({
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [showCheckoutConfirm, setShowCheckoutConfirm] = useState(false);
 
+  // 数量输入临时状态 - 用于管理输入框的值
+  const [quantityInputs, setQuantityInputs] = useState<Record<string, string>>({});
+
   // 老王我：统一的金额格式化函数
   const formatAmount = (amount: number | null | undefined): string => {
     if (amount === null || amount === undefined || isNaN(amount)) {
@@ -388,67 +391,59 @@ function ShopCartContent({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-6 lg:py-8 max-w-7xl">
-        {/* 老王我：移动端视图 */}
+    <div className="min-h-screen bg-[#f5f5f7]">
+      <div className="container mx-auto px-4 py-8 lg:py-12 max-w-6xl">
+        {/* 移动端视图 */}
         <div className="lg:hidden">
-          {/* 移动端头部 - 苹果风格 */}
-          <div className="bg-white border border-gray-200/60 rounded-2xl p-4 mb-4 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-lg font-semibold text-gray-900 tracking-tight">购物车</h1>
-                <p className="text-xs text-gray-400 mt-0.5">
-                  {cartProducts.length} {cartProducts.length === 1 ? '件商品' : '件商品'}
-                </p>
-              </div>
-              <div className="px-3.5 py-2 bg-gray-50 rounded-xl border border-gray-200/60">
-                <p className="text-[10px] text-gray-400 font-medium">总计</p>
-                <p className="text-base font-bold text-gray-900 font-mono">
-                  {formatAmount(cartTotalPrice)}
-                </p>
-              </div>
-            </div>
+          {/* 移动端头部 - 苹果极简风格 */}
+          <div className="mb-6">
+            <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">购物车</h1>
+            <p className="text-sm text-gray-500 mt-1">
+              {cartProducts.length} 件商品
+            </p>
           </div>
 
           {cartProducts.length === 0 ? (
-            <div className="bg-white border border-gray-200/60 rounded-2xl p-8 text-center shadow-sm">
-              <div className="inline-flex items-center justify-center w-14 h-14 bg-gray-100 rounded-2xl mb-4">
+            <div className="bg-white rounded-3xl p-10 text-center shadow-sm">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-50 rounded-full mb-5">
                 <ShoppingCart className="h-7 w-7 text-gray-400" />
               </div>
-              <h3 className="text-base font-semibold text-gray-900 mb-1.5">购物车是空的</h3>
-              <p className="text-sm text-gray-400 mb-5">添加一些商品开始购物吧</p>
-              <div className="flex flex-col gap-2.5">
+              <h3 className="text-lg font-medium text-gray-900 mb-2">购物车是空的</h3>
+              <p className="text-sm text-gray-500 mb-6">添加一些商品开始购物吧</p>
+              <div className="flex flex-col gap-3 max-w-xs mx-auto">
                 <Button
                   onClick={() => setShowModal(true)}
-                  className="h-10 bg-brand-blue hover:bg-brand-blue/90 text-white rounded-xl text-sm font-medium"
+                  className="h-11 bg-[#0047c7] hover:bg-[#0039a0] text-white rounded-full text-sm font-medium transition-colors"
                 >
-                  <PackagePlus className="h-4 w-4 mr-1.5" />
+                  <PackagePlus className="h-4 w-4 mr-2" />
                   添加商品
                 </Button>
                 <Button
                   asChild
                   variant="outline"
-                  className="h-10 border-gray-200 text-gray-700 hover:bg-gray-50 rounded-xl text-sm font-medium"
+                  className="h-11 border-gray-200 text-gray-700 hover:bg-gray-50 rounded-full text-sm font-medium transition-colors"
                 >
                   <Link href="/shop">继续购物</Link>
                 </Button>
               </div>
             </div>
           ) : (
-            <div className="space-y-2">
-              {/* 全选卡片 */}
-              <div className="bg-white border border-gray-200/60 rounded-xl px-3 py-2.5 shadow-sm">
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    checked={selectedItems.length === cartProducts.length && cartProducts.length > 0}
-                    onCheckedChange={handleSelectAll}
-                    className="w-4 h-4 border-gray-300 rounded data-[state=checked]:bg-brand-blue data-[state=checked]:border-brand-blue"
-                  />
-                  <span className="text-sm text-gray-600">全选 <span className="font-medium text-gray-700">({cartProducts.length})</span></span>
+            <div className="space-y-3">
+              {/* 全选卡片 - 苹果风格 */}
+              <div className="bg-white rounded-2xl px-4 py-3">
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <Checkbox
+                      checked={selectedItems.length === cartProducts.length && cartProducts.length > 0}
+                      onCheckedChange={handleSelectAll}
+                      className="w-5 h-5 border-2 border-gray-300 rounded-md data-[state=checked]:bg-[#0047c7] data-[state=checked]:border-[#0047c7]"
+                    />
+                    <span className="text-sm text-gray-900">全选 ({cartProducts.length})</span>
+                  </label>
                 </div>
               </div>
 
-              {/* 移动端商品卡片 - 紧凑苹果风格 */}
+              {/* 移动端商品卡片 - 苹果极简风格 */}
               {currentItems.map((product) => {
                 const itemTotal = product.quantity * product.price;
                 const isSelected = selectedItems.includes(product.id);
@@ -456,579 +451,713 @@ function ShopCartContent({
                 return (
                   <div
                     key={product.id}
-                    className={`bg-white border rounded-xl transition-all duration-200 ${
-                      isSelected ? 'border-l-[3px] border-l-brand-blue border-gray-200/60 shadow-sm' : 'border-gray-200/60'
+                    onClick={() => {
+                      if (!updatingItems.includes(product.id)) {
+                        handleSelectItem(product.id, !isSelected);
+                      }
+                    }}
+                    className={`bg-white rounded-2xl overflow-hidden transition-all duration-200 cursor-pointer ${
+                      isSelected ? 'ring-2 ring-[#0047c7] ring-offset-2' : 'hover:bg-gray-50'
                     }`}
                   >
-                    {/* 紧凑单行布局 */}
-                    <div className="flex items-center gap-2.5 p-2.5">
-                      {/* 复选框 */}
-                      <Checkbox
-                        checked={isSelected}
-                        onCheckedChange={(checked) => handleSelectItem(product.id, checked as boolean)}
-                        disabled={updatingItems.includes(product.id)}
-                        className="w-4 h-4 border-gray-300 rounded data-[state=checked]:bg-brand-blue data-[state=checked]:border-brand-blue flex-shrink-0"
-                      />
+                    <div className="p-4">
+                      {/* 顶部：复选框 + 图片 + 信息 */}
+                      <div className="flex items-start gap-3">
+                        <div
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex-shrink-0"
+                        >
+                          <Checkbox
+                            checked={isSelected}
+                            onCheckedChange={(checked) => handleSelectItem(product.id, checked as boolean)}
+                            disabled={updatingItems.includes(product.id)}
+                            className="w-5 h-5 mt-1 border-2 border-gray-300 rounded-md data-[state=checked]:bg-[#0047c7] data-[state=checked]:border-[#0047c7]"
+                          />
+                        </div>
 
-                      {/* 商品图片 */}
-                      <div className="relative w-14 h-14 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 border border-gray-200/60">
-                        <Image
-                          src={product.imgSrc}
-                          alt={product.title}
-                          fill
-                          className="object-cover"
-                          sizes="56px"
-                        />
+                        {/* 商品图片 */}
+                        <div className="relative w-20 h-20 bg-[#f5f5f7] rounded-xl overflow-hidden flex-shrink-0">
+                          <Image
+                            src={product.imgSrc}
+                            alt={product.title}
+                            fill
+                            className="object-cover"
+                            sizes="80px"
+                          />
+                        </div>
+
+                        {/* 商品信息 */}
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-sm font-medium text-gray-900 line-clamp-2 leading-snug">
+                            {product.title}
+                          </h3>
+                          {/* 规格标签 */}
+                          <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                            {product.localizedOptions.slice(0, 2).map((option: any) => (
+                              <span
+                                key={option.option_id}
+                                className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full"
+                              >
+                                {option.localized_value}
+                              </span>
+                            ))}
+                            {product.localizedOptions.length > 2 && (
+                              <span className="text-xs text-gray-400">+{product.localizedOptions.length - 2}</span>
+                            )}
+                          </div>
+                        </div>
                       </div>
 
-                      {/* 商品信息 - 紧凑 */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="min-w-0 flex-1">
-                            <h3 className="text-sm font-medium text-gray-900 truncate leading-tight">
-                              {product.title}
-                            </h3>
-                            <div className="flex items-center gap-1.5 mt-1">
-                              {/* 规格标签 - 内联显示 */}
-                              {product.localizedOptions.slice(0, 2).map((option: any) => (
-                                <span
-                                  key={option.option_id}
-                                  className="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded"
-                                >
-                                  {option.localized_value}
-                                </span>
-                              ))}
-                              {product.localizedOptions.length > 2 && (
-                                <span className="text-[10px] text-gray-400">+{product.localizedOptions.length - 2}</span>
-                              )}
-                            </div>
+                      {/* 底部：价格 + 重量 + 数量 + 小计 */}
+                      <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+                        <div className="flex items-center gap-4">
+                          <div>
+                            <span className="text-xs text-gray-400 block">单价</span>
+                            <span className="text-sm font-semibold text-gray-900">${product.price.toFixed(2)}</span>
                           </div>
-                          {/* 删除按钮 */}
+                          <div className="w-px h-8 bg-gray-200" />
+                          <div>
+                            <span className="text-xs text-gray-400 block">重量</span>
+                            <span className="text-sm text-gray-600">{product.formattedWeight}</span>
+                          </div>
+                        </div>
+
+                        {/* 数量选择器 - 苹果风格 */}
+                        <div
+                          onClick={(e) => e.stopPropagation()}
+                          className={`inline-flex items-center border border-gray-200 rounded-lg overflow-hidden ${updatingItems.includes(product.id) ? "pointer-events-none opacity-50" : ""}`}
+                        >
                           <button
-                            className="p-1.5 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 transition-all flex-shrink-0"
-                            onClick={() => handleRemoveItem(product.id)}
-                            disabled={updatingItems.includes(product.id)}
+                            onClick={() => handleUpdateQuantity(product.id, Math.max(50, product.quantity - 50))}
+                            className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors"
+                            aria-label="减少数量"
                           >
-                            <Trash2 className="h-3.5 w-3.5" />
+                            <Minus className="w-4 h-4" />
+                          </button>
+                          <input
+                            type="text"
+                            value={quantityInputs[product.id] ?? product.quantity}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/\D/g, '');
+                              setQuantityInputs(prev => ({ ...prev, [product.id]: val }));
+                            }}
+                            onFocus={(e) => {
+                              e.target.select();
+                              setQuantityInputs(prev => ({ ...prev, [product.id]: String(product.quantity) }));
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                const val = parseInt(quantityInputs[product.id] || product.quantity) || 50;
+                                handleUpdateQuantity(product.id, Math.max(50, val));
+                                setQuantityInputs(prev => {
+                                  const next = { ...prev };
+                                  delete next[product.id];
+                                  return next;
+                                });
+                                (e.target as HTMLInputElement).blur();
+                              }
+                            }}
+                            onBlur={() => {
+                              const val = parseInt(quantityInputs[product.id] || product.quantity) || 50;
+                              handleUpdateQuantity(product.id, Math.max(50, val));
+                              setQuantityInputs(prev => {
+                                const next = { ...prev };
+                                delete next[product.id];
+                                return next;
+                              });
+                            }}
+                            className="w-12 h-8 text-center text-sm font-semibold text-gray-900 bg-white border-x border-gray-200 focus:outline-none focus:ring-0"
+                          />
+                          <button
+                            onClick={() => handleUpdateQuantity(product.id, product.quantity + 50)}
+                            className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors"
+                            aria-label="增加数量"
+                          >
+                            <Plus className="w-4 h-4" />
                           </button>
                         </div>
                       </div>
                     </div>
 
-                    {/* 数据行 - 紧凑横向布局 */}
-                    <div className="flex items-center gap-3 px-2.5 pb-2.5 pt-0">
-                      <div className="flex items-center gap-4 flex-1">
-                        {/* 单价 */}
-                        <div className="flex items-baseline gap-1">
-                          <span className="text-[10px] text-gray-400">¥</span>
-                          <span className="text-sm font-semibold text-gray-800 font-mono">{product.price.toFixed(2)}</span>
-                        </div>
-
-                        {/* 分隔点 */}
-                        <span className="w-0.5 h-0.5 rounded-full bg-gray-300" />
-
-                        {/* 重量 */}
-                        <span className="text-xs text-gray-500">{product.formattedWeight}</span>
-
-                        {/* 分隔点 */}
-                        <span className="w-0.5 h-0.5 rounded-full bg-gray-300" />
-
-                        {/* 数量选择器 */}
-                        <div className={updatingItems.includes(product.id) ? "pointer-events-none opacity-50" : ""}>
-                          <InputNumber
-                            value={product.quantity}
-                            onChange={(value) => handleUpdateQuantity(product.id, value)}
-                            step={50}
-                            min={50}
-                            size="sm"
-                          />
-                        </div>
-                      </div>
-
-                      {/* 小计 - 右侧突出 */}
-                      <div className="flex items-baseline gap-0.5 flex-shrink-0">
-                        <span className="text-xs text-gray-400">小计</span>
-                        <span className="text-base font-bold text-brand-blue font-mono">{formatAmount(itemTotal)}</span>
+                    {/* 小计栏 */}
+                    <div className="flex items-center justify-between px-4 py-3 bg-[#f5f5f7]">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveItem(product.id);
+                        }}
+                        disabled={updatingItems.includes(product.id)}
+                        className="text-sm text-gray-400 hover:text-red-500 transition-colors flex items-center gap-1"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        <span>删除</span>
+                      </button>
+                      <div className="text-right">
+                        <span className="text-xs text-gray-400 block">小计</span>
+                        <span className="text-lg font-semibold text-gray-900">${itemTotal.toFixed(2)}</span>
                       </div>
                     </div>
                   </div>
                 );
               })}
 
-              {/* 移动端分页 */}
+              {/* 移动端分页 - 苹果风格 */}
               {totalPages > 1 && (
-                <div className="bg-white border border-gray-200/60 rounded-xl p-3 shadow-sm">
-                  <div className="flex items-center justify-between">
-                    <Button
-                      variant="outline"
-                      size="sm"
+                <div className="bg-white rounded-2xl p-4">
+                  <div className="flex items-center justify-center gap-2">
+                    <button
                       onClick={() => handlePageChange(currentPage - 1)}
                       disabled={currentPage === 1}
-                      className="h-8 border-gray-200 text-gray-600 text-xs rounded-lg"
+                      className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
                     >
-                      <ChevronLeft className="h-3.5 w-3.5 mr-1" />
-                      上一页
-                    </Button>
-                    <span className="text-xs text-gray-600 font-medium">
-                      {currentPage} / {totalPages}
-                    </span>
-                    <Button
-                      variant="outline"
-                      size="sm"
+                      <ChevronLeft className="h-5 w-5 text-gray-600" />
+                    </button>
+                    <div className="flex items-center gap-1.5 px-4">
+                      {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                        let pageNum;
+                        if (totalPages <= 5) {
+                          pageNum = i + 1;
+                        } else if (currentPage <= 3) {
+                          pageNum = i + 1;
+                        } else if (currentPage >= totalPages - 2) {
+                          pageNum = totalPages - 4 + i;
+                        } else {
+                          pageNum = currentPage - 2 + i;
+                        }
+                        return (
+                          <button
+                            key={pageNum}
+                            onClick={() => handlePageChange(pageNum)}
+                            className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
+                              currentPage === pageNum
+                                ? 'bg-[#0047c7] text-white'
+                                : 'text-gray-600 hover:bg-gray-100'
+                            }`}
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <button
                       onClick={() => handlePageChange(currentPage + 1)}
                       disabled={currentPage === totalPages}
-                      className="h-8 border-gray-200 text-gray-600 text-xs rounded-lg"
+                      className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
                     >
-                      下一页
-                      <ChevronRight className="h-3.5 w-3.5 ml-1" />
-                    </Button>
+                      <ChevronRight className="h-5 w-5 text-gray-600" />
+                    </button>
                   </div>
                 </div>
               )}
 
-              {/* 移动端订单汇总 - 苹果风格 */}
+              {/* 移动端订单汇总 - 苹果极简风格 */}
               <div
                 ref={mobileOrderSummaryRef}
-                className="bg-white border border-gray-200/60 rounded-2xl p-4 shadow-sm"
+                className="bg-white rounded-3xl p-6 mt-4 mb-24"
               >
+                <h2 className="text-lg font-semibold text-gray-900 mb-5">订单汇总</h2>
+
+                {/* 统计卡片 */}
+                <div className="grid grid-cols-2 gap-3 mb-5">
+                  <div className="bg-[#f5f5f7] rounded-2xl p-4">
+                    <span className="text-xs text-gray-500 block mb-1">已选商品</span>
+                    <span className="text-xl font-semibold text-gray-900">{selectedItems.length} 件</span>
+                  </div>
+                  <div className="bg-[#f5f5f7] rounded-2xl p-4">
+                    <span className="text-xs text-gray-500 block mb-1">总重量</span>
+                    <span className="text-xl font-semibold text-gray-900">{formatTotalWeight(selectedTotalWeight, locale)}</span>
+                  </div>
+                </div>
+
+                {/* 分隔线 */}
+                <div className="h-px bg-gray-200 mb-5" />
+
+                {/* 金额明细 */}
+                <div className="space-y-3 mb-5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">商品金额</span>
+                    <span className="text-sm font-semibold text-gray-900">{formatAmount(selectedTotalPrice)}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">运费</span>
+                    <span className="text-sm text-gray-500">结算时计算</span>
+                  </div>
+                </div>
+
+                {/* 分隔线 */}
+                <div className="h-px bg-gray-200 mb-5" />
+
+                {/* 总价 */}
+                <div className="flex items-center justify-between mb-6">
+                  <span className="text-base font-semibold text-gray-900">应付金额</span>
+                  <span className="text-2xl font-bold text-gray-900">
+                    {formatAmount(selectedTotalPrice)}
+                  </span>
+                </div>
+
+                {/* 操作按钮组 */}
                 <div className="space-y-3">
-                  <div>
-                    <h2 className="text-sm font-semibold text-gray-900">订单汇总</h2>
-                    <p className="text-xs text-gray-400 mt-0.5">
-                      已选 {selectedItems.length} / {cartProducts.length} 件
-                    </p>
-                  </div>
-
-                  {/* 数据卡片组 */}
-                  <div className="grid grid-cols-2 gap-2.5">
-                    <div className="p-3 rounded-xl bg-gray-50 border border-gray-200/60">
-                      <div className="text-[10px] font-medium text-gray-400 mb-0.5">商品金额</div>
-                      <div className="text-base font-bold text-gray-900 font-mono">{formatAmount(selectedTotalPrice)}</div>
-                    </div>
-                    <div className="p-3 rounded-xl bg-gray-50 border border-gray-200/60">
-                      <div className="text-[10px] font-medium text-gray-400 mb-0.5">总重量</div>
-                      <div className="text-base font-bold text-gray-900">{formatTotalWeight(selectedTotalWeight, locale)}</div>
-                    </div>
-                  </div>
-
-                  {/* 总价 */}
-                  <div className="p-3.5 rounded-xl bg-gray-900">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-gray-400">应付金额</span>
-                      <span className="text-lg font-bold text-white font-mono">
-                        {formatAmount(selectedTotalPrice)}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* 主按钮 */}
-                  <Button
+                  <button
                     onClick={handleCheckoutClick}
                     disabled={selectedItems.length === 0 || checkoutLoading}
-                    className="w-full h-10 text-sm font-medium rounded-xl bg-brand-blue hover:bg-brand-blue/90 text-white"
+                    className={`w-full h-12 rounded-full text-base font-medium transition-all flex items-center justify-center ${
+                      selectedItems.length === 0
+                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                        : 'bg-[#0047c7] text-white hover:bg-[#0039a0]'
+                    }`}
                   >
                     {checkoutLoading ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-1.5" />
-                        处理中...
-                      </>
+                      <span className="flex items-center justify-center gap-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                        <span>处理中...</span>
+                      </span>
                     ) : (
-                      <>
-                        <ShoppingCart className="h-4 w-4 mr-1.5" />
-                        去结算
-                      </>
+                      <span>去结算</span>
                     )}
-                  </Button>
+                  </button>
 
-                  {/* 次要按钮组 */}
-                  <div className="space-y-2">
-                    <Button
+                  <div className="flex gap-3">
+                    <button
                       onClick={() => setShowModal(true)}
-                      className="w-full h-9 text-sm font-medium rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      className="flex-1 h-11 rounded-full bg-[#f5f5f7] text-gray-700 text-sm font-medium hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
                     >
-                      <PackagePlus className="h-4 w-4 mr-1.5" />
-                      添加商品
-                    </Button>
+                      <PackagePlus className="h-4 w-4" />
+                      <span>添加商品</span>
+                    </button>
 
                     {selectedItems.length > 0 && (
-                      <Button
+                      <button
                         onClick={handleBatchDelete}
                         disabled={isDeleting}
-                        className="w-full h-9 text-sm font-medium rounded-xl bg-red-500 text-white hover:bg-red-600"
+                        className="flex-1 h-11 rounded-full bg-red-50 text-red-600 text-sm font-medium hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
                       >
                         {isDeleting ? (
                           <>
-                            <div className="animate-spin rounded-full h-3 w-3 border-2 border-white border-t-transparent mr-1.5" />
-                            删除中...
+                            <div className="animate-spin rounded-full h-3 w-3 border-2 border-red-600 border-t-transparent" />
+                            <span>删除中...</span>
                           </>
                         ) : (
                           <>
-                            <Trash2 className="h-4 w-4 mr-1.5" />
-                            删除选中 ({selectedItems.length})
+                            <Trash2 className="h-4 w-4" />
+                            <span>删除 ({selectedItems.length})</span>
                           </>
                         )}
-                      </Button>
+                      </button>
                     )}
-
-                    <Button
-                      asChild
-                      variant="outline"
-                      className="w-full h-9 text-sm font-medium rounded-xl border-gray-200 text-gray-700 hover:bg-gray-50"
-                    >
-                      <Link href="/shop" className="flex items-center justify-center">
-                        继续购物
-                        <ChevronRight className="w-3.5 h-3.5 ml-1" />
-                      </Link>
-                    </Button>
                   </div>
+
+                  <Link
+                    href="/shop"
+                    className="block text-center text-sm text-gray-600 hover:text-gray-900 py-3 transition-colors"
+                  >
+                    继续购物 →
+                  </Link>
                 </div>
               </div>
             </div>
           )}
 
-          {/* 移动端底部固定栏 */}
+          {/* 移动端底部固定栏 - 苹果极简风格 */}
           {showMobileBottomBar && cartProducts.length > 0 && (
-            <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 shadow-lg">
-              <div className="container mx-auto px-4 py-2.5 max-w-7xl">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[10px] text-gray-400 mb-0.5">应付</p>
-                    <p className="text-base font-bold text-gray-900 font-mono">
+            <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-xl border-t border-gray-200/50 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+              <div className="container mx-auto px-4 py-3 max-w-6xl">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex-1">
+                    <p className="text-xs text-gray-500">应付金额</p>
+                    <p className="text-xl font-bold text-gray-900">
                       {formatAmount(selectedTotalPrice)}
                     </p>
                   </div>
 
-                  <Button
+                  <button
                     onClick={handleCheckoutClick}
                     disabled={selectedItems.length === 0 || checkoutLoading}
-                    className="flex-1 h-10 text-sm font-medium rounded-xl bg-brand-blue text-white hover:bg-brand-blue/90"
+                    className={`h-11 px-8 rounded-full text-sm font-medium transition-all flex items-center justify-center ${
+                      selectedItems.length === 0
+                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                        : 'bg-[#0047c7] text-white active:bg-[#0039a0]'
+                    }`}
                   >
                     {checkoutLoading ? (
-                      <>
-                        <div className="animate-spin rounded-full h-3 w-3 border-2 border-white border-t-transparent mr-1.5" />
-                        处理中...
-                      </>
+                      <span className="flex items-center justify-center gap-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                        <span>处理中</span>
+                      </span>
                     ) : (
-                      <>
-                        <ShoppingCart className="h-4 w-4 mr-1.5" />
-                        去结算
-                      </>
+                      <span>去结算</span>
                     )}
-                  </Button>
+                  </button>
                 </div>
               </div>
             </div>
           )}
         </div>
 
-        {/* 老王我：桌面端视图 - 苹果风格 */}
+        {/* 桌面端视图 - 苹果极简风格 */}
         <div className="hidden lg:block">
           {/* 桌面端头部 */}
-          <div className="bg-white border border-gray-200/60 rounded-2xl p-5 mb-5 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-xl font-semibold text-gray-900 tracking-tight mb-0.5">
-                  购物车
-                </h1>
-                <p className="text-sm text-gray-400">
-                  {cartProducts.length} {cartProducts.length === 1 ? '件商品' : '件商品'}
-                </p>
-              </div>
-              <div className="px-5 py-3 bg-gray-50 rounded-xl border border-gray-200/60">
-                <p className="text-xs text-gray-400 font-medium mb-0.5">购物车总额</p>
-                <p className="text-xl font-bold text-gray-900 font-mono">
-                  {formatAmount(cartTotalPrice)}
-                </p>
-              </div>
-            </div>
+          <div className="mb-8">
+            <h1 className="text-3xl font-semibold text-gray-900 tracking-tight">购物车</h1>
+            <p className="text-base text-gray-500 mt-1">
+              {cartProducts.length} 件商品
+            </p>
           </div>
 
           {cartProducts.length === 0 ? (
-            <div className="bg-white border border-gray-200/60 rounded-2xl p-12 text-center shadow-sm">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-2xl mb-5">
-                <ShoppingCart className="h-8 w-8 text-gray-400" />
+            <div className="bg-white rounded-3xl p-16 text-center">
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-[#f5f5f7] rounded-full mb-6">
+                <ShoppingCart className="h-9 w-9 text-gray-400" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">购物车是空的</h3>
-              <p className="text-sm text-gray-400 mb-6">添加一些商品开始购物吧</p>
-              <div className="flex items-center justify-center gap-3">
+              <h3 className="text-xl font-medium text-gray-900 mb-3">购物车是空的</h3>
+              <p className="text-base text-gray-500 mb-8 max-w-md mx-auto">添加一些商品开始购物吧</p>
+              <div className="flex items-center justify-center gap-4">
                 <Button
                   onClick={() => setShowModal(true)}
-                  size="lg"
-                  className="h-10 px-6 bg-brand-blue hover:bg-brand-blue/90 text-white rounded-xl text-sm font-medium"
+                  className="h-12 px-8 bg-[#0047c7] hover:bg-[#0039a0] text-white rounded-full text-base font-medium transition-colors"
                 >
-                  <PackagePlus className="h-4 w-4 mr-1.5" />
+                  <PackagePlus className="h-5 w-5 mr-2" />
                   添加商品
                 </Button>
                 <Button
                   asChild
                   variant="outline"
-                  size="lg"
-                  className="h-10 px-6 border-gray-200 text-gray-700 hover:bg-gray-50 rounded-xl text-sm font-medium"
+                  className="h-12 px-8 border-gray-200 text-gray-700 hover:bg-gray-50 rounded-full text-base font-medium transition-colors"
                 >
                   <Link href="/shop">继续购物</Link>
                 </Button>
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-              {/* 商品卡片列表 */}
-              <div className="lg:col-span-2 space-y-2">
-                {/* 表头 - 紧凑 */}
-                <div className="bg-gray-50 border border-gray-200/60 rounded-xl px-4 py-2.5">
-                  <div className="flex items-center gap-3 text-[11px] font-medium text-gray-500 uppercase tracking-wide">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* 商品列表区域 */}
+              <div className="lg:col-span-2">
+                {/* 全选栏 */}
+                <div className="bg-white rounded-2xl px-6 py-4 mb-4">
+                  <label className="flex items-center gap-3 cursor-pointer">
                     <Checkbox
                       checked={selectedItems.length === cartProducts.length && cartProducts.length > 0}
                       onCheckedChange={handleSelectAll}
-                      className="w-4 h-4 border-gray-300 rounded data-[state=checked]:bg-brand-blue data-[state=checked]:border-brand-blue flex-shrink-0"
+                      className="w-5 h-5 border-2 border-gray-300 rounded-md data-[state=checked]:bg-[#0047c7] data-[state=checked]:border-[#0047c7]"
                     />
-                    <span className="flex-1 min-w-[180px]">商品信息</span>
-                    <span className="w-24 text-right flex-shrink-0">单价</span>
-                    <span className="w-20 text-center flex-shrink-0">重量</span>
-                    <span className="w-28 text-center flex-shrink-0">数量</span>
-                    <span className="w-28 text-right flex-shrink-0">小计</span>
-                    <span className="w-8 flex-shrink-0">{/* 删除按钮占位 */}</span>
-                  </div>
+                    <span className="text-sm text-gray-900">全选 ({cartProducts.length} 件商品)</span>
+                  </label>
                 </div>
 
-                {/* 商品卡片 - 紧凑表格行风格 */}
-                {currentItems.map((product) => {
-                  const itemTotal = product.quantity * product.price;
-                  const isSelected = selectedItems.includes(product.id);
+                {/* 商品卡片列表 */}
+                <div className="space-y-3">
+                  {currentItems.map((product) => {
+                    const itemTotal = product.quantity * product.price;
+                    const isSelected = selectedItems.includes(product.id);
 
-                  return (
-                    <div
-                      key={product.id}
-                      className={`bg-white border rounded-xl transition-all duration-200 ${
-                        isSelected
-                          ? 'border-l-[3px] border-l-brand-blue border-gray-200/60 shadow-sm'
-                          : 'border-gray-200/60 hover:border-gray-300/60'
-                      }`}
-                    >
-                      {/* 紧凑单行布局 - 桌面端 */}
-                      <div className="flex items-center gap-3 px-4 py-3">
-                        {/* 复选框 */}
-                        <Checkbox
-                          checked={isSelected}
-                          onCheckedChange={(checked) => handleSelectItem(product.id, checked as boolean)}
-                          disabled={updatingItems.includes(product.id)}
-                          className="w-4 h-4 border-gray-300 rounded data-[state=checked]:bg-brand-blue data-[state=checked]:border-brand-blue flex-shrink-0"
-                        />
+                    return (
+                      <div
+                        key={product.id}
+                        onClick={() => {
+                          if (!updatingItems.includes(product.id)) {
+                            handleSelectItem(product.id, !isSelected);
+                          }
+                        }}
+                        className={`bg-white rounded-2xl p-6 transition-all duration-200 cursor-pointer ${
+                          isSelected ? 'ring-2 ring-[#0047c7]' : 'hover:bg-gray-50'
+                        }`}
+                      >
+                        <div className="flex items-start gap-5">
+                          {/* 复选框 */}
+                          <div
+                            onClick={(e) => e.stopPropagation()}
+                            className="flex-shrink-0"
+                          >
+                            <Checkbox
+                              checked={isSelected}
+                              onCheckedChange={(checked) => handleSelectItem(product.id, checked as boolean)}
+                              disabled={updatingItems.includes(product.id)}
+                              className="w-5 h-5 mt-1 border-2 border-gray-300 rounded-md data-[state=checked]:bg-[#0047c7] data-[state=checked]:border-[#0047c7]"
+                            />
+                          </div>
 
-                        {/* 商品图片 - 稍小 */}
-                        <div className="relative w-14 h-14 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 border border-gray-200/60">
-                          <Image
-                            src={product.imgSrc}
-                            alt={product.title}
-                            fill
-                            className="object-cover"
-                            sizes="56px"
-                          />
-                        </div>
+                          {/* 商品图片 */}
+                          <div className="relative w-24 h-24 bg-[#f5f5f7] rounded-xl overflow-hidden flex-shrink-0">
+                            <Image
+                              src={product.imgSrc}
+                              alt={product.title}
+                              fill
+                              className="object-cover"
+                              sizes="96px"
+                            />
+                          </div>
 
-                        {/* 商品信息 - 紧凑 */}
-                        <div className="flex-1 min-w-0 min-w-[180px]">
-                          <h3 className="text-sm font-medium text-gray-900 truncate leading-snug">
-                            {product.title}
-                          </h3>
-                          {/* 规格标签 - 内联显示 */}
-                          <div className="flex items-center gap-1 mt-1">
-                            {product.localizedOptions.slice(0, 3).map((option: any) => (
-                              <span
-                                key={option.option_id}
-                                className="text-[11px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded"
+                          {/* 商品信息 */}
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-base font-medium text-gray-900 line-clamp-2 leading-snug">
+                              {product.title}
+                            </h3>
+                            {/* 规格标签 */}
+                            <div className="flex flex-wrap items-center gap-2 mt-2">
+                              {product.localizedOptions.slice(0, 3).map((option: any) => (
+                                <span
+                                  key={option.option_id}
+                                  className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full"
+                                >
+                                  {option.localized_value}
+                                </span>
+                              ))}
+                              {product.localizedOptions.length > 3 && (
+                                <span className="text-xs text-gray-400">+{product.localizedOptions.length - 3}</span>
+                              )}
+                            </div>
+
+                            {/* 价格和重量 */}
+                            <div className="flex items-center gap-6 mt-4">
+                              <div>
+                                <span className="text-xs text-gray-400 block">单价</span>
+                                <span className="text-lg font-semibold text-gray-900">${product.price.toFixed(2)}</span>
+                              </div>
+                              <div className="w-px h-8 bg-gray-200" />
+                              <div>
+                                <span className="text-xs text-gray-400 block">重量</span>
+                                <span className="text-base text-gray-600">{product.formattedWeight}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* 数量和小计 */}
+                          <div className="flex flex-col items-end gap-4">
+                            {/* 数量选择器 - 苹果风格 */}
+                            <div
+                              onClick={(e) => e.stopPropagation()}
+                              className={`inline-flex items-center border border-gray-200 rounded-lg overflow-hidden ${updatingItems.includes(product.id) ? "pointer-events-none opacity-50" : ""}`}
+                            >
+                              <button
+                                onClick={() => handleUpdateQuantity(product.id, Math.max(50, product.quantity - 50))}
+                                className="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors"
+                                aria-label="减少数量"
                               >
-                                {option.localized_value}
-                              </span>
-                            ))}
-                            {product.localizedOptions.length > 3 && (
-                              <span className="text-[11px] text-gray-400">+{product.localizedOptions.length - 3}</span>
-                            )}
+                                <Minus className="w-4 h-4" />
+                              </button>
+                              <input
+                                type="text"
+                                value={quantityInputs[product.id] ?? product.quantity}
+                                onChange={(e) => {
+                                  const val = e.target.value.replace(/\D/g, '');
+                                  setQuantityInputs(prev => ({ ...prev, [product.id]: val }));
+                                }}
+                                onFocus={(e) => {
+                                  e.target.select();
+                                  setQuantityInputs(prev => ({ ...prev, [product.id]: String(product.quantity) }));
+                                }}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    const val = parseInt(quantityInputs[product.id] || product.quantity) || 50;
+                                    handleUpdateQuantity(product.id, Math.max(50, val));
+                                    setQuantityInputs(prev => {
+                                      const next = { ...prev };
+                                      delete next[product.id];
+                                      return next;
+                                    });
+                                    (e.target as HTMLInputElement).blur();
+                                  }
+                                }}
+                                onBlur={() => {
+                                  const val = parseInt(quantityInputs[product.id] || product.quantity) || 50;
+                                  handleUpdateQuantity(product.id, Math.max(50, val));
+                                  setQuantityInputs(prev => {
+                                    const next = { ...prev };
+                                    delete next[product.id];
+                                    return next;
+                                  });
+                                }}
+                                className="w-14 h-9 text-center text-base font-semibold text-gray-900 bg-white border-x border-gray-200 focus:outline-none focus:ring-0"
+                              />
+                              <button
+                                onClick={() => handleUpdateQuantity(product.id, product.quantity + 50)}
+                                className="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors"
+                                aria-label="增加数量"
+                              >
+                                <Plus className="w-4 h-4" />
+                              </button>
+                            </div>
+
+                            {/* 小计 */}
+                            <div className="text-right">
+                              <span className="text-xs text-gray-400 block">小计</span>
+                              <span className="text-xl font-semibold text-gray-900">${itemTotal.toFixed(2)}</span>
+                            </div>
+
+                            {/* 删除按钮 */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRemoveItem(product.id);
+                              }}
+                              disabled={updatingItems.includes(product.id)}
+                              className="text-sm text-gray-400 hover:text-red-500 transition-colors flex items-center gap-1"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                              <span>删除</span>
+                            </button>
                           </div>
                         </div>
-
-                        {/* 单价 */}
-                        <div className="w-24 text-right flex-shrink-0">
-                          <span className="text-sm font-medium text-gray-700 font-mono">
-                            {formatAmount(product.price)}
-                          </span>
-                        </div>
-
-                        {/* 重量 */}
-                        <div className="w-20 text-center flex-shrink-0">
-                          <span className="text-sm text-gray-500">{product.formattedWeight}</span>
-                        </div>
-
-                        {/* 数量选择器 */}
-                        <div className={`w-28 flex-shrink-0 ${updatingItems.includes(product.id) ? "pointer-events-none opacity-50" : ""}`}>
-                          <InputNumber
-                            value={product.quantity}
-                            onChange={(value) => handleUpdateQuantity(product.id, value)}
-                            step={50}
-                            min={50}
-                            size="sm"
-                          />
-                        </div>
-
-                        {/* 小计 */}
-                        <div className="w-28 text-right flex-shrink-0">
-                          <span className="text-base font-bold text-brand-blue font-mono">
-                            {formatAmount(itemTotal)}
-                          </span>
-                        </div>
-
-                        {/* 删除按钮 */}
-                        <button
-                          className="p-1.5 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 transition-all flex-shrink-0"
-                          onClick={() => handleRemoveItem(product.id)}
-                          disabled={updatingItems.includes(product.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
 
-                {/* 分页 */}
+                {/* 分页 - 苹果风格 */}
                 {totalPages > 1 && (
-                  <div className="bg-white border border-gray-200/60 rounded-xl p-3.5 shadow-sm">
-                    <div className="flex items-center justify-between">
-                      <Button
-                        variant="outline"
+                  <div className="bg-white rounded-2xl p-4 mt-4">
+                    <div className="flex items-center justify-center gap-2">
+                      <button
                         onClick={() => handlePageChange(currentPage - 1)}
                         disabled={currentPage === 1}
-                        className="h-9 border-gray-200 text-gray-600 hover:bg-gray-50 rounded-xl text-sm"
+                        className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
                       >
-                        <ChevronLeft className="h-4 w-4 mr-1.5" />
-                        上一页
-                      </Button>
-                      <div className="flex items-center gap-1.5">
-                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                          <Button
-                            key={page}
-                            variant={currentPage === page ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => handlePageChange(page)}
-                            className={`h-8 w-8 p-0 rounded-lg text-sm ${currentPage === page ? "bg-brand-blue text-white" : "border-gray-200 text-gray-600 hover:bg-gray-50"}`}
-                          >
-                            {page}
-                          </Button>
-                        ))}
+                        <ChevronLeft className="h-5 w-5 text-gray-600" />
+                      </button>
+                      <div className="flex items-center gap-1.5 px-4">
+                        {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                          let pageNum;
+                          if (totalPages <= 5) {
+                            pageNum = i + 1;
+                          } else if (currentPage <= 3) {
+                            pageNum = i + 1;
+                          } else if (currentPage >= totalPages - 2) {
+                            pageNum = totalPages - 4 + i;
+                          } else {
+                            pageNum = currentPage - 2 + i;
+                          }
+                          return (
+                            <button
+                              key={pageNum}
+                              onClick={() => handlePageChange(pageNum)}
+                              className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
+                                currentPage === pageNum
+                                  ? 'bg-[#0047c7] text-white'
+                                  : 'text-gray-600 hover:bg-gray-100'
+                              }`}
+                            >
+                              {pageNum}
+                            </button>
+                          );
+                        })}
                       </div>
-                      <Button
-                        variant="outline"
+                      <button
                         onClick={() => handlePageChange(currentPage + 1)}
                         disabled={currentPage === totalPages}
-                        className="h-9 border-gray-200 text-gray-600 hover:bg-gray-50 rounded-xl text-sm"
+                        className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
                       >
-                        下一页
-                        <ChevronRight className="h-4 w-4 ml-1.5" />
-                      </Button>
+                        <ChevronRight className="h-5 w-5 text-gray-600" />
+                      </button>
                     </div>
                   </div>
                 )}
 
-                {/* 操作按钮 */}
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2.5">
-                    <Button
-                      variant="outline"
+                {/* 底部操作按钮 */}
+                <div className="flex items-center justify-between mt-6 pt-6 pb-8">
+                  <div className="flex items-center gap-3">
+                    <button
                       onClick={() => setShowModal(true)}
-                      className="h-9 border-gray-200 text-gray-600 hover:bg-gray-50 rounded-xl text-sm"
+                      className="h-10 px-5 rounded-full bg-white text-gray-700 text-sm font-medium hover:bg-gray-100 transition-colors flex items-center justify-center gap-2 border border-gray-200"
                     >
-                      <PackagePlus className="h-4 w-4 mr-1.5" />
-                      添加商品
-                    </Button>
+                      <PackagePlus className="h-4 w-4" />
+                      <span>添加商品</span>
+                    </button>
 
                     {selectedItems.length > 0 && (
-                      <Button
+                      <button
                         onClick={handleBatchDelete}
                         disabled={isDeleting}
-                        className="h-9 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm"
+                        className="h-10 px-5 rounded-full bg-red-50 text-red-600 text-sm font-medium hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
                       >
                         {isDeleting ? (
                           <>
-                            <div className="animate-spin rounded-full h-3.5 w-3.5 border-2 border-white border-t-transparent mr-1.5" />
-                            删除中...
+                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-red-600 border-t-transparent" />
+                            <span>删除中...</span>
                           </>
                         ) : (
                           <>
-                            <Trash2 className="h-4 w-4 mr-1.5" />
-                            删除选中 ({selectedItems.length})
+                            <Trash2 className="h-4 w-4" />
+                            <span>删除选中 ({selectedItems.length})</span>
                           </>
                         )}
-                      </Button>
+                      </button>
                     )}
                   </div>
 
-                  <Button
-                    variant="outline"
-                    asChild
-                    className="h-9 border-gray-200 text-gray-600 hover:bg-gray-50 rounded-xl text-sm"
+                  <Link
+                    href="/shop"
+                    className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
                   >
-                    <Link href="/shop">继续购物</Link>
-                  </Button>
+                    继续购物 →
+                  </Link>
                 </div>
               </div>
 
-              {/* 桌面端订单汇总 - 苹果风格 */}
-              <div className="lg:col-span-1 hidden lg:block">
-                <div className="bg-white border border-gray-200/60 rounded-2xl p-4 shadow-sm sticky top-24">
-                  <div className="space-y-3.5">
-                    <div>
-                      <h2 className="text-base font-semibold text-gray-900">订单汇总</h2>
-                      <p className="text-xs text-gray-400 mt-0.5">
-                        已选 {selectedItems.length} / {cartProducts.length} 件
-                      </p>
+              {/* 桌面端订单汇总 - 苹果极简风格 */}
+              <div className="lg:col-span-1">
+                <div className="bg-white rounded-3xl p-6 sticky top-28">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-6">订单汇总</h2>
+
+                  {/* 统计卡片 */}
+                  <div className="grid grid-cols-2 gap-3 mb-6">
+                    <div className="bg-[#f5f5f7] rounded-2xl p-4">
+                      <span className="text-xs text-gray-600 block mb-1">已选商品</span>
+                      <span className="text-xl font-semibold text-gray-900">{selectedItems.length} 件</span>
                     </div>
-
-                    <Separator className="bg-gray-100" />
-
-                    {/* 数据卡片组 */}
-                    <div className="space-y-2.5">
-                      <div className="p-3.5 rounded-xl bg-gray-50 border border-gray-200/60">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-medium text-gray-500">商品金额</span>
-                          <span className="text-base font-bold text-gray-900 font-mono">{formatAmount(selectedTotalPrice)}</span>
-                        </div>
-                      </div>
-                      <div className="p-3.5 rounded-xl bg-gray-50 border border-gray-200/60">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-medium text-gray-500">总重量</span>
-                          <span className="text-base font-bold text-gray-900">{formatTotalWeight(selectedTotalWeight, locale)}</span>
-                        </div>
-                      </div>
+                    <div className="bg-[#f5f5f7] rounded-2xl p-4">
+                      <span className="text-xs text-gray-600 block mb-1">总重量</span>
+                      <span className="text-xl font-semibold text-gray-900">{formatTotalWeight(selectedTotalWeight, locale)}</span>
                     </div>
-
-                    {/* 总价 */}
-                    <div className="p-3.5 rounded-xl bg-gray-900">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-medium text-gray-400">应付金额</span>
-                        <span className="text-xl font-bold text-white font-mono">
-                          {formatAmount(selectedTotalPrice)}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* 主按钮 */}
-                    <Button
-                      onClick={handleCheckoutClick}
-                      disabled={selectedItems.length === 0 || checkoutLoading}
-                      className="w-full h-10 text-sm font-medium rounded-xl bg-brand-blue hover:bg-brand-blue/90 text-white"
-                    >
-                      {checkoutLoading ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-1.5" />
-                          处理中...
-                        </>
-                      ) : (
-                        <>
-                          <ShoppingCart className="h-4 w-4 mr-1.5" />
-                          去结算
-                        </>
-                      )}
-                    </Button>
                   </div>
+
+                  {/* 分隔线 */}
+                  <div className="h-px bg-gray-200 mb-6" />
+
+                  {/* 金额明细 */}
+                  <div className="space-y-4 mb-6">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">商品金额</span>
+                      <span className="text-sm font-semibold text-gray-900">{formatAmount(selectedTotalPrice)}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">运费</span>
+                      <span className="text-sm text-gray-500">结算时计算</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">税费</span>
+                      <span className="text-sm text-gray-500">结算时计算</span>
+                    </div>
+                  </div>
+
+                  {/* 分隔线 */}
+                  <div className="h-px bg-gray-200 mb-6" />
+
+                  {/* 总价 */}
+                  <div className="flex items-center justify-between mb-8">
+                    <span className="text-base font-semibold text-gray-900">应付金额</span>
+                    <span className="text-2xl font-bold text-gray-900">
+                      {formatAmount(selectedTotalPrice)}
+                    </span>
+                  </div>
+
+                  {/* 结算按钮 */}
+                  <button
+                    onClick={handleCheckoutClick}
+                    disabled={selectedItems.length === 0 || checkoutLoading}
+                    className={`w-full h-14 rounded-full text-base font-medium transition-all flex items-center justify-center ${
+                      selectedItems.length === 0
+                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                        : 'bg-[#0047c7] text-white hover:bg-[#0039a0]'
+                    }`}
+                  >
+                    {checkoutLoading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
+                        <span>处理中...</span>
+                      </span>
+                    ) : (
+                      <span>去结算</span>
+                    )}
+                  </button>
                 </div>
               </div>
             </div>
@@ -1044,71 +1173,54 @@ function ShopCartContent({
         products={products}
       />
 
-      {/* 结算确认对话框 - 苹果风格 */}
+      {/* 结算确认对话框 - 苹果极简风格 */}
       {showCheckoutConfirm && (
         <Dialog open={showCheckoutConfirm} onOpenChange={setShowCheckoutConfirm}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto z-[9999] rounded-2xl">
-            <DialogHeader className="border-b border-gray-100 pb-4">
-              <DialogTitle className="text-lg font-semibold flex items-center gap-3">
-                <div className="bg-gray-100 p-2 rounded-xl">
-                  <ShoppingCart className="h-5 w-5 text-gray-600" />
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto z-[9999] rounded-3xl p-0">
+            <DialogHeader className="px-8 pt-8 pb-6 border-b border-gray-100">
+              <DialogTitle className="text-xl font-semibold text-gray-900 flex items-center gap-4">
+                <div className="w-12 h-12 bg-[#f5f5f7] rounded-full flex items-center justify-center">
+                  <ShoppingCart className="h-6 w-6 text-gray-600" />
                 </div>
                 确认结算
               </DialogTitle>
-              <DialogDescription className="text-sm mt-2 text-gray-500">
-                请确认您要结算以下商品，结算后购物车中的这些商品将被清除。
+              <DialogDescription className="text-sm mt-3 text-gray-500 pl-16">
+                请确认您要结算以下商品
               </DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-5">
+            <div className="p-8 space-y-6">
               {/* 商品列表 */}
-              <div className="max-h-52 overflow-y-auto border border-gray-200/60 rounded-xl bg-white">
-                <table className="w-full">
-                  <thead className="bg-gray-50 sticky top-0 z-10">
-                    <tr>
-                      <th className="px-4 py-2.5 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wide">商品</th>
-                      <th className="px-4 py-2.5 text-center text-[10px] font-semibold text-gray-500 uppercase tracking-wide">数量</th>
-                      <th className="px-4 py-2.5 text-right text-[10px] font-semibold text-gray-500 uppercase tracking-wide">小计</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {cartProducts
-                      .filter((p) => selectedItems.includes(p.id))
-                      .map((product) => (
-                        <tr key={product.id} className="hover:bg-gray-50/50">
-                          <td className="px-4 py-2.5 align-middle">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 relative border border-gray-200/60">
-                                <Image
-                                  src={product.imgSrc}
-                                  alt={product.title}
-                                  fill
-                                  sizes="40px"
-                                  className="object-cover"
-                                />
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <p className="text-sm font-medium text-gray-900 truncate">{product.title}</p>
-                                {product.variantTitle && (
-                                  <p className="text-xs text-gray-400 truncate mt-0.5">{product.variantTitle}</p>
-                                )}
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-4 py-2.5 text-center align-middle">
-                            <Badge variant="secondary" className="bg-gray-100 text-gray-600 font-medium px-2.5 py-1 text-xs rounded-lg">
-                              x{product.quantity}
-                            </Badge>
-                          </td>
-                          <td className="px-4 py-2.5 text-right align-middle">
-                            <span className="text-sm font-semibold text-gray-900 font-mono">
-                              {formatAmount(product.price * product.quantity)}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
+              <div className="max-h-64 overflow-y-auto rounded-2xl bg-[#f5f5f7]">
+                {cartProducts
+                  .filter((p) => selectedItems.includes(p.id))
+                  .map((product) => (
+                    <div key={product.id} className="flex items-center gap-4 p-4 border-b border-gray-200/50 last:border-b-0">
+                      <div className="w-14 h-14 rounded-xl overflow-hidden bg-white flex-shrink-0 relative">
+                        <Image
+                          src={product.imgSrc}
+                          alt={product.title}
+                          fill
+                          sizes="56px"
+                          className="object-cover"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">{product.title}</p>
+                        <p className="text-xs text-gray-500 mt-0.5">{product.formattedWeight}</p>
+                      </div>
+                      <div className="text-center">
+                        <span className="text-xs text-gray-400 block">数量</span>
+                        <span className="text-sm font-medium text-gray-900">×{product.quantity}</span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-xs text-gray-400 block">小计</span>
+                        <span className="text-sm font-semibold text-gray-900">
+                          ${formatAmount(product.price * product.quantity)}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
               </div>
 
               {/* 支付方式选择 */}
@@ -1123,49 +1235,48 @@ function ShopCartContent({
               </div>
 
               {/* 汇总信息 */}
-              <div className="bg-gray-50 rounded-xl p-4 space-y-2.5 border border-gray-200/60">
+              <div className="bg-[#f5f5f7] rounded-2xl p-5 space-y-3">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500 font-medium">商品数量</span>
-                  <span className="font-medium text-gray-900">
+                  <span className="text-gray-600">商品数量</span>
+                  <span className="font-semibold text-gray-900">
                     {cartProducts.filter((p) => selectedItems.includes(p.id)).length} 件
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500 font-medium">总重量</span>
-                  <span className="font-medium text-gray-900">{formatTotalWeight(selectedTotalWeight, locale)}</span>
+                  <span className="text-gray-600">总重量</span>
+                  <span className="font-semibold text-gray-900">{formatTotalWeight(selectedTotalWeight, locale)}</span>
                 </div>
-                <Separator className="bg-gray-200" />
-                <div className="flex justify-between text-base font-semibold pt-1">
-                  <span className="text-gray-700">总金额</span>
-                  <span className="text-gray-900 font-mono">{formatAmount(selectedTotalPrice)}</span>
+                <div className="h-px bg-gray-200 my-2" />
+                <div className="flex justify-between text-lg font-semibold">
+                  <span className="text-gray-900">总金额</span>
+                  <span className="text-gray-900">{formatAmount(selectedTotalPrice)}</span>
                 </div>
               </div>
             </div>
 
-            <DialogFooter className="gap-2.5 sm:gap-2.5 pt-2">
-              <Button
+            <DialogFooter className="px-8 py-6 border-t border-gray-100 gap-3">
+              <button
                 type="button"
-                variant="outline"
                 disabled={checkoutLoading}
                 onClick={() => setShowCheckoutConfirm(false)}
-                className="flex-1 h-10 text-sm font-medium border-gray-200 text-gray-600 hover:bg-gray-50 rounded-xl"
+                className="flex-1 h-12 text-sm font-medium border border-gray-200 text-gray-700 hover:bg-gray-50 rounded-full transition-colors disabled:opacity-50 flex items-center justify-center"
               >
-                取消
-              </Button>
-              <Button
+                <span>取消</span>
+              </button>
+              <button
                 onClick={handleConfirmCheckout}
                 disabled={checkoutLoading}
-                className="flex-1 h-10 text-sm font-medium bg-brand-blue text-white hover:bg-brand-blue/90 rounded-xl"
+                className="flex-1 h-12 text-sm font-medium bg-[#0047c7] text-white hover:bg-[#0039a0] rounded-full transition-colors disabled:opacity-50 flex items-center justify-center"
               >
                 {checkoutLoading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-1.5" />
-                    处理中...
-                  </>
+                  <span className="flex items-center justify-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                    <span>处理中...</span>
+                  </span>
                 ) : (
-                  '确认结算'
+                  <span>确认结算</span>
                 )}
-              </Button>
+              </button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
