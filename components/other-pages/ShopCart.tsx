@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useContextElement } from "@/context/Context";
 import { Link, useRouter } from '@/i18n/routing';
 import { useLocale, useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import {
   PackagePlus,
   ShoppingCart,
@@ -94,6 +95,7 @@ function ShopCartContent({
   customer?: (HttpTypes.StoreCustomer & { zgar_customer?: any }) | null;
 }) {
   const locale = useLocale();
+  const searchParams = useSearchParams();
   const [showModal, setShowModal] = useState(false);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -277,6 +279,15 @@ function ShopCartContent({
   };
 
   const router = useRouter();
+
+  // 监听 URL 参数，自动打开批量添加弹框
+  useEffect(() => {
+    if (searchParams.get("batch") === "add") {
+      setShowModal(true);
+      // 清除 URL 参数，避免刷新时重复打开
+      router.replace("/view-cart");
+    }
+  }, [searchParams, router]);
 
   const removeFromCart = async (lineId: string) => {
     if (!cart?.id) return;
