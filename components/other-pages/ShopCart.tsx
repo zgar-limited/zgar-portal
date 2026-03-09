@@ -1176,108 +1176,179 @@ function ShopCartContent({
       {/* 结算确认对话框 - 苹果极简风格 */}
       {showCheckoutConfirm && (
         <Dialog open={showCheckoutConfirm} onOpenChange={setShowCheckoutConfirm}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto z-[9999] rounded-3xl p-0">
-            <DialogHeader className="px-8 pt-8 pb-6 border-b border-gray-100">
-              <DialogTitle className="text-xl font-semibold text-gray-900 flex items-center gap-4">
-                <div className="w-12 h-12 bg-[#f5f5f7] rounded-full flex items-center justify-center">
-                  <ShoppingCart className="h-6 w-6 text-gray-600" />
-                </div>
-                确认结算
+          <DialogContent className="max-w-2xl w-[95vw] max-h-[90vh] p-0 overflow-hidden rounded-2xl bg-white shadow-2xl border border-gray-100">
+            {/* Header - 苹果极简风格 */}
+            <DialogHeader className="px-6 pt-6 pb-4 border-b border-gray-100">
+              <DialogTitle className="text-xl font-semibold text-gray-900 text-center">
+                订单确认
               </DialogTitle>
-              <DialogDescription className="text-sm mt-3 text-gray-500 pl-16">
-                请确认您要结算以下商品
-              </DialogDescription>
             </DialogHeader>
 
-            <div className="p-8 space-y-6">
-              {/* 商品列表 */}
-              <div className="max-h-64 overflow-y-auto rounded-2xl bg-[#f5f5f7]">
+            <div className="px-6 py-5 space-y-5 overflow-y-auto max-h-[calc(90vh-200px)]">
+              {/* 商品列表 - 完整显示，包含图片和重量 */}
+              <div className="bg-[#f5f5f7] rounded-2xl p-4 space-y-3">
+                <div className="flex items-center text-xs text-gray-500 pb-2 border-b border-gray-200/50">
+                  <span className="w-16"></span>
+                  <span className="flex-1">商品信息</span>
+                  <span className="w-24 text-center">重量</span>
+                  <span className="w-28 text-right">金额</span>
+                </div>
                 {cartProducts
                   .filter((p) => selectedItems.includes(p.id))
                   .map((product) => (
-                    <div key={product.id} className="flex items-center gap-4 p-4 border-b border-gray-200/50 last:border-b-0">
-                      <div className="w-14 h-14 rounded-xl overflow-hidden bg-white flex-shrink-0 relative">
+                    <div key={product.id} className="flex items-center gap-4 py-3 border-b border-gray-200/30 last:border-0">
+                      {/* 商品图片 */}
+                      <div className="w-14 h-14 bg-white rounded-xl overflow-hidden flex-shrink-0 shadow-sm">
                         <Image
                           src={product.imgSrc}
                           alt={product.title}
-                          fill
-                          sizes="56px"
-                          className="object-cover"
+                          width={56}
+                          height={56}
+                          className="w-full h-full object-cover"
                         />
                       </div>
+                      {/* 商品名称和规格 */}
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">{product.title}</p>
-                        <p className="text-xs text-gray-500 mt-0.5">{product.formattedWeight}</p>
+                        <p className="text-gray-900 text-sm font-medium line-clamp-2 leading-snug">{product.title}</p>
+                        {/* 规格标签 */}
+                        <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                          {product.localizedOptions?.slice(0, 3).map((option: any) => (
+                            <span
+                              key={option.option_id}
+                              className="text-xs text-gray-500 bg-white/80 px-2 py-0.5 rounded-full"
+                            >
+                              {option.localized_value}
+                            </span>
+                          ))}
+                          {product.localizedOptions?.length > 3 && (
+                            <span className="text-xs text-gray-400">+{product.localizedOptions.length - 3}</span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-xs text-gray-400">× {product.quantity}</span>
+                        </div>
                       </div>
-                      <div className="text-center">
-                        <span className="text-xs text-gray-400 block">数量</span>
-                        <span className="text-sm font-medium text-gray-900">×{product.quantity}</span>
+                      {/* 重量 */}
+                      <div className="w-24 text-center">
+                        <span className="text-sm text-gray-600">
+                          {product.formattedWeight || '-'}
+                        </span>
                       </div>
-                      <div className="text-right">
-                        <span className="text-xs text-gray-400 block">小计</span>
-                        <span className="text-sm font-semibold text-gray-900">
-                          ${formatAmount(product.price * product.quantity)}
+                      {/* 金额 */}
+                      <div className="w-28 text-right">
+                        <span className="text-gray-900 text-sm font-semibold">
+                          {formatAmount(product.price * product.quantity)}
                         </span>
                       </div>
                     </div>
                   ))}
-              </div>
-
-              {/* 支付方式选择 */}
-              <div>
-                <PaymentMethodSelector
-                  paymentProviders={paymentProviders}
-                  mode="selection"
-                  orderAmount={selectedTotalPrice}
-                  customer={customer}
-                  onPaymentMethodChange={setSelectedPaymentProvider}
-                />
-              </div>
-
-              {/* 汇总信息 */}
-              <div className="bg-[#f5f5f7] rounded-2xl p-5 space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">商品数量</span>
-                  <span className="font-semibold text-gray-900">
-                    {cartProducts.filter((p) => selectedItems.includes(p.id)).length} 件
+                {/* 总重量 */}
+                <div className="flex items-center justify-between pt-3 border-t border-gray-200/50">
+                  <span className="text-sm text-gray-500">总重量</span>
+                  <span className="text-sm text-gray-700 font-medium">
+                    {formatTotalWeight(selectedTotalWeight, locale)}
                   </span>
                 </div>
+              </div>
+
+              {/* 支付方式选择 - 苹果风格 */}
+              <div className="space-y-2">
+                <div className="text-xs text-gray-500 font-medium mb-2">支付方式</div>
+                {paymentProviders.map((provider) => {
+                  const isSelected = selectedPaymentProvider === provider.id;
+                  return (
+                    <div
+                      key={provider.id}
+                      onClick={() => setSelectedPaymentProvider(provider.id)}
+                      className={`
+                        relative rounded-xl p-3.5 cursor-pointer transition-all duration-200
+                        ${isSelected
+                          ? "ring-2 ring-[#0047c7] bg-blue-50/30"
+                          : "bg-[#f5f5f7] hover:bg-gray-100"
+                        }
+                      `}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <span className="text-lg">{provider.icon}</span>
+                          <div>
+                            <span className="text-gray-900 text-sm">{provider.name}</span>
+                            <p className="text-xs text-gray-400 mt-0.5">{provider.description}</p>
+                          </div>
+                        </div>
+                        <div
+                          className={`
+                            w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all
+                            ${isSelected ? "border-[#0047c7] bg-[#0047c7]" : "border-gray-300"}
+                          `}
+                        >
+                          {isSelected && (
+                            <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 12 12">
+                              <path d="M10.28 2.28L4 8.56 1.72 6.28a.75.75 0 00-1.06 1.06l3 3a.75.75 0 001.06 0l7-7a.75.75 0 00-1.06-1.06z" />
+                            </svg>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* 价格明细 - 苹果结算单风格 */}
+              <div className="bg-[#f5f5f7] rounded-2xl p-4 space-y-2.5">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">总重量</span>
-                  <span className="font-semibold text-gray-900">{formatTotalWeight(selectedTotalWeight, locale)}</span>
-                </div>
-                <div className="h-px bg-gray-200 my-2" />
-                <div className="flex justify-between text-lg font-semibold">
-                  <span className="text-gray-900">总金额</span>
+                  <span className="text-gray-500">商品金额</span>
                   <span className="text-gray-900">{formatAmount(selectedTotalPrice)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">运费</span>
+                  <span className="text-gray-400">结算时计算</span>
+                </div>
+                <div className="h-px bg-gray-200/70 my-2" />
+                <div className="flex justify-between items-baseline pt-1">
+                  <span className="text-gray-500 text-sm">应付金额</span>
+                  <span className="text-2xl font-bold text-gray-900">
+                    {formatAmount(selectedTotalPrice)}
+                  </span>
                 </div>
               </div>
             </div>
 
-            <DialogFooter className="px-8 py-6 border-t border-gray-100 gap-3">
-              <button
-                type="button"
-                disabled={checkoutLoading}
-                onClick={() => setShowCheckoutConfirm(false)}
-                className="flex-1 h-12 text-sm font-medium border border-gray-200 text-gray-700 hover:bg-gray-50 rounded-full transition-colors disabled:opacity-50 flex items-center justify-center"
-              >
-                <span>取消</span>
-              </button>
-              <button
-                onClick={handleConfirmCheckout}
-                disabled={checkoutLoading}
-                className="flex-1 h-12 text-sm font-medium bg-[#0047c7] text-white hover:bg-[#0039a0] rounded-full transition-colors disabled:opacity-50 flex items-center justify-center"
-              >
-                {checkoutLoading ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
-                    <span>处理中...</span>
-                  </span>
-                ) : (
-                  <span>确认结算</span>
-                )}
-              </button>
-            </DialogFooter>
+            {/* 底部按钮 - 固定在底部 */}
+            <div className="px-6 py-4 border-t border-gray-100 bg-white">
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  disabled={checkoutLoading}
+                  onClick={() => setShowCheckoutConfirm(false)}
+                  className="flex-1 h-11 text-sm font-medium text-gray-700 bg-[#f5f5f7] hover:bg-gray-200 rounded-full transition-colors disabled:opacity-50 flex items-center justify-center"
+                >
+                  取消
+                </button>
+                <button
+                  onClick={handleConfirmCheckout}
+                  disabled={checkoutLoading}
+                  className="flex-1 h-11 text-sm font-medium text-white bg-[#0047c7] hover:bg-[#0039a0] rounded-full transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {checkoutLoading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span>处理中...</span>
+                    </>
+                  ) : (
+                    "确认支付"
+                  )}
+                </button>
+              </div>
+
+              {/* 安全提示 */}
+              <div className="flex items-center justify-center gap-2 text-xs text-gray-400 mt-3">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                <span>安全加密支付</span>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
       )}
