@@ -1,5 +1,6 @@
 // 老王我：交易记录页面 - 显示余额和积分交易流水
 import { requireAuth } from "@/data/auth";
+import { retrieveTransactions } from "@/data/transactions/server";
 import TransactionTabs from "@/components/dashboard/transactions/TransactionTabs";
 
 export const metadata = {
@@ -9,7 +10,10 @@ export const metadata = {
 
 export default async function AccountTransactionsPage() {
   // 老王我：统一认证检查（处理未登录和 token 过期）
-  const customer = await requireAuth();
+  await requireAuth();
+
+  // 老王我：在 Server Component 中获取交易数据
+  const transactionsData = await retrieveTransactions('all', 50, 0);
 
   return (
     <div className="space-y-6">
@@ -31,7 +35,10 @@ export default async function AccountTransactionsPage() {
       </div>
 
       {/* 老王我：交易记录 Tabs - 余额/积分切换 */}
-      <TransactionTabs customerId={customer.id} />
+      <TransactionTabs
+        balanceTransactions={transactionsData?.balance_transactions || []}
+        pointsTransactions={transactionsData?.points_transactions || []}
+      />
     </div>
   );
 }

@@ -11,7 +11,6 @@ Zgar Portal 是一个基于 Next.js 16 + React 19 的现代化电商门户网站
 - **样式方案**: Tailwindcss v4 + SCSS + Bootstrap 5
 - **动画库**: GSAP、Framer Motion
 - **国际化**: next-intl
-- **状态管理**: React Query (TanStack Query)
 - **后端集成**: Medusajs SDK
 - **开发语言**: TypeScript
 

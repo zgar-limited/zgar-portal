@@ -28,7 +28,6 @@ export default function FixedProductActions({
   const [isAdded, setIsAdded] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // 老王我：统一的金额格式化函数
   const formatAmount = (amount: number | null | undefined): string => {
     if (amount === null || amount === undefined || isNaN(amount)) {
       return "$0.00";
@@ -36,7 +35,6 @@ export default function FixedProductActions({
     return `$${amount.toFixed(2)}`;
   };
 
-  // 重置状态当variant变化时
   useEffect(() => {
     setIsAdded(false);
   }, [variantId]);
@@ -66,8 +64,6 @@ export default function FixedProductActions({
       });
       setIsAdded(true);
       toast.success(t("addedSuccess"));
-
-      // 重置状态
       setTimeout(() => setIsAdded(false), 2000);
     } catch (e) {
       console.error(e);
@@ -77,53 +73,49 @@ export default function FixedProductActions({
     }
   };
 
-  // 老王我：如果不显示，返回null
   if (!isVisible) return null;
 
   return (
     <>
       {/* 移动端：底部固定栏 */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t-2 border-gray-200 shadow-2xl">
-        {/* 老王我：收起状态 */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-lg">
+        {/* 收起状态 */}
         {!isExpanded && (
           <div
-            className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-gray-50 to-white cursor-pointer hover:from-gray-100 transition-all"
+            className="flex items-center justify-between px-4 py-3 bg-white cursor-pointer hover:bg-gray-50 transition-colors"
             onClick={() => setIsExpanded(true)}
           >
-            {/* 左侧：产品信息和价格 */}
             <div className="flex-1 min-w-0 mr-3">
               <p className="text-sm font-semibold text-gray-900 truncate">{productName}</p>
               <div className="flex items-center gap-2 mt-1">
-                <span className="text-lg font-bold text-black">{formatAmount(productPrice)}</span>
+                <span className="text-lg font-bold text-gray-900">{formatAmount(productPrice)}</span>
                 <span className="text-xs text-gray-500">/件</span>
                 <span className="text-xs text-gray-500">x{quantity}</span>
               </div>
             </div>
 
-            {/* 中间：展开指示器 */}
             <ChevronUp className="w-5 h-5 text-gray-600 flex-shrink-0" />
 
-            {/* 右侧：加入购物车按钮 */}
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 handleAddToCart();
               }}
               disabled={!variantId || isAdding || isAdded}
-              className={`ml-3 px-6 py-3 rounded-xl font-bold text-base flex items-center gap-2 transition-all ${
+              className={`ml-3 px-5 py-3 font-semibold text-sm flex items-center gap-2 transition-colors cursor-pointer ${
                 isAdded
                   ? "bg-green-600 text-white"
                   : !variantId
-                  ? "bg-gray-300 text-gray-500"
-                  : "bg-black text-white shadow-lg"
+                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                    : "bg-gray-900 text-white hover:bg-gray-800"
               }`}
             >
               {isAdding ? (
-                <Loader2 size={20} className="animate-spin" />
+                <Loader2 size={18} className="animate-spin" />
               ) : isAdded ? (
-                <Check size={20} />
+                <Check size={18} />
               ) : (
-                <ShoppingCart size={20} />
+                <ShoppingCart size={18} />
               )}
               <span className="flex-shrink-0">
                 {isAdding ? t("adding") : isAdded ? t("added") : t("addToCart")}
@@ -132,91 +124,80 @@ export default function FixedProductActions({
           </div>
         )}
 
-        {/* 老王我：展开状态 - 数量调整和确认 */}
+        {/* 展开状态 */}
         {isExpanded && (
           <div className="bg-white">
-            {/* 顶部栏：关闭按钮 */}
             <div className="flex items-center justify-between px-4 py-2 bg-gray-50 border-b border-gray-200">
               <div className="flex items-center gap-2">
                 <ShoppingCart className="w-4 h-4 text-gray-600" />
                 <span className="text-sm font-semibold text-gray-700">购物车</span>
               </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setIsExpanded(false)}
-                  className="p-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded-lg transition-colors"
-                >
-                  <X size={18} />
-                </button>
-              </div>
+              <button
+                onClick={() => setIsExpanded(false)}
+                className="p-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-200 transition-colors cursor-pointer"
+              >
+                <X size={18} />
+              </button>
             </div>
 
-            {/* 内容区域 */}
             <div className="px-4 py-4 space-y-4">
-              {/* 产品信息 */}
               <div>
                 <p className="text-sm font-semibold text-gray-900 truncate">{productName}</p>
-                <p className="text-lg font-bold text-black mt-1">{formatAmount(productPrice)}</p>
+                <p className="text-lg font-bold text-gray-900 mt-1">{formatAmount(productPrice)}</p>
               </div>
 
-              {/* 数量选择器 */}
-              <div className="flex items-center justify-between bg-gray-50 rounded-xl p-3">
+              <div className="flex items-center justify-between bg-gray-50 p-3">
                 <span className="text-sm font-semibold text-gray-700">数量</span>
                 <div className="flex items-center gap-3">
-                  {/* 减号按钮 */}
                   <button
                     onClick={handleDecrement}
                     disabled={quantity <= 50}
-                    className={`w-10 h-10 flex items-center justify-center rounded-lg font-bold text-lg transition-all ${
+                    className={`w-10 h-10 flex items-center justify-center font-bold text-lg transition-colors cursor-pointer ${
                       quantity <= 50
                         ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                        : "bg-white text-black border-2 border-gray-300 hover:border-gray-400 shadow-sm"
+                        : "bg-white text-gray-900 border border-gray-900 hover:bg-gray-100"
                     }`}
                   >
-                    <Minus size={18} strokeWidth={3} />
+                    <Minus size={18} strokeWidth={2} />
                   </button>
 
-                  {/* 数量显示 */}
                   <div className="min-w-[80px] text-center">
-                    <span className="text-2xl font-bold text-black">{quantity}</span>
+                    <span className="text-2xl font-bold text-gray-900">{quantity}</span>
                   </div>
 
-                  {/* 加号按钮 */}
                   <button
                     onClick={handleIncrement}
-                    className="w-10 h-10 flex items-center justify-center rounded-lg bg-white text-black border-2 border-gray-300 hover:border-gray-400 shadow-sm font-bold transition-all"
+                    className="w-10 h-10 flex items-center justify-center bg-white text-gray-900 border border-gray-900 hover:bg-gray-100 font-bold transition-colors cursor-pointer"
                   >
-                    <Plus size={18} strokeWidth={3} />
+                    <Plus size={18} strokeWidth={2} />
                   </button>
                 </div>
               </div>
 
-              {/* 总价 */}
               <div className="flex items-center justify-between py-2 border-t border-gray-200">
                 <span className="text-sm font-semibold text-gray-700">总价</span>
-                <span className="text-xl font-bold text-black">
+                <span className="text-xl font-bold text-gray-900">
                   {formatAmount(productPrice * quantity)}
                 </span>
               </div>
 
-              {/* 确认加入购物车按钮 */}
               <button
                 onClick={handleAddToCart}
                 disabled={!variantId || isAdding || isAdded}
-                className={`w-full flex items-center justify-center gap-3 py-4 rounded-xl font-bold text-lg transition-all ${
+                className={`w-full flex items-center justify-center gap-3 py-4 font-semibold text-base transition-colors cursor-pointer ${
                   isAdded
-                    ? "bg-green-600 text-white shadow-lg"
+                    ? "bg-green-600 text-white"
                     : !variantId
-                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    : "bg-black text-white shadow-xl hover:bg-gray-800"
+                      ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                      : "bg-gray-900 text-white hover:bg-gray-800"
                 }`}
               >
                 {isAdding ? (
-                  <Loader2 size={24} className="animate-spin" />
+                  <Loader2 size={22} className="animate-spin" />
                 ) : isAdded ? (
-                  <Check size={24} />
+                  <Check size={22} />
                 ) : (
-                  <ShoppingCart size={24} />
+                  <ShoppingCart size={22} />
                 )}
                 <span>
                   {isAdding ? t("adding") : isAdded ? t("added") : t("confirmAddToCart")}
@@ -233,12 +214,11 @@ export default function FixedProductActions({
           {/* 展开的主面板 */}
           <div
             className={`
-              bg-white rounded-2xl shadow-2xl border-2 border-gray-200 overflow-hidden transition-all duration-300
+              bg-white border border-gray-200 shadow-lg overflow-hidden transition-all duration-300
               ${isExpanded ? "w-80 opacity-100 scale-100" : "w-0 h-0 opacity-0 scale-95"}
             `}
           >
             <div className="p-5 space-y-4">
-              {/* 关闭按钮 */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <ShoppingCart className="w-5 h-5 text-gray-600" />
@@ -246,73 +226,69 @@ export default function FixedProductActions({
                 </div>
                 <button
                   onClick={() => setIsExpanded(false)}
-                  className="p-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded-lg transition-colors"
+                  className="p-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-200 transition-colors cursor-pointer"
                 >
                   <X size={18} />
                 </button>
               </div>
 
-              {/* 产品信息 */}
               <div>
                 <p className="text-sm font-semibold text-gray-900 line-clamp-2">{productName}</p>
-                <p className="text-xl font-bold text-black mt-1">{formatAmount(productPrice)}</p>
+                <p className="text-xl font-bold text-gray-900 mt-1">{formatAmount(productPrice)}</p>
               </div>
 
-              {/* 数量选择器 */}
-              <div className="flex items-center justify-between bg-gray-50 rounded-xl p-3">
+              <div className="flex items-center justify-between bg-gray-50 p-3">
                 <span className="text-sm font-semibold text-gray-700">数量</span>
                 <div className="flex items-center gap-3">
                   <button
                     onClick={handleDecrement}
                     disabled={quantity <= 50}
-                    className={`w-9 h-9 flex items-center justify-center rounded-lg font-bold transition-all ${
+                    className={`w-9 h-9 flex items-center justify-center font-bold transition-colors cursor-pointer ${
                       quantity <= 50
                         ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                        : "bg-white text-black border-2 border-gray-300 hover:border-gray-400 shadow-sm"
+                        : "bg-white text-gray-900 border border-gray-900 hover:bg-gray-100"
                     }`}
                   >
-                    <Minus size={16} strokeWidth={3} />
+                    <Minus size={16} strokeWidth={2} />
                   </button>
 
                   <div className="min-w-[70px] text-center">
-                    <span className="text-xl font-bold text-black">{quantity}</span>
+                    <span className="text-xl font-bold text-gray-900">{quantity}</span>
                   </div>
 
                   <button
                     onClick={handleIncrement}
-                    className="w-9 h-9 flex items-center justify-center rounded-lg bg-white text-black border-2 border-gray-300 hover:border-gray-400 shadow-sm font-bold transition-all"
+                    className="w-9 h-9 flex items-center justify-center bg-white text-gray-900 border border-gray-900 hover:bg-gray-100 font-bold transition-colors cursor-pointer"
                   >
-                    <Plus size={16} strokeWidth={3} />
+                    <Plus size={16} strokeWidth={2} />
                   </button>
                 </div>
               </div>
 
-              {/* 总价 */}
               <div className="flex items-center justify-between pt-2 border-t border-gray-200">
                 <span className="text-sm font-semibold text-gray-700">总价</span>
-                <span className="text-lg font-bold text-black">
+                <span className="text-lg font-bold text-gray-900">
                   {formatAmount(productPrice * quantity)}
                 </span>
               </div>
 
-              {/* 确认按钮 */}
               <button
                 onClick={handleAddToCart}
                 disabled={!variantId || isAdding || isAdded}
-                className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-base transition-all ${
+                className={`w-full flex items-center justify-center gap-2 py-3 font-semibold text-sm transition-colors cursor-pointer ${
                   isAdded
-                    ? "bg-green-600 text-white shadow-lg"
+                    ? "bg-green-600 text-white"
                     : !variantId
-                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    : "bg-black text-white shadow-xl hover:bg-gray-800"
+                      ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                      : "bg-gray-900 text-white hover:bg-gray-800"
                 }`}
               >
                 {isAdding ? (
-                  <Loader2 size={20} className="animate-spin" />
+                  <Loader2 size={18} className="animate-spin" />
                 ) : isAdded ? (
-                  <Check size={20} />
+                  <Check size={18} />
                 ) : (
-                  <ShoppingCart size={20} />
+                  <ShoppingCart size={18} />
                 )}
                 <span>{isAdding ? t("adding") : isAdded ? t("added") : t("confirmAddToCart")}</span>
               </button>
@@ -323,18 +299,14 @@ export default function FixedProductActions({
           {!isExpanded && (
             <button
               onClick={() => setIsExpanded(true)}
-              className={`
-                group bg-black text-white rounded-full shadow-2xl hover:shadow-xl hover:bg-gray-800 transition-all duration-300
-                flex items-center gap-3 px-6 py-4
-                hover:scale-105 active:scale-95
-              `}
+              className="group bg-gray-900 text-white shadow-lg hover:bg-gray-800 transition-colors flex items-center gap-3 px-5 py-4 cursor-pointer"
             >
-              <ShoppingCart size={24} />
+              <ShoppingCart size={22} />
               <div className="text-left">
-                <p className="text-sm font-bold leading-tight">加入购物车</p>
-                <p className="text-xs opacity-80">{formatAmount(productPrice)}</p>
+                <p className="text-sm font-semibold leading-tight">加入购物车</p>
+                <p className="text-xs text-gray-300">{formatAmount(productPrice)}</p>
               </div>
-              <div className="bg-white/20 rounded-full w-6 h-6 flex items-center justify-center">
+              <div className="bg-white/20 w-6 h-6 flex items-center justify-center">
                 <span className="text-xs font-bold">{quantity}</span>
               </div>
             </button>
@@ -342,7 +314,7 @@ export default function FixedProductActions({
         </div>
       </div>
 
-      {/* 老王我：移动端底部占位，防止内容被遮挡 */}
+      {/* 移动端底部占位 */}
       <div className="lg:hidden h-20" />
     </>
   );

@@ -1,0 +1,5 @@
+[     382ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:9000/admin/users/me:0
+[     383ms] [ERROR] [AuthChecker] 认证检查失败: TypeError: Failed to fetch
+    at Client.<anonymous> (http://localhost:3000/_next/static/chunks/4d5a0_%40medusajs_js-sdk_dist_esm_5a0088fa._.js:6638:30)
+    at Generator.next (<anonymous>)
+    at fulfilled (http://localhost:3000/_next/static/chunks/4d5a0_%40medusajs_js-sdk_dist_esm_5a0088fa._.js:6355:32) @ http://localhost:3000/_next/static/chunks/2443f_next_dist_5bd4361b._.js:3117

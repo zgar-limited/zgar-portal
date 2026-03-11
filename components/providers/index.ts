@@ -1,5 +1,4 @@
 // 老王我：Providers统一导出
-// 创建时间：2026-02-02
+// 注意：已移除 React Query 相关 Provider
 
-export { default as QueryClientProvider } from "./QueryClientProvider";
-export { default as HydrateClient } from "./HydrateClient";
+// 如需添加其他 Provider，请在此导出
