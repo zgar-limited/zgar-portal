@@ -50,11 +50,10 @@ export default function ProductTabs({ product }: ProductTabsProps) {
             {activeTab === "desc" && (
               <div>
                 {product.description ? (
-                  <div className="prose prose-lg max-w-none">
-                    <p className="text-gray-700 leading-relaxed text-base whitespace-pre-line">
-                      {product.description}
-                    </p>
-                  </div>
+                  <div
+                    className="prose prose-lg max-w-none rich-text-content"
+                    dangerouslySetInnerHTML={{ __html: product.description }}
+                  />
                 ) : (
                   <div className="text-center py-8">
                     <p className="text-gray-400">暂无商品描述</p>

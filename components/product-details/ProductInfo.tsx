@@ -54,17 +54,18 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
     };
   }, []);
 
-  // 初始化选项
+  // 初始化选项 - 只在产品变化时初始化，避免规格选择时重置
   useEffect(() => {
     if (product.variants && product.variants.length > 0) {
-      const variantToUse = selectedVariant || product.variants[0];
+      const variantToUse = product.variants[0];
       const initialOptions: Record<string, string> = {};
       variantToUse.options?.forEach((opt: any) => {
         initialOptions[opt.option_id] = opt.value;
       });
       setSelectedOptions(initialOptions);
     }
-  }, [product, selectedVariant]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product.id]);
 
   // 查找当前选中的variant
   const currentVariant = useMemo(() => {
@@ -160,11 +161,8 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
           </div>
         )}
         <h1 className="mb-2 text-3xl lg:text-4xl font-bold text-gray-900 leading-tight tracking-tight">
-          {currentVariant?.title || product.title}
+          {product.title}
         </h1>
-        {currentVariant?.title && currentVariant.title !== product.title && (
-          <p className="mb-4 text-lg text-gray-500 font-normal">{product.title}</p>
-        )}
 
         {/* 价格展示 */}
         <div className="mt-6">
@@ -196,11 +194,6 @@ export default function ProductInfo({ product, selectedVariant, onVariantSelect 
 
       {/* 分隔线 */}
       <div className="h-px bg-gray-200"></div>
-
-      {/* 描述预览 */}
-      {product.description && (
-        <p className="text-base text-gray-600 leading-relaxed">{product.description}</p>
-      )}
 
       {/* 规格选择 */}
       <div className="space-y-6">
