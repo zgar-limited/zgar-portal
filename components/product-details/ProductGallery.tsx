@@ -1,8 +1,8 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { StoreProduct, StoreProductVariant } from "@medusajs/types";
-import { ChevronLeft, ChevronRight, ZoomIn, Package } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface ProductGalleryProps {
   product: StoreProduct;
@@ -12,7 +12,6 @@ interface ProductGalleryProps {
 
 export default function ProductGallery({ product, selectedVariant, onVariantSelect }: ProductGalleryProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isZoomed, setIsZoomed] = useState(false);
 
   // 记录最后手动选择的图片URL
   const lastManualSelectedImage = React.useRef<string | null>(null);
@@ -166,11 +165,6 @@ export default function ProductGallery({ product, selectedVariant, onVariantSele
     }
   }, [selectedVariant, allImages]);
 
-  // 缩放功能
-  const handleImageClick = () => {
-    setIsZoomed(!isZoomed);
-  };
-
   const handlePrevImage = () => {
     setCurrentImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
   };
@@ -182,7 +176,6 @@ export default function ProductGallery({ product, selectedVariant, onVariantSele
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowLeft') handlePrevImage();
     if (e.key === 'ArrowRight') handleNextImage();
-    if (e.key === 'Escape') setIsZoomed(false);
   };
 
   // 点击底部小图选择对应的variant和图片
@@ -203,15 +196,11 @@ export default function ProductGallery({ product, selectedVariant, onVariantSele
 
   return (
     <div className="flex flex-col gap-6" onKeyDown={handleKeyDown}>
-      {/* 老王我：IKEA 风格 - 主图区域 */}
-      <div className="bg-white border-2 border-gray-200">
-        {/* 老王我：主图容器 - 功能性设计 */}
+      {/* 主图区域 */}
+      <div className="bg-white border border-gray-200">
         <div
-          className={`relative overflow-hidden bg-gray-50 ${
-            isZoomed ? 'cursor-zoom-out' : 'cursor-zoom-in'
-          }`}
+          className="relative overflow-hidden bg-gray-50 cursor-pointer"
           style={{ aspectRatio: "1/1" }}
-          onClick={handleImageClick}
         >
           <Image
             src={allImages[currentImageIndex]}
@@ -222,57 +211,46 @@ export default function ProductGallery({ product, selectedVariant, onVariantSele
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 40vw"
           />
 
-          {/* 老王我：功能提示 - 简洁文字 */}
-          {!isZoomed && (
-            <div className="absolute top-4 right-4 bg-white/95 backdrop-blur text-gray-900 px-3 py-2 text-sm font-medium border border-gray-300">
-              点击放大
-            </div>
-          )}
-
-          {/* 老王我：导航箭头 - 功能性按钮 */}
+          {/* 导航箭头 */}
           {allImages.length > 1 && (
             <>
               <button
-                onClick={(e) => { e.stopPropagation(); handlePrevImage(); }}
-                className="absolute left-4 top-1/2 -translate-y-1/2 bg-white border-2 border-gray-900 hover:bg-gray-50 flex items-center justify-center transition-colors"
-                style={{ width: 44, height: 44 }}
+                onClick={handlePrevImage}
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white border border-gray-900 flex items-center justify-center hover:bg-gray-100 transition-colors cursor-pointer"
                 aria-label="上一张图片"
               >
-                <ChevronLeft size={20} />
+                <ChevronLeft size={18} className="text-gray-900" />
               </button>
               <button
-                onClick={(e) => { e.stopPropagation(); handleNextImage(); }}
-                className="absolute right-4 top-1/2 -translate-y-1/2 bg-white border-2 border-gray-900 hover:bg-gray-50 flex items-center justify-center transition-colors"
-                style={{ width: 44, height: 44 }}
+                onClick={handleNextImage}
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white border border-gray-900 flex items-center justify-center hover:bg-gray-100 transition-colors cursor-pointer"
                 aria-label="下一张图片"
               >
-                <ChevronRight size={20} />
+                <ChevronRight size={18} className="text-gray-900" />
               </button>
             </>
           )}
         </div>
 
-        {/* 老王我：图片计数器 - 简洁信息 */}
+        {/* 图片计数器 */}
         {allImages.length > 1 && (
-          <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-t border-gray-200">
+          <div className="flex items-center justify-center px-4 py-3 bg-gray-50 border-t border-gray-200">
             <span className="text-sm font-medium text-gray-600">
-              图片 {currentImageIndex + 1} / {allImages.length}
+              {currentImageIndex + 1} / {allImages.length}
             </span>
           </div>
         )}
       </div>
 
-      {/* 老王我：IKEA 风格缩略图 - 网格布局 + 序号 */}
+      {/* 缩略图网格 */}
       {allVariantImages.length > 1 && (
         <div>
-          {/* 老王我：缩略图标题 */}
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-base font-semibold text-gray-900">选择款式</h3>
-            <span className="text-sm text-gray-500">点击切换</span>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">选择款式</h3>
+            <span className="text-sm text-gray-500">{allVariantImages.length} 款可选</span>
           </div>
 
-          {/* 老王我：网格布局 - 数学化间距 */}
-          <div className="grid grid-cols-4 sm:grid-cols-6 gap-3">
+          <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
             {allVariantImages.map((imageData, idx) => {
               const isSelected = selectedVariant?.id === imageData.variant.id &&
                                 allImages[currentImageIndex] === imageData.url;
@@ -281,15 +259,19 @@ export default function ProductGallery({ product, selectedVariant, onVariantSele
                 <button
                   key={`${imageData.variant.id}-${idx}`}
                   onClick={() => handleVariantImageClick(imageData)}
-                  className="relative group"
+                  className="relative group cursor-pointer"
                 >
-                  {/* 老王我：序号标识 */}
-                  <div className={`absolute top-2 left-2 w-6 h-6 flex items-center justify-center text-xs font-bold transition-colors z-10 ${isSelected ? 'bg-brand-pink text-white' : 'bg-gray-200 text-gray-600 group-hover:bg-gray-300'}`}>
+                  {/* 序号标识 */}
+                  <div className={`absolute top-1 left-1 w-5 h-5 flex items-center justify-center text-xs font-bold z-10 ${
+                    isSelected ? 'bg-gray-900 text-white' : 'bg-white text-gray-600 group-hover:bg-gray-100'
+                  }`}>
                     {idx + 1}
                   </div>
 
-                  {/* 老王我：图片容器 - 扁平设计 */}
-                  <div className={`relative w-full aspect-square rounded overflow-hidden border-2 transition-colors ${isSelected ? 'border-brand-pink' : 'border-gray-300 group-hover:border-gray-900'}`}>
+                  {/* 图片容器 */}
+                  <div className={`relative w-full aspect-square overflow-hidden border transition-colors ${
+                    isSelected ? 'border-gray-900' : 'border-gray-200 group-hover:border-gray-400'
+                  }`}>
                     <Image
                       src={imageData.url}
                       alt={`款式 ${idx + 1}`}
@@ -306,258 +288,65 @@ export default function ProductGallery({ product, selectedVariant, onVariantSele
         </div>
       )}
 
-      {/* 老王我：Package Specifications (箱规) - Memphis 风格大卡片 */}
+      {/* Package Specifications */}
       {product?.metadata && Object.keys(product.metadata).some(key => key.startsWith('package_spec_')) && (
-        <div className="relative">
-          {/* 老王我：Memphis 风格大卡片容器 */}
-          <div
-            className="relative p-5 shadow-xl"
-            style={{
-              backgroundColor: 'white',
-              borderRadius: "4px",
-              border: '3px dashed #f496d3'
-            }}
-          >
-            {/* 老王我：卡片装饰 - 波点图案背景 */}
-            <div
-              className="absolute inset-0 opacity-5 rounded-sm"
-              style={{
-                backgroundImage: 'radial-gradient(circle, #f496d3 2px, transparent 2px)',
-                backgroundSize: '20px 20px',
-                pointerEvents: 'none'
-              }}
-            ></div>
+        <div className="border border-gray-200 bg-white">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h3 className="text-base font-semibold text-gray-900 uppercase tracking-wide">
+              Package Specifications / 箱规详情
+            </h3>
+          </div>
 
-            {/* 老王我：装饰性几何图形 */}
-            {/* 左上角三角形 */}
-            <div
-              className="absolute -top-4 -left-4 w-10 h-10 opacity-30"
-              style={{
-                backgroundColor: '#f496d3',
-                clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
-                transform: 'rotate(-25deg)'
-              }}
-            ></div>
+          <div className="p-6">
+            <div className="grid grid-cols-2 gap-4">
+              {Object.keys(product.metadata)
+                .filter(key => key.startsWith('package_spec_'))
+                .sort((a, b) => {
+                  const order = [
+                    'package_spec_shipment_box_contains',
+                    'package_spec_product_size',
+                    'package_spec_product_weight',
+                    'package_spec_packaging_box_size',
+                    'package_spec_packaging_box_weight',
+                    'package_spec_outer_box_size',
+                    'package_spec_outer_box_weight',
+                    'package_spec_shipment_box_size',
+                    'package_spec_shipment_box_weight'
+                  ];
+                  const indexA = order.indexOf(a);
+                  const indexB = order.indexOf(b);
+                  return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
+                })
+                .map((key, index) => {
+                  const value = product.metadata![key];
+                  if (!value) return null;
 
-            {/* 右上角圆形 */}
-            <div
-              className="absolute -top-5 -right-5 w-14 h-14 opacity-20 rounded-sm"
-              style={{ backgroundColor: '#f496d3' }}
-            ></div>
+                  const labelKey = key.replace('package_spec_', '');
+                  const labelText = labelKey
+                    .split('_')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ');
 
-            {/* 左下角方形 */}
-            <div
-              className="absolute -bottom-4 -left-4 w-12 h-12 opacity-25"
-              style={{
-                backgroundColor: '#0047c7',
-                transform: 'rotate(-15deg)'
-              }}
-            ></div>
+                  // 交替背景色
+                  const bgColor = index % 2 === 0 ? 'bg-gray-50' : 'bg-white';
 
-            {/* 右下角X形 */}
-            <div className="absolute -bottom-3 -right-3 w-6 h-6 opacity-20">
-              <svg viewBox="0 0 32 32" className="w-full h-full">
-                <path
-                  d="M4,4 L28,28 M28,4 L4,28"
-                  stroke="#0047c7"
-                  strokeWidth="4"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </div>
-
-            {/* 老王我：内容区域 */}
-            <div className="relative z-10">
-              {/* 老王我：Memphis 风格标题区 */}
-              <div className="relative mb-5">
-                {/* 老王我：装饰性三角形 */}
-                <div
-                  className="absolute -left-6 top-1/2 w-8 h-8 opacity-40"
-                  style={{
-                    backgroundColor: '#f496d3',
-                    clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
-                    transform: 'translateY(-50%) rotate(-20deg)'
-                  }}
-                ></div>
-
-                <div className="flex items-center justify-between pl-8">
-                  <div>
-                    {/* 老王我：波浪线装饰 */}
-                    <div className="w-16 h-2 mb-1">
-                      <svg viewBox="0 0 96 12" className="w-full h-full">
-                        <path
-                          d="M0,6 Q12,0 24,6 T48,6 T72,6 T96,6"
-                          fill="none"
-                          stroke="#f496d3"
-                          strokeWidth="4"
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                    </div>
-
-                    <h3 className="text-2xl font-black text-gray-900 tracking-tight" style={{ fontFamily: 'sans-serif' }}>
-                      Package Specifications
-                    </h3>
-                    <p className="text-sm text-gray-600 font-bold mt-1">箱规详情</p>
-                  </div>
-
-                  {/* 老王我：装饰性圆形 */}
-                  <div className="flex gap-2">
-                    <div className="w-5 h-5 rounded-sm border-3 border-pink-400 bg-pink-100" style={{ borderWidth: '3px' }}></div>
-                    <div className="w-5 h-5 rounded-sm border-3 border-yellow-400 bg-yellow-100" style={{ borderWidth: '3px' }}></div>
-                    <div className="w-5 h-5 rounded-sm border-3 border-teal-400 bg-teal-100" style={{ borderWidth: '3px' }}></div>
-                  </div>
-                </div>
-              </div>
-
-              {/* 老王我：Memphis 风格网格 */}
-              <div className="grid grid-cols-2 gap-4">
-            {Object.keys(product.metadata)
-              .filter(key => key.startsWith('package_spec_'))
-              .sort((a, b) => {
-                const order = [
-                  'package_spec_shipment_box_contains',
-                  'package_spec_product_size',
-                  'package_spec_product_weight',
-                  'package_spec_packaging_box_size',
-                  'package_spec_packaging_box_weight',
-                  'package_spec_outer_box_size',
-                  'package_spec_outer_box_weight',
-                  'package_spec_shipment_box_size',
-                  'package_spec_shipment_box_weight'
-                ];
-                const indexA = order.indexOf(a);
-                const indexB = order.indexOf(b);
-                return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
-              })
-              .map((key, index) => {
-                const value = product.metadata![key];
-                if (!value) return null;
-
-                const labelKey = key.replace('package_spec_', '');
-                // 老王我：格式化标签文本
-                const labelText = labelKey
-                  .split('_')
-                  .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                  .join(' ');
-
-                // 老王我：Memphis 明亮碰撞色彩
-                const memphisColors = [
-                  {
-                    bg: 'bg-pink-400',
-                    border: 'border-pink-500',
-                    text: 'text-white',
-                    subtext: 'text-pink-100',
-                    accent: '#f496d3'
-                  },
-                  {
-                    bg: 'bg-yellow-400',
-                    border: 'border-yellow-500',
-                    text: 'text-gray-900',
-                    subtext: 'text-yellow-900',
-                    accent: '#f496d3'
-                  },
-                  {
-                    bg: 'bg-teal-400',
-                    border: 'border-teal-500',
-                    text: 'text-white',
-                    subtext: 'text-teal-100',
-                    accent: '#0047c7'
-                  },
-                  {
-                    bg: 'bg-purple-400',
-                    border: 'border-purple-500',
-                    text: 'text-white',
-                    subtext: 'text-purple-100',
-                    accent: '#0047c7'
-                  }
-                ];
-                const colorScheme = memphisColors[index % memphisColors.length];
-
-                return (
-                  <div
-                    key={key}
-                    className="group relative overflow-hidden"
-                    style={{
-                      backgroundColor: colorScheme.accent,
-                      borderRadius: "4px"
-                    }}
-                  >
-                    {/* 老王我：Memphis 装饰边框 - 虚线 */}
+                  return (
                     <div
-                      className="absolute inset-0 rounded-sm"
-                      style={{
-                        border: '3px dashed',
-                        borderColor: 'rgba(255, 255, 255, 0.5)',
-                        padding: '12px'
-                      }}
-                    ></div>
-
-                    {/* 老王我：装饰性几何图形 - 三角形 */}
-                    <div
-                      className="absolute -top-2 -right-2 w-12 h-12 opacity-20"
-                      style={{
-                        backgroundColor: 'white',
-                        clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
-                        transform: 'rotate(25deg)'
-                      }}
-                    ></div>
-
-                    {/* 老王我：波点装饰 */}
-                    <div
-                      className="absolute bottom-0 left-0 w-10 h-10 opacity-10"
-                      style={{
-                        backgroundImage: 'radial-gradient(circle, white 2px, transparent 2px)',
-                        backgroundSize: '8px 8px'
-                      }}
-                    ></div>
-
-                    {/* 老王我：内容区域 */}
-                    <div className="relative z-10 p-3">
-                      {/* 老王我：序号 - 圆形徽章 */}
-                      <div className="absolute -top-2 -right-2 w-7 h-7 rounded-sm bg-white border-3 shadow-md flex items-center justify-center" style={{ borderColor: colorScheme.accent, borderWidth: '3px' }}>
-                        <span className={`text-xs font-black ${colorScheme.text}`}>
-                          {index + 1}
-                        </span>
-                      </div>
-
-                      {/* 老王我：图标容器 - 方形旋转 */}
-                      <div
-                        className="w-9 h-9 bg-white/30 backdrop-blur-sm rounded-sm flex items-center justify-center mb-2"
-                        style={{ transform: 'rotate(-5deg)' }}
-                      >
-                        <Package size={18} className={colorScheme.text} />
-                      </div>
-
-                      {/* 老王我：标签 - 粗体大写 */}
-                      <p className={`text-[10px] font-black uppercase tracking-wider mb-1 ${colorScheme.subtext}}`}>
+                      key={key}
+                      className={`p-4 border border-gray-200 ${bgColor}`}
+                    >
+                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
                         {labelText}
                       </p>
-
-                      {/* 老王我：值 - 超粗字体 */}
-                      <p className={`text-sm font-black ${colorScheme.text} leading-tight`}>
+                      <p className="text-sm font-semibold text-gray-900">
                         {value}
                       </p>
-
-                      {/* 老王我：装饰性X标记 */}
-                      <div className="absolute bottom-2 right-2 w-3 h-3 opacity-20">
-                        <svg viewBox="0 0 16 16" className="w-full h-full">
-                          <path
-                            d="M2,2 L14,14 M14,2 L2,14"
-                            stroke="white"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                          />
-                        </svg>
-                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
             </div>
           </div>
         </div>
-      </div>
       )}
     </div>
   );

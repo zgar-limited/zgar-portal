@@ -55,7 +55,7 @@ export function BalanceTransactionTable({ transactions }: BalanceTransactionTabl
     return `$${amount.toFixed(2)}`;
   };
 
-  if (transactions.length === 0) {
+  if (!transactions || transactions.length === 0) {
     return (
       <div className="relative overflow-hidden p-12 rounded-xl border-4 border-black shadow-[6px_6px_0_0_#000000] bg-white text-center">
         <FileText size={48} className="mx-auto mb-4 text-gray-400" />

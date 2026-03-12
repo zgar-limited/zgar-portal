@@ -247,6 +247,7 @@
     "paymentMethod": "Payment Method",
     "fulfillment": "Fulfillment",
     "shippingAddress": "Shipping Address",
+    "addressConfirmed": "Address Confirmed",
     "tel": "Tel",
     "auditStatus": "Audit Status",
     "paymentAuditStatus": "Payment Audit Status",
@@ -284,7 +285,10 @@
       "insufficientBalance": "Insufficient balance",
       "required": "required"
     },
-    "rejectKeyword": "reject"
+    "rejectKeyword": "reject",
+    "lastAddress": {
+      "addressUpdated": "Address updated successfully"
+    }
   },
   "pendingAction": {
     "title": {
@@ -332,6 +336,8 @@
   "edit-address": {
     "title": "Edit Shipping Address",
     "description": "Update your shipping address information for this order",
+    "recipientInfo": "Recipient Information",
+    "addressInfo": "Address Information",
     "firstName": "First Name",
     "firstNamePlaceholder": "Enter first name",
     "lastName": "Last Name",
@@ -980,5 +986,18 @@
       "title": "Zgar Brand Story: From Inception to Global",
       "description": "Learn about Zgar's development journey, core values, and future vision. From a small team to serving global users, we always adhere to quality first."
     }
+  },
+  "shipping-address-section": {
+    "title": "Shipping Address",
+    "confirmed": "Confirmed",
+    "noAddress": "Please select or enter a shipping address",
+    "selectPrompt": "Select an address or add a new one",
+    "lastOrderAddress": "Previous Order Address",
+    "savedAddresses": "Saved Addresses",
+    "lastUsed": "Last Used",
+    "default": "Default",
+    "current": "Current",
+    "addNewAddress": "Add New Address",
+    "noSavedAddresses": "No saved addresses, please add or edit directly"
   }
 }

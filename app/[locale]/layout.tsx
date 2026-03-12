@@ -14,7 +14,6 @@ import "../../public/css/harmonyos_sans_tc.css";
 import { Toaster } from "sonner";
 import GlobalEffectsProvider from "@/components/common/GlobalEffectProvider";
 import BackToTop from "@/components/back-to-top/BackToTop";
-import QueryClientProvider from "@/components/providers/QueryClientProvider";
 
 export const metadata = {
   title: "Zgar Vape Website",
@@ -43,16 +42,14 @@ export default async function RootLayout({
     <html lang={locale}>
       <head></head>
       <body>
-        <QueryClientProvider>
-          <NextIntlClientProvider messages={messages}>
-            <main id="wrapper">
+        <NextIntlClientProvider messages={messages}>
+          <main id="wrapper">
             {children}
 
             <GlobalEffectsProvider />
             <BackToTop />
           </main>
-          </NextIntlClientProvider>
-        </QueryClientProvider>
+        </NextIntlClientProvider>
         <Toaster position="top-right" duration={3000} richColors />
       </body>
     </html>

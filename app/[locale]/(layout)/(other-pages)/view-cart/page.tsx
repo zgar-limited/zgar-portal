@@ -2,6 +2,7 @@ import ShopCart from "@/components/other-pages/ShopCart";
 import { retrieveCart } from "@/data/cart";
 import { fetchProducts } from "@/data/products";
 import { requireAuth } from "@/data/auth";
+import { Suspense } from "react";
 
 export const metadata = {
   title: "View Cart  ",
@@ -19,8 +20,8 @@ export default async function page() {
   const { response } = await fetchProducts({});
 
   return (
-    <>
+    <Suspense fallback={<div className="min-h-[60vh]" />}>
       <ShopCart cart={cart} products={response.products} customer={customer} />
-    </>
+    </Suspense>
   );
 }

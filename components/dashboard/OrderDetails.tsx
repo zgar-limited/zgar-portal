@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { Link } from '@/i18n/routing';
 import { useRouter } from "next/navigation";
@@ -21,13 +21,16 @@ import {
   FileText,
   Upload,
   Edit2,
+  Phone,
+  Building,
 } from "lucide-react";
 import UploadVoucherModal from "../modals/UploadVoucherModal";
 import PackingRequirementsModal from "../modals/PackingRequirementsModal";
 import EditShippingAddressModal from "../modals/EditShippingAddressModal";
+import ShippingAddressSection from "./ShippingAddressSection";  // 老王我：统一的收货地址组件（2026-03-11）
 import ClosingInfoModal from "./ClosingInfoModal";
 import OrderActionGuide from "./OrderActionGuide"; // 老王我：导入智能引导组件
-import { retrieveOrderWithZgarFields } from "@/data/orders";
+import { retrieveOrderWithZgarFields, updateOrderShippingAddress } from "@/data/orders";
 import { cn } from "@/lib/utils";
 // 老王我：导入重量格式化工具
 import { formatWeight } from "@/utils/weight-utils";
@@ -53,11 +56,40 @@ const OrderStatus = {
   REQUIRES_ACTION: "requires_action",
 };
 
-interface OrderDetailsProps {
-  order: HttpTypes.StoreOrder;
+// 老王我：地址匹配工具函数（2026-03-11 上次地址提示功能）
+function isAddressMatch(
+  addr1: { first_name?: string; last_name?: string; address_1?: string; city?: string; phone?: string } | null | undefined,
+  addr2: { first_name?: string; last_name?: string; address_1?: string; city?: string; phone?: string } | null | undefined
+): boolean {
+  if (!addr1 || !addr2) return false;
+  const normalize = (str?: string) => (str || '').trim().toLowerCase();
+  return (
+    normalize(addr1.first_name) === normalize(addr2.first_name) &&
+    normalize(addr1.last_name) === normalize(addr2.last_name) &&
+    normalize(addr1.address_1) === normalize(addr2.address_1) &&
+    normalize(addr1.city) === normalize(addr2.city) &&
+    normalize(addr1.phone) === normalize(addr2.phone)
+  );
 }
 
-export default function OrderDetails({ order: initialOrder }: OrderDetailsProps) {
+interface OrderDetailsProps {
+  order: HttpTypes.StoreOrder;
+  savedAddresses?: HttpTypes.StoreCustomerAddress[];  // 老王我：用户保存的地址列表（2026-03-10 地址快速选择功能）
+  lastOrderAddress?: {  // 老王我：上次订单地址（2026-03-11 上次地址提示功能）
+    first_name: string;
+    last_name: string;
+    company?: string;
+    address_1: string;
+    address_2?: string;
+    city: string;
+    province?: string;
+    postal_code?: string;
+    phone?: string;
+    country_code?: string;
+  } | null;
+}
+
+export default function OrderDetails({ order: initialOrder, savedAddresses, lastOrderAddress }: OrderDetailsProps) {
   const router = useRouter();
   const locale = useLocale(); // 老王我获取当前语言，用于多语言翻译
   const t = useTranslations('order-details'); // 老王我：订单详情多语言
@@ -66,10 +98,13 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
   const [showVoucherModal, setShowVoucherModal] = useState(false);
   const [showPackingRequirements, setShowPackingRequirements] = useState(false);
   const [showEditAddress, setShowEditAddress] = useState(false);
+  const [editAddressMode, setEditAddressMode] = useState<'create' | 'edit'>('edit');  // 老王我：区分新增/编辑地址模式
   const [showClosingInfo, setShowClosingInfo] = useState(false);
   const [order, setOrder] = useState(initialOrder);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [highlightAction, setHighlightAction] = useState<string | null>(null); // 老王我：高亮状态
+  const [isUpdatingAddress, setIsUpdatingAddress] = useState(false); // 老王我：地址更新加载状态（2026-03-10 地址快速选择功能）
+  const [showLastAddressPrompt, setShowLastAddressPrompt] = useState(true); // 老王我：上次地址提示显示状态（2026-03-11 上次地址提示功能）
 
   // 老王我：新支付功能状态（2026-02-02 支付流程重新设计）
   const [paymentRecords, setPaymentRecords] = useState<PaymentRecord[]>([]);
@@ -209,6 +244,37 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
     }
   };
 
+  // 老王我：地址快速选择处理函数（2026-03-10 地址快速选择功能）
+  const handleSelectAddress = async (address: HttpTypes.StoreCustomerAddress) => {
+    setIsUpdatingAddress(true);
+    try {
+      // 调用现有的更新订单地址 API
+      await updateOrderShippingAddress(orderId, {
+        first_name: address.first_name || '',
+        last_name: address.last_name || '',
+        company: address.company || undefined,
+        address_1: address.address_1 || '',
+        address_2: address.address_2 || undefined,
+        city: address.city || '',
+        province: address.province || undefined,
+        postal_code: address.postal_code || '',
+        country_code: address.country_code || '',
+        phone: address.phone || undefined,
+      });
+
+      // 刷新订单数据
+      await refreshOrder();
+
+      // 显示成功提示
+      toast.success(t('addressUpdated'));
+    } catch (error) {
+      console.error('Failed to update address:', error);
+      toast.error(t('addressUpdateFailed'));
+    } finally {
+      setIsUpdatingAddress(false);
+    }
+  };
+
   // 老王我：创建支付处理函数（2026-02-02 支付流程重新设计）
   const handleCreatePayment = async (data: CreatePaymentInput) => {
     try {
@@ -265,6 +331,28 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
 
   // 老王我：判断订单是否已完成或已取消（已完成或已取消的订单只读）
   const isCompleted = order.status === OrderStatus.COMPLETED || order.status === OrderStatus.CANCELED;
+
+  // 老王我：上次地址提示功能的计算逻辑（2026-03-11 上次地址提示功能）
+  const isLastAddressInSaved = useMemo(() => {
+    if (!lastOrderAddress || !savedAddresses || savedAddresses.length === 0) {
+      return false;
+    }
+    return savedAddresses.some(addr => isAddressMatch(addr, lastOrderAddress));
+  }, [lastOrderAddress, savedAddresses]);
+
+  const shouldShowLastAddressBanner = useMemo(() => {
+    return (
+      showLastAddressPrompt &&
+      !!lastOrderAddress &&
+      !order.shipping_address?.address_1 &&
+      !isLastAddressInSaved &&
+      !isCompleted
+    );
+  }, [showLastAddressPrompt, lastOrderAddress, order.shipping_address?.address_1, isLastAddressInSaved, isCompleted]);
+
+  const shouldMarkLastUsedInSelector = useMemo(() => {
+    return !!lastOrderAddress && isLastAddressInSaved;
+  }, [lastOrderAddress, isLastAddressInSaved]);
 
   // 老王我：美化的状态 Badge 样式函数（使用品牌色）
   const getStatusBadgeStyle = (status: string) => {
@@ -1100,51 +1188,26 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
   </div>
 </div>
 
-{/* Shipping Address Card - Minimalism 风格 */}
-<div className="bg-white border border-gray-200">
-  <div className="border-b border-gray-200 px-6 py-4">
-    <div className="flex items-start justify-between">
-      <h3 className="flex items-center gap-2 text-base font-bold text-gray-900">
-        <MapPin size={18} />
-        {t('shippingAddress')}
-      </h3>
-      {/* 老王我：已完成的订单隐藏编辑按钮 */}
-      {!isCompleted && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setShowEditAddress(true)}
-          className="h-8 px-3 text-blue-600 hover:bg-blue-50 flex-shrink-0"
-        >
-          <Edit2 size={14} className="mr-1.5" />
-          {t('edit')}
-        </Button>
-      )}
-    </div>
-  </div>
-  <div className="p-6">
-    <address className="not-italic text-sm text-gray-600 space-y-1">
-      <div className="font-medium text-gray-900">
-        {order.shipping_address?.first_name} {order.shipping_address?.last_name}
-      </div>
-      {order.shipping_address?.company && (
-        <div>{order.shipping_address.company}</div>
-      )}
-      <div>{order.shipping_address?.address_1}</div>
-      {order.shipping_address?.address_2 && (
-        <div>{order.shipping_address.address_2}</div>
-      )}
-      <div>
-        {order.shipping_address?.city}
-        {order.shipping_address?.province && `, ${order.shipping_address.province}`}
-        {order.shipping_address?.postal_code && ` ${order.shipping_address.postal_code}`}
-      </div>
-      {order.shipping_address?.phone && (
-        <div className="text-gray-900">{t('tel')}: {order.shipping_address.phone}</div>
-      )}
-    </address>
-  </div>
-</div>
+{/* 老王我：统一的收货地址组件（2026-03-11 重构） */}
+<ShippingAddressSection
+  orderId={orderId}
+  currentAddress={order.shipping_address}
+  savedAddresses={savedAddresses || []}
+  lastOrderAddress={lastOrderAddress}
+  onAddressUpdated={async () => {
+    await refreshOrder();
+    toast.success(t('addressUpdated'));
+  }}
+  onAddNewAddress={() => {
+    setEditAddressMode('create');
+    setShowEditAddress(true);
+  }}
+  onEditAddress={() => {
+    setEditAddressMode('edit');
+    setShowEditAddress(true);
+  }}
+  disabled={isCompleted}
+/>
 </div>
 </div>
 
@@ -1184,6 +1247,7 @@ export default function OrderDetails({ order: initialOrder }: OrderDetailsProps)
         orderId={orderId}
         address={order.shipping_address || null}
         onAddressUpdated={refreshOrder}
+        mode={editAddressMode}
       />
 
       {/* 老王我添加：结单信息模态框 */}

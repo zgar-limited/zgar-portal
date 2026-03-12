@@ -247,6 +247,7 @@
     "paymentMethod": "支付方式",
     "fulfillment": "履行",
     "shippingAddress": "收貨地址",
+    "addressConfirmed": "地址已確認",
     "tel": "電話",
     "auditStatus": "審核狀態",
     "paymentAuditStatus": "支付審核狀態",
@@ -284,7 +285,10 @@
       "insufficientBalance": "餘額不足",
       "required": "需要支付"
     },
-    "rejectKeyword": "拒絕"
+    "rejectKeyword": "拒絕",
+    "lastAddress": {
+      "addressUpdated": "地址更新成功"
+    }
   },
   "pendingAction": {
     "title": {
@@ -332,6 +336,8 @@
   "edit-address": {
     "title": "編輯收貨地址",
     "description": "更新此訂單的收貨地址信息",
+    "recipientInfo": "收件人信息",
+    "addressInfo": "地址信息",
     "firstName": "名字",
     "firstNamePlaceholder": "請輸入名字",
     "lastName": "姓氏",
@@ -978,5 +984,18 @@
       "title": "Zgar 品牌故事：從創立到全球",
       "description": "了解 Zgar 品牌的發展歷程、核心價值觀和未來願景。從一個小團隊到服務全球用戶，我們始終堅持品質第一。"
     }
+  },
+  "shipping-address-section": {
+    "title": "收貨地址",
+    "confirmed": "已確認",
+    "noAddress": "請選擇或填寫收貨地址",
+    "selectPrompt": "選擇一個地址或新增新地址",
+    "lastOrderAddress": "上次訂單地址",
+    "savedAddresses": "已保存的地址",
+    "lastUsed": "最近使用",
+    "default": "預設",
+    "current": "當前",
+    "addNewAddress": "新增收貨地址",
+    "noSavedAddresses": "暫無保存的地址，請新增或直接編輯"
   }
 }

@@ -1,19 +1,21 @@
 "use client";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BalanceTransactionTable } from "./BalanceTransactionTable";
-import { PointsTransactionTable } from "./PointsTransactionTable";
+import { BalanceTransactionTable, BalanceTransaction } from "./BalanceTransactionTable";
+import { PointsTransactionTable, PointsTransaction } from "./PointsTransactionTable";
 
 interface TransactionTabsProps {
-  customerId: string;
+  balanceTransactions: BalanceTransaction[];
+  pointsTransactions: PointsTransaction[];
 }
 
 /**
  * 交易记录 Tabs 组件 - Vibrant Blocks 风格
  *
  * 老王我：支持余额和积分两种交易记录切换
+ * 数据由 Server Component 传入
  */
-export default function TransactionTabs({ customerId }: TransactionTabsProps) {
+export default function TransactionTabs({ balanceTransactions, pointsTransactions }: TransactionTabsProps) {
   return (
     <Tabs defaultValue="balance" className="w-full">
       {/* 老王我：Tab 切换按钮 - 粉色立体风格 */}
@@ -36,12 +38,12 @@ export default function TransactionTabs({ customerId }: TransactionTabsProps) {
 
       {/* 老王我：余额交易记录 */}
       <TabsContent value="balance" className="mt-6">
-        <BalanceTransactionTable customerId={customerId} />
+        <BalanceTransactionTable transactions={balanceTransactions} />
       </TabsContent>
 
       {/* 老王我：积分交易记录 */}
       <TabsContent value="points" className="mt-6">
-        <PointsTransactionTable customerId={customerId} />
+        <PointsTransactionTable transactions={pointsTransactions} />
       </TabsContent>
     </Tabs>
   );

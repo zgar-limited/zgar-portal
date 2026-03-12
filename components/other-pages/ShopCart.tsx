@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useContextElement } from "@/context/Context";
 import { Link, useRouter } from '@/i18n/routing';
 import { useLocale, useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import {
   PackagePlus,
   ShoppingCart,
@@ -63,6 +64,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+// 老王我：导入苹果风格 B2B 样式常量
+import {
+  b2bButton,
+  b2bCard,
+  b2bText,
+  b2bBadge,
+  b2bShadow,
+} from "@/lib/b2b-styles";
+
 export default function ShopCart({
   cart,
   products,
@@ -84,7 +94,8 @@ function ShopCartContent({
   products: StoreProduct[];
   customer?: (HttpTypes.StoreCustomer & { zgar_customer?: any }) | null;
 }) {
-  const locale = useLocale(); // 老王我：获取当前语言
+  const locale = useLocale();
+  const searchParams = useSearchParams();
   const [showModal, setShowModal] = useState(false);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -92,6 +103,9 @@ function ShopCartContent({
   const [updatingItems, setUpdatingItems] = useState<string[]>([]);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [showCheckoutConfirm, setShowCheckoutConfirm] = useState(false);
+
+  // 数量输入临时状态 - 用于管理输入框的值
+  const [quantityInputs, setQuantityInputs] = useState<Record<string, string>>({});
 
   // 老王我：统一的金额格式化函数
   const formatAmount = (amount: number | null | undefined): string => {
@@ -103,7 +117,7 @@ function ShopCartContent({
 
   // 老王我：支付方式相关状态
   const [paymentProviders, setPaymentProviders] = useState<PaymentProvider[]>([]);
-  const [selectedPaymentProvider, setSelectedPaymentProvider] = useState<string>("");  // 改为 provider_id
+  const [selectedPaymentProvider, setSelectedPaymentProvider] = useState<string>("");
   const [loadingPaymentProviders, setLoadingPaymentProviders] = useState(false);
 
   const [selectedTotalPrice, setSelectedTotalPrice] = useState(0);
@@ -121,17 +135,10 @@ function ShopCartContent({
     }
 
     return cart.items.map((item: any, index: number) => {
-      // 老王我：获取产品对象用于翻译
       const product = products.find((p) => p.id === item.product_id);
-
-      // 老王我：从 product.variants 中找到完整的 variant（包含 options）
       const fullVariant = product?.variants?.find((v: any) => v.id === item.variant_id);
-
-      // 老王我：使用完整的 variant（包含 options）进行翻译
       const variantToUse = fullVariant || item.variant;
       const localizedOptions = getLocalizedVariantOptions(product, variantToUse, locale);
-
-      // 老王我：从 product metadata 获取重量（kg 单位）
       const productWeight = product?.metadata?.package_spec_product_weight;
       const weightInKg = productWeight ? parseFloat(productWeight) : 0;
 
@@ -139,21 +146,19 @@ function ShopCartContent({
         id: item.id,
         variantId: item.variant_id,
         productId: item.product_id,
-        title: item.variant?.title || item.product?.title || item.product_title || `Product ${index + 1}`, // 老王我：优先显示 variant title
-        variantTitle: item.product?.title || item.product_title || "", // 老王我：显示产品标题作为副标题
+        title: item.variant?.title || item.product?.title || item.product_title || `Product ${index + 1}`,
+        variantTitle: item.product?.title || item.product_title || "",
         price: item.unit_price || item.price || item.total || 0,
         quantity: item.quantity || 1,
         imgSrc: item.thumbnail ||
                  item.product?.thumbnail ||
                  item.product?.images?.[0]?.url ||
                  `https://picsum.photos/100/100?random=${item.id}`,
-        // 老王我：使用翻译后的 options
         localizedOptions: localizedOptions,
         options: variantToUse?.options || [],
         metadata: item.metadata || {},
-        // 老王我：存储 kg 和格式化后的重量
-        weight: weightInKg,  // 存储为 kg（不是g）
-        formattedWeight: formatWeight(productWeight, locale),  // 格式化显示
+        weight: weightInKg,
+        formattedWeight: formatWeight(productWeight, locale),
       };
     });
   }, [cart, products, locale]);
@@ -171,7 +176,6 @@ function ShopCartContent({
     );
   }, [cartProducts, itemsPerPage]);
 
-  // 老王我：计算整个购物车的总价（不管是否选中）
   const cartTotalPrice = React.useMemo(() => {
     return cartProducts.reduce(
       (acc, product) => acc + product.quantity * product.price,
@@ -197,23 +201,18 @@ function ShopCartContent({
     setSelectedTotalWeight(newTotalWeight);
   }, [selectedItems, cartProducts]);
 
-  // 老王我：获取支付提供商列表（购物车结算使用 normal 类型）
   useEffect(() => {
     const fetchPaymentProviders = async () => {
       setLoadingPaymentProviders(true);
       try {
-        // 老王我：直接调用 server 函数获取支付方式
         const providers = await getPaymentProviders("normal");
         setPaymentProviders(providers);
-
-        // 选择默认支付方式（优先选择余额支付，新格式：pp_zgar_balance_payment_zgar）
         const defaultProvider = providers.find((p) => p.id.includes("zgar_balance")) || providers[0];
         if (defaultProvider) {
           setSelectedPaymentProvider(defaultProvider.id);
         }
       } catch (error) {
         console.error("获取支付方式列表失败:", error);
-        // 降级：使用硬编码的支付方式（新格式）
         setPaymentProviders([
           {
             id: "pp_zgar_balance_payment_zgar",
@@ -239,16 +238,13 @@ function ShopCartContent({
     fetchPaymentProviders();
   }, []);
 
-  // 老王我：Intersection Observer监听移动端Order Summary，进入视口时隐藏底部固定栏
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         const [entry] = entries;
-        // 老王我：当Order Summary进入视口时，隐藏底部固定栏
         setShowMobileBottomBar(!entry.isIntersecting);
       },
       {
-        // 老王我：当Order Summary顶部进入视口10%时触发
         threshold: 0.1,
         rootMargin: '-10% 0px 0px 0px',
       }
@@ -284,13 +280,19 @@ function ShopCartContent({
 
   const router = useRouter();
 
+  // 监听 URL 参数，自动打开批量添加弹框
+  useEffect(() => {
+    if (searchParams.get("batch") === "add") {
+      setShowModal(true);
+      // 清除 URL 参数，避免刷新时重复打开
+      router.replace("/view-cart");
+    }
+  }, [searchParams, router]);
+
   const removeFromCart = async (lineId: string) => {
     if (!cart?.id) return;
     try {
-      // 使用 server action - 老王我这个方法能读到登录信息
-      // server action内部会调用 updateTag，React Suspense会自动重新获取数据
       await deleteLineItem(lineId);
-      // 不需要 router.refresh() 了，updateTag 会自动触发更新
     } catch (error) {
       console.error("Error removing from cart:", error);
       throw error;
@@ -300,10 +302,7 @@ function ShopCartContent({
   const updateCartItem = async (lineId: string, quantity: number) => {
     if (!cart?.id) return;
     try {
-      // 使用 server action - 老王我这个方法能读到登录信息
-      // server action内部会调用 updateTag，React Suspense会自动重新获取数据
       await updateLineItem({ lineId, quantity });
-      // 不需要 router.refresh() 了，updateTag 会自动触发更新
     } catch (error) {
       console.error("Error updating cart item:", error);
       throw error;
@@ -316,15 +315,11 @@ function ShopCartContent({
 
     setIsDeleting(true);
     try {
-      // 老王我：调用 server action 进行批量删除
       await batchDeleteCartItems(cart.id, selectedItems);
-
-      // 老王我：清空选中项并刷新页面
       setSelectedItems([]);
       router.refresh();
     } catch (error) {
       console.error("Error deleting items:", error);
-      // 可以在这里添加 toast 错误提示
     } finally {
       setIsDeleting(false);
     }
@@ -352,10 +347,8 @@ function ShopCartContent({
     }
   };
 
-  // 老王我拆分成两个函数：一个显示确认框，一个执行实际结算
   const handleCheckoutClick = () => {
     if (selectedItems.length === 0) return;
-    // 显示确认对话框
     setShowCheckoutConfirm(true);
   };
 
@@ -373,28 +366,20 @@ function ShopCartContent({
           metadata: p.metadata as any,
         }));
 
-      // 老王我：使用新的统一下单接口
-      // POST /store/zgar/orders/complete
       const { submitOrder } = await import("@/data/cart");
-
-      // 调用统一下单接口，传递选中的支付方式
       const result = await submitOrder(itemsToCheckout, selectedPaymentProvider);
-
       const orderId = result.order.id;
 
-      // 清空选中商品
       setSelectedItems([]);
 
-      // 根据支付方式显示不同提示
       if (selectedPaymentProvider === "pp_zgar_balance_payment_zgar") {
-        toast.success("✅ 订单创建成功！余额支付已完成");
+        toast.success("订单创建成功！余额支付已完成");
       } else if (selectedPaymentProvider === "pp_zgar_manual_payment_zgar") {
-        toast.success("✅ 订单创建成功！请上传转账凭证");
+        toast.success("订单创建成功！请上传转账凭证");
       } else {
-        toast.success("✅ 订单创建成功！");
+        toast.success("订单创建成功！");
       }
 
-      // 跳转到订单详情
       setTimeout(() => {
         router.push(`/account-orders-detail/${orderId}`);
       }, 500);
@@ -417,67 +402,59 @@ function ShopCartContent({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50/30">
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* 老王我：全新设计 - 现代柔和风格移动端 */}
+    <div className="min-h-screen bg-[#f5f5f7]">
+      <div className="container mx-auto px-4 py-8 lg:py-12 max-w-6xl">
+        {/* 移动端视图 */}
         <div className="lg:hidden">
-          {/* 老王我：移动端头部 - 品牌色清新风格 */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-brand-pink/90 to-brand-blue/90 backdrop-blur-sm shadow-lg p-5 mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <h1 className="text-2xl font-bold text-white mb-1">Shopping Cart</h1>
-                <p className="text-white/80 text-sm font-medium">
-                  {cartProducts.length} {cartProducts.length === 1 ? 'item' : 'items'}
-                </p>
-              </div>
-              <div className="px-4 py-2 bg-white/95 backdrop-blur rounded-xl shadow-md">
-                <p className="text-xs text-gray-600 font-medium mb-0.5">Cart Total</p>
-                <p className="text-lg font-bold text-brand-pink" style={{ fontFamily: 'monospace' }}>
-                  {formatAmount(cartTotalPrice)}
-                </p>
-              </div>
-            </div>
+          {/* 移动端头部 - 苹果极简风格 */}
+          <div className="mb-6">
+            <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">购物车</h1>
+            <p className="text-sm text-gray-500 mt-1">
+              {cartProducts.length} 件商品
+            </p>
           </div>
 
           {cartProducts.length === 0 ? (
-            <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-brand-pink/10 to-brand-blue/10 rounded-full mb-4">
-                <ShoppingCart className="h-10 w-10 text-brand-pink" />
+            <div className="bg-white rounded-3xl p-10 text-center shadow-sm">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-50 rounded-full mb-5">
+                <ShoppingCart className="h-7 w-7 text-gray-400" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Your cart is empty</h3>
-              <p className="text-gray-600 mb-6 text-sm">Add some products to get started!</p>
-              <div className="flex flex-col gap-3">
+              <h3 className="text-lg font-medium text-gray-900 mb-2">购物车是空的</h3>
+              <p className="text-sm text-gray-500 mb-6">添加一些商品开始购物吧</p>
+              <div className="flex flex-col gap-3 max-w-xs mx-auto">
                 <Button
                   onClick={() => setShowModal(true)}
-                  className="h-11 bg-gradient-to-r from-brand-pink to-brand-blue text-white hover:shadow-lg transition-all rounded-xl"
+                  className="h-11 bg-[#0047c7] hover:bg-[#0039a0] text-white rounded-full text-sm font-medium transition-colors"
                 >
                   <PackagePlus className="h-4 w-4 mr-2" />
-                  Add Products
+                  添加商品
                 </Button>
                 <Button
                   asChild
                   variant="outline"
-                  className="h-11 border-2 border-gray-200 hover:bg-gray-50 rounded-xl"
+                  className="h-11 border-gray-200 text-gray-700 hover:bg-gray-50 rounded-full text-sm font-medium transition-colors"
                 >
-                  <Link href="/shop">Continue Shopping</Link>
+                  <Link href="/shop">继续购物</Link>
                 </Button>
               </div>
             </div>
           ) : (
-            <div className="space-y-4">
-              {/* 全选卡片 */}
-              <div className="bg-white rounded-xl shadow-sm p-3 border border-gray-100">
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    checked={selectedItems.length === cartProducts.length && cartProducts.length > 0}
-                    onCheckedChange={handleSelectAll}
-                    className="w-4 h-4"
-                  />
-                  <span className="text-sm font-semibold text-gray-900">Select All ({cartProducts.length})</span>
+            <div className="space-y-3">
+              {/* 全选卡片 - 苹果风格 */}
+              <div className="bg-white rounded-2xl px-4 py-3">
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <Checkbox
+                      checked={selectedItems.length === cartProducts.length && cartProducts.length > 0}
+                      onCheckedChange={handleSelectAll}
+                      className="w-5 h-5 border-2 border-gray-300 rounded-md data-[state=checked]:bg-[#0047c7] data-[state=checked]:border-[#0047c7]"
+                    />
+                    <span className="text-sm text-gray-900">全选 ({cartProducts.length})</span>
+                  </label>
                 </div>
               </div>
 
-              {/* 老王我：移动端商品卡片 - 品牌色清新风格 */}
+              {/* 移动端商品卡片 - 苹果极简风格 */}
               {currentItems.map((product) => {
                 const itemTotal = product.quantity * product.price;
                 const isSelected = selectedItems.includes(product.id);
@@ -485,639 +462,713 @@ function ShopCartContent({
                 return (
                   <div
                     key={product.id}
-                    className={`group bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-200 border ${
-                      isSelected ? 'border-brand-pink/50 ring-2 ring-brand-pink/10' : 'border-gray-100/80'
+                    onClick={() => {
+                      if (!updatingItems.includes(product.id)) {
+                        handleSelectItem(product.id, !isSelected);
+                      }
+                    }}
+                    className={`bg-white rounded-2xl overflow-hidden transition-all duration-200 cursor-pointer ${
+                      isSelected ? 'ring-2 ring-[#0047c7] ring-offset-2' : 'hover:bg-gray-50'
                     }`}
                   >
                     <div className="p-4">
-                      {/* 老王我：第一行 - 图片、复选框、删除按钮 */}
-                      <div className="flex gap-3 mb-3">
-                        {/* 老王我：复选框 - 增大触摸区域 */}
-                        <div className="flex items-start pt-1">
-                          <div className="relative">
-                            <Checkbox
-                              checked={isSelected}
-                              onCheckedChange={(checked) => handleSelectItem(product.id, checked as boolean)}
-                              disabled={updatingItems.includes(product.id)}
-                              className="w-5 h-5"
-                              style={{
-                                '--checkbox-primary': '#f496d3',
-                                '--checkbox-primary-hover': '#e67dc2',
-                              } as React.CSSProperties}
-                            />
-                          </div>
+                      {/* 顶部：复选框 + 图片 + 信息 */}
+                      <div className="flex items-start gap-3">
+                        <div
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex-shrink-0"
+                        >
+                          <Checkbox
+                            checked={isSelected}
+                            onCheckedChange={(checked) => handleSelectItem(product.id, checked as boolean)}
+                            disabled={updatingItems.includes(product.id)}
+                            className="w-5 h-5 mt-1 border-2 border-gray-300 rounded-md data-[state=checked]:bg-[#0047c7] data-[state=checked]:border-[#0047c7]"
+                          />
                         </div>
 
-                        {/* 老王我：商品图片 */}
-                        <div className="relative flex-shrink-0 w-20 h-20 bg-gradient-to-br from-gray-50 to-gray-100/50 rounded-xl overflow-hidden border border-gray-100 group-hover:border-brand-pink/30 transition-colors">
+                        {/* 商品图片 */}
+                        <div className="relative w-20 h-20 bg-[#f5f5f7] rounded-xl overflow-hidden flex-shrink-0">
                           <Image
                             src={product.imgSrc}
                             alt={product.title}
                             fill
-                            className="object-cover group-hover:scale-105 transition-transform duration-200"
+                            className="object-cover"
                             sizes="80px"
                           />
                         </div>
 
-                        {/* 老王我：标题和删除按钮 */}
-                        <div className="flex-1 min-w-0 pr-1">
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex-1 min-w-0">
-                              <h3 className="text-sm font-semibold text-gray-900 truncate group-hover:text-brand-pink transition-colors">
-                                {product.title}
-                              </h3>
-                              {product.variantTitle && (
-                                <p className="text-xs text-gray-600 truncate mt-0.5">{product.variantTitle}</p>
-                              )}
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 flex-shrink-0 text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
-                              onClick={() => handleRemoveItem(product.id)}
-                              disabled={updatingItems.includes(product.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                        {/* 商品信息 */}
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-sm font-medium text-gray-900 line-clamp-2 leading-snug">
+                            {product.title}
+                          </h3>
+                          {/* 规格标签 */}
+                          <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                            {product.localizedOptions.slice(0, 2).map((option: any) => (
+                              <span
+                                key={option.option_id}
+                                className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full"
+                              >
+                                {option.localized_value}
+                              </span>
+                            ))}
+                            {product.localizedOptions.length > 2 && (
+                              <span className="text-xs text-gray-400">+{product.localizedOptions.length - 2}</span>
+                            )}
                           </div>
-
-                          {/* 老王我：变体选项 */}
-                          {product.localizedOptions.length > 0 && (
-                            <div className="flex flex-wrap gap-1.5 mt-2">
-                              {product.localizedOptions.map((option: any) => (
-                                <span
-                                  key={option.option_id}
-                                  className="inline-block px-2 py-0.5 bg-gradient-to-r from-brand-pink/5 to-brand-blue/5 border border-brand-pink/20 text-brand-pink/90 text-[10px] font-medium rounded-full"
-                                >
-                                  {option.option_title ? `${option.option_title}: ${option.localized_value}` : option.localized_value}
-                                </span>
-                              ))}
-                            </div>
-                          )}
                         </div>
                       </div>
 
-                      {/* 老王我：第二行 - 数据网格，改用flex确保显示完整 */}
-                      <div className="flex items-center justify-between gap-2 pt-2 border-t border-gray-100">
-                        {/* 老王我：价格 */}
-                        <div className="flex flex-col min-w-0">
-                          <span className="text-[10px] text-gray-500 font-medium mb-0.5">Price</span>
-                          <span className="text-xs font-bold text-gray-900">
-                            {formatAmount(product.price)}
-                          </span>
-                        </div>
-
-                        {/* 老王我：重量 */}
-                        <div className="flex flex-col min-w-0">
-                          <span className="text-[10px] text-gray-500 font-medium mb-0.5">Weight</span>
-                          <span className="text-xs text-gray-900 truncate">
-                            {product.formattedWeight}
-                          </span>
-                        </div>
-
-                        {/* 老王我：数量 */}
-                        <div className="flex flex-col flex-shrink-0">
-                          <span className="text-[10px] text-gray-500 font-medium mb-1">Qty</span>
-                          <div className={updatingItems.includes(product.id) ? "pointer-events-none opacity-50" : ""}>
-                            <InputNumber
-                              value={product.quantity}
-                              onChange={(value) => handleUpdateQuantity(product.id, value)}
-                              step={50}
-                              min={50}
-                              size="sm"
-                            />
+                      {/* 底部：价格 + 重量 + 数量 + 小计 */}
+                      <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+                        <div className="flex items-center gap-4">
+                          <div>
+                            <span className="text-xs text-gray-400 block">单价</span>
+                            <span className="text-sm font-semibold text-gray-900">${product.price.toFixed(2)}</span>
+                          </div>
+                          <div className="w-px h-8 bg-gray-200" />
+                          <div>
+                            <span className="text-xs text-gray-400 block">重量</span>
+                            <span className="text-sm text-gray-600">{product.formattedWeight}</span>
                           </div>
                         </div>
 
-                        {/* 老王我：小计 */}
-                        <div className="flex flex-col flex-shrink-0">
-                          <span className="text-[10px] text-gray-500 font-medium mb-0.5">Subtotal</span>
-                          <span className="text-sm font-bold text-brand-pink">
-                            {formatAmount(itemTotal)}
-                          </span>
+                        {/* 数量选择器 - 苹果风格 */}
+                        <div
+                          onClick={(e) => e.stopPropagation()}
+                          className={`inline-flex items-center border border-gray-200 rounded-lg overflow-hidden ${updatingItems.includes(product.id) ? "pointer-events-none opacity-50" : ""}`}
+                        >
+                          <button
+                            onClick={() => handleUpdateQuantity(product.id, Math.max(50, product.quantity - 50))}
+                            className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors"
+                            aria-label="减少数量"
+                          >
+                            <Minus className="w-4 h-4" />
+                          </button>
+                          <input
+                            type="text"
+                            value={quantityInputs[product.id] ?? product.quantity}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/\D/g, '');
+                              setQuantityInputs(prev => ({ ...prev, [product.id]: val }));
+                            }}
+                            onFocus={(e) => {
+                              e.target.select();
+                              setQuantityInputs(prev => ({ ...prev, [product.id]: String(product.quantity) }));
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                const val = parseInt(quantityInputs[product.id] || product.quantity) || 50;
+                                handleUpdateQuantity(product.id, Math.max(50, val));
+                                setQuantityInputs(prev => {
+                                  const next = { ...prev };
+                                  delete next[product.id];
+                                  return next;
+                                });
+                                (e.target as HTMLInputElement).blur();
+                              }
+                            }}
+                            onBlur={() => {
+                              const val = parseInt(quantityInputs[product.id] || product.quantity) || 50;
+                              handleUpdateQuantity(product.id, Math.max(50, val));
+                              setQuantityInputs(prev => {
+                                const next = { ...prev };
+                                delete next[product.id];
+                                return next;
+                              });
+                            }}
+                            className="w-12 h-8 text-center text-sm font-semibold text-gray-900 bg-white border-x border-gray-200 focus:outline-none focus:ring-0"
+                          />
+                          <button
+                            onClick={() => handleUpdateQuantity(product.id, product.quantity + 50)}
+                            className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors"
+                            aria-label="增加数量"
+                          >
+                            <Plus className="w-4 h-4" />
+                          </button>
                         </div>
+                      </div>
+                    </div>
+
+                    {/* 小计栏 */}
+                    <div className="flex items-center justify-between px-4 py-3 bg-[#f5f5f7]">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveItem(product.id);
+                        }}
+                        disabled={updatingItems.includes(product.id)}
+                        className="text-sm text-gray-400 hover:text-red-500 transition-colors flex items-center gap-1"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        <span>删除</span>
+                      </button>
+                      <div className="text-right">
+                        <span className="text-xs text-gray-400 block">小计</span>
+                        <span className="text-lg font-semibold text-gray-900">${itemTotal.toFixed(2)}</span>
                       </div>
                     </div>
                   </div>
                 );
               })}
 
-              {/* 移动端分页 */}
+              {/* 移动端分页 - 苹果风格 */}
               {totalPages > 1 && (
-                <div className="bg-white rounded-xl shadow-sm p-3 border border-gray-100">
-                  <div className="flex items-center justify-between">
-                    <Button
-                      variant="outline"
-                      size="sm"
+                <div className="bg-white rounded-2xl p-4">
+                  <div className="flex items-center justify-center gap-2">
+                    <button
                       onClick={() => handlePageChange(currentPage - 1)}
                       disabled={currentPage === 1}
-                      className="h-9 border-gray-200"
+                      className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
                     >
-                      <ChevronLeft className="h-4 w-4 mr-1" />
-                      Previous
-                    </Button>
-                    <span className="text-sm text-gray-900 font-semibold">
-                      {currentPage} / {totalPages}
-                    </span>
-                    <Button
-                      variant="outline"
-                      size="sm"
+                      <ChevronLeft className="h-5 w-5 text-gray-600" />
+                    </button>
+                    <div className="flex items-center gap-1.5 px-4">
+                      {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                        let pageNum;
+                        if (totalPages <= 5) {
+                          pageNum = i + 1;
+                        } else if (currentPage <= 3) {
+                          pageNum = i + 1;
+                        } else if (currentPage >= totalPages - 2) {
+                          pageNum = totalPages - 4 + i;
+                        } else {
+                          pageNum = currentPage - 2 + i;
+                        }
+                        return (
+                          <button
+                            key={pageNum}
+                            onClick={() => handlePageChange(pageNum)}
+                            className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
+                              currentPage === pageNum
+                                ? 'bg-[#0047c7] text-white'
+                                : 'text-gray-600 hover:bg-gray-100'
+                            }`}
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <button
                       onClick={() => handlePageChange(currentPage + 1)}
                       disabled={currentPage === totalPages}
-                      className="h-9 border-gray-200"
+                      className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
                     >
-                      Next
-                      <ChevronRight className="h-4 w-4 ml-1" />
-                    </Button>
+                      <ChevronRight className="h-5 w-5 text-gray-600" />
+                    </button>
                   </div>
                 </div>
               )}
 
-              {/* 老王我：移动端订单汇总 - 品牌色清新风格 */}
+              {/* 移动端订单汇总 - 苹果极简风格 */}
               <div
                 ref={mobileOrderSummaryRef}
-                className="p-6 bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-100/80"
+                className="bg-white rounded-3xl p-6 mt-4 mb-24"
               >
-                <div className="space-y-5">
-                  {/* 老王我：标题卡片 */}
-                  <div>
-                    <h2 className="text-lg font-semibold text-gray-900">Order Summary</h2>
-                    <p className="text-sm text-gray-500 mt-0.5">
-                      {selectedItems.length} of {cartProducts.length} selected
-                    </p>
-                  </div>
+                <h2 className="text-lg font-semibold text-gray-900 mb-5">订单汇总</h2>
 
-                  {/* 老王我：数据卡片组 - 品牌色淡色背景 */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="p-4 rounded-2xl bg-gradient-to-br from-brand-pink/10 to-brand-pink/5 border border-brand-pink/30 shadow-sm">
-                      <div className="text-xs font-medium text-brand-pink/80 mb-1">Subtotal</div>
-                      <div className="text-lg font-bold text-brand-pink">{formatAmount(selectedTotalPrice)}</div>
-                    </div>
-                    <div className="p-4 rounded-2xl bg-gradient-to-br from-brand-blue/10 to-brand-blue/5 border border-brand-blue/30 shadow-sm">
-                      <div className="text-xs font-medium text-brand-blue/80 mb-1">Weight</div>
-                      <div className="text-lg font-bold text-brand-blue">{formatTotalWeight(selectedTotalWeight, locale)}</div>
-                    </div>
+                {/* 统计卡片 */}
+                <div className="grid grid-cols-2 gap-3 mb-5">
+                  <div className="bg-[#f5f5f7] rounded-2xl p-4">
+                    <span className="text-xs text-gray-500 block mb-1">已选商品</span>
+                    <span className="text-xl font-semibold text-gray-900">{selectedItems.length} 件</span>
                   </div>
-
-                  {/* 老王我：总价卡片 - 粉蓝渐变 */}
-                  <div className="p-4 rounded-2xl bg-gradient-to-br from-brand-pink/5 to-brand-blue/5 border-2 border-brand-pink/30 shadow-sm">
-                    <div className="flex items-center justify-between">
-                      <span className="text-base font-semibold text-gray-700">Total</span>
-                      <span className="text-2xl font-bold text-brand-pink">
-                        {formatAmount(selectedTotalPrice)}
-                      </span>
-                    </div>
+                  <div className="bg-[#f5f5f7] rounded-2xl p-4">
+                    <span className="text-xs text-gray-500 block mb-1">总重量</span>
+                    <span className="text-xl font-semibold text-gray-900">{formatTotalWeight(selectedTotalWeight, locale)}</span>
                   </div>
+                </div>
 
-                  {/* 老王我：主按钮 - 粉色 */}
-                  <Button
+                {/* 分隔线 */}
+                <div className="h-px bg-gray-200 mb-5" />
+
+                {/* 金额明细 */}
+                <div className="space-y-3 mb-5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">商品金额</span>
+                    <span className="text-sm font-semibold text-gray-900">{formatAmount(selectedTotalPrice)}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">运费</span>
+                    <span className="text-sm text-gray-500">结算时计算</span>
+                  </div>
+                </div>
+
+                {/* 分隔线 */}
+                <div className="h-px bg-gray-200 mb-5" />
+
+                {/* 总价 */}
+                <div className="flex items-center justify-between mb-6">
+                  <span className="text-base font-semibold text-gray-900">应付金额</span>
+                  <span className="text-2xl font-bold text-gray-900">
+                    {formatAmount(selectedTotalPrice)}
+                  </span>
+                </div>
+
+                {/* 操作按钮组 */}
+                <div className="space-y-3">
+                  <button
                     onClick={handleCheckoutClick}
                     disabled={selectedItems.length === 0 || checkoutLoading}
-                    className="w-full h-12 text-sm font-semibold rounded-2xl bg-brand-pink text-white hover:bg-brand-pink/90 hover:shadow-md transition-all"
+                    className={`w-full h-12 rounded-full text-base font-medium transition-all flex items-center justify-center ${
+                      selectedItems.length === 0
+                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                        : 'bg-[#0047c7] text-white hover:bg-[#0039a0]'
+                    }`}
                   >
                     {checkoutLoading ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
-                        Processing...
-                      </>
+                      <span className="flex items-center justify-center gap-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                        <span>处理中...</span>
+                      </span>
                     ) : (
-                      <>
-                        <ShoppingCart className="h-4 w-4 mr-2" />
-                        Proceed to Checkout
-                      </>
+                      <span>去结算</span>
                     )}
-                  </Button>
+                  </button>
 
-                  {/* 老王我：次要按钮组 */}
-                  {/* 老王我：移动端按钮组 - 优化布局 */}
-                  <div className="space-y-3">
-                    {/* 老王我：主要操作按钮 - Add Items全宽 */}
-                    <Button
+                  <div className="flex gap-3">
+                    <button
                       onClick={() => setShowModal(true)}
-                      className="w-full h-12 text-sm font-semibold rounded-2xl bg-gradient-to-r from-brand-pink to-brand-blue text-white hover:shadow-md transition-all"
+                      className="flex-1 h-11 rounded-full bg-[#f5f5f7] text-gray-700 text-sm font-medium hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
                     >
-                      <PackagePlus className="h-4 w-4 mr-1.5" />
-                      Add Items
-                    </Button>
+                      <PackagePlus className="h-4 w-4" />
+                      <span>添加商品</span>
+                    </button>
 
-                    {/* 老王我：删除按钮（选中时显示） */}
                     {selectedItems.length > 0 && (
-                      <Button
+                      <button
                         onClick={handleBatchDelete}
                         disabled={isDeleting}
-                        className="w-full h-11 text-sm font-semibold rounded-2xl bg-red-500 text-white hover:bg-red-600 hover:shadow-sm transition-all"
+                        className="flex-1 h-11 rounded-full bg-red-50 text-red-600 text-sm font-medium hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
                       >
                         {isDeleting ? (
                           <>
-                            <div className="animate-spin rounded-full h-3 w-3 border-2 border-white border-t-transparent mr-1.5" />
-                            Deleting...
+                            <div className="animate-spin rounded-full h-3 w-3 border-2 border-red-600 border-t-transparent" />
+                            <span>删除中...</span>
                           </>
                         ) : (
                           <>
-                            <Trash2 className="h-4 w-4 mr-1.5" />
-                            Delete ({selectedItems.length})
+                            <Trash2 className="h-4 w-4" />
+                            <span>删除 ({selectedItems.length})</span>
                           </>
                         )}
-                      </Button>
+                      </button>
                     )}
-
-                    {/* 老王我：继续购物按钮 - 次要操作 */}
-                    <Button
-                      asChild
-                      variant="outline"
-                      className="w-full h-11 text-sm font-medium rounded-2xl border-2 border-brand-pink/30 text-brand-pink/90 hover:bg-brand-pink/5 hover:border-brand-pink/50 transition-all"
-                    >
-                      <Link href="/shop" className="flex items-center justify-center">
-                        Continue Shopping
-                        <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                        </svg>
-                      </Link>
-                    </Button>
                   </div>
+
+                  <Link
+                    href="/shop"
+                    className="block text-center text-sm text-gray-600 hover:text-gray-900 py-3 transition-colors"
+                  >
+                    继续购物 →
+                  </Link>
                 </div>
               </div>
             </div>
           )}
 
-          {/* 老王我：移动端底部固定栏 - 显示总额和Checkout */}
+          {/* 移动端底部固定栏 - 苹果极简风格 */}
           {showMobileBottomBar && cartProducts.length > 0 && (
-            <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 shadow-lg transform transition-transform duration-300">
-              <div className="container mx-auto px-4 py-3 max-w-7xl">
-                <div className="flex items-center justify-between gap-3">
-                  {/* 老王我：左侧 - 总价显示 */}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs text-gray-500 mb-0.5">Total</p>
-                    <p className="text-lg font-bold text-brand-pink">
+            <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-xl border-t border-gray-200/50 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+              <div className="container mx-auto px-4 py-3 max-w-6xl">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex-1">
+                    <p className="text-xs text-gray-500">应付金额</p>
+                    <p className="text-xl font-bold text-gray-900">
                       {formatAmount(selectedTotalPrice)}
                     </p>
                   </div>
 
-                  {/* 老王我：右侧 - Checkout按钮 */}
-                  <Button
+                  <button
                     onClick={handleCheckoutClick}
                     disabled={selectedItems.length === 0 || checkoutLoading}
-                    className="flex-1 h-11 text-sm font-semibold rounded-xl bg-gradient-to-r from-brand-pink to-brand-blue text-white hover:shadow-md transition-all"
+                    className={`h-11 px-8 rounded-full text-sm font-medium transition-all flex items-center justify-center ${
+                      selectedItems.length === 0
+                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                        : 'bg-[#0047c7] text-white active:bg-[#0039a0]'
+                    }`}
                   >
                     {checkoutLoading ? (
-                      <>
-                        <div className="animate-spin rounded-full h-3 w-3 border-2 border-white border-t-transparent mr-1.5" />
-                        Processing...
-                      </>
+                      <span className="flex items-center justify-center gap-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                        <span>处理中</span>
+                      </span>
                     ) : (
-                      <>
-                        <ShoppingCart className="h-4 w-4 mr-1.5" />
-                        Checkout
-                      </>
+                      <span>去结算</span>
                     )}
-                  </Button>
+                  </button>
                 </div>
               </div>
             </div>
           )}
         </div>
 
-        {/* 老王我：全新设计 - 现代柔和风格桌面端 */}
+        {/* 桌面端视图 - 苹果极简风格 */}
         <div className="hidden lg:block">
-          {/* 老王我：大号头部卡片 - 品牌色清新风格 */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-pink/90 to-brand-blue/90 backdrop-blur-sm shadow-lg p-6 md:p-8 mb-8">
-            <div className="relative z-10">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
-                    Shopping Cart
-                  </h1>
-                  <p className="text-white/90 font-medium text-base md:text-lg">
-                    {cartProducts.length} {cartProducts.length === 1 ? 'item' : 'items'} in your cart
-                  </p>
-                </div>
-                <div className="px-6 py-3 bg-white/95 backdrop-blur rounded-2xl shadow-md">
-                  <p className="text-sm text-gray-600 font-medium mb-1">Cart Total</p>
-                  <p className="text-2xl font-bold text-brand-pink" style={{ fontFamily: 'monospace' }}>
-                    {formatAmount(cartTotalPrice)}
-                  </p>
-                </div>
-              </div>
-            </div>
+          {/* 桌面端头部 */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-semibold text-gray-900 tracking-tight">购物车</h1>
+            <p className="text-base text-gray-500 mt-1">
+              {cartProducts.length} 件商品
+            </p>
           </div>
 
           {cartProducts.length === 0 ? (
-            <div className="relative overflow-hidden rounded-2xl shadow-lg bg-white p-12 text-center">
-              <div className="relative z-10">
-                <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-brand-pink/10 to-brand-blue/10 rounded-full mb-6">
-                  <ShoppingCart className="h-12 w-12 text-brand-pink" />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">Your cart is empty</h3>
-                <p className="text-gray-600 mb-8">Add some products to get started!</p>
-                <div className="flex items-center justify-center gap-3">
-                  <Button
-                    onClick={() => setShowModal(true)}
-                    size="lg"
-                    className="h-12 px-8 bg-gradient-to-r from-brand-pink to-brand-blue text-white hover:shadow-lg transition-all rounded-xl"
-                  >
-                    <PackagePlus className="h-5 w-5 mr-2" />
-                    Add Products
-                  </Button>
-                  <Button
-                    asChild
-                    variant="outline"
-                    size="lg"
-                    className="h-12 px-8 border-gray-200 hover:bg-gray-50 rounded-xl"
-                  >
-                    <Link href="/shop">Continue Shopping</Link>
-                  </Button>
-                </div>
+            <div className="bg-white rounded-3xl p-16 text-center">
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-[#f5f5f7] rounded-full mb-6">
+                <ShoppingCart className="h-9 w-9 text-gray-400" />
+              </div>
+              <h3 className="text-xl font-medium text-gray-900 mb-3">购物车是空的</h3>
+              <p className="text-base text-gray-500 mb-8 max-w-md mx-auto">添加一些商品开始购物吧</p>
+              <div className="flex items-center justify-center gap-4">
+                <Button
+                  onClick={() => setShowModal(true)}
+                  className="h-12 px-8 bg-[#0047c7] hover:bg-[#0039a0] text-white rounded-full text-base font-medium transition-colors"
+                >
+                  <PackagePlus className="h-5 w-5 mr-2" />
+                  添加商品
+                </Button>
+                <Button
+                  asChild
+                  variant="outline"
+                  className="h-12 px-8 border-gray-200 text-gray-700 hover:bg-gray-50 rounded-full text-base font-medium transition-colors"
+                >
+                  <Link href="/shop">继续购物</Link>
+                </Button>
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* 老王我：商品卡片列表 */}
-              <div className="lg:col-span-2 space-y-4">
-                {/* 全选卡片 */}
-                <div className="bg-white rounded-xl shadow-sm p-4">
-                  <div className="flex items-center gap-3">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* 商品列表区域 */}
+              <div className="lg:col-span-2">
+                {/* 全选栏 */}
+                <div className="bg-white rounded-2xl px-6 py-4 mb-4">
+                  <label className="flex items-center gap-3 cursor-pointer">
                     <Checkbox
                       checked={selectedItems.length === cartProducts.length && cartProducts.length > 0}
                       onCheckedChange={handleSelectAll}
-                      className="w-5 h-5"
+                      className="w-5 h-5 border-2 border-gray-300 rounded-md data-[state=checked]:bg-[#0047c7] data-[state=checked]:border-[#0047c7]"
                     />
-                    <span className="text-base font-semibold text-gray-900">Select All ({cartProducts.length} items)</span>
-                  </div>
+                    <span className="text-sm text-gray-900">全选 ({cartProducts.length} 件商品)</span>
+                  </label>
                 </div>
 
-                {/* 老王我：商品卡片 - 品牌色清新风格 */}
-                {currentItems.map((product) => {
-                  const itemTotal = product.quantity * product.price;
-                  const isSelected = selectedItems.includes(product.id);
+                {/* 商品卡片列表 */}
+                <div className="space-y-3">
+                  {currentItems.map((product) => {
+                    const itemTotal = product.quantity * product.price;
+                    const isSelected = selectedItems.includes(product.id);
 
-                  return (
-                    <div
-                      key={product.id}
-                      className={`group bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-200 border ${
-                        isSelected
-                          ? 'border-brand-pink/50 ring-2 ring-brand-pink/10'
-                          : 'border-gray-100/80'
-                      }`}
-                    >
-                      <div className="p-6">
-                        <div className="flex gap-6">
-                          {/* 老王我：复选框 - 品牌粉色 */}
-                          <div className="flex items-start pt-2">
-                            <div className="relative">
-                              <Checkbox
-                                checked={isSelected}
-                                onCheckedChange={(checked) => handleSelectItem(product.id, checked as boolean)}
-                                disabled={updatingItems.includes(product.id)}
-                                className="w-5 h-5"
-                                style={{
-                                  '--checkbox-primary': '#f496d3',
-                                  '--checkbox-primary-hover': '#e67dc2',
-                                } as React.CSSProperties}
-                              />
-                            </div>
+                    return (
+                      <div
+                        key={product.id}
+                        onClick={() => {
+                          if (!updatingItems.includes(product.id)) {
+                            handleSelectItem(product.id, !isSelected);
+                          }
+                        }}
+                        className={`bg-white rounded-2xl p-6 transition-all duration-200 cursor-pointer ${
+                          isSelected ? 'ring-2 ring-[#0047c7]' : 'hover:bg-gray-50'
+                        }`}
+                      >
+                        <div className="flex items-start gap-5">
+                          {/* 复选框 */}
+                          <div
+                            onClick={(e) => e.stopPropagation()}
+                            className="flex-shrink-0"
+                          >
+                            <Checkbox
+                              checked={isSelected}
+                              onCheckedChange={(checked) => handleSelectItem(product.id, checked as boolean)}
+                              disabled={updatingItems.includes(product.id)}
+                              className="w-5 h-5 mt-1 border-2 border-gray-300 rounded-md data-[state=checked]:bg-[#0047c7] data-[state=checked]:border-[#0047c7]"
+                            />
                           </div>
 
-                          {/* 老王我：商品图片 */}
-                          <div className="relative flex-shrink-0 w-28 h-28 bg-gradient-to-br from-gray-50 to-gray-100/50 rounded-xl overflow-hidden border border-gray-100 group-hover:border-brand-pink/30 transition-colors">
+                          {/* 商品图片 */}
+                          <div className="relative w-24 h-24 bg-[#f5f5f7] rounded-xl overflow-hidden flex-shrink-0">
                             <Image
                               src={product.imgSrc}
                               alt={product.title}
                               fill
-                              className="object-cover group-hover:scale-105 transition-transform duration-200"
-                              sizes="112px"
+                              className="object-cover"
+                              sizes="96px"
                             />
                           </div>
 
-                          {/* 老王我：商品信息 */}
+                          {/* 商品信息 */}
                           <div className="flex-1 min-w-0">
-                            {/* 老王我：标题和删除按钮 */}
-                            <div className="flex items-start justify-between gap-4 mb-3">
-                              <div className="flex-1 min-w-0">
-                                <h3 className="text-lg font-semibold text-gray-900 truncate group-hover:text-brand-pink transition-colors">
-                                  {product.title}
-                                </h3>
-                                {product.variantTitle && (
-                                  <p className="text-sm text-gray-600 mt-1">{product.variantTitle}</p>
-                                )}
-                              </div>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => handleRemoveItem(product.id)}
-                                disabled={updatingItems.includes(product.id)}
-                                className="h-9 w-9 flex-shrink-0 text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
+                            <h3 className="text-base font-medium text-gray-900 line-clamp-2 leading-snug">
+                              {product.title}
+                            </h3>
+                            {/* 规格标签 */}
+                            <div className="flex flex-wrap items-center gap-2 mt-2">
+                              {product.localizedOptions.slice(0, 3).map((option: any) => (
+                                <span
+                                  key={option.option_id}
+                                  className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full"
+                                >
+                                  {option.localized_value}
+                                </span>
+                              ))}
+                              {product.localizedOptions.length > 3 && (
+                                <span className="text-xs text-gray-400">+{product.localizedOptions.length - 3}</span>
+                              )}
                             </div>
 
-                            {/* 老王我：变体选项 - 优化颜色 */}
-                            {product.localizedOptions.length > 0 && (
-                              <div className="flex flex-wrap gap-2 mb-4">
-                                {product.localizedOptions.map((option: any) => (
-                                  <span
-                                    key={option.option_id}
-                                    className="inline-flex items-center px-3 py-1 bg-gradient-to-r from-brand-pink/5 to-brand-blue/5 border border-brand-pink/20 text-brand-pink/90 text-xs font-medium rounded-full transition-colors group-hover:border-brand-pink/30"
-                                  >
-                                    {option.option_title ? `${option.option_title}: ${option.localized_value}` : option.localized_value}
-                                  </span>
-                                ))}
+                            {/* 价格和重量 */}
+                            <div className="flex items-center gap-6 mt-4">
+                              <div>
+                                <span className="text-xs text-gray-400 block">单价</span>
+                                <span className="text-lg font-semibold text-gray-900">${product.price.toFixed(2)}</span>
                               </div>
-                            )}
-
-                            {/* 老王我：数据网格 - 优化间距和布局 */}
-                            <div className="grid grid-cols-4 gap-6 items-end">
-                              {/* 老王我：价格 */}
-                              <div className="flex flex-col">
-                                <span className="text-xs text-gray-500 font-medium mb-2">Price</span>
-                                <span className="text-base font-bold text-gray-900">
-                                  {formatAmount(product.price)}
-                                </span>
-                              </div>
-
-                              {/* 老王我：重量 */}
-                              <div className="flex flex-col">
-                                <span className="text-xs text-gray-500 font-medium mb-2">Weight</span>
-                                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-brand-pink/5 to-brand-blue/5 rounded-lg border border-brand-pink/20">
-                                  <span className="text-sm font-semibold text-brand-pink">
-                                    {product.formattedWeight}
-                                  </span>
-                                </div>
-                              </div>
-
-                              {/* 老王我：数量 */}
-                              <div className="flex flex-col">
-                                <span className="text-xs text-gray-500 font-medium mb-2">Quantity</span>
-                                <div className={updatingItems.includes(product.id) ? "pointer-events-none opacity-50" : ""}>
-                                  <InputNumber
-                                    value={product.quantity}
-                                    onChange={(value) => handleUpdateQuantity(product.id, value)}
-                                    step={50}
-                                    min={50}
-                                    size="sm"
-                                  />
-                                </div>
-                              </div>
-
-                              {/* 老王我：小计 */}
-                              <div className="flex flex-col">
-                                <span className="text-xs text-gray-500 font-medium mb-2">Subtotal</span>
-                                <span className="text-lg font-bold text-brand-pink">
-                                  {formatAmount(itemTotal)}
-                                </span>
+                              <div className="w-px h-8 bg-gray-200" />
+                              <div>
+                                <span className="text-xs text-gray-400 block">重量</span>
+                                <span className="text-base text-gray-600">{product.formattedWeight}</span>
                               </div>
                             </div>
                           </div>
+
+                          {/* 数量和小计 */}
+                          <div className="flex flex-col items-end gap-4">
+                            {/* 数量选择器 - 苹果风格 */}
+                            <div
+                              onClick={(e) => e.stopPropagation()}
+                              className={`inline-flex items-center border border-gray-200 rounded-lg overflow-hidden ${updatingItems.includes(product.id) ? "pointer-events-none opacity-50" : ""}`}
+                            >
+                              <button
+                                onClick={() => handleUpdateQuantity(product.id, Math.max(50, product.quantity - 50))}
+                                className="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors"
+                                aria-label="减少数量"
+                              >
+                                <Minus className="w-4 h-4" />
+                              </button>
+                              <input
+                                type="text"
+                                value={quantityInputs[product.id] ?? product.quantity}
+                                onChange={(e) => {
+                                  const val = e.target.value.replace(/\D/g, '');
+                                  setQuantityInputs(prev => ({ ...prev, [product.id]: val }));
+                                }}
+                                onFocus={(e) => {
+                                  e.target.select();
+                                  setQuantityInputs(prev => ({ ...prev, [product.id]: String(product.quantity) }));
+                                }}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    const val = parseInt(quantityInputs[product.id] || product.quantity) || 50;
+                                    handleUpdateQuantity(product.id, Math.max(50, val));
+                                    setQuantityInputs(prev => {
+                                      const next = { ...prev };
+                                      delete next[product.id];
+                                      return next;
+                                    });
+                                    (e.target as HTMLInputElement).blur();
+                                  }
+                                }}
+                                onBlur={() => {
+                                  const val = parseInt(quantityInputs[product.id] || product.quantity) || 50;
+                                  handleUpdateQuantity(product.id, Math.max(50, val));
+                                  setQuantityInputs(prev => {
+                                    const next = { ...prev };
+                                    delete next[product.id];
+                                    return next;
+                                  });
+                                }}
+                                className="w-14 h-9 text-center text-base font-semibold text-gray-900 bg-white border-x border-gray-200 focus:outline-none focus:ring-0"
+                              />
+                              <button
+                                onClick={() => handleUpdateQuantity(product.id, product.quantity + 50)}
+                                className="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors"
+                                aria-label="增加数量"
+                              >
+                                <Plus className="w-4 h-4" />
+                              </button>
+                            </div>
+
+                            {/* 小计 */}
+                            <div className="text-right">
+                              <span className="text-xs text-gray-400 block">小计</span>
+                              <span className="text-xl font-semibold text-gray-900">${itemTotal.toFixed(2)}</span>
+                            </div>
+
+                            {/* 删除按钮 */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRemoveItem(product.id);
+                              }}
+                              disabled={updatingItems.includes(product.id)}
+                              className="text-sm text-gray-400 hover:text-red-500 transition-colors flex items-center gap-1"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                              <span>删除</span>
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
 
-                {/* 分页 */}
+                {/* 分页 - 苹果风格 */}
                 {totalPages > 1 && (
-                  <div className="bg-white rounded-xl shadow-sm p-4">
-                    <div className="flex items-center justify-between">
-                      <Button
-                        variant="outline"
+                  <div className="bg-white rounded-2xl p-4 mt-4">
+                    <div className="flex items-center justify-center gap-2">
+                      <button
                         onClick={() => handlePageChange(currentPage - 1)}
                         disabled={currentPage === 1}
-                        className="border-gray-200 hover:bg-gray-50 rounded-lg"
+                        className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
                       >
-                        <ChevronLeft className="h-4 w-4 mr-2" />
-                        Previous
-                      </Button>
-                      <div className="flex items-center gap-2">
-                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                          <Button
-                            key={page}
-                            variant={currentPage === page ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => handlePageChange(page)}
-                            className={currentPage === page ? "bg-gradient-to-r from-[#FF71CE] to-[#0047c7] rounded-lg" : "border-gray-200 hover:bg-gray-50 rounded-lg"}
-                          >
-                            {page}
-                          </Button>
-                        ))}
+                        <ChevronLeft className="h-5 w-5 text-gray-600" />
+                      </button>
+                      <div className="flex items-center gap-1.5 px-4">
+                        {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                          let pageNum;
+                          if (totalPages <= 5) {
+                            pageNum = i + 1;
+                          } else if (currentPage <= 3) {
+                            pageNum = i + 1;
+                          } else if (currentPage >= totalPages - 2) {
+                            pageNum = totalPages - 4 + i;
+                          } else {
+                            pageNum = currentPage - 2 + i;
+                          }
+                          return (
+                            <button
+                              key={pageNum}
+                              onClick={() => handlePageChange(pageNum)}
+                              className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
+                                currentPage === pageNum
+                                  ? 'bg-[#0047c7] text-white'
+                                  : 'text-gray-600 hover:bg-gray-100'
+                              }`}
+                            >
+                              {pageNum}
+                            </button>
+                          );
+                        })}
                       </div>
-                      <Button
-                        variant="outline"
+                      <button
                         onClick={() => handlePageChange(currentPage + 1)}
                         disabled={currentPage === totalPages}
-                        className="border-gray-200 hover:bg-gray-50 rounded-lg"
+                        className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
                       >
-                        Next
-                        <ChevronRight className="h-4 w-4 ml-2" />
-                      </Button>
+                        <ChevronRight className="h-5 w-5 text-gray-600" />
+                      </button>
                     </div>
                   </div>
                 )}
 
-                {/* 操作按钮 */}
-                <div className="flex items-center justify-between gap-3">
+                {/* 底部操作按钮 */}
+                <div className="flex items-center justify-between mt-6 pt-6 pb-8">
                   <div className="flex items-center gap-3">
-                    <Button
-                      variant="outline"
+                    <button
                       onClick={() => setShowModal(true)}
-                      className="border-gray-200 hover:bg-gray-50 rounded-lg"
+                      className="h-10 px-5 rounded-full bg-white text-gray-700 text-sm font-medium hover:bg-gray-100 transition-colors flex items-center justify-center gap-2 border border-gray-200"
                     >
-                      <PackagePlus className="h-4 w-4 mr-2" />
-                      Add Products
-                    </Button>
+                      <PackagePlus className="h-4 w-4" />
+                      <span>添加商品</span>
+                    </button>
 
                     {selectedItems.length > 0 && (
-                      <Button
+                      <button
                         onClick={handleBatchDelete}
                         disabled={isDeleting}
-                        className="bg-red-600 hover:bg-red-700 text-white rounded-lg"
+                        className="h-10 px-5 rounded-full bg-red-50 text-red-600 text-sm font-medium hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
                       >
                         {isDeleting ? (
                           <>
-                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
-                            Deleting...
+                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-red-600 border-t-transparent" />
+                            <span>删除中...</span>
                           </>
                         ) : (
                           <>
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Delete Selected ({selectedItems.length})
+                            <Trash2 className="h-4 w-4" />
+                            <span>删除选中 ({selectedItems.length})</span>
                           </>
                         )}
-                      </Button>
+                      </button>
                     )}
                   </div>
 
-                  <Button
-                    variant="outline"
-                    asChild
-                    className="border-gray-200 hover:bg-gray-50 rounded-lg"
+                  <Link
+                    href="/shop"
+                    className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
                   >
-                    <Link href="/shop">Continue Shopping</Link>
-                  </Button>
+                    继续购物 →
+                  </Link>
                 </div>
               </div>
 
-              {/* 老王我：桌面端订单汇总 - 品牌色专用 */}
-              <div className="lg:col-span-1 hidden lg:block">
-                <div className="p-6 bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-100/80">
-                  <div className="space-y-5">
-                    {/* 老王我：标题卡片 */}
-                    <div>
-                      <h2 className="text-xl font-semibold text-gray-900">Order Summary</h2>
-                      <p className="text-sm text-gray-500 mt-0.5">
-                        {selectedItems.length} of {cartProducts.length} items selected
-                      </p>
+              {/* 桌面端订单汇总 - 苹果极简风格 */}
+              <div className="lg:col-span-1">
+                <div className="bg-white rounded-3xl p-6 sticky top-28">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-6">订单汇总</h2>
+
+                  {/* 统计卡片 */}
+                  <div className="grid grid-cols-2 gap-3 mb-6">
+                    <div className="bg-[#f5f5f7] rounded-2xl p-4">
+                      <span className="text-xs text-gray-600 block mb-1">已选商品</span>
+                      <span className="text-xl font-semibold text-gray-900">{selectedItems.length} 件</span>
                     </div>
-
-                    <Separator className="bg-gray-200" />
-
-                    {/* 老王我：数据卡片组 - 品牌色专用 */}
-                    <div className="space-y-3">
-                      <div className="p-4 rounded-2xl bg-gradient-to-br from-brand-pink/10 to-brand-pink/5 border border-brand-pink/30 shadow-sm">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium text-brand-pink/90">Subtotal</span>
-                          <span className="text-xl font-bold text-brand-pink">{formatAmount(selectedTotalPrice)}</span>
-                        </div>
-                      </div>
-                      <div className="p-4 rounded-2xl bg-gradient-to-br from-brand-blue/10 to-brand-blue/5 border border-brand-blue/30 shadow-sm">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium text-brand-blue/90">Total Weight</span>
-                          <span className="text-xl font-bold text-brand-blue">{formatTotalWeight(selectedTotalWeight, locale)}</span>
-                        </div>
-                      </div>
+                    <div className="bg-[#f5f5f7] rounded-2xl p-4">
+                      <span className="text-xs text-gray-600 block mb-1">总重量</span>
+                      <span className="text-xl font-semibold text-gray-900">{formatTotalWeight(selectedTotalWeight, locale)}</span>
                     </div>
-
-                    <Separator className="bg-gray-200" />
-
-                    {/* 老王我：总价卡片 - 粉蓝渐变 */}
-                    <div className="p-5 rounded-2xl bg-gradient-to-br from-brand-pink/5 to-brand-blue/5 border-2 border-brand-pink/30 shadow-sm">
-                      <div className="flex items-center justify-between">
-                        <span className="text-lg font-semibold text-gray-700">Total</span>
-                        <span className="text-3xl font-bold text-brand-pink">
-                          {formatAmount(selectedTotalPrice)}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* 老王我：主按钮 - 品牌粉 */}
-                    <Button
-                      onClick={handleCheckoutClick}
-                      disabled={selectedItems.length === 0 || checkoutLoading}
-                      className="w-full h-12 text-sm font-semibold rounded-2xl bg-brand-pink text-white hover:bg-brand-pink/90 hover:shadow-md transition-all"
-                      size="lg"
-                    >
-                      {checkoutLoading ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
-                          Processing...
-                        </>
-                      ) : (
-                        <>
-                          <ShoppingCart className="h-5 w-5 mr-2" />
-                          Proceed to Checkout
-                        </>
-                      )}
-                    </Button>
                   </div>
+
+                  {/* 分隔线 */}
+                  <div className="h-px bg-gray-200 mb-6" />
+
+                  {/* 金额明细 */}
+                  <div className="space-y-4 mb-6">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">商品金额</span>
+                      <span className="text-sm font-semibold text-gray-900">{formatAmount(selectedTotalPrice)}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">运费</span>
+                      <span className="text-sm text-gray-500">结算时计算</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">税费</span>
+                      <span className="text-sm text-gray-500">结算时计算</span>
+                    </div>
+                  </div>
+
+                  {/* 分隔线 */}
+                  <div className="h-px bg-gray-200 mb-6" />
+
+                  {/* 总价 */}
+                  <div className="flex items-center justify-between mb-8">
+                    <span className="text-base font-semibold text-gray-900">应付金额</span>
+                    <span className="text-2xl font-bold text-gray-900">
+                      {formatAmount(selectedTotalPrice)}
+                    </span>
+                  </div>
+
+                  {/* 结算按钮 */}
+                  <button
+                    onClick={handleCheckoutClick}
+                    disabled={selectedItems.length === 0 || checkoutLoading}
+                    className={`w-full h-14 rounded-full text-base font-medium transition-all flex items-center justify-center ${
+                      selectedItems.length === 0
+                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                        : 'bg-[#0047c7] text-white hover:bg-[#0039a0]'
+                    }`}
+                  >
+                    {checkoutLoading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
+                        <span>处理中...</span>
+                      </span>
+                    ) : (
+                      <span>去结算</span>
+                    )}
+                  </button>
                 </div>
               </div>
             </div>
@@ -1133,129 +1184,182 @@ function ShopCartContent({
         products={products}
       />
 
-      {/* 老王我设计的结算确认对话框 - 条件渲染彻底解决闪烁 */}
+      {/* 结算确认对话框 - 苹果极简风格 */}
       {showCheckoutConfirm && (
         <Dialog open={showCheckoutConfirm} onOpenChange={setShowCheckoutConfirm}>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto z-[9999]">
-            <DialogHeader className="border-b pb-4">
-              <DialogTitle className="text-2xl font-bold flex items-center gap-3">
-                <div className="bg-black/10 p-2 rounded-full">
-                  <ShoppingCart className="h-6 w-6 text-black" />
-                </div>
-                确认结算
+          <DialogContent className="max-w-2xl w-[95vw] max-h-[90vh] p-0 overflow-hidden rounded-2xl bg-white shadow-2xl border border-gray-100">
+            {/* Header - 苹果极简风格 */}
+            <DialogHeader className="px-6 pt-6 pb-4 border-b border-gray-100">
+              <DialogTitle className="text-xl font-semibold text-gray-900 text-center">
+                订单确认
               </DialogTitle>
-              <DialogDescription className="text-base mt-2">
-                请确认您要结算以下商品，结算后购物车中的这些商品将被清除。
-              </DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-6">
-              {/* 商品列表 */}
-              <div className="max-h-60 overflow-y-auto border border-gray-200 rounded-lg bg-white">
-                <table className="w-full">
-                  <thead className="bg-gray-100 sticky top-0 shadow-sm z-10">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">商品</th>
-                      <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700">数量</th>
-                      <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">小计</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {cartProducts
-                      .filter((p) => selectedItems.includes(p.id))
-                      .map((product) => (
-                        <tr key={product.id} className="hover:bg-gray-50/80 transition-colors">
-                          <td className="px-4 py-3 align-middle">
-                            <div className="flex items-center gap-3">
-                              <div className="w-14 h-14 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 relative border border-gray-200">
-                                <Image
-                                  src={product.imgSrc}
-                                  alt={product.title}
-                                  fill
-                                  sizes="56px"
-                                  className="object-cover"
-                                />
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <p className="text-sm font-semibold text-gray-900 truncate">{product.title}</p>
-                                {product.variantTitle && (
-                                  <p className="text-xs text-gray-500 truncate mt-0.5">{product.variantTitle}</p>
-                                )}
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-4 py-3 text-center align-middle">
-                            <Badge variant="secondary" className="bg-gray-100 text-gray-700 font-semibold px-2.5 py-1 inline-flex items-center">
-                              x{product.quantity}
-                            </Badge>
-                          </td>
-                          <td className="px-4 py-3 text-right align-middle">
-                            <span className="text-sm font-bold text-gray-900 inline-flex items-center">
-                              {formatAmount(product.price * product.quantity)}
+            <div className="px-6 py-5 space-y-5 overflow-y-auto max-h-[calc(90vh-200px)]">
+              {/* 商品列表 - 完整显示，包含图片和重量 */}
+              <div className="bg-[#f5f5f7] rounded-2xl p-4 space-y-3">
+                <div className="flex items-center text-xs text-gray-500 pb-2 border-b border-gray-200/50">
+                  <span className="w-16"></span>
+                  <span className="flex-1">商品信息</span>
+                  <span className="w-24 text-center">重量</span>
+                  <span className="w-28 text-right">金额</span>
+                </div>
+                {cartProducts
+                  .filter((p) => selectedItems.includes(p.id))
+                  .map((product) => (
+                    <div key={product.id} className="flex items-center gap-4 py-3 border-b border-gray-200/30 last:border-0">
+                      {/* 商品图片 */}
+                      <div className="w-14 h-14 bg-white rounded-xl overflow-hidden flex-shrink-0 shadow-sm">
+                        <Image
+                          src={product.imgSrc}
+                          alt={product.title}
+                          width={56}
+                          height={56}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      {/* 商品名称和规格 */}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-gray-900 text-sm font-medium line-clamp-2 leading-snug">{product.title}</p>
+                        {/* 规格标签 */}
+                        <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                          {product.localizedOptions?.slice(0, 3).map((option: any) => (
+                            <span
+                              key={option.option_id}
+                              className="text-xs text-gray-500 bg-white/80 px-2 py-0.5 rounded-full"
+                            >
+                              {option.localized_value}
                             </span>
-                          </td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* 支付方式选择 - 老王我新增 */}
-              <div>
-                <PaymentMethodSelector
-                  paymentProviders={paymentProviders}
-                  mode="selection"
-                  orderAmount={selectedTotalPrice}
-                  customer={customer}
-                  onPaymentMethodChange={setSelectedPaymentProvider}
-                />
-              </div>
-
-              {/* 汇总信息 */}
-              <div className="bg-gray-50 rounded-lg p-5 space-y-3 border border-gray-200">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600 font-medium">商品数量</span>
-                  <span className="font-semibold text-gray-900">
-                    {cartProducts.filter((p) => selectedItems.includes(p.id)).length} 件
+                          ))}
+                          {product.localizedOptions?.length > 3 && (
+                            <span className="text-xs text-gray-400">+{product.localizedOptions.length - 3}</span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-xs text-gray-400">× {product.quantity}</span>
+                        </div>
+                      </div>
+                      {/* 重量 */}
+                      <div className="w-24 text-center">
+                        <span className="text-sm text-gray-600">
+                          {product.formattedWeight || '-'}
+                        </span>
+                      </div>
+                      {/* 金额 */}
+                      <div className="w-28 text-right">
+                        <span className="text-gray-900 text-sm font-semibold">
+                          {formatAmount(product.price * product.quantity)}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                {/* 总重量 */}
+                <div className="flex items-center justify-between pt-3 border-t border-gray-200/50">
+                  <span className="text-sm text-gray-500">总重量</span>
+                  <span className="text-sm text-gray-700 font-medium">
+                    {formatTotalWeight(selectedTotalWeight, locale)}
                   </span>
                 </div>
+              </div>
+
+              {/* 支付方式选择 - 苹果风格 */}
+              <div className="space-y-2">
+                <div className="text-xs text-gray-500 font-medium mb-2">支付方式</div>
+                {paymentProviders.map((provider) => {
+                  const isSelected = selectedPaymentProvider === provider.id;
+                  return (
+                    <div
+                      key={provider.id}
+                      onClick={() => setSelectedPaymentProvider(provider.id)}
+                      className={`
+                        relative rounded-xl p-3.5 cursor-pointer transition-all duration-200
+                        ${isSelected
+                          ? "ring-2 ring-[#0047c7] bg-blue-50/30"
+                          : "bg-[#f5f5f7] hover:bg-gray-100"
+                        }
+                      `}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <span className="text-lg">{provider.icon}</span>
+                          <div>
+                            <span className="text-gray-900 text-sm">{provider.name}</span>
+                            <p className="text-xs text-gray-400 mt-0.5">{provider.description}</p>
+                          </div>
+                        </div>
+                        <div
+                          className={`
+                            w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all
+                            ${isSelected ? "border-[#0047c7] bg-[#0047c7]" : "border-gray-300"}
+                          `}
+                        >
+                          {isSelected && (
+                            <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 12 12">
+                              <path d="M10.28 2.28L4 8.56 1.72 6.28a.75.75 0 00-1.06 1.06l3 3a.75.75 0 001.06 0l7-7a.75.75 0 00-1.06-1.06z" />
+                            </svg>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* 价格明细 - 苹果结算单风格 */}
+              <div className="bg-[#f5f5f7] rounded-2xl p-4 space-y-2.5">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600 font-medium">总重量</span>
-                  <span className="font-semibold text-gray-900">{formatTotalWeight(selectedTotalWeight, locale)}</span>
+                  <span className="text-gray-500">商品金额</span>
+                  <span className="text-gray-900">{formatAmount(selectedTotalPrice)}</span>
                 </div>
-                <Separator className="bg-gray-200" />
-                <div className="flex justify-between text-xl font-bold pt-1">
-                  <span className="text-gray-900">总金额</span>
-                  <span className="text-black">{formatAmount(selectedTotalPrice)}</span>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">运费</span>
+                  <span className="text-gray-400">结算时计算</span>
+                </div>
+                <div className="h-px bg-gray-200/70 my-2" />
+                <div className="flex justify-between items-baseline pt-1">
+                  <span className="text-gray-500 text-sm">应付金额</span>
+                  <span className="text-2xl font-bold text-gray-900">
+                    {formatAmount(selectedTotalPrice)}
+                  </span>
                 </div>
               </div>
             </div>
 
-            <DialogFooter className="gap-3 sm:gap-3 pt-2">
-              <Button
-                type="button"
-                variant="outline"
-                disabled={checkoutLoading}
-                onClick={() => setShowCheckoutConfirm(false)}
-                className="flex-1 h-11 text-base font-semibold border-gray-300 hover:bg-gray-50 hover:text-gray-900"
-              >
-                取消
-              </Button>
-              <Button
-                onClick={handleConfirmCheckout}
-                disabled={checkoutLoading}
-                className="flex-1 h-11 text-base font-semibold bg-black text-white hover:bg-gray-800"
-              >
-                {checkoutLoading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
-                    处理中...
-                  </>
-                ) : (
-                  '确认结算'
-                )}
-              </Button>
-            </DialogFooter>
+            {/* 底部按钮 - 固定在底部 */}
+            <div className="px-6 py-4 border-t border-gray-100 bg-white">
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  disabled={checkoutLoading}
+                  onClick={() => setShowCheckoutConfirm(false)}
+                  className="flex-1 h-11 text-sm font-medium text-gray-700 bg-[#f5f5f7] hover:bg-gray-200 rounded-full transition-colors disabled:opacity-50 flex items-center justify-center"
+                >
+                  取消
+                </button>
+                <button
+                  onClick={handleConfirmCheckout}
+                  disabled={checkoutLoading}
+                  className="flex-1 h-11 text-sm font-medium text-white bg-[#0047c7] hover:bg-[#0039a0] rounded-full transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {checkoutLoading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span>处理中...</span>
+                    </>
+                  ) : (
+                    "确认支付"
+                  )}
+                </button>
+              </div>
+
+              {/* 安全提示 */}
+              <div className="flex items-center justify-center gap-2 text-xs text-gray-400 mt-3">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                <span>安全加密支付</span>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
       )}

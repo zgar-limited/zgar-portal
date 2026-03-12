@@ -49,8 +49,8 @@ interface ProductPageProps {
 - `@/components/products/LayoutHandler.jsx`: 布局处理器
 - `@/widgets/ShopWidget`: 商店侧边栏组件
 
-### 状态管理
-- **React Query**: 用于缓存和同步产品数据
+### 数据获取模式
+- **RSC 模式**: Server Component 获取数据，传递给 Client Component
 - **URL 参数**: 管理筛选、排序和分页状态
 
 ## 数据模型
@@ -115,7 +115,7 @@ A: 在 `data/productFilterOptions.js` 中添加新的筛选选项，并在 `prod
 A: 使用 Next.js 的 Image 组件，配置适当的图片尺寸和格式优化，实现懒加载。
 
 ### Q: 如何处理大型产品目录的性能？
-A: 使用 React Query 缓存、虚拟滚动、分页加载和图片懒加载等技术优化性能。
+A: 使用 RSC 数据获取、虚拟滚动、分页加载和图片懒加载等技术优化性能。
 
 ## 相关文件清单
 
