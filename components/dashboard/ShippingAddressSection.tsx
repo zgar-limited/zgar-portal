@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl";
 import { HttpTypes } from "@medusajs/types";
 import {
   MapPin,
-  Building,
   Phone,
   ChevronDown,
   Edit2,
@@ -36,10 +35,9 @@ function isAddressMatch(
   );
 }
 
-// 地址信息组件
+// 地址信息组件 - Tesla极简风格
 function AddressInfo({
   address,
-  showLabels = false,
   compact = false,
 }: {
   address: {
@@ -53,53 +51,34 @@ function AddressInfo({
     postal_code?: string;
     phone?: string;
   } | null;
-  showLabels?: boolean;
   compact?: boolean;
 }) {
   if (!address || !address.address_1) {
-    return (
-      <span className="text-gray-400 italic">
-        {showLabels ? "暂无收货地址" : "—"}
-      </span>
-    );
+    return <span className="text-gray-300">—</span>;
   }
 
   return (
-    <div className={cn("space-y-1.5", compact && "space-y-1")}>
+    <div className={cn("space-y-1", compact && "space-y-0.5")}>
       {/* 收件人 */}
-      <div className={cn("font-semibold text-gray-900", compact ? "text-sm" : "text-base")}>
+      <div className={cn("text-gray-900", compact ? "text-sm font-medium" : "text-base font-light")}>
         {address.first_name} {address.last_name}
       </div>
 
       {/* 详细地址 */}
-      <div className={cn("text-gray-600", compact ? "text-xs" : "text-sm")}>
-        <div className="flex items-start gap-1.5">
-          {!compact && <MapPin size={14} className="text-gray-400 flex-shrink-0 mt-0.5" />}
-          <div>
-            <div>{address.address_1}</div>
-            {address.address_2 && <div>{address.address_2}</div>}
-            <div>
-              {address.city}
-              {address.province && `, ${address.province}`}
-              {address.postal_code && ` ${address.postal_code}`}
-            </div>
-          </div>
+      <div className={cn("text-gray-500", compact ? "text-xs" : "text-sm")}>
+        <div>{address.address_1}</div>
+        {address.address_2 && <div>{address.address_2}</div>}
+        <div>
+          {address.city}
+          {address.province && `, ${address.province}`}
+          {address.postal_code && ` ${address.postal_code}`}
         </div>
       </div>
 
-      {/* 公司 */}
-      {address.company && !compact && (
-        <div className="flex items-center gap-1.5 text-sm text-gray-600">
-          <Building size={14} className="text-gray-400 flex-shrink-0" />
-          <span>{address.company}</span>
-        </div>
-      )}
-
       {/* 电话 */}
       {address.phone && (
-        <div className={cn("flex items-center gap-1.5 text-gray-600", compact ? "text-xs" : "text-sm")}>
-          {!compact && <Phone size={14} className="text-gray-400 flex-shrink-0" />}
-          <span>{address.phone}</span>
+        <div className={cn("text-gray-500", compact ? "text-xs" : "text-sm")}>
+          {address.phone}
         </div>
       )}
     </div>
@@ -188,33 +167,31 @@ export default function ShippingAddressSection({
   const isDisabled = disabled || isUpdating;
 
   return (
-    <div className="bg-white border border-gray-200 overflow-hidden">
-      {/* 标题栏 - 商务风格 */}
-      <div className="border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <MapPin size={18} className="text-gray-700" strokeWidth={2} />
-            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide">{t("title")}</h3>
-            {hasCurrentAddress && (
-              <CheckCircle size={16} className="text-gray-900" strokeWidth={2.5} />
-            )}
-          </div>
-          {!isDisabled && hasCurrentAddress && (
-            <button
-              onClick={onEditAddress}
-              className="p-2 text-gray-400 hover:text-gray-900 transition-colors cursor-pointer"
-            >
-              <Edit2 size={16} strokeWidth={2} />
-            </button>
+    <div>
+      {/* 标题栏 - Tesla极简风格 */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <h2 className="text-sm font-medium text-gray-700 uppercase tracking-wide">{t("title")}</h2>
+          {hasCurrentAddress && (
+            <CheckCircle size={14} className="text-black" />
           )}
         </div>
+        {!isDisabled && hasCurrentAddress && (
+          <button
+            onClick={onEditAddress}
+            className="text-xs text-gray-500 hover:text-black transition-colors flex items-center gap-1 cursor-pointer"
+          >
+            <Edit2 size={12} />
+            {t("edit") || "Edit"}
+          </button>
+        )}
       </div>
 
       {/* 当前地址显示 */}
       <div
         className={cn(
-          "px-6 py-4 cursor-pointer transition-colors",
-          !isDisabled && "hover:bg-gray-50"
+          "cursor-pointer transition-colors",
+          !isDisabled && "hover:opacity-80"
         )}
         onClick={() => !isDisabled && setIsExpanded(!isExpanded)}
       >
@@ -223,67 +200,93 @@ export default function ShippingAddressSection({
             {hasCurrentAddress ? (
               <AddressInfo address={currentAddress} />
             ) : (
-              <div className="flex items-center gap-2 text-gray-500">
-                <AlertCircle size={16} className="text-gray-400" strokeWidth={2} />
-                <span className="text-sm font-medium">{t("noAddress")}</span>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-gray-500">
+                  <AlertCircle size={14} />
+                  <span className="text-sm">{t("noAddress")}</span>
+                </div>
+                {/* 快速操作按钮 */}
+                <div className="flex flex-wrap gap-3 pt-2">
+                  {savedAddresses.length > 0 && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsExpanded(true);
+                      }}
+                      disabled={isDisabled}
+                      className="flex items-center gap-1.5 py-2 px-3 bg-gray-100 hover:bg-gray-200 text-gray-900 text-xs font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <MapPin size={14} />
+                      {t("selectAddress") || "選擇地址"}
+                    </button>
+                  )}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onAddNewAddress();
+                    }}
+                    disabled={isDisabled}
+                    className="flex items-center gap-1.5 py-2 px-3 bg-gray-100 hover:bg-gray-200 text-gray-900 text-xs font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Plus size={14} strokeWidth={2} />
+                    {t("addNewAddress")}
+                  </button>
+                </div>
               </div>
             )}
           </div>
 
-          {/* 展开/收起按钮 */}
-          <div className={cn(
-            "p-2 text-gray-400 transition-transform",
-            isExpanded && "rotate-180"
-          )}>
-            <ChevronDown size={20} strokeWidth={2} />
-          </div>
+          {/* 展开/收起按钮 - 只在有地址时显示 */}
+          {hasCurrentAddress && (
+            <div className={cn(
+              "p-1 text-gray-300 transition-transform",
+              isExpanded && "rotate-180"
+            )}>
+              <ChevronDown size={16} />
+            </div>
+          )}
         </div>
       </div>
 
-      {/* 展开的地址选择面板 - 商务风格 */}
+      {/* 展开的地址选择面板 - Tesla极简风格 */}
       {isExpanded && (
-        <div className="border-t border-gray-200">
+        <div className="mt-6 pt-6 border-t border-gray-100 space-y-6">
           {/* 上次订单地址选项 */}
           {hasLastAddress && !isLastAddressInSaved && (
-            <div className="border-b border-gray-200">
-              <div className="px-6 py-3 bg-gray-50">
-                <p className="text-xs font-bold text-gray-700 uppercase tracking-wide">
-                  {t("lastOrderAddress")}
-                </p>
-              </div>
+            <div>
+              <p className="text-xs text-gray-400 uppercase tracking-wide mb-3">
+                {t("lastOrderAddress")}
+              </p>
               <div
                 onClick={() => !isDisabled && handleSelectAddress(lastOrderAddress!, true)}
                 className={cn(
-                  "relative px-6 py-4 transition-all cursor-pointer",
-                  isCurrentAddressMatchLast
-                    ? "bg-gray-50"
-                    : "hover:bg-gray-50",
+                  "py-4 transition-all cursor-pointer border-b border-gray-100",
+                  isCurrentAddressMatchLast ? "opacity-100" : "opacity-70 hover:opacity-100",
                   isDisabled && "opacity-50 cursor-not-allowed"
                 )}
               >
-                {/* 选中状态指示 */}
                 <div className="flex items-start gap-4">
                   <div
                     className={cn(
-                      "w-5 h-5 border-2 flex items-center justify-center flex-shrink-0 mt-1",
+                      "w-4 h-4 border flex items-center justify-center flex-shrink-0 mt-0.5",
                       isCurrentAddressMatchLast
-                        ? "border-gray-900 bg-gray-900"
+                        ? "border-black bg-black"
                         : "border-gray-300"
                     )}
                   >
                     {(isCurrentAddressMatchLast || selectedAddressId === 'last-used') && (
                       isUpdating && selectedAddressId === 'last-used' ? (
-                        <Loader2 size={12} className="text-white animate-spin" />
+                        <Loader2 size={10} className="text-white animate-spin" />
                       ) : (
-                        <Check size={12} className="text-white" strokeWidth={3} />
+                        <Check size={10} className="text-white" strokeWidth={3} />
                       )
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
                     {/* 标签 */}
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-bold bg-gray-200 text-gray-900">
-                        <Clock size={10} strokeWidth={2.5} />
+                      <span className="text-xs text-gray-400 flex items-center gap-1">
+                        <Clock size={10} />
                         {t("lastUsed")}
                       </span>
                     </div>
@@ -297,14 +300,12 @@ export default function ShippingAddressSection({
 
           {/* 保存的地址列表 */}
           {savedAddresses.length > 0 && (
-            <div className="border-b border-gray-200">
-              <div className="px-6 py-3 bg-gray-50">
-                <p className="text-xs font-bold text-gray-700 uppercase tracking-wide">
-                  {t("savedAddresses")} ({savedAddresses.length})
-                </p>
-              </div>
-              <div className="divide-y divide-gray-200">
-                {savedAddresses.map((address) => {
+            <div>
+              <p className="text-xs text-gray-400 uppercase tracking-wide mb-3">
+                {t("savedAddresses")} ({savedAddresses.length})
+              </p>
+              <div className="space-y-0">
+                {savedAddresses.map((address, idx) => {
                   const isCurrent = isAddressMatch(address, currentAddress);
                   const isLastUsed = isAddressMatch(address, lastOrderAddress);
                   const isSelected = selectedAddressId === address.id;
@@ -314,51 +315,47 @@ export default function ShippingAddressSection({
                       key={address.id}
                       onClick={() => !isDisabled && !isCurrent && handleSelectAddress(address)}
                       className={cn(
-                        "relative px-6 py-4 transition-all",
-                        isCurrent
-                          ? "bg-gray-50 cursor-default"
-                          : "hover:bg-gray-50 cursor-pointer",
+                        "py-4 transition-all border-b border-gray-100 first:pt-0 last:border-b-0",
+                        isCurrent ? "cursor-default" : "cursor-pointer",
+                        !isCurrent && "hover:opacity-80",
                         isDisabled && "opacity-50 cursor-not-allowed"
                       )}
                     >
-                      {/* 选中状态指示 */}
                       <div className="flex items-start gap-4">
                         <div
                           className={cn(
-                            "w-5 h-5 border-2 flex items-center justify-center flex-shrink-0 mt-1",
-                            isCurrent
-                              ? "border-gray-900 bg-gray-900"
-                              : isSelected
-                              ? "border-gray-900 bg-gray-900"
+                            "w-4 h-4 border flex items-center justify-center flex-shrink-0 mt-0.5",
+                            (isCurrent || isSelected)
+                              ? "border-black bg-black"
                               : "border-gray-300"
                           )}
                         >
                           {(isCurrent || isSelected) && (
                             isUpdating && isSelected ? (
-                              <Loader2 size={12} className="text-white animate-spin" />
+                              <Loader2 size={10} className="text-white animate-spin" />
                             ) : (
-                              <Check size={12} className="text-white" strokeWidth={3} />
+                              <Check size={10} className="text-white" strokeWidth={3} />
                             )
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
                           {/* 标签 */}
-                          <div className="flex items-center gap-2 mb-2 flex-wrap">
+                          <div className="flex items-center gap-3 mb-2 flex-wrap">
                             {address.is_default_shipping && (
-                              <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-bold bg-gray-900 text-white">
-                                <Star size={10} className="fill-current" strokeWidth={2.5} />
+                              <span className="text-xs text-black font-medium flex items-center gap-1">
+                                <Star size={10} className="fill-current" />
                                 {t("default")}
                               </span>
                             )}
                             {isCurrent && (
-                              <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-bold bg-gray-700 text-white">
-                                <Check size={10} strokeWidth={3} />
+                              <span className="text-xs text-gray-600 flex items-center gap-1">
+                                <Check size={10} />
                                 {t("current")}
                               </span>
                             )}
                             {isLastUsed && !isCurrent && (
-                              <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-bold bg-gray-200 text-gray-900">
-                                <Clock size={10} strokeWidth={2.5} />
+                              <span className="text-xs text-gray-400 flex items-center gap-1">
+                                <Clock size={10} />
                                 {t("lastUsed")}
                               </span>
                             )}
@@ -374,33 +371,25 @@ export default function ShippingAddressSection({
             </div>
           )}
 
-          {/* 新增地址按钮 - 商务风格 */}
-          <div className="px-6 py-4">
-            <button
-              onClick={() => {
-                setIsExpanded(false);
-                onAddNewAddress();
-              }}
-              disabled={isDisabled}
-              className={cn(
-                "w-full flex items-center justify-center gap-2 px-4 py-3 cursor-pointer",
-                "border border-gray-900 bg-gray-900 text-white",
-                "hover:bg-gray-800",
-                "transition-all font-semibold text-sm",
-                "disabled:opacity-50 disabled:cursor-not-allowed"
-              )}
-            >
-              <Plus size={16} strokeWidth={2.5} />
-              <span className="text-sm font-bold uppercase tracking-wide">{t("addNewAddress")}</span>
-            </button>
-          </div>
+          {/* 新增地址按钮 - 更明显 */}
+          <button
+            onClick={() => {
+              setIsExpanded(false);
+              onAddNewAddress();
+            }}
+            disabled={isDisabled}
+            className={cn(
+              "text-sm font-medium text-gray-900 hover:text-gray-600 transition-colors flex items-center gap-2 cursor-pointer py-3 px-4 bg-gray-100 hover:bg-gray-200",
+              "disabled:opacity-50 disabled:cursor-not-allowed"
+            )}
+          >
+            <Plus size={16} strokeWidth={2} />
+            {t("addNewAddress")}
+          </button>
 
           {/* 无地址时的提示 */}
           {savedAddresses.length === 0 && !hasLastAddress && (
-            <div className="px-6 py-8 text-center text-gray-500">
-              <MapPin size={24} className="mx-auto text-gray-300 mb-2" strokeWidth={2} />
-              <p className="text-sm font-medium">{t("noSavedAddresses")}</p>
-            </div>
+            <p className="text-sm text-gray-400">{t("noSavedAddresses")}</p>
           )}
         </div>
       )}

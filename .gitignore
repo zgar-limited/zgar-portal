@@ -45,3 +45,5 @@ next-env.d.ts
 
 # oh-my-claudecode
 .omc/
+
+.playwright-mcp/
