@@ -114,29 +114,29 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
 
   const orderId = order.id;
 
-  // 老王注：从数据库字段获取支付审核状态（2026-02-05 回滚）
+  // 老王注：从数据库字段获取支付审核状态（商务风格）
   const getPaymentAuditStatus = () => {
     const status = zgarOrder?.payment_audit_status;
 
     const statusMap = {
       "not_uploaded": {
         label: t('paymentAuditStatusObj.notUploaded'),
-        variant: "bg-gray-100 text-gray-800 border border-gray-200",
+        variant: "text-gray-500",
         status: "not_uploaded",
       },
       "uploaded": {
         label: t('paymentAuditStatusObj.uploaded'),
-        variant: "bg-blue-100 text-blue-800 border border-blue-200",
+        variant: "text-gray-700",
         status: "uploaded",
       },
       "partial": {
         label: t('paymentAuditStatusObj.partial'),
-        variant: "bg-yellow-100 text-yellow-800 border border-yellow-200",
+        variant: "text-gray-700",
         status: "partial",
       },
       "completed": {
         label: t('paymentAuditStatusObj.completed'),
-        variant: "bg-green-100 text-green-800 border border-green-200",
+        variant: "text-gray-900 font-semibold",
         status: "completed",
       },
     };
@@ -354,21 +354,21 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
     return !!lastOrderAddress && isLastAddressInSaved;
   }, [lastOrderAddress, isLastAddressInSaved]);
 
-  // 老王我：美化的状态 Badge 样式函数（使用品牌色）
+  // 老王我：商务风格状态 Badge 样式函数（与商品详情页一致）
   const getStatusBadgeStyle = (status: string) => {
     switch (status) {
       case OrderStatus.COMPLETED:
-        return "bg-brand-pink text-white border-0 shadow-lg";
+        return "bg-gray-900 text-white";
       case OrderStatus.PENDING:
-        return "bg-brand-blue text-white border-0 shadow-lg";
+        return "bg-gray-700 text-white";
       case OrderStatus.CANCELED:
-        return "bg-gray-400 dark:bg-gray-600 text-white border-0 shadow-lg";
+        return "bg-gray-500 text-white";
       case OrderStatus.ARCHIVED:
-        return "bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-white border-0 shadow-lg";
+        return "bg-gray-200 text-gray-900";
       case OrderStatus.REQUIRES_ACTION:
-        return "bg-brand-gradient text-white border-0 shadow-lg";
+        return "bg-gray-900 text-white";
       default:
-        return "bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-white border-0 shadow-lg";
+        return "bg-gray-200 text-gray-900";
     }
   };
 
@@ -382,7 +382,7 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
           onHighlightChange={setHighlightAction}
         />
 
-        {/* 老王我：Minimalism 风格 - 简洁头部卡片 */}
+        {/* 老王我：商务风格 - 简洁头部卡片 */}
       <div className="bg-white border border-gray-200 p-6 md:p-8">
         {/* 返回按钮 + 订单号 + 状态 */}
         <div className="flex items-center justify-between gap-4">
@@ -392,27 +392,27 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
               className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
             >
               <ChevronLeft size={20} />
-              <span className="text-sm font-medium">{t('backToOrders')}</span>
+              <span className="text-sm font-medium uppercase tracking-wide">{t('backToOrders')}</span>
             </Link>
             <div className="h-6 w-px bg-gray-200"></div>
             <div>
-              <p className="text-xs text-gray-500">{t('orderNumber')}</p>
-              <p className="text-lg font-bold text-gray-900" style={{ fontFamily: 'monospace' }}>
+              <p className="text-xs text-gray-500 uppercase tracking-wide">{t('orderNumber')}</p>
+              <p className="text-lg font-bold text-gray-900 tracking-tight" style={{ fontFamily: 'monospace' }}>
                 #{order.display_id}
               </p>
             </div>
           </div>
           <div className="text-right">
-            <p className="text-xs text-gray-500 mb-1">{t('orderStatus')}</p>
-            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg ${getStatusBadgeStyle(order.status)}`}>
+            <p className="text-xs text-gray-500 mb-1 uppercase tracking-wide">{t('orderStatus')}</p>
+            <div className={`inline-flex items-center gap-2 px-4 py-2 ${getStatusBadgeStyle(order.status)}`}>
               {order.status === 'completed' ? (
-                <CheckCircle size={18} />
+                <CheckCircle size={16} strokeWidth={2.5} />
               ) : order.status === 'pending' ? (
-                <Package size={18} />
+                <Package size={16} strokeWidth={2.5} />
               ) : (
-                <AlertCircle size={18} />
+                <AlertCircle size={16} strokeWidth={2.5} />
               )}
-              <span className="text-sm font-bold">
+              <span className="text-sm font-bold uppercase tracking-wide">
                 {order.status === 'completed' ? t('statusObj.completed') :
                  order.status === 'pending' ? t('statusObj.pending') :
                  order.status === 'canceled' ? t('statusObj.canceled') :
@@ -427,11 +427,11 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 {/* Left Column - Order Items */}
 <div className="lg:col-span-2 space-y-6">
-{/* 老王我：Minimalism 风格 - 简洁订单商品列表 */}
+{/* 商务风格 - 简洁订单商品列表 */}
 <div className="bg-white border border-gray-200">
   {/* 标题栏 */}
   <div className="border-b border-gray-200 px-6 py-4">
-    <h2 className="text-base font-bold text-gray-900">{t('orderItems')}</h2>
+    <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wide">{t('orderItems')}</h2>
   </div>
 
   {/* 商品列表 */}
@@ -445,7 +445,7 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
         <div key={item.id} className="p-6">
           <div className="flex gap-6">
             {/* 商品图片 - 80x80 小尺寸 */}
-            <div className="relative flex-shrink-0 w-20 h-20 bg-gray-50 rounded-lg overflow-hidden">
+            <div className="relative flex-shrink-0 w-20 h-20 bg-gray-50 border border-gray-200 overflow-hidden">
               <Image
                 src={item.thumbnail || "https://placehold.co/100"}
                 alt={item.title}
@@ -460,7 +460,7 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
               {/* 商品标题 */}
               <Link
                 href={`/product-detail/${item.variant?.product_id || ""}`}
-                className="text-gray-900 hover:text-brand-pink font-medium text-base mb-2 block transition-colors"
+                className="text-gray-900 hover:text-gray-600 font-medium text-base mb-2 block transition-colors"
               >
                 {item.variant_title || item.title}
               </Link>
@@ -477,7 +477,7 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
                     return (
                       <span
                         key={optIdx}
-                        className="inline-flex items-center px-2 py-1 bg-gray-50 text-gray-700 text-xs rounded"
+                        className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-700 text-xs font-medium"
                       >
                         {localizedValue}
                       </span>
@@ -489,25 +489,25 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
               {/* 数据网格 - 简洁4列布局 */}
               <div className="grid grid-cols-4 gap-4">
                 <div>
-                  <p className="text-xs text-gray-500 mb-1">{t('price')}</p>
+                  <p className="text-xs text-gray-500 mb-1 uppercase tracking-wide">{t('price')}</p>
                   <p className="text-sm font-semibold text-gray-900">
                     {formatAmount(item.unit_price)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500 mb-1">{t('qty')}</p>
+                  <p className="text-xs text-gray-500 mb-1 uppercase tracking-wide">{t('qty')}</p>
                   <p className="text-sm font-semibold text-gray-900">
                     × {item.quantity}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500 mb-1">{t('subtotal')}</p>
-                  <p className="text-sm font-bold text-brand-pink">
+                  <p className="text-xs text-gray-500 mb-1 uppercase tracking-wide">{t('subtotal')}</p>
+                  <p className="text-sm font-bold text-gray-900">
                     {formatAmount(itemTotal)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500 mb-1">{t('weight')}</p>
+                  <p className="text-xs text-gray-500 mb-1 uppercase tracking-wide">{t('weight')}</p>
                   <p className="text-sm font-medium text-gray-700">
                     {formattedWeight}
                   </p>
@@ -524,7 +524,7 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
   <div className="border-t border-gray-200 px-6 py-4 bg-gray-50">
     <div className="flex items-center justify-between">
       <div className="space-y-1">
-        <p className="text-xs text-gray-600">{t('totalWeight')}</p>
+        <p className="text-xs text-gray-600 uppercase tracking-wide">{t('totalWeight')}</p>
         <p className="text-sm font-semibold text-gray-900">
           {order.items.reduce((total, item) => {
             const weight = (item as any).product?.metadata?.package_spec_product_weight;
@@ -533,8 +533,8 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
         </p>
       </div>
       <div className="text-right">
-        <p className="text-sm text-gray-600">{t('total')}</p>
-        <p className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'monospace' }}>
+        <p className="text-sm text-gray-600 uppercase tracking-wide">{t('total')}</p>
+        <p className="text-2xl font-bold text-gray-900 tracking-tight" style={{ fontFamily: 'monospace' }}>
           {formatAmount(order.total)}
         </p>
       </div>
@@ -566,27 +566,27 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
     </>
   )}
 
-  {/* Packing Requirements Card - Minimalism 风格 */}
+  {/* Packing Requirements Card - 商务风格 */}
   <div
     id="packing-requirements-card"
     className={cn(
-      "bg-white border-2 border-gray-200 transition-all duration-300",
-      highlightAction === 'packing' && "border-solid animate-super-highlight"
+      "bg-white border border-gray-200 transition-all duration-300",
+      highlightAction === 'packing' && "border-gray-900"
     )}
   >
     {/* 标题栏 */}
     <div className="border-b border-gray-200 px-6 py-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Package size={18} className="text-gray-400" />
-          <h3 className="text-base font-bold text-gray-900">{t('packingRequirements')}</h3>
+          <Package size={18} className="text-gray-700" strokeWidth={2} />
+          <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide">{t('packingRequirements')}</h3>
         </div>
         {shippingMarks && Array.isArray(shippingMarks) && shippingMarks.length > 0 ? (
-          <CheckCircle size={18} className="text-green-600" />
+          <CheckCircle size={18} className="text-gray-900" strokeWidth={2.5} />
         ) : zgarOrder.packing_requirement_uploaded_at ? (
-          <CheckCircle size={18} className="text-green-600" />
+          <CheckCircle size={18} className="text-gray-900" strokeWidth={2.5} />
         ) : (
-          <AlertCircle size={18} className="text-gray-400" />
+          <AlertCircle size={18} className="text-gray-400" strokeWidth={2} />
         )}
       </div>
     </div>
@@ -611,7 +611,7 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
                   {/* 唛头标题 */}
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <Package size={16} className="text-brand-blue" />
+                      <Package size={16} className="text-gray-700" strokeWidth={2} />
                       <span className="text-sm font-bold text-gray-900">
                         {mark.name}
                       </span>
@@ -621,7 +621,7 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
                         </span>
                       )}
                     </div>
-                    <span className="text-xs font-medium text-gray-600 bg-white px-2 py-0.5 rounded">
+                    <span className="text-xs font-semibold text-gray-700 bg-white px-2 py-1 border border-gray-200">
                       {totalItems} {t('items')}
                     </span>
                   </div>
@@ -635,7 +635,7 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
 
                         return (
                           <div key={allocIdx} className="flex items-center gap-2 text-xs text-gray-600">
-                            <span className="font-medium text-gray-900">{item.variant_title || item.title}</span>
+                            <span className="font-semibold text-gray-900">{item.variant_title || item.title}</span>
                             {item.variant?.options && (item.variant.options as any[]).length > 0 && (
                               <div className="flex items-center gap-1">
                                 {(item.variant.options as any[]).map((option: any, idx: number) => {
@@ -645,7 +645,7 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
                                   const localizedValue = productMetadata[optionValueKey] || option.value;
 
                                   return (
-                                    <span key={idx} className="text-gray-700 bg-gray-100 px-1.5 py-0.5 rounded text-xs">
+                                    <span key={idx} className="text-gray-700 bg-gray-200 px-1.5 py-0.5 text-xs font-medium">
                                       {localizedValue}
                                     </span>
                                   );
@@ -684,7 +684,7 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
                 href={url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-3 py-2 text-sm border border-gray-300 hover:bg-gray-50 transition-colors text-gray-900"
+                className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium border border-gray-900 bg-gray-900 text-white hover:bg-gray-800 transition-colors"
               >
                 <FileText size={14} />
                 {t('attachmentNumber', { idx: idx + 1 })}
@@ -693,75 +693,74 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
           </div>
         </div>
       ) : (
-        <p className="mb-4 text-sm text-gray-500 italic">
+        <p className="mb-4 text-sm text-gray-500">
           {t('noPackingRequirements')}
         </p>
       )}
 
       {/* 按钮 */}
       {!isCompleted && (
-        <Button
-          variant="outline"
-          className="w-full h-11 text-sm font-semibold"
+        <button
           onClick={() => setShowPackingRequirements(true)}
+          className="w-full h-11 text-sm font-semibold border border-gray-900 bg-white text-gray-900 hover:bg-gray-100 transition-colors flex items-center justify-center gap-2 cursor-pointer"
         >
-          <Upload size={16} className="mr-2" />
+          <Upload size={16} />
           {shippingMarks && shippingMarks.length > 0
             ? t('editPackingPlan')
             : zgarOrder.packing_requirement_uploaded_at
             ? t('updatePackingRequirements')
             : t('createPackingPlan')}
-        </Button>
+        </button>
       )}
     </div>
   </div>
 
-  {/* Closing Info Card - Minimalism 风格 */}
+  {/* Closing Info Card - 商务风格 */}
   <div
     id="closing-info-card"
     className={cn(
-      "bg-white border-2 border-gray-200 transition-all duration-300",
-      highlightAction === 'closing' && "border-solid animate-super-highlight"
+      "bg-white border border-gray-200 transition-all duration-300",
+      highlightAction === 'closing' && "border-gray-900"
     )}
   >
-    {/* 老王我：标题栏 - border-b 分隔 */}
+    {/* 标题栏 */}
     <div className="border-b border-gray-200 px-6 py-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <FileText size={18} className="text-gray-400" />
+          <FileText size={18} className="text-gray-700" strokeWidth={2} />
           <div>
-            <h3 className="text-base font-bold text-gray-900">{t('closingInfoTitle')}</h3>
-            <p className="text-xs text-gray-500">{t('closingInfoDescription')}</p>
+            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide">{t('closingInfoTitle')}</h3>
+            <p className="text-xs text-gray-500 mt-0.5">{t('closingInfoDescription')}</p>
           </div>
         </div>
-        {/* 老王我：显示结单状态 */}
+        {/* 显示结单状态 */}
         {zgarOrder.closing_remark || (zgarOrder.closure_attachments && zgarOrder.closure_attachments.length > 0) || zgarOrder.closure_image_url ? (
-          <CheckCircle size={18} className="text-green-600" />
+          <CheckCircle size={18} className="text-gray-900" strokeWidth={2.5} />
         ) : (
-          <AlertCircle size={18} className="text-gray-400" />
+          <AlertCircle size={18} className="text-gray-400" strokeWidth={2} />
         )}
       </div>
     </div>
 
-    {/* 老王我：内容区域 - 简洁的 div 结构 */}
+    {/* 内容区域 */}
     <div className="p-6">
-      {/* 老王我：显示已上传的结单信息 */}
+      {/* 显示已上传的结单信息 */}
       {zgarOrder.closing_remark || (zgarOrder.closure_attachments && zgarOrder.closure_attachments.length > 0) || zgarOrder.closure_image_url ? (
         <div className="space-y-4">
           {/* 结单备注 */}
           {zgarOrder.closing_remark && (
             <div>
-              <div className="text-xs text-gray-600 mb-2">{t('closingRemark')}:</div>
-              <div className="text-sm text-gray-900 bg-gray-50 rounded p-3">
+              <div className="text-xs text-gray-600 mb-2 uppercase tracking-wide">{t('closingRemark')}:</div>
+              <div className="text-sm text-gray-900 bg-gray-50 border border-gray-200 p-3">
                 {zgarOrder.closing_remark}
               </div>
             </div>
           )}
 
-          {/* 老王我添加：新的结单附件列表（closure_attachments） */}
+          {/* 新的结单附件列表（closure_attachments） */}
           {zgarOrder.closure_attachments && zgarOrder.closure_attachments.length > 0 && (
             <div>
-              <div className="text-xs text-gray-600 mb-2">{t('closingAttachments')}:</div>
+              <div className="text-xs text-gray-600 mb-2 uppercase tracking-wide">{t('closingAttachments')}:</div>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {zgarOrder.closure_attachments.map((attachment: any, idx: number) => (
                   <a
@@ -769,9 +768,9 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
                     href={attachment.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="relative group border border-gray-200 hover:border-brand-pink transition-colors"
+                    className="relative group border border-gray-200 hover:border-gray-900 transition-colors"
                   >
-                    {/* 老王我：根据文件类型显示不同的图标或预览 */}
+                    {/* 根据文件类型显示不同的图标或预览 */}
                     {attachment.file_type === "image" ? (
                       <img
                         src={attachment.url}
@@ -781,14 +780,14 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
                     ) : (
                       <div className="w-full h-32 flex flex-col items-center justify-center bg-gray-50 p-2">
                         {attachment.file_type === "pdf" ? (
-                          <FileText size={32} className="text-red-500" />
+                          <FileText size={32} className="text-gray-700" strokeWidth={2} />
                         ) : (
-                          <FileText size={32} className="text-blue-500" />
+                          <FileText size={32} className="text-gray-700" strokeWidth={2} />
                         )}
-                        <p className="text-xs text-gray-600 mt-2 text-center truncate w-full px-1">
+                        <p className="text-xs text-gray-600 mt-2 text-center truncate w-full px-1 font-medium">
                           {attachment.filename}
                         </p>
-                        {/* 老王我：显示文件大小 */}
+                        {/* 显示文件大小 */}
                         {attachment.file_size > 0 && (
                           <p className="text-xs text-gray-500 text-center">
                             {(attachment.file_size / 1024).toFixed(1)} KB
@@ -797,7 +796,7 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
                       </div>
                     )}
                     {/* 序号 */}
-                    <div className="absolute top-2 left-2 bg-gray-900/80 text-white text-xs font-bold px-2 py-0.5 rounded">
+                    <div className="absolute top-2 left-2 bg-gray-900 text-white text-xs font-bold px-2 py-0.5">
                       {idx + 1}
                     </div>
                   </a>
@@ -806,11 +805,11 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
             </div>
           )}
 
-          {/* 老王我：旧的结单附件列表（closure_image_url，兼容旧数据） */}
+          {/* 旧的结单附件列表（closure_image_url，兼容旧数据） */}
           {!zgarOrder.closure_attachments || zgarOrder.closure_attachments.length === 0 ? (
             zgarOrder.closure_image_url && (
               <div>
-                <div className="text-xs text-gray-600 mb-2">{t('closingAttachmentsLegacy')}:</div>
+                <div className="text-xs text-gray-600 mb-2 uppercase tracking-wide">{t('closingAttachmentsLegacy')}:</div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {zgarOrder.closure_image_url.split(",").filter(Boolean).map((url: string, idx: number) => (
                     <a
@@ -818,7 +817,7 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
                       href={url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="relative group border border-gray-200 hover:border-brand-pink transition-colors"
+                      className="relative group border border-gray-200 hover:border-gray-900 transition-colors"
                     >
                       {url.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
                         <img
@@ -828,8 +827,8 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
                         />
                       ) : (
                         <div className="w-full h-32 flex flex-col items-center justify-center bg-gray-50">
-                          <FileText size={32} className="text-gray-400" />
-                          <p className="text-xs text-gray-600 mt-2 px-2 text-center truncate">
+                          <FileText size={32} className="text-gray-700" strokeWidth={2} />
+                          <p className="text-xs text-gray-600 mt-2 px-2 text-center truncate font-medium">
                             {url.split("/").pop()}
                           </p>
                         </div>
@@ -843,24 +842,23 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
         </div>
       ) : (
         <div className="text-center py-8 px-4">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-50 rounded-full mb-4">
-            <FileText size={32} className="text-gray-400" />
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 border border-gray-200 mb-4">
+            <FileText size={32} className="text-gray-400" strokeWidth={2} />
           </div>
-          <p className="text-gray-600 font-medium mb-1">{t('noClosingInfo')}</p>
+          <p className="text-gray-600 font-semibold mb-1">{t('noClosingInfo')}</p>
           <p className="text-sm text-gray-500">{t('uploadClosingInfoDescription')}</p>
         </div>
       )}
 
-      {/* 老王我：已完成的订单隐藏上传按钮 */}
+      {/* 已完成的订单隐藏上传按钮 */}
       {!isCompleted && (
-        <Button
-          variant="outline"
+        <button
           onClick={() => setShowClosingInfo(true)}
-          className="w-full h-11 text-sm font-semibold mt-4 border-2 border-gray-900 text-gray-900 hover:bg-gray-50 transition-colors"
+          className="w-full h-11 text-sm font-semibold mt-4 border border-gray-900 bg-gray-900 text-white hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 cursor-pointer"
         >
-          <Upload size={16} className="mr-2" />
+          <Upload size={16} />
           {zgarOrder.closing_remark || (zgarOrder.closure_attachments && zgarOrder.closure_attachments.length > 0) || zgarOrder.closure_image_url ? t('editClosingInfo') : t('uploadClosingInfo')}
-        </Button>
+        </button>
       )}
     </div>
   </div>
@@ -869,11 +867,11 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
 
 {/* Right Column - Order Tracking & Summary */}
 <div className="lg:col-span-1 space-y-6">
-  {/* 老王我：订单追踪 - Minimalism 风格垂直时间轴 */}
+  {/* 订单追踪 - 商务风格垂直时间轴 */}
   <div className="bg-white border border-gray-200">
     <div className="border-b border-gray-200 px-6 py-4">
-      <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
-        <Package size={18} className="text-brand-pink" />
+      <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide flex items-center gap-2">
+        <Package size={18} className="text-gray-700" strokeWidth={2} />
         {t('tracking.title')}
       </h3>
     </div>
@@ -882,8 +880,8 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
         {/* 步骤 1：订单已创建 */}
         <div className="flex gap-4">
           <div className="relative">
-            <div className="w-8 h-8 rounded-full bg-brand-pink border-2 border-white flex items-center justify-center">
-              <CheckCircle size={16} className="text-white" />
+            <div className="w-8 h-8 bg-gray-900 flex items-center justify-center">
+              <CheckCircle size={16} className="text-white" strokeWidth={2.5} />
             </div>
             <div className="absolute top-8 left-1/2 -translate-x-1/2 w-px h-full bg-gray-200"></div>
           </div>
@@ -896,15 +894,15 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
         {/* 步骤 2：支付确认 */}
         <div className="flex gap-4">
           <div className="relative">
-            <div className={`w-8 h-8 rounded-full border-2 border-white flex items-center justify-center ${
+            <div className={`w-8 h-8 flex items-center justify-center ${
               order.payment_status === 'paid' || order.payment_status === 'captured'
-                ? 'bg-brand-pink'
+                ? 'bg-gray-900'
                 : 'bg-gray-300'
             }`}>
               {order.payment_status === 'paid' || order.payment_status === 'captured' ? (
-                <CheckCircle size={16} className="text-white" />
+                <CheckCircle size={16} className="text-white" strokeWidth={2.5} />
               ) : (
-                <CreditCard size={16} className="text-white" />
+                <CreditCard size={16} className="text-white" strokeWidth={2} />
               )}
             </div>
             <div className="absolute top-8 left-1/2 -translate-x-1/2 w-px h-full bg-gray-200"></div>
@@ -916,9 +914,9 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
                 : 'text-gray-400'
             }`}>{t('tracking.payment')}</p>
             {order.payment_status === 'paid' || order.payment_status === 'captured' ? (
-              <p className="text-xs text-green-600 mt-1">{t('tracking.completed')}</p>
+              <p className="text-xs text-gray-900 mt-1 font-medium">{t('tracking.completed')}</p>
             ) : (
-              <p className="text-xs text-amber-600 mt-1">{t('tracking.pending')}</p>
+              <p className="text-xs text-gray-500 mt-1">{t('tracking.pending')}</p>
             )}
           </div>
         </div>
@@ -926,15 +924,15 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
         {/* 步骤 3：商品打包 */}
         <div className="flex gap-4">
           <div className="relative">
-            <div className={`w-8 h-8 rounded-full border-2 border-white flex items-center justify-center ${
+            <div className={`w-8 h-8 flex items-center justify-center ${
               order.fulfillment_status === 'fulfilled' || order.fulfillment_status === 'partially_fulfilled'
-                ? 'bg-brand-blue'
+                ? 'bg-gray-900'
                 : 'bg-gray-300'
             }`}>
               {order.fulfillment_status === 'fulfilled' || order.fulfillment_status === 'partially_fulfilled' ? (
-                <CheckCircle size={16} className="text-white" />
+                <CheckCircle size={16} className="text-white" strokeWidth={2.5} />
               ) : (
-                <Package size={16} className="text-white" />
+                <Package size={16} className="text-white" strokeWidth={2} />
               )}
             </div>
             <div className="absolute top-8 left-1/2 -translate-x-1/2 w-px h-full bg-gray-200"></div>
@@ -946,9 +944,9 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
                 : 'text-gray-400'
             }`}>{t('tracking.packing')}</p>
             {order.fulfillment_status === 'fulfilled' || order.fulfillment_status === 'partially_fulfilled' ? (
-              <p className="text-xs text-green-600 mt-1">{t('tracking.completed')}</p>
+              <p className="text-xs text-gray-900 mt-1 font-medium">{t('tracking.completed')}</p>
             ) : (
-              <p className="text-xs text-amber-600 mt-1">{t('tracking.inProgress')}</p>
+              <p className="text-xs text-gray-500 mt-1">{t('tracking.inProgress')}</p>
             )}
           </div>
         </div>
@@ -956,15 +954,15 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
         {/* 步骤 4：已发货 */}
         <div className="flex gap-4">
           <div className="relative">
-            <div className={`w-8 h-8 rounded-full border-2 border-white flex items-center justify-center ${
+            <div className={`w-8 h-8 flex items-center justify-center ${
               order.fulfillment_status === 'shipped' || order.fulfillment_status === 'fulfilled'
-                ? 'bg-brand-blue'
+                ? 'bg-gray-900'
                 : 'bg-gray-300'
             }`}>
               {order.fulfillment_status === 'shipped' || order.fulfillment_status === 'fulfilled' ? (
-                <CheckCircle size={16} className="text-white" />
+                <CheckCircle size={16} className="text-white" strokeWidth={2.5} />
               ) : (
-                <Package size={16} className="text-white" />
+                <Package size={16} className="text-white" strokeWidth={2} />
               )}
             </div>
           </div>
@@ -975,7 +973,7 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
                 : 'text-gray-400'
             }`}>{t('tracking.shipped')}</p>
             {order.fulfillment_status === 'shipped' || order.fulfillment_status === 'fulfilled' ? (
-              <p className="text-xs text-green-600 mt-1">{t('tracking.completed')}</p>
+              <p className="text-xs text-gray-900 mt-1 font-medium">{t('tracking.completed')}</p>
             ) : (
               <p className="text-xs text-gray-400 mt-1">{t('tracking.pendingShipment')}</p>
             )}
@@ -985,19 +983,19 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
     </div>
   </div>
 
-{/* Order Summary Card - Minimalism 风格 */}
+{/* Order Summary Card - 商务风格 */}
 <div className="bg-white border border-gray-200">
   <div className="border-b border-gray-200 px-6 py-4">
-    <h3 className="text-base font-bold text-gray-900">{t('orderSummary')}</h3>
+    <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide">{t('orderSummary')}</h3>
   </div>
   <div className="p-6 space-y-4">
     {/* 订单日期 */}
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-2">
-        <Calendar size={16} className="text-gray-400" />
+        <Calendar size={16} className="text-gray-700" strokeWidth={2} />
         <span className="text-sm text-gray-600">{t('orderDate')}</span>
       </div>
-      <span className="text-sm font-medium text-gray-900">
+      <span className="text-sm font-semibold text-gray-900">
         {new Date(order.created_at).toLocaleDateString("en-US", {
           year: "numeric",
           month: "short",
@@ -1011,10 +1009,10 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
     {/* 支付状态 */}
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-2">
-        <CreditCard size={16} className="text-gray-400" />
+        <CreditCard size={16} className="text-gray-700" strokeWidth={2} />
         <span className="text-sm text-gray-600">{t('payment')}</span>
       </div>
-      <span className="text-sm font-medium text-gray-900 capitalize">
+      <span className="text-sm font-semibold text-gray-900 uppercase">
         {order.payment_status}
       </span>
     </div>
@@ -1028,7 +1026,7 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
             <div className="w-4" />
             <span className="text-sm text-gray-500">{t('paymentMethod')}</span>
           </div>
-          <span className="text-sm text-gray-600">
+          <span className="text-sm font-medium text-gray-700">
             {zgarOrder.payment_method === 'balance' ? t('balancePayment') :
              zgarOrder.payment_method === 'points' ? 'Points Payment' :
              zgarOrder.payment_method === 'credit' ? 'Credit Payment' :
@@ -1044,10 +1042,10 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
     {/* 发货状态 */}
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-2">
-        <Package size={16} className="text-gray-400" />
+        <Package size={16} className="text-gray-700" strokeWidth={2} />
         <span className="text-sm text-gray-600">{t('fulfillment')}</span>
       </div>
-      <span className="text-sm font-medium text-gray-900 capitalize">
+      <span className="text-sm font-semibold text-gray-900 uppercase">
         {order.fulfillment_status}
       </span>
     </div>
@@ -1059,22 +1057,22 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <FileText size={16} className="text-gray-400" />
+              <FileText size={16} className="text-gray-700" strokeWidth={2} />
               <span className="text-sm text-gray-600">{t('auditStatus')}</span>
             </div>
-            <span className={`text-sm font-medium capitalize ${
+            <span className={`text-sm font-semibold uppercase ${
               zgarOrder.audit_status.toLowerCase().includes('reject') || zgarOrder.audit_status.includes(t('rejectKeyword'))
-                ? 'text-red-600'
+                ? 'text-gray-900'
                 : 'text-gray-900'
             }`}>
               {zgarOrder.audit_status}
             </span>
           </div>
-          {/* 老王我：如果审核拒绝，显示拒绝理由 */}
+          {/* 如果审核拒绝，显示拒绝理由 */}
           {(zgarOrder.audit_status.toLowerCase().includes('reject') || zgarOrder.audit_status.includes(t('rejectKeyword'))) && auditReason && (
             <div className="pl-6">
-              <p className="text-xs text-gray-500">{t('rejectionReason')}:</p>
-              <p className="text-xs text-red-600 mt-1 break-words">
+              <p className="text-xs text-gray-500 uppercase tracking-wide">{t('rejectionReason')}:</p>
+              <p className="text-xs text-gray-900 mt-1 break-words font-medium">
                 {auditReason}
               </p>
             </div>
@@ -1083,16 +1081,16 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
       </>
     )}
 
-    {/* 支付审核状态 - 从数据库字段获取（2026-02-05 回滚），余额支付时不显示 */}
+    {/* 支付审核状态 - 从数据库字段获取，余额支付时不显示 */}
     {paymentMethod !== 'balance' && (
       <>
         <div className="h-px bg-gray-200"></div>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <CheckCircle size={16} className="text-gray-400" />
+            <CheckCircle size={16} className="text-gray-700" strokeWidth={2} />
             <span className="text-sm text-gray-600">{t('paymentAuditStatus')}</span>
           </div>
-          <span className="text-sm font-medium text-gray-900">
+          <span className="text-sm font-semibold text-gray-900">
             {getPaymentAuditStatus().label}
           </span>
         </div>
@@ -1105,12 +1103,12 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
         <div className="h-px bg-gray-200"></div>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <AlertCircle size={16} className="text-gray-400" />
+            <AlertCircle size={16} className="text-gray-700" strokeWidth={2} />
             <span className="text-sm text-gray-600">{t('closingAuditStatus')}</span>
           </div>
-          <span className={`text-sm font-medium capitalize ${
+          <span className={`text-sm font-semibold uppercase ${
             zgarOrder.closing_status.toLowerCase().includes('reject') || zgarOrder.closing_status.includes(t('rejectKeyword'))
-              ? 'text-red-600'
+              ? 'text-gray-900'
               : 'text-gray-900'
           }`}>
             {zgarOrder.closing_status}
@@ -1119,7 +1117,7 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
       </>
     )}
 
-    {/* 老王我：待办操作列表 - 仅未完成订单显示 */}
+    {/* 待办操作列表 - 仅未完成订单显示 */}
     {!isCompleted && (
       <>
         <div className="h-px bg-gray-200"></div>
@@ -1128,18 +1126,18 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
           {(paymentMethod === 'manual' || paymentMethod === 'credit' || !paymentMethod || paymentMethod !== 'balance') && (
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Upload size={18} className="text-gray-400" />
-                <span className="text-sm text-gray-900">{t('payment')}</span>
+                <Upload size={18} className="text-gray-700" strokeWidth={2} />
+                <span className="text-sm text-gray-900 font-medium">{t('payment')}</span>
               </div>
               {zgarOrder.payment_voucher_uploaded_at ? (
-                <div className="flex items-center gap-1.5 text-green-600">
-                  <CheckCircle size={14} />
-                  <span className="text-xs font-semibold">DONE</span>
+                <div className="flex items-center gap-1.5 text-gray-900">
+                  <CheckCircle size={14} strokeWidth={2.5} />
+                  <span className="text-xs font-bold uppercase">Done</span>
                 </div>
               ) : (
-                <div className="flex items-center gap-1.5 text-amber-600">
-                  <AlertCircle size={14} />
-                  <span className="text-xs font-semibold">PENDING</span>
+                <div className="flex items-center gap-1.5 text-gray-500">
+                  <AlertCircle size={14} strokeWidth={2} />
+                  <span className="text-xs font-semibold uppercase">Pending</span>
                 </div>
               )}
             </div>
@@ -1148,18 +1146,18 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
           {/* 打包要求状态 */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Package size={18} className="text-gray-400" />
-              <span className="text-sm text-gray-900">{t('packingRequirements')}</span>
+              <Package size={18} className="text-gray-700" strokeWidth={2} />
+              <span className="text-sm text-gray-900 font-medium">{t('packingRequirements')}</span>
             </div>
             {zgarOrder.packing_requirement?.shipping_marks?.length > 0 ? (
-              <div className="flex items-center gap-1.5 text-green-600">
-                <CheckCircle size={14} />
-                <span className="text-xs font-semibold">DONE</span>
+              <div className="flex items-center gap-1.5 text-gray-900">
+                <CheckCircle size={14} strokeWidth={2.5} />
+                <span className="text-xs font-bold uppercase">Done</span>
               </div>
             ) : (
-              <div className="flex items-center gap-1.5 text-amber-600">
-                <AlertCircle size={14} />
-                <span className="text-xs font-semibold">PENDING</span>
+              <div className="flex items-center gap-1.5 text-gray-500">
+                <AlertCircle size={14} strokeWidth={2} />
+                <span className="text-xs font-semibold uppercase">Pending</span>
               </div>
             )}
           </div>
@@ -1167,18 +1165,18 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
           {/* 结单信息状态 */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <FileText size={18} className="text-gray-400" />
-              <span className="text-sm text-gray-900">{t('closingInfoTitle')}</span>
+              <FileText size={18} className="text-gray-700" strokeWidth={2} />
+              <span className="text-sm text-gray-900 font-medium">{t('closingInfoTitle')}</span>
             </div>
             {(zgarOrder.closing_remark || (zgarOrder.closure_attachments && zgarOrder.closure_attachments.length > 0)) ? (
-              <div className="flex items-center gap-1.5 text-green-600">
-                <CheckCircle size={14} />
-                <span className="text-xs font-semibold">DONE</span>
+              <div className="flex items-center gap-1.5 text-gray-900">
+                <CheckCircle size={14} strokeWidth={2.5} />
+                <span className="text-xs font-bold uppercase">Done</span>
               </div>
             ) : (
-              <div className="flex items-center gap-1.5 text-amber-600">
-                <AlertCircle size={14} />
-                <span className="text-xs font-semibold">PENDING</span>
+              <div className="flex items-center gap-1.5 text-gray-500">
+                <AlertCircle size={14} strokeWidth={2} />
+                <span className="text-xs font-semibold uppercase">Pending</span>
               </div>
             )}
           </div>

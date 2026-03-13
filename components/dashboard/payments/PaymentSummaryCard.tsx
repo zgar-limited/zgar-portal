@@ -1,7 +1,5 @@
-// 老王我：支付汇总卡片组件（新架构 - 多次支付）
-// 设计风格：Minimalism，直角设计，匹配订单详情页面
-// 创建时间：2026-02-03
-// 作者：老王
+// 支付汇总卡片组件（新架构 - 多次支付）
+// 设计风格：商务风格，直角设计，匹配订单详情页面
 
 import React from "react";
 import { Wallet, CheckCircle, TrendingUp } from "lucide-react";
@@ -13,7 +11,7 @@ interface PaymentSummaryCardProps {
 }
 
 /**
- * 老王我：支付汇总卡片组件
+ * 支付汇总卡片组件
  *
  * 显示支付统计信息：
  * - 总应付金额
@@ -21,12 +19,12 @@ interface PaymentSummaryCardProps {
  * - 剩余金额
  * - 支付进度条
  *
- * 设计风格：Minimalism，直角设计，参考订单详情页面
+ * 设计风格：商务风格，直角设计，参考订单详情页面
  */
 export default function PaymentSummaryCard({ summary }: PaymentSummaryCardProps) {
   const t = useTranslations("PaymentSummary");
 
-  // 老王我：安全的金额格式化函数
+  // 安全的金额格式化函数
   const formatAmount = (amount: number | null | undefined): string => {
     if (amount === null || amount === undefined || isNaN(amount)) {
       return "$0.00";
@@ -34,11 +32,11 @@ export default function PaymentSummaryCard({ summary }: PaymentSummaryCardProps)
     return `$${amount.toFixed(2)}`;
   };
 
-  // 老王我：计算进度百分比
+  // 计算进度百分比
   const progress = summary.payment_progress ?? 0;
   const isFullyPaid = progress === 100 && progress > 0;
 
-  // 老王我：获取数据
+  // 获取数据
   const totalPayable = summary.total_payable_amount ?? 0;
   const totalPaid = summary.total_paid_amount ?? 0;
   const remaining = summary.remaining_amount ?? 0;
@@ -47,38 +45,38 @@ export default function PaymentSummaryCard({ summary }: PaymentSummaryCardProps)
     <div className="bg-white border border-gray-200">
       {/* 标题栏 */}
       <div className="border-b border-gray-200 px-6 py-4">
-        <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
-          <Wallet size={18} className="text-brand-pink" />
+        <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide flex items-center gap-2">
+          <Wallet size={18} className="text-gray-700" strokeWidth={2} />
           {t("title")}
         </h3>
       </div>
 
       {/* 统计数据 */}
       <div className="p-6">
-        {/* 老王注：审核中金额提示（2026-02-05） */}
+        {/* 审核中金额提示 */}
         {summary.reviewing_amount > 0 && (
-          <div className="mb-4 p-3 bg-blue-50 border border-blue-200">
-            <p className="text-sm text-blue-800 flex items-center gap-2">
-              ℹ️ {t("reviewingNote", { amount: formatAmount(summary.reviewing_amount) })}
+          <div className="mb-4 p-3 bg-gray-50 border border-gray-200">
+            <p className="text-sm text-gray-700 flex items-center gap-2">
+              <span className="font-semibold">{t("reviewingNote", { amount: formatAmount(summary.reviewing_amount) })}</span>
             </p>
           </div>
         )}
 
-        {/* 老王注：未通过审核金额警告提示（2026-02-05） */}
+        {/* 未通过审核金额警告提示 */}
         {summary.rejected_amount > 0 && (
-          <div className="mb-4 p-3 bg-orange-50 border border-orange-200">
-            <p className="text-sm text-orange-800 flex items-center gap-2">
-              ⚠️ {t("rejectedNote", { amount: formatAmount(summary.rejected_amount) })}
+          <div className="mb-4 p-3 bg-gray-100 border border-gray-300">
+            <p className="text-sm text-gray-900 flex items-center gap-2">
+              <span className="font-semibold">{t("rejectedNote", { amount: formatAmount(summary.rejected_amount) })}</span>
             </p>
           </div>
         )}
 
         {/* 已付清恭喜提示 */}
         {isFullyPaid && (
-          <div className="mb-4 p-3 bg-green-50 border border-green-200">
-            <p className="text-sm text-green-800 flex items-center gap-2">
-              <CheckCircle size={16} />
-              🎉 {t("fullyPaid")}
+          <div className="mb-4 p-3 bg-gray-900">
+            <p className="text-sm text-white flex items-center gap-2">
+              <CheckCircle size={16} strokeWidth={2.5} />
+              <span className="font-semibold">{t("fullyPaid")}</span>
             </p>
           </div>
         )}
@@ -87,21 +85,21 @@ export default function PaymentSummaryCard({ summary }: PaymentSummaryCardProps)
         <div className="grid grid-cols-3 gap-4 mb-4">
           {/* 总应付 */}
           <div>
-            <p className="text-xs text-gray-600 mb-1">{t("totalPayable")}</p>
-            <p className="text-lg font-bold text-gray-900" style={{ fontFamily: 'monospace' }}>
+            <p className="text-xs text-gray-600 mb-1 uppercase tracking-wide">{t("totalPayable")}</p>
+            <p className="text-lg font-bold text-gray-900 tracking-tight" style={{ fontFamily: 'monospace' }}>
               {formatAmount(totalPayable)}
             </p>
           </div>
 
-          {/* 已付金额 - 老王注：显示审核中金额提示（2026-02-05） */}
+          {/* 已付金额 */}
           <div>
-            <p className="text-xs text-gray-600 mb-1">{t("totalPaid")}</p>
+            <p className="text-xs text-gray-600 mb-1 uppercase tracking-wide">{t("totalPaid")}</p>
             <div className="flex flex-col">
-              <p className="text-lg font-bold text-brand-blue" style={{ fontFamily: 'monospace' }}>
+              <p className="text-lg font-bold text-gray-900 tracking-tight" style={{ fontFamily: 'monospace' }}>
                 {formatAmount(totalPaid)}
               </p>
               {summary.reviewing_amount > 0 && (
-                <p className="text-xs text-blue-600 font-medium">
+                <p className="text-xs text-gray-500 font-medium">
                   {t("reviewingAmount", { amount: formatAmount(summary.reviewing_amount) })}
                 </p>
               )}
@@ -110,8 +108,8 @@ export default function PaymentSummaryCard({ summary }: PaymentSummaryCardProps)
 
           {/* 剩余金额 */}
           <div>
-            <p className="text-xs text-gray-600 mb-1">{t("remaining")}</p>
-            <p className={`text-lg font-bold ${remaining > 0 ? 'text-brand-pink' : 'text-green-600'}`} style={{ fontFamily: 'monospace' }}>
+            <p className="text-xs text-gray-600 mb-1 uppercase tracking-wide">{t("remaining")}</p>
+            <p className={`text-lg font-bold tracking-tight ${remaining > 0 ? 'text-gray-900' : 'text-gray-700'}`} style={{ fontFamily: 'monospace' }}>
               {formatAmount(remaining)}
             </p>
           </div>
@@ -122,8 +120,8 @@ export default function PaymentSummaryCard({ summary }: PaymentSummaryCardProps)
           <div className="pt-4 border-t border-gray-200">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2 text-sm">
-                <TrendingUp size={14} />
-                <span className="text-gray-700">{t("paymentProgress")}</span>
+                <TrendingUp size={14} strokeWidth={2} />
+                <span className="text-gray-700 font-medium">{t("paymentProgress")}</span>
               </div>
               <span className="text-sm font-bold text-gray-900">
                 {progress.toFixed(0)}%
@@ -135,8 +133,8 @@ export default function PaymentSummaryCard({ summary }: PaymentSummaryCardProps)
               <div
                 className={`h-full transition-all duration-500 ${
                   progress >= 100
-                    ? 'bg-green-500'
-                    : 'bg-brand-pink'
+                    ? 'bg-gray-900'
+                    : 'bg-gray-700'
                 }`}
                 style={{ width: `${Math.min(progress, 100)}%` }}
               />
