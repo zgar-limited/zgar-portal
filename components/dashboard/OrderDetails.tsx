@@ -374,54 +374,39 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
 
   return (
     <>
-      {/* 老王我移除外层布局和 Sidebar，因为 layout 已经提供了 */}
-      <div className="space-y-6">
-        {/* 老王我：智能引导系统 */}
+      {/* ToB 紧凑风格 - 参考 Stripe Dashboard */}
+      <div className="space-y-4">
+        {/* 智能引导 */}
         <OrderActionGuide
           order={order}
           onHighlightChange={setHighlightAction}
         />
 
-        {/* 老王我：商务风格 - 简洁头部卡片 */}
-      <div className="bg-white border border-gray-200 p-6 md:p-8">
-        {/* 返回按钮 + 订单号 + 状态 */}
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <Link
-              href="/account-orders"
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              <ChevronLeft size={20} />
-              <span className="text-sm font-medium uppercase tracking-wide">{t('backToOrders')}</span>
-            </Link>
-            <div className="h-6 w-px bg-gray-200"></div>
-            <div>
-              <p className="text-xs text-gray-500 uppercase tracking-wide">{t('orderNumber')}</p>
-              <p className="text-lg font-bold text-gray-900 tracking-tight" style={{ fontFamily: 'monospace' }}>
-                #{order.display_id}
-              </p>
-            </div>
-          </div>
-          <div className="text-right">
-            <p className="text-xs text-gray-500 mb-1 uppercase tracking-wide">{t('orderStatus')}</p>
-            <div className={`inline-flex items-center gap-2 px-4 py-2 ${getStatusBadgeStyle(order.status)}`}>
-              {order.status === 'completed' ? (
-                <CheckCircle size={16} strokeWidth={2.5} />
-              ) : order.status === 'pending' ? (
-                <Package size={16} strokeWidth={2.5} />
-              ) : (
-                <AlertCircle size={16} strokeWidth={2.5} />
-              )}
-              <span className="text-sm font-bold uppercase tracking-wide">
-                {order.status === 'completed' ? t('statusObj.completed') :
-                 order.status === 'pending' ? t('statusObj.pending') :
-                 order.status === 'canceled' ? t('statusObj.canceled') :
-                 order.status.toUpperCase().replace('_', ' ')}
-              </span>
-            </div>
+        {/* 顶部导航 - 极简一行 */}
+        <div className="flex items-center justify-between py-2">
+          <Link
+            href="/account-orders"
+            className="inline-flex items-center gap-1 text-gray-500 hover:text-gray-900 transition-colors text-sm"
+          >
+            <ChevronLeft size={16} />
+            <span>{t('backToOrders')}</span>
+          </Link>
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-gray-400 font-mono">#{order.display_id}</span>
+            <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium ${
+              order.status === 'completed' ? 'bg-emerald-50 text-emerald-700' :
+              order.status === 'pending' ? 'bg-amber-50 text-amber-700' :
+              'bg-gray-100 text-gray-600'
+            }`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${
+                order.status === 'completed' ? 'bg-emerald-500' :
+                order.status === 'pending' ? 'bg-amber-500' :
+                'bg-gray-400'
+              }`} />
+              {order.status}
+            </span>
           </div>
         </div>
-      </div>
 
 {/* Main Content Grid - 左侧订单商品，右侧追踪和信息 */}
 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
