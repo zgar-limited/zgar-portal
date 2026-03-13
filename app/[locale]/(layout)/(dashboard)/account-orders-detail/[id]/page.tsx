@@ -37,5 +37,5 @@ export default async function page({ params }: { params: Promise<{ id: string }>
     ?.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())?.[0]
     ?.shipping_address || null;
 
-  return <OrderDetails order={order} savedAddresses={savedAddresses} lastOrderAddress={lastOrderAddress} />;
+  return <OrderDetails order={order} savedAddresses={savedAddresses} lastOrderAddress={lastOrderAddress} customer={customer} />;
 }

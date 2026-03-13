@@ -1,29 +1,34 @@
-// 老王我：付款弹窗组件（新架构 - 多次支付）
-// 设计风格：Minimalism，直角设计，匹配订单详情页面
-// 创建时间：2026-02-03
-// 作者：老王
+// 支付弹窗组件（新架构 - 多次支付）
+// 设计风格：Tesla极简风格，匹配订单详情页面
+//
+// 设计原则：
+// - 白色背景 + 浅灰分隔线
+// - 轻字重 (font-light) 用于金额
+// - 淡雅的颜色层次 (gray-900/400/300)
+// - 大量留白
+// - 无厚重卡片边框
+// - 品牌色只用于确认按钮强调
 
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Wallet, CreditCard, Loader2, AlertCircle } from "lucide-react";
+import { Wallet, CreditCard, Loader2, ArrowRight, AlertTriangle, CheckCircle } from "lucide-react";
 import VoucherUploadArea from "./VoucherUploadArea";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import { cn } from "@/lib/utils";
 
 interface CreatePaymentModalProps {
   show: boolean;
   onHide: () => void;
   remainingAmount: number;
+  customerBalance: number;
   onSubmit: (data: CreatePaymentInput) => Promise<void>;
 }
 
@@ -35,28 +40,22 @@ export interface CreatePaymentInput {
 }
 
 /**
- * 老王我：付款弹窗组件
+ * 支付弹窗组件
  *
- * 功能：
- * - 显示剩余应付金额
- * - 输入支付金额（带验证）
- * - 选择支付方式（余额/打款）
- * - 打款支付时上传多张支付凭证
- * - 输入支付说明（可选）
- *
- * 设计风格：Minimalism，直角设计，参考订单详情页面
+ * 设计风格：Tesla极简风格，参考订单详情页面
  */
 export default function CreatePaymentModal({
   show,
   onHide,
   remainingAmount,
+  customerBalance,
   onSubmit,
 }: CreatePaymentModalProps) {
   const t = useTranslations("CreatePaymentModal");
   const [amount, setAmount] = useState<number>(0);
   const [method, setMethod] = useState<"balance" | "manual">("balance");
   const [description, setDescription] = useState<string>("");
-  const [voucherUrls, setVoucherUrls] = useState<string[]>([]);  // 老王注：改为直接存储 URL 数组（2026-02-05）
+  const [voucherUrls, setVoucherUrls] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
 
@@ -65,7 +64,7 @@ export default function CreatePaymentModal({
       setAmount(0);
       setMethod("balance");
       setDescription("");
-      setVoucherUrls([]);  // 老王注：改为 URL 数组（2026-02-05）
+      setVoucherUrls([]);
       setError("");
     }
   }, [show]);
@@ -77,6 +76,18 @@ export default function CreatePaymentModal({
     return `$${amount.toFixed(2)}`;
   };
 
+  // 余额支付相关计算
+  const balanceInfo = useMemo(() => {
+    const isInsufficient = method === "balance" && amount > 0 && amount > customerBalance;
+    const balanceAfter = customerBalance - amount;
+    const hasEnoughBalance = amount > 0 && amount <= customerBalance;
+    return {
+      isInsufficient,
+      balanceAfter: balanceAfter < 0 ? 0 : balanceAfter,
+      hasEnoughBalance,
+    };
+  }, [method, amount, customerBalance]);
+
   const validateAmount = (value: number): boolean => {
     if (!value || value <= 0) {
       setError(t("invalidAmount"));
@@ -84,6 +95,11 @@ export default function CreatePaymentModal({
     }
     if (value > remainingAmount) {
       setError(t("amountExceeds", { amount: formatAmount(remainingAmount) }));
+      return false;
+    }
+    // 余额支付时检查余额
+    if (method === "balance" && value > customerBalance) {
+      setError(t("insufficientBalance", { balance: formatAmount(customerBalance), amount: formatAmount(value) }));
       return false;
     }
     setError("");
@@ -100,12 +116,9 @@ export default function CreatePaymentModal({
     }
   };
 
-  // 老王注：移除旧的图片处理函数，使用 VoucherUploadArea 组件（2026-02-05）
-
   const handleSubmit = async () => {
     if (!validateAmount(amount)) return;
 
-    // 老王注：manual 支付必填凭证验证（2026-02-05）
     if (method === "manual" && voucherUrls.length === 0) {
       setError(t("voucherRequired"));
       toast.error(t("uploadVoucher"));
@@ -118,12 +131,11 @@ export default function CreatePaymentModal({
         amount,
         payment_method: method,
         payment_description: description || undefined,
-        payment_voucher_urls: voucherUrls.length > 0 ? voucherUrls : undefined,  // 老王注：直接传递 URL 数组（2026-02-05）
+        payment_voucher_urls: voucherUrls.length > 0 ? voucherUrls : undefined,
       });
-      // 老王注：成功提示由父组件处理（2026-02-05）
     } catch (error: any) {
       setError(error.message || t("paymentFailed"));
-      toast.error(error.message || t("paymentFailed"));  // 老王注：添加 toast 错误提示（2026-02-05）
+      toast.error(error.message || t("paymentFailed"));
     } finally {
       setIsSubmitting(false);
     }
@@ -135,48 +147,45 @@ export default function CreatePaymentModal({
       setDescription(selectedMethod === "balance" ? t("balancePayment") : t("bankTransferPayment"));
     }
     if (selectedMethod === "balance") {
-      setVoucherUrls([]);  // 老王注：切换到余额支付时清空凭证（2026-02-05）
+      setVoucherUrls([]);
+    }
+    // 切换方式时重新验证金额
+    if (amount > 0) {
+      validateAmount(amount);
     }
   };
 
   return (
     <Dialog open={show} onOpenChange={(open) => !open && onHide()}>
-      <DialogContent className="max-w-lg max-h-[90vh] flex flex-col p-0">
-        <DialogHeader className="border-b pb-4 px-6 pt-6">
-          <DialogTitle className="flex items-center gap-2 text-lg font-bold">
-            <Wallet size={18} className="text-brand-pink" />
-            {t("title")}
-          </DialogTitle>
-        </DialogHeader>
+      <DialogContent className="max-w-lg max-h-[90vh] flex flex-col p-0 bg-white border-gray-100 shadow-2xl">
+        {/* 头部 - 极简 */}
+        <div className="px-8 pt-8 pb-6 border-b border-gray-100">
+          <DialogTitle className="text-xl font-light text-gray-900">{t("title")}</DialogTitle>
+        </div>
 
-        {/* 老王注：可滚动的内容区域（2026-02-05） */}
-        <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4">
+        {/* 内容区域 */}
+        <div className="flex-1 overflow-y-auto px-8 py-8 space-y-10">
           {/* 错误提示 */}
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 flex items-center gap-2 text-sm text-red-700">
-              <AlertCircle size={16} />
+            <div className="flex items-center gap-2 text-sm text-red-600">
+              <ArrowRight size={14} />
               {error}
             </div>
           )}
 
-          {/* 剩余应付 */}
-          <div className="p-4 bg-gray-50 border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-gray-600 mb-1">{t("remainingAmount")}</p>
-                <p className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'monospace' }}>
-                  {formatAmount(remainingAmount)}
-                </p>
-              </div>
-              <Wallet size={24} className="text-brand-pink" />
-            </div>
+          {/* 剩余应付 - Tesla风格 */}
+          <div>
+            <p className="text-xs text-gray-400 uppercase tracking-wide mb-2">{t("remainingAmount")}</p>
+            <p className="text-3xl font-light text-gray-900 tracking-tight">
+              {formatAmount(remainingAmount)}
+            </p>
           </div>
 
           {/* 支付金额 */}
-          <div className="space-y-2">
-            <Label className="text-sm font-semibold text-gray-900">
-              {t("paymentAmount")} <span className="text-red-500">*</span>
-            </Label>
+          <div>
+            <p className="text-xs text-gray-400 uppercase tracking-wide mb-3">
+              {t("paymentAmount")} <span className="text-gray-300">*</span>
+            </p>
             <Input
               type="number"
               min={0}
@@ -185,55 +194,121 @@ export default function CreatePaymentModal({
               placeholder={t("amountPlaceholder")}
               value={amount === 0 ? "" : amount}
               onChange={(e) => handleAmountChange(e.target.value)}
-              className="h-10"
+              className="h-12 text-lg font-light border-gray-200 focus:border-gray-900 focus:ring-0"
             />
           </div>
 
-          {/* 支付方式 */}
-          <div className="space-y-2">
-            <Label className="text-sm font-semibold text-gray-900">
-              {t("paymentMethod")} <span className="text-red-500">*</span>
-            </Label>
-            <div className="grid grid-cols-2 gap-3">
-              <Button
+          {/* 支付方式 - 极简选择器 */}
+          <div>
+            <p className="text-xs text-gray-400 uppercase tracking-wide mb-4">
+              {t("paymentMethod")} <span className="text-gray-300">*</span>
+            </p>
+            <div className="space-y-0">
+              {/* 余额支付 */}
+              <button
                 type="button"
-                variant={method === "balance" ? "default" : "outline"}
                 onClick={() => handleMethodSelect("balance")}
-                className={`
-                  h-16 flex flex-col items-center justify-center gap-1
-                  ${method === "balance"
-                    ? "bg-brand-pink text-white border-brand-pink hover:bg-brand-pink/90"
-                    : "hover:border-brand-pink"
-                  }
-                `}
+                className={cn(
+                  "w-full flex items-center justify-between py-4 px-0 transition-colors cursor-pointer",
+                  "border-b",
+                  method === "balance" ? "border-gray-900" : "border-gray-100"
+                )}
               >
-                <Wallet size={20} />
-                <span className="text-xs font-semibold">{t("balancePayment_option")}</span>
-              </Button>
-              <Button
+                <div className="flex items-center gap-4">
+                  <Wallet size={18} className={method === "balance" ? "text-gray-900" : "text-gray-400"} />
+                  <div className="flex flex-col items-start">
+                    <span className={cn("text-sm", method === "balance" ? "text-gray-900" : "text-gray-500")}>
+                      {t("balancePayment_option")}
+                    </span>
+                    <span className="text-xs text-gray-400 mt-0.5">
+                      {t("currentBalance")}: {formatAmount(customerBalance)}
+                    </span>
+                  </div>
+                </div>
+                <div className={cn(
+                  "w-4 h-4 rounded-full border-2 transition-colors",
+                  method === "balance" ? "border-gray-900 bg-gray-900" : "border-gray-300"
+                )}>
+                  {method === "balance" && (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="w-1.5 h-1.5 bg-white rounded-full" />
+                    </div>
+                  )}
+                </div>
+              </button>
+
+              {/* 余额支付详情 - 选中时显示 */}
+              {method === "balance" && amount > 0 && (
+                <div className="py-4 space-y-3 border-b border-gray-100">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-400">{t("currentBalance")}</span>
+                    <span className="text-gray-900 font-light">{formatAmount(customerBalance)}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-400">{t("deductAmount")}</span>
+                    <span className="text-gray-900 font-light">-{formatAmount(amount)}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm pt-2 border-t border-gray-50">
+                    <span className="text-gray-400">{t("balanceAfter")}</span>
+                    <span className={cn(
+                      "font-light",
+                      balanceInfo.isInsufficient ? "text-red-600" : "text-gray-900"
+                    )}>
+                      {formatAmount(balanceInfo.balanceAfter)}
+                    </span>
+                  </div>
+                  {/* 余额状态提示 */}
+                  {balanceInfo.isInsufficient && (
+                    <div className="flex items-center gap-2 text-xs text-red-600 bg-red-50 px-3 py-2 mt-2">
+                      <AlertTriangle size={14} />
+                      {t("insufficientBalanceHint")}
+                    </div>
+                  )}
+                  {balanceInfo.hasEnoughBalance && (
+                    <div className="flex items-center gap-2 text-xs text-gray-600 bg-gray-50 px-3 py-2 mt-2">
+                      <CheckCircle size={14} />
+                      {t("sufficientBalanceHint")}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* 银行转账 */}
+              <button
                 type="button"
-                variant={method === "manual" ? "default" : "outline"}
                 onClick={() => handleMethodSelect("manual")}
-                className={`
-                  h-16 flex flex-col items-center justify-center gap-1
-                  ${method === "manual"
-                    ? "bg-brand-blue text-white border-brand-blue hover:bg-brand-blue/90"
-                    : "hover:border-brand-blue"
-                  }
-                `}
+                className={cn(
+                  "w-full flex items-center justify-between py-4 px-0 transition-colors cursor-pointer",
+                  "border-b",
+                  method === "manual" ? "border-gray-900" : "border-gray-100"
+                )}
               >
-                <CreditCard size={20} />
-                <span className="text-xs font-semibold">{t("bankTransfer_option")}</span>
-              </Button>
+                <div className="flex items-center gap-4">
+                  <CreditCard size={18} className={method === "manual" ? "text-gray-900" : "text-gray-400"} />
+                  <span className={cn("text-sm", method === "manual" ? "text-gray-900" : "text-gray-500")}>
+                    {t("bankTransfer_option")}
+                  </span>
+                </div>
+                <div className={cn(
+                  "w-4 h-4 rounded-full border-2 transition-colors",
+                  method === "manual" ? "border-gray-900 bg-gray-900" : "border-gray-300"
+                )}>
+                  {method === "manual" && (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="w-1.5 h-1.5 bg-white rounded-full" />
+                    </div>
+                  )}
+                </div>
+              </button>
             </div>
           </div>
 
-          {/* 上传凭证 - 老王注：使用 VoucherUploadArea 组件（2026-02-05） */}
+          {/* 上传凭证 - 仅银行转账 */}
           {method === "manual" && (
-            <div className="space-y-2">
-              <Label className="text-sm font-semibold text-gray-900">
-                {t("paymentVoucher")} <span className="text-red-500">*</span>
-              </Label>
+            <div>
+              <p className="text-xs text-gray-400 uppercase tracking-wide mb-3">
+                {t("paymentVoucher")} <span className="text-gray-300">*</span>
+              </p>
               <VoucherUploadArea
                 urls={voucherUrls}
                 onChange={setVoucherUrls}
@@ -245,56 +320,53 @@ export default function CreatePaymentModal({
           )}
 
           {/* 支付说明 */}
-          <div className="space-y-2">
-            <Label className="text-sm font-semibold text-gray-900">
-              {t("paymentDescription")}
-            </Label>
+          <div>
+            <p className="text-xs text-gray-400 uppercase tracking-wide mb-3">{t("paymentDescription")}</p>
             <Input
               type="text"
               placeholder={t("descriptionPlaceholder")}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="h-10"
+              className="h-10 text-sm border-gray-200 focus:border-gray-900 focus:ring-0"
             />
           </div>
         </div>
 
-        {/* 底部按钮 */}
-        <div className="border-t pt-4 px-6 pb-6 flex gap-3">
-          <Button
-            variant="outline"
+        {/* 底部按钮 - 极简 */}
+        <div className="px-8 py-6 border-t border-gray-100 flex gap-4">
+          <button
             onClick={onHide}
-            className="flex-1 h-10 font-semibold"
+            className="flex-1 py-3 text-sm text-gray-500 hover:text-gray-900 transition-colors cursor-pointer flex items-center justify-center"
             disabled={isSubmitting}
           >
             {t("cancel")}
-          </Button>
-          <Button
+          </button>
+          <button
             onClick={handleSubmit}
-            className={`
-              flex-1 h-10 font-semibold
-              ${amount && method && (method !== "manual" || voucherUrls.length > 0) && !error && !isSubmitting
-                ? "bg-brand-pink text-white hover:bg-brand-pink/90"
-                : "bg-gray-200 text-gray-400 cursor-not-allowed"
-              }
-            `}
             disabled={
               !amount ||
               !method ||
               (method === "manual" && voucherUrls.length === 0) ||
+              (method === "balance" && amount > customerBalance) ||
               isSubmitting ||
               !!error
             }
+            className={cn(
+              "flex-1 py-3 text-sm font-medium transition-all cursor-pointer flex items-center justify-center",
+              amount && method && (method !== "manual" || voucherUrls.length > 0) && (method !== "balance" || amount <= customerBalance) && !error && !isSubmitting
+                ? "bg-gray-900 text-white hover:bg-gray-800"
+                : "bg-gray-100 text-gray-400 cursor-not-allowed"
+            )}
           >
             {isSubmitting ? (
-              <span className="flex items-center justify-center">
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              <span className="flex items-center justify-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
                 {t("processing")}
               </span>
             ) : (
               t("confirmPayment")
             )}
-          </Button>
+          </button>
         </div>
       </DialogContent>
     </Dialog>

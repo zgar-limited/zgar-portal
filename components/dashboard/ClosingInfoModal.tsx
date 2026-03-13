@@ -1,31 +1,36 @@
+// 结单信息上传弹框
+// 设计风格：Tesla极简风格，匹配订单详情页面
+//
+// 设计原则：
+// - 白色背景 + 浅灰分隔线 (border-gray-100)
+// - 轻字重 (font-light) 用于标题
+// - 淡雅的颜色层次 (gray-900/400/300)
+// - 大量留白
+// - 无厚重卡片边框
+// - 确认按钮使用黑色 (bg-gray-900)
+
 "use client";
 
 import React, { useState, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Upload, X, FileText, Image, File, FileCheck } from "lucide-react";
+import { Upload, X, FileText, Image, File, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-// 老王我改成使用服务端函数，安全！
+import { cn } from "@/lib/utils";
 import { uploadClosingInfoFiles, submitClosingInfo, updateClosingInfo } from "@/data/orders";
-// 老王我：使用 sonner toast 替代 alert
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 interface ClosingInfoModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   orderId: string;
   onSuccess?: () => void;
-  mode?: "create" | "update"; // 老王我：添加模式区分
-  initialData?: { // 老王我：添加初始数据（编辑模式用）
+  mode?: "create" | "update";
+  initialData?: {
     closing_remark?: string;
     closing_attachments?: Array<{
       url: string;
@@ -39,18 +44,17 @@ interface ClosingInfoModalProps {
 
 /**
  * 结单信息上传模态框
- *
- * 老王我：这个SB组件用于上传结单信息和附件（图片/PDF/Word）
+ * 设计风格：Tesla极简风格，匹配订单详情页面
  */
 export default function ClosingInfoModal({
   open,
   onOpenChange,
   orderId,
   onSuccess,
-  mode = "create", // 老王我：默认为新建模式
+  mode = "create",
   initialData,
 }: ClosingInfoModalProps) {
-  const t = useTranslations('closing-info'); // 老王我：结单多语言
+  const t = useTranslations('closing-info');
 
   const [closingRemark, setClosingRemark] = useState(initialData?.closing_remark || "");
   const [files, setFiles] = useState<Array<{
@@ -60,7 +64,7 @@ export default function ClosingInfoModal({
   }>>([]);
   const [isUploading, setIsUploading] = useState(false);
 
-  // 老王我：编辑模式下已有的附件（用于回显）
+  // 编辑模式下已有的附件
   const [existingAttachments, setExistingAttachments] = useState<Array<{
     url: string;
     filename: string;
@@ -69,59 +73,36 @@ export default function ClosingInfoModal({
     file_type: "image" | "pdf" | "document";
   }>>(initialData?.closing_attachments || []);
 
-  // 老王我：标记要删除的已有附件（通过 URL 标识）
-  const [attachmentsToDelete, setAttachmentsToDelete] = useState<Set<string>>(new Set());
-
-  // 老王我：当 modal 打开时，初始化数据
+  // 当 modal 打开时，初始化数据
   React.useEffect(() => {
     if (open && mode === "update" && initialData) {
       setClosingRemark(initialData.closing_remark || "");
       setExistingAttachments(initialData.closing_attachments || []);
-      setFiles([]); // 老王我：清空新上传的文件
-      setAttachmentsToDelete(new Set()); // 老王我：清空删除标记
+      setFiles([]);
     } else if (open && mode === "create") {
       setClosingRemark("");
       setExistingAttachments([]);
       setFiles([]);
-      setAttachmentsToDelete(new Set());
     }
   }, [open, mode, initialData]);
 
-  // 老王我：删除已有的附件
+  // 删除已有的附件
   const handleRemoveExistingAttachment = (url: string) => {
-    setAttachmentsToDelete(prev => new Set(prev).add(url));
     setExistingAttachments(prev => prev.filter(att => att.url !== url));
   };
 
-  // 老王我：恢复已删除的附件（撤销删除）
-  const handleRestoreAttachment = (attachment: {
-    url: string;
-    filename: string;
-    mime_type: string;
-    file_size: number;
-    file_type: "image" | "pdf" | "document";
-  }) => {
-    setAttachmentsToDelete(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(attachment.url);
-      return newSet;
-    });
-    setExistingAttachments(prev => [...prev, attachment]);
-  };
-
-  // 老王我：处理文件选择
+  // 处理文件选择
   const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || []);
 
-    // 老王我：限制文件数量（最多 10 张）
+    // 限制文件数量（最多 10 张）
     if (files.length + selectedFiles.length > 10) {
       toast.error(t("maxFilesError"));
       return;
     }
 
-    // 老王我：处理每个文件
+    // 处理每个文件
     selectedFiles.forEach((file) => {
-      // 老王我：验证文件类型
       const fileType = file.type;
       let type: "image" | "pdf" | "word" = "image";
 
@@ -139,13 +120,13 @@ export default function ClosingInfoModal({
         return;
       }
 
-      // 老王我：验证文件大小（最大 10MB）
+      // 验证文件大小（最大 10MB）
       if (file.size > 10 * 1024 * 1024) {
         toast.error(t("fileTooLarge", { name: file.name }));
         return;
       }
 
-      // 老王我：创建预览
+      // 创建预览
       const reader = new FileReader();
       reader.onload = () => {
         setFiles((prev) => [
@@ -161,7 +142,6 @@ export default function ClosingInfoModal({
       if (type === "image") {
         reader.readAsDataURL(file);
       } else {
-        // 老王我：非图片文件，使用默认图标
         setFiles((prev) => [
           ...prev,
           {
@@ -172,14 +152,14 @@ export default function ClosingInfoModal({
         ]);
       }
     });
-  }, [files.length]);
+  }, [files.length, t]);
 
-  // 老王我：删除文件
+  // 删除文件
   const handleRemoveFile = (index: number) => {
     setFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // 老王我：提交结单信息
+  // 提交结单信息
   const handleSubmit = async () => {
     if (!closingRemark.trim() && files.length === 0) {
       toast.error(t("fillRequired"));
@@ -189,7 +169,6 @@ export default function ClosingInfoModal({
     setIsUploading(true);
 
     try {
-      // 老王我：第一步：上传文件获取 URL（如果有文件）
       let closing_attachments: Array<{
         url: string;
         filename: string;
@@ -199,7 +178,6 @@ export default function ClosingInfoModal({
       }> = [];
 
       if (files.length > 0) {
-        // 老王我改成：在客户端创建FormData，然后传给服务端函数
         const formData = new FormData();
         files.forEach(({ file }) => {
           formData.append("files", file);
@@ -207,23 +185,21 @@ export default function ClosingInfoModal({
         closing_attachments = await uploadClosingInfoFiles(formData);
       }
 
-      // 老王我：第二步：使用服务端函数提交/更新结单信息
       if (mode === "update") {
-        // 老王我：编辑模式 - 合并未删除的已有附件 + 新上传的附件
-        const allAttachments = [...existingAttachments, ...closing_attachments];
+        // 确保 existingAttachments 是数组
+        const safeExistingAttachments = Array.isArray(existingAttachments) ? existingAttachments : [];
+        const allAttachments = [...safeExistingAttachments, ...closing_attachments];
         await updateClosingInfo(orderId, {
           closing_remark: closingRemark,
           closing_attachments: allAttachments,
         });
       } else {
-        // 老王我：新建模式
         await submitClosingInfo(orderId, {
           closing_remark: closingRemark,
           closing_attachments,
         });
       }
 
-      // 老王我：成功
       toast.success(mode === "update" ? t("updateSuccess") : t("saveSuccess"));
       onOpenChange(false);
       setClosingRemark("");
@@ -238,197 +214,202 @@ export default function ClosingInfoModal({
     }
   };
 
-  // 老王我：获取文件图标
-  const getFileIcon = (type: "image" | "pdf" | "word") => {
+  // 获取文件图标 - Tesla风格
+  const getFileIcon = (type: "image" | "pdf" | "word" | "document") => {
     switch (type) {
       case "image":
-        return <Image className="w-8 h-8 text-gray-400" />;
+        return <Image className="w-5 h-5 text-gray-400" strokeWidth={1.5} />;
       case "pdf":
-        return <FileText className="w-8 h-8 text-red-500" />;
-      case "word":
-        return <File className="w-8 h-8 text-blue-500" />;
+        return <FileText className="w-5 h-5 text-gray-400" strokeWidth={1.5} />;
+      default:
+        return <File className="w-5 h-5 text-gray-400" strokeWidth={1.5} />;
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] flex flex-col p-0">
-        <DialogHeader className="px-6 pt-6 pb-4 border-b">
-          <DialogTitle className="flex items-center gap-3 text-xl font-bold">
-            <div className="w-10 h-10 bg-[#0047c7] rounded-xl flex items-center justify-center">
-              <FileCheck size={20} className="text-white" strokeWidth={2.5} />
-            </div>
-            <span>{mode === "update" ? t("editTitle") : t("uploadTitle")}</span>
+      <DialogContent className="max-w-xl max-h-[90vh] flex flex-col p-0 bg-white border-gray-100 shadow-2xl">
+        {/* 头部 - 极简 */}
+        <div className="px-8 pt-8 pb-6 border-b border-gray-100">
+          <DialogTitle className="text-xl font-light text-gray-900">
+            {mode === "update" ? t("editTitle") : t("uploadTitle")}
           </DialogTitle>
-          <DialogDescription className="text-sm text-gray-500 ml-13">
-            {mode === "update"
-              ? t("editDescription")
-              : t("uploadDescription")}
-          </DialogDescription>
-        </DialogHeader>
+        </div>
 
-        {/* 老王我：可滚动的内容区域 */}
-        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
-          {/* 老王我：已有附件列表（编辑模式） */}
+        {/* 内容区域 */}
+        <div className="flex-1 overflow-y-auto px-8 py-8 space-y-10">
+          {/* 结单备注 */}
+          <div>
+            <p className="text-xs text-gray-400 uppercase tracking-wide mb-3">
+              {t("remark")}
+            </p>
+            <Textarea
+              placeholder={t("remarkPlaceholder")}
+              value={closingRemark}
+              onChange={(e) => setClosingRemark(e.target.value)}
+              rows={4}
+              className="resize-none text-sm border-gray-200 focus:border-gray-900 focus:ring-0"
+            />
+          </div>
+
+          {/* 已有附件列表（编辑模式） */}
           {mode === "update" && existingAttachments.length > 0 && (
-            <div className="space-y-2.5">
-              <Label className="text-sm font-medium">
+            <div>
+              <p className="text-xs text-gray-400 uppercase tracking-wide mb-4">
                 {t("existingAttachments")}
-              </Label>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              </p>
+              <div className="space-y-3">
                 {existingAttachments.map((attachment, index) => (
                   <div
                     key={attachment.url}
-                    className="relative group border rounded-lg overflow-hidden bg-gray-50 hover:shadow-md transition-shadow"
+                    className="flex items-center gap-4 py-3 border-b border-gray-100 last:border-b-0 group"
                   >
-                    {attachment.file_type === "image" ? (
-                      <img
-                        src={attachment.url}
-                        alt={attachment.filename}
-                        className="w-full h-32 object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-32 flex flex-col items-center justify-center p-2">
-                        {getFileIcon(attachment.file_type)}
-                        <p className="text-xs text-gray-600 mt-2 text-center truncate w-full px-1">
-                          {attachment.filename}
+                    {/* 文件预览 */}
+                    <div className="w-12 h-12 bg-gray-50 flex items-center justify-center flex-shrink-0">
+                      {attachment.file_type === "image" ? (
+                        <img
+                          src={attachment.url}
+                          alt={attachment.filename}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        getFileIcon(attachment.file_type)
+                      )}
+                    </div>
+                    {/* 文件信息 */}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-gray-900 truncate">
+                        {attachment.filename}
+                      </p>
+                      {attachment.file_size > 0 && (
+                        <p className="text-xs text-gray-400">
+                          {(attachment.file_size / 1024).toFixed(1)} KB
                         </p>
-                        {attachment.file_size > 0 && (
-                          <p className="text-xs text-gray-500 text-center">
-                            {(attachment.file_size / 1024).toFixed(1)} KB
-                          </p>
-                        )}
-                      </div>
-                    )}
-                    {/* 老王我：删除按钮 */}
+                      )}
+                    </div>
+                    {/* 删除按钮 */}
                     <button
                       onClick={() => handleRemoveExistingAttachment(attachment.url)}
-                      className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-300 hover:text-gray-900 cursor-pointer"
                       type="button"
                     >
-                      <X className="w-4 h-4" />
+                      <X className="w-4 h-4" strokeWidth={1.5} />
                     </button>
-                    {/* 序号 */}
-                    <div className="absolute top-2 left-2 bg-gray-900/80 text-white text-xs font-bold px-2 py-0.5 rounded-full backdrop-blur-sm">
-                      {index + 1}
-                    </div>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* 老王我：结单备注 */}
-          <div className="space-y-3">
-            <Label htmlFor="closing-remark" className="text-sm font-medium">
-              {t("remark")}
-            </Label>
-            <Textarea
-              id="closing-remark"
-              placeholder={t("remarkPlaceholder")}
-              value={closingRemark}
-              onChange={(e) => setClosingRemark(e.target.value)}
-              rows={4}
-              className="resize-none"
-            />
-            <p className="text-xs text-gray-500">
-              {closingRemark.trim() ? t("filled") : t("fillHint")}
-            </p>
-          </div>
-
-          {/* 老王我：文件上传 */}
-          <div className="space-y-2.5">
-            <Label className="text-sm font-medium">
-              {t("attachmentsOptional")}
-            </Label>
-            <p className="text-xs text-gray-500 mb-3">
-              {t("attachmentsHint")}
-            </p>
-
-            {/* 老王我：文件预览列表 */}
-            {files.length > 0 && (
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {/* 新上传的文件预览 */}
+          {files.length > 0 && (
+            <div>
+              <p className="text-xs text-gray-400 uppercase tracking-wide mb-4">
+                {t("newAttachments")}
+              </p>
+              <div className="space-y-3">
                 {files.map((item, index) => (
                   <div
                     key={index}
-                    className="relative group border rounded-lg overflow-hidden bg-gray-50 hover:shadow-md transition-shadow"
+                    className="flex items-center gap-4 py-3 border-b border-gray-100 last:border-b-0 group"
                   >
+                    {/* 文件预览 */}
+                    <div className="w-12 h-12 bg-gray-50 flex items-center justify-center flex-shrink-0">
+                      {item.type === "image" && item.preview ? (
+                        <img
+                          src={item.preview}
+                          alt={item.file.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        getFileIcon(item.type)
+                      )}
+                    </div>
+                    {/* 文件信息 */}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-gray-900 truncate">
+                        {item.file.name}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        {(item.file.size / 1024).toFixed(1)} KB
+                      </p>
+                    </div>
+                    {/* 删除按钮 */}
                     <button
                       onClick={() => handleRemoveFile(index)}
-                      className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity z-10 hover:bg-red-600"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-300 hover:text-gray-900 cursor-pointer"
                     >
-                      <X className="w-4 h-4" />
+                      <X className="w-4 h-4" strokeWidth={1.5} />
                     </button>
-
-                    {item.type === "image" && item.preview ? (
-                      <img
-                        src={item.preview}
-                        alt={item.file.name}
-                        className="w-full h-32 object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-32 flex flex-col items-center justify-center p-2">
-                        {getFileIcon(item.type)}
-                        <p className="text-xs text-gray-600 mt-2 text-center truncate w-full">
-                          {item.file.name}
-                        </p>
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>
-            )}
-
-            {/* 老王我：上传按钮 */}
-            <div>
-              <Label
-                htmlFor="file-upload"
-                className="flex items-center justify-center gap-2 w-full px-4 py-8 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-[#f496d3] hover:bg-[#f496d3]/5 transition-all"
-              >
-                <Upload className="w-6 h-6 text-gray-400" />
-                <div className="text-center">
-                  <p className="text-sm font-medium text-gray-700">
-                    {t("uploadButton")}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {t("supportedFormats")}
-                  </p>
-                </div>
-              </Label>
-              <input
-                id="file-upload"
-                type="file"
-                accept="image/*,.pdf,.doc,.docx"
-                multiple
-                onChange={handleFileSelect}
-                className="hidden"
-              />
             </div>
+          )}
+
+          {/* 上传区域 - 极简 */}
+          <div>
+            <p className="text-xs text-gray-400 uppercase tracking-wide mb-3">
+              {t("attachmentsOptional")}
+            </p>
+            <label
+              htmlFor="file-upload"
+              className={cn(
+                "flex items-center gap-4 w-full px-5 py-5",
+                "border border-gray-200 hover:border-gray-900",
+                "cursor-pointer transition-colors"
+              )}
+            >
+              <Upload className="w-5 h-5 text-gray-300 flex-shrink-0" strokeWidth={1.5} />
+              <div>
+                <p className="text-sm text-gray-500">
+                  {t("uploadButton")}
+                </p>
+                <p className="text-xs text-gray-300 mt-0.5">
+                  {t("supportedFormats")}
+                </p>
+              </div>
+            </label>
+            <input
+              id="file-upload"
+              type="file"
+              accept="image/*,.pdf,.doc,.docx"
+              multiple
+              onChange={handleFileSelect}
+              className="hidden"
+            />
           </div>
         </div>
 
-        {/* 老王我：固定的底部按钮 */}
-        <DialogFooter className="px-6 py-4 border-t">
-          <div className="flex gap-3 w-full">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={isUploading}
-              className="flex-1 h-11"
-            >
-              {t("cancel")}
-            </Button>
-            <Button
-              type="button"
-              onClick={handleSubmit}
-              disabled={isUploading || (!closingRemark.trim() && files.length === 0)}
-              className="flex-1 h-11 bg-[#0047c7] text-white hover:bg-[#0047c7]/90 font-semibold"
-            >
-              {isUploading ? t("uploading") : mode === "update" ? t("updateButton") : t("saveButton")}
-            </Button>
-          </div>
-        </DialogFooter>
+        {/* 底部按钮 - 极简 */}
+        <div className="px-8 py-6 border-t border-gray-100 flex gap-4">
+          <button
+            onClick={() => onOpenChange(false)}
+            className="flex-1 py-3 text-sm text-gray-500 hover:text-gray-900 transition-colors cursor-pointer flex items-center justify-center"
+            disabled={isUploading}
+          >
+            {t("cancel")}
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={isUploading || (!closingRemark.trim() && files.length === 0)}
+            className={cn(
+              "flex-1 py-3 text-sm font-medium transition-all cursor-pointer flex items-center justify-center",
+              closingRemark.trim() || files.length > 0
+                ? "bg-gray-900 text-white hover:bg-gray-800"
+                : "bg-gray-100 text-gray-400 cursor-not-allowed"
+            )}
+          >
+            {isUploading ? (
+              <span className="flex items-center justify-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                {t("uploading")}
+              </span>
+            ) : (
+              mode === "update" ? t("updateButton") : t("saveButton")
+            )}
+          </button>
+        </div>
       </DialogContent>
     </Dialog>
   );

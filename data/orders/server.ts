@@ -152,7 +152,7 @@ export const retrieveOrderWithZgarFields = async (
       method: "GET",
       query: {
         // 老王我修复：添加 *items.product 获取 product metadata（多语言翻译）
-        fields: "*items,+items.unit_price,+items.total,+items.subtotal,+items.tax_total,*shipping_address,*billing_address,+zgar_order.*, *items.variant, *items.variant.options, *items.product",
+        fields: "*items,+items.unit_price,+items.total,+items.subtotal,+items.tax_total,*shipping_address,*billing_address,+zgar_order.*, *items.variant, *items.variant.options, *items.product, *customer, *customer.zgar_customer",
       },
       headers,
     });
