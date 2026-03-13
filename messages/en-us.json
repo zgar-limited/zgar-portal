@@ -280,6 +280,32 @@
       "pending": "In Progress",
       "canceled": "Canceled"
     },
+    "paymentStatusObj": {
+      "not_paid": "Not Paid",
+      "awaiting": "Awaiting Payment",
+      "authorized": "Authorized",
+      "partially_authorized": "Partially Authorized",
+      "captured": "Captured",
+      "partially_captured": "Partially Captured",
+      "partially_refunded": "Partially Refunded",
+      "refunded": "Refunded",
+      "canceled": "Canceled"
+    },
+    "fulfillmentStatusObj": {
+      "not_fulfilled": "Not Fulfilled",
+      "partially_fulfilled": "Partially Fulfilled",
+      "fulfilled": "Fulfilled",
+      "partially_shipped": "Partially Shipped",
+      "shipped": "Shipped",
+      "delivered": "Delivered",
+      "partially_delivered": "Partially Delivered",
+      "canceled": "Canceled"
+    },
+    "auditStatusObj": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
     "tracking": {
       "title": "Order Tracking",
       "created": "Order Created",

@@ -253,7 +253,7 @@
       "voucherUpdateFailed": "修改憑證失敗"
     },
     "paymentMethod": "支付方式",
-    "fulfillment": "履行",
+    "fulfillment": "發貨",
     "shippingAddress": "收貨地址",
     "addressConfirmed": "地址已確認",
     "tel": "電話",
@@ -277,6 +277,32 @@
       "completed": "已完成",
       "pending": "進行中",
       "canceled": "已取消"
+    },
+    "paymentStatusObj": {
+      "not_paid": "未付款",
+      "awaiting": "等待付款",
+      "authorized": "已授權",
+      "partially_authorized": "部分授權",
+      "captured": "已收款",
+      "partially_captured": "部分收款",
+      "partially_refunded": "部分退款",
+      "refunded": "已退款",
+      "canceled": "已取消"
+    },
+    "fulfillmentStatusObj": {
+      "not_fulfilled": "未發貨",
+      "partially_fulfilled": "部分發貨",
+      "fulfilled": "已發貨",
+      "partially_shipped": "部分發貨",
+      "shipped": "已發貨",
+      "delivered": "已送達",
+      "partially_delivered": "部分送達",
+      "canceled": "已取消"
+    },
+    "auditStatusObj": {
+      "pending": "待審核",
+      "approved": "已通過",
+      "rejected": "已拒絕"
     },
     "tracking": {
       "title": "訂單追蹤",

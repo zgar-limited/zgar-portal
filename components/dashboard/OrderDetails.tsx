@@ -295,7 +295,7 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
           <div className="pb-8 mb-12 border-b border-gray-100">
             <div className="flex items-start justify-between mb-8">
               <div>
-                <h1 className="text-3xl font-light text-gray-900 mb-2">#{order.display_id}</h1>
+                <h1 className="text-3xl font-light text-gray-900 mb-2">#{order.id}</h1>
                 <div className="text-sm text-gray-400">
                   {new Date(order.created_at).toLocaleDateString("en-US", {
                     year: "numeric", month: "long", day: "numeric"
@@ -647,10 +647,12 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
                     <span className="text-gray-400">{t('orderDate')}</span>
                     <span className="text-gray-900">{new Date(order.created_at).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">{t('paymentAuditStatus')}</span>
-                    <span className="text-gray-900 uppercase">{order.payment_status}</span>
-                  </div>
+                  {zgarOrder.audit_status && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">{t('auditStatus')}</span>
+                      <span className="text-gray-900">{t(`auditStatusObj.${zgarOrder.audit_status}`)}</span>
+                    </div>
+                  )}
                   {paymentMethod && (
                     <div className="flex justify-between">
                       <span className="text-gray-400">{t('paymentMethod')}</span>
@@ -658,15 +660,13 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
                     </div>
                   )}
                   <div className="flex justify-between">
-                    <span className="text-gray-400">{t('fulfillment')}</span>
-                    <span className="text-gray-900 uppercase">{order.fulfillment_status}</span>
+                    <span className="text-gray-400">{t('paymentAuditStatus')}</span>
+                    <span className="text-gray-900">{t(`paymentStatusObj.${order.payment_status}`)}</span>
                   </div>
-                  {zgarOrder.audit_status && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">{t('auditStatus')}</span>
-                      <span className="text-gray-900">{zgarOrder.audit_status}</span>
-                    </div>
-                  )}
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">{t('fulfillment')}</span>
+                    <span className="text-gray-900">{t(`fulfillmentStatusObj.${order.fulfillment_status}`)}</span>
+                  </div>
                 </div>
               </section>
 
