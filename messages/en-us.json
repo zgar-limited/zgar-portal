@@ -223,9 +223,19 @@
     "closingAttachmentsLegacy": "Closing Attachments (Legacy)",
     "closingAttachmentAlt": "Closing Attachment {idx}",
     "noClosingInfo": "No Closing Information",
+    "noClosingInfoHint": "Click the button below to upload closing information",
     "uploadClosingInfoDescription": "Please upload closing attachments and remarks",
     "editClosingInfo": "Edit Closing Info",
     "uploadClosingInfo": "Upload Closing Info",
+    "resubmitClosingInfo": "Resubmit Closing Info",
+    "closingInfoRejected": "Closing information was rejected, please edit and resubmit",
+    "resubmitClosingInfo": "Resubmit Closing Info",
+    "closingInfoRejected": "Closing information was rejected, please edit and resubmit",
+    "createPayment": "Create Payment",
+    "pendingActions": "Pending Actions",
+    "addressUpdated": "Address updated successfully",
+    "remaining": "remaining",
+    "items": "items",
     "uploadedAtColon": "Uploaded at:",
     "attachmentNumber": "Attachment {idx}",
     "edit": "Edit",
@@ -279,7 +289,16 @@
       "packing": "Packing",
       "inProgress": "In Progress",
       "shipped": "Shipped",
-      "pendingShipment": "Pending Shipment"
+      "pendingShipment": "Pending Shipment",
+      "audited": "Audited",
+      "notAudited": "Not Audited",
+      "partialPayment": "Partial Payment",
+      "paid": "Paid",
+      "notPaid": "Not Paid",
+      "shipped": "Shipped",
+      "notShipped": "Not Shipped",
+      "orderCompleted": "Order Completed",
+      "orderNotCompleted": "Not Completed"
     },
     "errors": {
       "insufficientBalance": "Insufficient balance",
@@ -498,7 +517,12 @@
     "createFailed": "Failed to create payment, please try again",
     "voucherUploadSuccess": "Voucher uploaded successfully",
     "voucherUpdateSuccess": "Voucher updated successfully",
-    "uploadVoucherFailed": "Failed to upload voucher"
+    "uploadVoucherFailed": "Failed to upload voucher",
+    "currentBalance": "Current Balance",
+    "deductAmount": "Deduct Amount",
+    "balanceAfter": "Balance After",
+    "insufficientBalanceHint": "Insufficient balance. Please choose another payment method or top up",
+    "sufficientBalanceHint": "Balance sufficient. Ready to pay"
   },
   "VerifyPage": {
     "hero": {
@@ -613,7 +637,11 @@
     "voucherNumber": "Voucher {n}",
     "reuploadVoucher": "Re-upload Voucher",
     "updateVoucher": "Update Voucher",
-    "uploadVoucher": "Upload Voucher"
+    "uploadVoucher": "Upload Voucher",
+    "createPayment": "Create Payment",
+    "manualTransfer": "Manual Transfer",
+    "files": "files",
+    "editVoucher": "Edit"
   },
   "AboutUs": {
     "whoWeAre": "Who We Are",
@@ -695,7 +723,8 @@
     "uploadTitle": "Upload Closing Information",
     "editDescription": "Modify closing remarks or add new attachments (Images, PDF, Word)",
     "uploadDescription": "Please fill in closing remarks or upload attachments (Images, PDF, Word)",
-    "existingAttachments": "Uploaded attachments (click to delete)",
+    "existingAttachments": "Uploaded attachments",
+    "newAttachments": "New attachments",
     "remark": "Closing Remarks",
     "remarkPlaceholder": "Please enter closing remarks...",
     "filled": "✓ Filled",
@@ -998,6 +1027,8 @@
     "default": "Default",
     "current": "Current",
     "addNewAddress": "Add New Address",
-    "noSavedAddresses": "No saved addresses, please add or edit directly"
+    "selectAddress": "Select Address",
+    "noSavedAddresses": "No saved addresses, please add or edit directly",
+    "edit": "Edit"
   }
 }

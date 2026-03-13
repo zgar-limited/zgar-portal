@@ -5,45 +5,32 @@ import Image from "next/image";
 import { Link } from '@/i18n/routing';
 import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
-import Sidebar from "./Sidebar";
 import { HttpTypes } from "@medusajs/types";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import {
   ChevronLeft,
-  Package,
-  Calendar,
-  CreditCard,
-  MapPin,
   CheckCircle,
   AlertCircle,
   FileText,
   Upload,
-  Edit2,
-  Phone,
-  Building,
+  ExternalLink,
+  ArrowRight,
 } from "lucide-react";
 import UploadVoucherModal from "../modals/UploadVoucherModal";
 import PackingRequirementsModal from "../modals/PackingRequirementsModal";
 import EditShippingAddressModal from "../modals/EditShippingAddressModal";
-import ShippingAddressSection from "./ShippingAddressSection";  // 老王我：统一的收货地址组件（2026-03-11）
+import ShippingAddressSection from "./ShippingAddressSection";
 import ClosingInfoModal from "./ClosingInfoModal";
-import OrderActionGuide from "./OrderActionGuide"; // 老王我：导入智能引导组件
-import { retrieveOrderWithZgarFields, updateOrderShippingAddress } from "@/data/orders";
+import { retrieveOrderWithZgarFields } from "@/data/orders";
 import { cn } from "@/lib/utils";
-// 老王我：导入重量格式化工具
 import { formatWeight } from "@/utils/weight-utils";
-// 老王注：移除实时计算工具函数，改用数据库字段（2026-02-05 回滚）
-// 老王我：导入新支付功能相关（2026-02-02 支付流程重新设计）
 import {
   getPaymentRecords,
   createPayment,
-  updatePaymentVoucher,  // 老王注：改名（2026-02-05）
+  updatePaymentVoucher,
   type PaymentRecord,
   type PaymentSummary,
 } from "@/data/payments";
-import { toast } from "sonner";  // 老王注：导入 toast（2026-02-05）
+import { toast } from "sonner";
 import PaymentSummaryCard from "./payments/PaymentSummaryCard";
 import PaymentRecordsList from "./payments/PaymentRecordsList";
 import CreatePaymentModal, { type CreatePaymentInput } from "./payments/CreatePaymentModal";
@@ -56,26 +43,10 @@ const OrderStatus = {
   REQUIRES_ACTION: "requires_action",
 };
 
-// 老王我：地址匹配工具函数（2026-03-11 上次地址提示功能）
-function isAddressMatch(
-  addr1: { first_name?: string; last_name?: string; address_1?: string; city?: string; phone?: string } | null | undefined,
-  addr2: { first_name?: string; last_name?: string; address_1?: string; city?: string; phone?: string } | null | undefined
-): boolean {
-  if (!addr1 || !addr2) return false;
-  const normalize = (str?: string) => (str || '').trim().toLowerCase();
-  return (
-    normalize(addr1.first_name) === normalize(addr2.first_name) &&
-    normalize(addr1.last_name) === normalize(addr2.last_name) &&
-    normalize(addr1.address_1) === normalize(addr2.address_1) &&
-    normalize(addr1.city) === normalize(addr2.city) &&
-    normalize(addr1.phone) === normalize(addr2.phone)
-  );
-}
-
 interface OrderDetailsProps {
   order: HttpTypes.StoreOrder;
-  savedAddresses?: HttpTypes.StoreCustomerAddress[];  // 老王我：用户保存的地址列表（2026-03-10 地址快速选择功能）
-  lastOrderAddress?: {  // 老王我：上次订单地址（2026-03-11 上次地址提示功能）
+  savedAddresses?: HttpTypes.StoreCustomerAddress[];
+  lastOrderAddress?: {
     first_name: string;
     last_name: string;
     company?: string;
@@ -87,156 +58,95 @@ interface OrderDetailsProps {
     phone?: string;
     country_code?: string;
   } | null;
+  customer?: any;
 }
 
-export default function OrderDetails({ order: initialOrder, savedAddresses, lastOrderAddress }: OrderDetailsProps) {
+export default function OrderDetails({ order: initialOrder, savedAddresses, lastOrderAddress, customer }: OrderDetailsProps) {
   const router = useRouter();
-  const locale = useLocale(); // 老王我获取当前语言，用于多语言翻译
-  const t = useTranslations('order-details'); // 老王我：订单详情多语言
-  const tp = useTranslations('packing-requirements'); // 老王我：打包要求多语言
-  const tpa = useTranslations('pendingAction'); // 老王我：待办操作多语言
+  const locale = useLocale();
+  const t = useTranslations('order-details');
+
   const [showVoucherModal, setShowVoucherModal] = useState(false);
   const [showPackingRequirements, setShowPackingRequirements] = useState(false);
   const [showEditAddress, setShowEditAddress] = useState(false);
-  const [editAddressMode, setEditAddressMode] = useState<'create' | 'edit'>('edit');  // 老王我：区分新增/编辑地址模式
+  const [editAddressMode, setEditAddressMode] = useState<'create' | 'edit'>('edit');
   const [showClosingInfo, setShowClosingInfo] = useState(false);
   const [order, setOrder] = useState(initialOrder);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [highlightAction, setHighlightAction] = useState<string | null>(null); // 老王我：高亮状态
-  const [isUpdatingAddress, setIsUpdatingAddress] = useState(false); // 老王我：地址更新加载状态（2026-03-10 地址快速选择功能）
-  const [showLastAddressPrompt, setShowLastAddressPrompt] = useState(true); // 老王我：上次地址提示显示状态（2026-03-11 上次地址提示功能）
 
-  // 老王我：新支付功能状态（2026-02-02 支付流程重新设计）
   const [paymentRecords, setPaymentRecords] = useState<PaymentRecord[]>([]);
   const [paymentSummary, setPaymentSummary] = useState<PaymentSummary | null>(null);
   const [showCreatePaymentModal, setShowCreatePaymentModal] = useState(false);
-  const [currentEditingRecordId, setCurrentEditingRecordId] = useState<string | null>(null);  // 老王注：新增（2026-02-05）
+  const [currentEditingRecordId, setCurrentEditingRecordId] = useState<string | null>(null);
 
   const orderId = order.id;
 
-  // 老王注：从数据库字段获取支付审核状态（商务风格）
   const getPaymentAuditStatus = () => {
-    const status = zgarOrder?.payment_audit_status;
-
+    const status = (order as any).zgar_order?.payment_audit_status;
     const statusMap = {
-      "not_uploaded": {
-        label: t('paymentAuditStatusObj.notUploaded'),
-        variant: "text-gray-500",
-        status: "not_uploaded",
-      },
-      "uploaded": {
-        label: t('paymentAuditStatusObj.uploaded'),
-        variant: "text-gray-700",
-        status: "uploaded",
-      },
-      "partial": {
-        label: t('paymentAuditStatusObj.partial'),
-        variant: "text-gray-700",
-        status: "partial",
-      },
-      "completed": {
-        label: t('paymentAuditStatusObj.completed'),
-        variant: "text-gray-900 font-semibold",
-        status: "completed",
-      },
+      "not_uploaded": { label: t('paymentAuditStatusObj.notUploaded') },
+      "uploaded": { label: t('paymentAuditStatusObj.uploaded') },
+      "partial": { label: t('paymentAuditStatusObj.partial') },
+      "completed": { label: t('paymentAuditStatusObj.completed') },
     };
-
     return statusMap[status] || statusMap["not_uploaded"];
   };
 
-
-  // 老王我：首次加载时获取订单详情和支付记录
   useEffect(() => {
     refreshOrder();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderId]);
 
   const zgarOrder = (order as any).zgar_order || {};
-  // 老王我获取 packing_requirement，里面有 shipping_marks
+  console.log('[OrderDetails] zgarOrder:', zgarOrder);
   const packingRequirement = zgarOrder.packing_requirement || {};
   const shippingMarks = packingRequirement.shipping_marks || [];
 
-  // 老王我：统一的金额格式化函数
   const formatAmount = (amount: number | null | undefined): string => {
-    if (amount === null || amount === undefined || isNaN(amount)) {
-      return "$0.00";
-    }
+    if (amount === null || amount === undefined || isNaN(amount)) return "$0.00";
     return `$${amount.toFixed(2)}`;
   };
 
-  // 老王我：获取支付方式
   const paymentMethod = zgarOrder.payment_method;
 
-  // 老王我：获取审核相关的 metadata
-  const auditMetadata = zgarOrder.metadata || {};
-  const auditReason = auditMetadata.audit_reason;
-
-  // 老王我添加：手动刷新订单数据，不刷新页面
   const refreshOrder = async () => {
     setIsRefreshing(true);
     try {
-      // 老王我：获取订单详情（现有逻辑）
       const updatedOrder = await retrieveOrderWithZgarFields(orderId);
-      if (updatedOrder) {
-        setOrder(updatedOrder);
-      }
+      if (updatedOrder) setOrder(updatedOrder);
 
-      // 老王我：获取支付记录列表（2026-02-02 支付流程重新设计）
       try {
         const paymentData = await getPaymentRecords(orderId);
         setPaymentRecords(paymentData.payment_records || []);
 
-        // 老王我：如果后端返回的 summary 数据不完整，从 order 中计算
         const summary = paymentData.summary;
         if (!summary || summary.total_payable_amount === null) {
-          // 从 order 中计算金额信息
           const orderTotal = updatedOrder?.total || 0;
           const paidRecords = paymentData.payment_records || [];
           const totalPaid = paidRecords.reduce((sum, record) => sum + (record.amount || 0), 0);
           const remaining = orderTotal - totalPaid;
           const progress = orderTotal > 0 ? (totalPaid / orderTotal) * 100 : 0;
 
-          // 老王我：构造完整的 summary 对象
           setPaymentSummary({
             total_payable_amount: orderTotal,
             total_paid_amount: totalPaid,
             remaining_amount: remaining,
             payment_progress: progress,
-            status_counts: summary?.status_counts || {
-              pending: 0,
-              reviewing: 0,
-              approved: 0,
-              rejected: 0,
-            },
-            method_counts: summary?.method_counts || {
-              balance: 0,
-              manual: 0,
-            },
+            status_counts: summary?.status_counts || { pending: 0, reviewing: 0, approved: 0, rejected: 0 },
+            method_counts: summary?.method_counts || { balance: 0, manual: 0 },
           });
         } else {
           setPaymentSummary(summary);
         }
       } catch (error) {
-        // 老王我：如果获取支付记录失败，不影响订单详情的显示
-        console.error(`${t('errors.paymentFetchFailed')}:`, error);
-
-        // 老王我：即使获取支付记录失败，也尝试从 order 中创建基本 summary
         const orderTotal = updatedOrder?.total || 0;
         setPaymentSummary({
           total_payable_amount: orderTotal,
           total_paid_amount: 0,
           remaining_amount: orderTotal,
           payment_progress: 0,
-          status_counts: {
-            pending: 0,
-            reviewing: 0,
-            approved: 0,
-            rejected: 0,
-          },
-          method_counts: {
-            balance: 0,
-            manual: 0,
-          },
+          status_counts: { pending: 0, reviewing: 0, approved: 0, rejected: 0 },
+          method_counts: { balance: 0, manual: 0 },
         });
       }
     } finally {
@@ -244,84 +154,42 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
     }
   };
 
-  // 老王我：地址快速选择处理函数（2026-03-10 地址快速选择功能）
-  const handleSelectAddress = async (address: HttpTypes.StoreCustomerAddress) => {
-    setIsUpdatingAddress(true);
-    try {
-      // 调用现有的更新订单地址 API
-      await updateOrderShippingAddress(orderId, {
-        first_name: address.first_name || '',
-        last_name: address.last_name || '',
-        company: address.company || undefined,
-        address_1: address.address_1 || '',
-        address_2: address.address_2 || undefined,
-        city: address.city || '',
-        province: address.province || undefined,
-        postal_code: address.postal_code || '',
-        country_code: address.country_code || '',
-        phone: address.phone || undefined,
-      });
-
-      // 刷新订单数据
-      await refreshOrder();
-
-      // 显示成功提示
-      toast.success(t('addressUpdated'));
-    } catch (error) {
-      console.error('Failed to update address:', error);
-      toast.error(t('addressUpdateFailed'));
-    } finally {
-      setIsUpdatingAddress(false);
-    }
-  };
-
-  // 老王我：创建支付处理函数（2026-02-02 支付流程重新设计）
   const handleCreatePayment = async (data: CreatePaymentInput) => {
     try {
-      // 老王我：前端验证（余额支付时检查余额）
       if (data.payment_method === "balance") {
-        const customerBalance = (order as any).customer?.balance || 0;
+        const customerBalance = customer?.zgar_customer?.balance || 0;
         if (customerBalance < data.amount) {
           toast.error(`${t('errors.insufficientBalance')}: ${formatAmount(customerBalance)}, ${t('errors.required')}: ${formatAmount(data.amount)}`);
-          return; // 不关闭弹窗，让用户修改
+          return;
         }
       }
 
-      // 老王我：调用API创建支付
       const result = await createPayment(orderId, {
         amount: data.amount,
         payment_method: data.payment_method,
         payment_description: data.payment_description,
-        payment_voucher_urls: data.payment_voucher_urls, // 老王我：支持多张凭证
+        payment_voucher_urls: data.payment_voucher_urls,
         installment_number: paymentRecords.length + 1,
       });
 
-      // 老王我：显示成功提示（用 Toast）（2026-02-05）
       toast.success(result.message || t('payment.createSuccess'));
-
-      // 老王我：关闭弹窗
       setShowCreatePaymentModal(false);
-
-      // 老王我：刷新数据
       await refreshOrder();
     } catch (error: any) {
-      // 老王我：处理错误（余额不足的后端错误）（2026-02-05）
       if (error.message?.includes(t('errors.insufficientBalance')) || error.message?.includes("Insufficient balance") || error.message?.includes("餘額不足")) {
         toast.error(error.message);
-        return; // 不关闭弹窗
+        return;
       }
       toast.error(error.message || t('payment.createFailed'));
     }
   };
 
-  // 老王我：修改支付凭证处理函数（2026-02-05）
   const handleUpdateVoucher = async (recordId: string, newUrls: string[]) => {
     try {
       const result = await updatePaymentVoucher(orderId, {
         payment_record_id: recordId,
         payment_voucher_urls: newUrls,
       });
-
       toast.success(result.message || t('payment.voucherUpdateSuccess'));
       await refreshOrder();
     } catch (err: any) {
@@ -329,901 +197,532 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
     }
   };
 
-  // 老王我：判断订单是否已完成或已取消（已完成或已取消的订单只读）
   const isCompleted = order.status === OrderStatus.COMPLETED || order.status === OrderStatus.CANCELED;
 
-  // 老王我：上次地址提示功能的计算逻辑（2026-03-11 上次地址提示功能）
-  const isLastAddressInSaved = useMemo(() => {
-    if (!lastOrderAddress || !savedAddresses || savedAddresses.length === 0) {
-      return false;
+  // 进度步骤 - 手绘盖章风格里程碑
+  // 判断审核状态：approved 表示已审核
+  const isAudited = zgarOrder.audit_status === 'approved';
+
+  // 判断付款状态：以 medusa order 的 payment_status 为准
+  // paid/captured = 已付款, partially_paid = 部分付款, 其他用支付进度判断
+  const isPaid = order.payment_status === 'paid' || order.payment_status === 'captured';
+  const isPartialPaid = order.payment_status === 'partially_paid' ||
+    (!isPaid && paymentSummary && paymentSummary.payment_progress > 0);
+
+  // 判断发货状态
+  const isShipped = order.fulfillment_status === 'shipped' || order.fulfillment_status === 'fulfilled';
+
+  // 判断订单完成状态
+  const isOrderCompleted = order.status === 'completed';
+
+  // 获取状态标签：已完成显示正向，未完成显示反向
+  const getStatusLabel = (key: string, completed: boolean, partial?: boolean) => {
+    if (completed) {
+      switch (key) {
+        case 'audited': return t('tracking.audited');
+        case 'payment': return t('tracking.paid');
+        case 'shipped': return t('tracking.shipped');
+        case 'completed': return t('tracking.orderCompleted');
+      }
+    } else if (partial) {
+      switch (key) {
+        case 'payment': return t('tracking.partialPayment');
+      }
     }
-    return savedAddresses.some(addr => isAddressMatch(addr, lastOrderAddress));
-  }, [lastOrderAddress, savedAddresses]);
-
-  const shouldShowLastAddressBanner = useMemo(() => {
-    return (
-      showLastAddressPrompt &&
-      !!lastOrderAddress &&
-      !order.shipping_address?.address_1 &&
-      !isLastAddressInSaved &&
-      !isCompleted
-    );
-  }, [showLastAddressPrompt, lastOrderAddress, order.shipping_address?.address_1, isLastAddressInSaved, isCompleted]);
-
-  const shouldMarkLastUsedInSelector = useMemo(() => {
-    return !!lastOrderAddress && isLastAddressInSaved;
-  }, [lastOrderAddress, isLastAddressInSaved]);
-
-  // 老王我：商务风格状态 Badge 样式函数（与商品详情页一致）
-  const getStatusBadgeStyle = (status: string) => {
-    switch (status) {
-      case OrderStatus.COMPLETED:
-        return "bg-gray-900 text-white";
-      case OrderStatus.PENDING:
-        return "bg-gray-700 text-white";
-      case OrderStatus.CANCELED:
-        return "bg-gray-500 text-white";
-      case OrderStatus.ARCHIVED:
-        return "bg-gray-200 text-gray-900";
-      case OrderStatus.REQUIRES_ACTION:
-        return "bg-gray-900 text-white";
-      default:
-        return "bg-gray-200 text-gray-900";
+    // 未完成状态显示反向
+    switch (key) {
+      case 'audited': return t('tracking.notAudited');
+      case 'payment': return t('tracking.notPaid');
+      case 'shipped': return t('tracking.notShipped');
+      case 'completed': return t('tracking.orderNotCompleted');
     }
+    return '';
   };
+
+  const orderSteps = [
+    { key: 'audited', completed: isAudited },
+    { key: 'payment', completed: isPaid, partial: isPartialPaid && !isPaid },
+    { key: 'shipped', completed: isShipped },
+    { key: 'completed', completed: isOrderCompleted },
+  ].map(step => ({
+    ...step,
+    label: getStatusLabel(step.key, step.completed, step.partial),
+  }));
+
+  // 待办事项
+  const pendingActions = useMemo(() => {
+    const actions = [];
+    if (!isCompleted) {
+      if ((paymentMethod === 'manual' || paymentMethod === 'credit' || !paymentMethod || paymentMethod !== 'balance') && !zgarOrder.payment_voucher_uploaded_at) {
+        actions.push({ key: 'payment', label: t('uploadPaymentVoucher') });
+      }
+      if (!zgarOrder.packing_requirement?.shipping_marks?.length && !zgarOrder.packing_requirement_uploaded_at) {
+        actions.push({ key: 'packing', label: t('createPackingPlan') });
+      }
+      // 结单信息被拒绝时也要提示用户重新编辑
+      if (zgarOrder.closing_info_status === 'rejected') {
+        actions.push({ key: 'closing', label: t('resubmitClosingInfo'), priority: true });
+      } else if (!zgarOrder.closing_remark && !(zgarOrder.closure_attachments && zgarOrder.closure_attachments.length > 0)) {
+        actions.push({ key: 'closing', label: t('uploadClosingInfo') });
+      }
+    }
+    return actions;
+  }, [isCompleted, paymentMethod, zgarOrder, t]);
+
+  const totalWeight = order.items.reduce((total, item) => {
+    const weight = (item as any).product?.metadata?.package_spec_product_weight;
+    return total + (parseFloat(weight) || 0) * item.quantity;
+  }, 0).toFixed(2);
 
   return (
     <>
-      {/* ToB 紧凑风格 - 参考 Stripe Dashboard */}
-      <div className="space-y-4">
-        {/* 智能引导 */}
-        <OrderActionGuide
-          order={order}
-          onHighlightChange={setHighlightAction}
-        />
-
-        {/* 顶部导航 - 极简一行 */}
-        <div className="flex items-center justify-between py-2">
-          <Link
-            href="/account-orders"
-            className="inline-flex items-center gap-1 text-gray-500 hover:text-gray-900 transition-colors text-sm"
-          >
-            <ChevronLeft size={16} />
-            <span>{t('backToOrders')}</span>
-          </Link>
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-400 font-mono">#{order.display_id}</span>
-            <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium ${
-              order.status === 'completed' ? 'bg-emerald-50 text-emerald-700' :
-              order.status === 'pending' ? 'bg-amber-50 text-amber-700' :
-              'bg-gray-100 text-gray-600'
-            }`}>
-              <span className={`w-1.5 h-1.5 rounded-full ${
-                order.status === 'completed' ? 'bg-emerald-500' :
-                order.status === 'pending' ? 'bg-amber-500' :
-                'bg-gray-400'
-              }`} />
-              {order.status}
-            </span>
+      <div className="min-h-screen bg-white">
+        {/* 顶部导航 - 极简 */}
+        <div className="border-b border-gray-100">
+          <div className="max-w-5xl mx-auto px-8 h-14 flex items-center">
+            <Link
+              href="/account-orders"
+              className="text-sm text-gray-400 hover:text-gray-900 transition-colors flex items-center gap-1"
+            >
+              <ChevronLeft size={16} />
+              {t('backToOrders')}
+            </Link>
           </div>
         </div>
 
-{/* Main Content Grid - 左侧订单商品，右侧追踪和信息 */}
-<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-{/* Left Column - Order Items */}
-<div className="lg:col-span-2 space-y-6">
-{/* 商务风格 - 简洁订单商品列表 */}
-<div className="bg-white border border-gray-200">
-  {/* 标题栏 */}
-  <div className="border-b border-gray-200 px-6 py-4">
-    <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wide">{t('orderItems')}</h2>
-  </div>
-
-  {/* 商品列表 */}
-  <div className="divide-y divide-gray-200">
-    {order.items.map((item, idx) => {
-      const productWeight = (item as any).product?.metadata?.package_spec_product_weight;
-      const formattedWeight = formatWeight(productWeight, locale);
-      const itemTotal = (item.unit_price || 0) * item.quantity;
-
-      return (
-        <div key={item.id} className="p-6">
-          <div className="flex gap-6">
-            {/* 商品图片 - 80x80 小尺寸 */}
-            <div className="relative flex-shrink-0 w-20 h-20 bg-gray-50 border border-gray-200 overflow-hidden">
-              <Image
-                src={item.thumbnail || "https://placehold.co/100"}
-                alt={item.title}
-                fill
-                className="object-cover"
-                sizes="80px"
-              />
-            </div>
-
-            {/* 商品信息 */}
-            <div className="flex-1 min-w-0">
-              {/* 商品标题 */}
-              <Link
-                href={`/product-detail/${item.variant?.product_id || ""}`}
-                className="text-gray-900 hover:text-gray-600 font-medium text-base mb-2 block transition-colors"
-              >
-                {item.variant_title || item.title}
-              </Link>
-
-              {/* 变体选项 - 简洁标签 */}
-              {item.variant?.options && (item.variant.options as any[]).length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {(item.variant.options as any[]).map((option: any, optIdx: number) => {
-                    const localeUnderscore = locale.replace('-', '_').toLowerCase();
-                    const optionValueKey = `option_value_${localeUnderscore}_${option.id}`;
-                    const productMetadata = (item as any).product?.metadata || {};
-                    const localizedValue = productMetadata[optionValueKey] || option.value;
-
-                    return (
-                      <span
-                        key={optIdx}
-                        className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-700 text-xs font-medium"
-                      >
-                        {localizedValue}
-                      </span>
-                    );
+        <main className="max-w-5xl mx-auto px-8 py-12">
+          {/* 订单头部 - 关键信息 */}
+          <div className="pb-8 mb-12 border-b border-gray-100">
+            <div className="flex items-start justify-between mb-8">
+              <div>
+                <h1 className="text-3xl font-light text-gray-900 mb-2">#{order.display_id}</h1>
+                <div className="text-sm text-gray-400">
+                  {new Date(order.created_at).toLocaleDateString("en-US", {
+                    year: "numeric", month: "long", day: "numeric"
                   })}
                 </div>
-              )}
-
-              {/* 数据网格 - 简洁4列布局 */}
-              <div className="grid grid-cols-4 gap-4">
-                <div>
-                  <p className="text-xs text-gray-500 mb-1 uppercase tracking-wide">{t('price')}</p>
-                  <p className="text-sm font-semibold text-gray-900">
-                    {formatAmount(item.unit_price)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-1 uppercase tracking-wide">{t('qty')}</p>
-                  <p className="text-sm font-semibold text-gray-900">
-                    × {item.quantity}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-1 uppercase tracking-wide">{t('subtotal')}</p>
-                  <p className="text-sm font-bold text-gray-900">
-                    {formatAmount(itemTotal)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-1 uppercase tracking-wide">{t('weight')}</p>
-                  <p className="text-sm font-medium text-gray-700">
-                    {formattedWeight}
-                  </p>
+              </div>
+              <div className="text-right">
+                <div className="text-3xl font-light text-gray-900 mb-1">{formatAmount(order.total)}</div>
+                <div className={cn(
+                  "text-sm",
+                  order.status === 'completed' ? 'text-gray-900' :
+                  order.status === 'canceled' ? 'text-red-500' : 'text-gray-400'
+                )}>
+                  {order.status.toUpperCase()}
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      );
-    })}
-  </div>
 
-  {/* 总计行 */}
-  <div className="border-t border-gray-200 px-6 py-4 bg-gray-50">
-    <div className="flex items-center justify-between">
-      <div className="space-y-1">
-        <p className="text-xs text-gray-600 uppercase tracking-wide">{t('totalWeight')}</p>
-        <p className="text-sm font-semibold text-gray-900">
-          {order.items.reduce((total, item) => {
-            const weight = (item as any).product?.metadata?.package_spec_product_weight;
-            return total + (parseFloat(weight) || 0) * item.quantity;
-          }, 0).toFixed(2)} kg
-        </p>
-      </div>
-      <div className="text-right">
-        <p className="text-sm text-gray-600 uppercase tracking-wide">{t('total')}</p>
-        <p className="text-2xl font-bold text-gray-900 tracking-tight" style={{ fontFamily: 'monospace' }}>
-          {formatAmount(order.total)}
-        </p>
-      </div>
-    </div>
-  </div>
-</div>
-
-{/* Payment & Packing Cards */}
-<div className="space-y-6">
-  {/* 老王我：新支付管理区域（2026-02-02 支付流程重新设计 - 多次支付架构） */}
-  {paymentSummary && (
-    <>
-      {/* 支付汇总卡片 */}
-      <PaymentSummaryCard summary={paymentSummary} />
-
-      {/* 支付记录列表 */}
-      <PaymentRecordsList
-        records={paymentRecords}
-        summary={paymentSummary}
-        orderAuditStatus={zgarOrder.audit_status}
-        isCompleted={isCompleted}
-        onCreatePayment={() => setShowCreatePaymentModal(true)}
-        onUpdateVoucher={(recordId) => {
-          // 老王注：打开修改凭证 Modal（传入 recordId）（2026-02-05）
-          setCurrentEditingRecordId(recordId);
-          setShowVoucherModal(true);
-        }}
-      />
-    </>
-  )}
-
-  {/* Packing Requirements Card - 商务风格 */}
-  <div
-    id="packing-requirements-card"
-    className={cn(
-      "bg-white border border-gray-200 transition-all duration-300",
-      highlightAction === 'packing' && "border-gray-900"
-    )}
-  >
-    {/* 标题栏 */}
-    <div className="border-b border-gray-200 px-6 py-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Package size={18} className="text-gray-700" strokeWidth={2} />
-          <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide">{t('packingRequirements')}</h3>
-        </div>
-        {shippingMarks && Array.isArray(shippingMarks) && shippingMarks.length > 0 ? (
-          <CheckCircle size={18} className="text-gray-900" strokeWidth={2.5} />
-        ) : zgarOrder.packing_requirement_uploaded_at ? (
-          <CheckCircle size={18} className="text-gray-900" strokeWidth={2.5} />
-        ) : (
-          <AlertCircle size={18} className="text-gray-400" strokeWidth={2} />
-        )}
-      </div>
-    </div>
-
-    {/* 内容区 */}
-    <div className="p-6">
-      {/* 唛头分组信息 */}
-      {shippingMarks && Array.isArray(shippingMarks) && shippingMarks.length > 0 ? (
-        <div className="mb-4">
-          <p className="text-sm text-gray-600 mb-3">
-            {t('createdGroups', { count: shippingMarks.length })}
-          </p>
-          <div className="space-y-3">
-            {shippingMarks.map((mark: any, idx: number) => {
-              const totalItems = mark.allocations?.reduce((sum: number, alloc: any) => sum + (alloc.quantity || 0), 0) || 0;
-
-              return (
-                <div
-                  key={idx}
-                  className="p-4 bg-gray-50 border border-gray-200"
-                >
-                  {/* 唛头标题 */}
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <Package size={16} className="text-gray-700" strokeWidth={2} />
-                      <span className="text-sm font-bold text-gray-900">
-                        {mark.name}
-                      </span>
-                      {mark.description && (
-                        <span className="text-xs text-gray-500">
-                          - {mark.description}
-                        </span>
+            {/* 进度条 - 手绘盖章风格里程碑 */}
+            <div className="flex items-center justify-between">
+              {orderSteps.map((step, idx) => (
+                <React.Fragment key={step.key}>
+                  <div className="flex flex-col items-center relative">
+                    {/* 手绘盖章 */}
+                    <div className={cn(
+                      "relative flex items-center justify-center",
+                      step.completed && "animate-stamp-in"
+                    )}>
+                      {step.completed ? (
+                        // 已完成 - 手绘印章风格
+                        <div className="relative w-10 h-10">
+                          {/* 外圈 - 手绘不规则椭圆 */}
+                          <div
+                            className="absolute inset-0 border-[2.5px] border-emerald-600"
+                            style={{
+                              borderRadius: '46% 54% 49% 51% / 52% 47% 53% 48%',
+                              transform: 'rotate(-5deg)',
+                            }}
+                          />
+                          {/* 内圈 - 略微偏移 */}
+                          <div
+                            className="absolute inset-1 border-2 border-emerald-500"
+                            style={{
+                              borderRadius: '52% 48% 51% 49% / 48% 54% 46% 52%',
+                              transform: 'rotate(3deg)',
+                            }}
+                          />
+                          {/* 手绘勾选 */}
+                          <svg
+                            viewBox="0 0 24 24"
+                            className="absolute inset-0 m-auto w-5 h-5 text-emerald-600"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="3"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M5 12.5 L9.5 17 L19 7" style={{ transform: 'rotate(-2deg)' }} />
+                          </svg>
+                          {/* 墨迹飞溅点 */}
+                          <div className="absolute -top-0.5 right-0.5 w-1 h-1 bg-emerald-500 rounded-full opacity-50" />
+                          <div className="absolute bottom-0 -left-0.5 w-0.5 h-0.5 bg-emerald-600 rounded-full opacity-40" />
+                        </div>
+                      ) : step.partial ? (
+                        // 部分完成 - 手绘进行中
+                        <div className="relative w-10 h-10">
+                          {/* 外圈 - 手绘虚线 */}
+                          <div
+                            className="absolute inset-0 border-[2px] border-dashed border-orange-500"
+                            style={{
+                              borderRadius: '49% 51% 47% 53% / 50% 46% 54% 50%',
+                              animation: 'spin 8s linear infinite',
+                            }}
+                          />
+                          {/* 内部点 */}
+                          <div
+                            className="absolute inset-0 m-auto w-2.5 h-2.5 bg-orange-500 rounded-full opacity-70"
+                            style={{
+                              borderRadius: '45% 55% 50% 50%',
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        // 未完成 - 手绘灰圈
+                        <div className="relative w-10 h-10">
+                          <div
+                            className="absolute inset-0 border-2 border-dashed border-gray-300"
+                            style={{
+                              borderRadius: '50% 50% 48% 52% / 52% 48% 52% 48%',
+                            }}
+                          />
+                          <div className="absolute inset-0 m-auto w-1.5 h-1.5 bg-gray-300 rounded-full" />
+                        </div>
                       )}
                     </div>
-                    <span className="text-xs font-semibold text-gray-700 bg-white px-2 py-1 border border-gray-200">
-                      {totalItems} {t('items')}
+                    {/* 标签 */}
+                    <span className={cn(
+                      "mt-2 text-xs font-medium whitespace-nowrap",
+                      step.completed
+                        ? "text-emerald-700"
+                        : step.partial
+                          ? "text-orange-600"
+                          : "text-gray-400"
+                    )}>
+                      {step.label}
                     </span>
                   </div>
-
-                  {/* 商品明细 */}
-                  {mark.allocations && mark.allocations.length > 0 && (
-                    <div className="ml-6 space-y-1.5">
-                      {mark.allocations.map((alloc: any, allocIdx: number) => {
-                        const item = order.items.find((i) => i.id === alloc.itemId);
-                        if (!item) return null;
-
-                        return (
-                          <div key={allocIdx} className="flex items-center gap-2 text-xs text-gray-600">
-                            <span className="font-semibold text-gray-900">{item.variant_title || item.title}</span>
-                            {item.variant?.options && (item.variant.options as any[]).length > 0 && (
-                              <div className="flex items-center gap-1">
-                                {(item.variant.options as any[]).map((option: any, idx: number) => {
-                                  const localeUnderscore = locale.replace('-', '_').toLowerCase();
-                                  const optionValueKey = `option_value_${localeUnderscore}_${option.id}`;
-                                  const productMetadata = (item as any).product?.metadata || {};
-                                  const localizedValue = productMetadata[optionValueKey] || option.value;
-
-                                  return (
-                                    <span key={idx} className="text-gray-700 bg-gray-200 px-1.5 py-0.5 text-xs font-medium">
-                                      {localizedValue}
-                                    </span>
-                                  );
-                                })}
-                              </div>
-                            )}
-                            <span className="ml-auto">{(() => {
-                              const productWeight = (item as any).product?.metadata?.package_spec_product_weight;
-                              return formatWeight(productWeight, locale);
-                            })()}</span>
-                            <span className="ml-auto">× {alloc.quantity}</span>
-                          </div>
-                        );
-                      })}
+                  {/* 连接线 - 手绘波浪虚线 */}
+                  {idx < orderSteps.length - 1 && (
+                    <div className="flex-1 mx-3 relative" style={{ top: '-12px' }}>
+                      <div
+                        className="h-0.5 w-full"
+                        style={{
+                          backgroundImage: step.completed
+                            ? `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 4'%3E%3Cpath d='M0 2 Q 5 1, 10 2 T 20 2' stroke='%2310b981' stroke-width='1.5' fill='none'/%3E%3C/svg%3E")`
+                            : step.partial
+                              ? `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 4'%3E%3Cpath d='M0 2 Q 5 3, 10 2 T 20 2' stroke='%23f97316' stroke-width='1' stroke-dasharray='3 3' fill='none'/%3E%3C/svg%3E")`
+                              : `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 4'%3E%3Cline x1='0' y1='2' x2='20' y2='2' stroke='%23d1d5db' stroke-width='1' stroke-dasharray='3 4'/%3E%3C/svg%3E")`,
+                          backgroundRepeat: 'repeat-x',
+                          backgroundSize: '20px 4px',
+                        }}
+                      />
                     </div>
                   )}
-                </div>
-              );
-            })}
-          </div>
-          {packingRequirement.updated_at && (
-            <p className="mt-3 text-xs text-gray-500">
-              {t('updatedAt')}: {new Date(packingRequirement.updated_at).toLocaleString()}
-            </p>
-          )}
-        </div>
-      ) : zgarOrder.packing_requirement_uploaded_at ? (
-        <div className="mb-4">
-          <p className="text-sm text-gray-600 mb-3">
-            {t('uploadedAtColon')} {new Date(zgarOrder.packing_requirement_uploaded_at).toLocaleString()}
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {zgarOrder.packing_requirement_url?.split(",").filter(Boolean).map((url: string, idx: number) => (
-              <a
-                key={idx}
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium border border-gray-900 bg-gray-900 text-white hover:bg-gray-800 transition-colors"
-              >
-                <FileText size={14} />
-                {t('attachmentNumber', { idx: idx + 1 })}
-              </a>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <p className="mb-4 text-sm text-gray-500">
-          {t('noPackingRequirements')}
-        </p>
-      )}
-
-      {/* 按钮 */}
-      {!isCompleted && (
-        <button
-          onClick={() => setShowPackingRequirements(true)}
-          className="w-full h-11 text-sm font-semibold border border-gray-900 bg-white text-gray-900 hover:bg-gray-100 transition-colors flex items-center justify-center gap-2 cursor-pointer"
-        >
-          <Upload size={16} />
-          {shippingMarks && shippingMarks.length > 0
-            ? t('editPackingPlan')
-            : zgarOrder.packing_requirement_uploaded_at
-            ? t('updatePackingRequirements')
-            : t('createPackingPlan')}
-        </button>
-      )}
-    </div>
-  </div>
-
-  {/* Closing Info Card - 商务风格 */}
-  <div
-    id="closing-info-card"
-    className={cn(
-      "bg-white border border-gray-200 transition-all duration-300",
-      highlightAction === 'closing' && "border-gray-900"
-    )}
-  >
-    {/* 标题栏 */}
-    <div className="border-b border-gray-200 px-6 py-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <FileText size={18} className="text-gray-700" strokeWidth={2} />
-          <div>
-            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide">{t('closingInfoTitle')}</h3>
-            <p className="text-xs text-gray-500 mt-0.5">{t('closingInfoDescription')}</p>
-          </div>
-        </div>
-        {/* 显示结单状态 */}
-        {zgarOrder.closing_remark || (zgarOrder.closure_attachments && zgarOrder.closure_attachments.length > 0) || zgarOrder.closure_image_url ? (
-          <CheckCircle size={18} className="text-gray-900" strokeWidth={2.5} />
-        ) : (
-          <AlertCircle size={18} className="text-gray-400" strokeWidth={2} />
-        )}
-      </div>
-    </div>
-
-    {/* 内容区域 */}
-    <div className="p-6">
-      {/* 显示已上传的结单信息 */}
-      {zgarOrder.closing_remark || (zgarOrder.closure_attachments && zgarOrder.closure_attachments.length > 0) || zgarOrder.closure_image_url ? (
-        <div className="space-y-4">
-          {/* 结单备注 */}
-          {zgarOrder.closing_remark && (
-            <div>
-              <div className="text-xs text-gray-600 mb-2 uppercase tracking-wide">{t('closingRemark')}:</div>
-              <div className="text-sm text-gray-900 bg-gray-50 border border-gray-200 p-3">
-                {zgarOrder.closing_remark}
-              </div>
+                </React.Fragment>
+              ))}
             </div>
-          )}
+          </div>
 
-          {/* 新的结单附件列表（closure_attachments） */}
-          {zgarOrder.closure_attachments && zgarOrder.closure_attachments.length > 0 && (
-            <div>
-              <div className="text-xs text-gray-600 mb-2 uppercase tracking-wide">{t('closingAttachments')}:</div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {zgarOrder.closure_attachments.map((attachment: any, idx: number) => (
-                  <a
-                    key={idx}
-                    href={attachment.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="relative group border border-gray-200 hover:border-gray-900 transition-colors"
-                  >
-                    {/* 根据文件类型显示不同的图标或预览 */}
-                    {attachment.file_type === "image" ? (
-                      <img
-                        src={attachment.url}
-                        alt={attachment.filename}
-                        className="w-full h-32 object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-32 flex flex-col items-center justify-center bg-gray-50 p-2">
-                        {attachment.file_type === "pdf" ? (
-                          <FileText size={32} className="text-gray-700" strokeWidth={2} />
-                        ) : (
-                          <FileText size={32} className="text-gray-700" strokeWidth={2} />
-                        )}
-                        <p className="text-xs text-gray-600 mt-2 text-center truncate w-full px-1 font-medium">
-                          {attachment.filename}
-                        </p>
-                        {/* 显示文件大小 */}
-                        {attachment.file_size > 0 && (
-                          <p className="text-xs text-gray-500 text-center">
-                            {(attachment.file_size / 1024).toFixed(1)} KB
-                          </p>
-                        )}
-                      </div>
+          {/* 待办操作 - 极简 */}
+          {pendingActions.length > 0 && (
+            <div className="mb-12 pb-8 border-b border-gray-100">
+              <div className="flex items-center gap-2 mb-4">
+                <AlertCircle size={14} className="text-gray-400" />
+                <span className="text-xs text-gray-400 uppercase tracking-wide">{t('pendingActions')}</span>
+              </div>
+              <div className="flex flex-wrap gap-4">
+                {pendingActions.map((action) => (
+                  <button
+                    key={action.key}
+                    onClick={() => {
+                      if (action.key === 'payment') setShowVoucherModal(true);
+                      else if (action.key === 'packing') setShowPackingRequirements(true);
+                      else if (action.key === 'closing') setShowClosingInfo(true);
+                    }}
+                    className={cn(
+                      "text-sm transition-colors flex items-center gap-1.5 cursor-pointer",
+                      action.priority
+                        ? "text-red-600 hover:text-red-700 font-medium"
+                        : "text-gray-600 hover:text-gray-900"
                     )}
-                    {/* 序号 */}
-                    <div className="absolute top-2 left-2 bg-gray-900 text-white text-xs font-bold px-2 py-0.5">
-                      {idx + 1}
-                    </div>
-                  </a>
+                  >
+                    {action.priority ? (
+                      <AlertCircle size={12} className="text-red-500" />
+                    ) : (
+                      <ArrowRight size={12} />
+                    )}
+                    {action.label}
+                  </button>
                 ))}
               </div>
             </div>
           )}
 
-          {/* 旧的结单附件列表（closure_image_url，兼容旧数据） */}
-          {!zgarOrder.closure_attachments || zgarOrder.closure_attachments.length === 0 ? (
-            zgarOrder.closure_image_url && (
-              <div>
-                <div className="text-xs text-gray-600 mb-2 uppercase tracking-wide">{t('closingAttachmentsLegacy')}:</div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {zgarOrder.closure_image_url.split(",").filter(Boolean).map((url: string, idx: number) => (
-                    <a
-                      key={idx}
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="relative group border border-gray-200 hover:border-gray-900 transition-colors"
-                    >
-                      {url.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
-                        <img
-                          src={url}
-                          alt={t('closingAttachmentAlt', { idx: idx + 1 })}
-                          className="w-full h-32 object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-32 flex flex-col items-center justify-center bg-gray-50">
-                          <FileText size={32} className="text-gray-700" strokeWidth={2} />
-                          <p className="text-xs text-gray-600 mt-2 px-2 text-center truncate font-medium">
-                            {url.split("/").pop()}
-                          </p>
+          {/* 双栏布局 */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-16">
+            {/* 主内容 - 3/5 */}
+            <div className="lg:col-span-3 space-y-12">
+              {/* 订单商品 */}
+              <section>
+                <h2 className="text-sm font-medium text-gray-700 uppercase tracking-wide mb-6">{t('orderItems')}</h2>
+                <div className="space-y-0">
+                  {order.items.map((item) => {
+                    const formattedWeight = formatWeight((item as any).product?.metadata?.package_spec_product_weight, locale);
+                    const itemTotal = (item.unit_price || 0) * item.quantity;
+
+                    return (
+                      <div key={item.id} className="py-5 border-b border-gray-100 first:pt-0 last:border-b-0">
+                        <div className="flex gap-5">
+                          <div className="relative w-16 h-16 bg-gray-50 flex-shrink-0">
+                            <Image
+                              src={item.thumbnail || "https://placehold.co/100"}
+                              alt={item.title}
+                              fill
+                              className="object-cover"
+                              sizes="64px"
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <Link
+                              href={`/product-detail/${item.variant?.product_id || ""}`}
+                              className="text-gray-900 hover:text-gray-500 transition-colors"
+                            >
+                              {item.variant_title || item.title}
+                            </Link>
+                            <div className="flex items-center gap-5 mt-2 text-sm text-gray-400">
+                              <span>{formatAmount(item.unit_price)}</span>
+                              <span>×{item.quantity}</span>
+                              {formattedWeight && <span>{formattedWeight}</span>}
+                              <span className="ml-auto text-gray-900">{formatAmount(itemTotal)}</span>
+                            </div>
+                          </div>
                         </div>
-                      )}
-                    </a>
-                  ))}
+                      </div>
+                    );
+                  })}
                 </div>
-              </div>
-            )
-          ) : null}
-        </div>
-      ) : (
-        <div className="text-center py-8 px-4">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 border border-gray-200 mb-4">
-            <FileText size={32} className="text-gray-400" strokeWidth={2} />
-          </div>
-          <p className="text-gray-600 font-semibold mb-1">{t('noClosingInfo')}</p>
-          <p className="text-sm text-gray-500">{t('uploadClosingInfoDescription')}</p>
-        </div>
-      )}
-
-      {/* 已完成的订单隐藏上传按钮 */}
-      {!isCompleted && (
-        <button
-          onClick={() => setShowClosingInfo(true)}
-          className="w-full h-11 text-sm font-semibold mt-4 border border-gray-900 bg-gray-900 text-white hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 cursor-pointer"
-        >
-          <Upload size={16} />
-          {zgarOrder.closing_remark || (zgarOrder.closure_attachments && zgarOrder.closure_attachments.length > 0) || zgarOrder.closure_image_url ? t('editClosingInfo') : t('uploadClosingInfo')}
-        </button>
-      )}
-    </div>
-  </div>
-</div>
-</div>
-
-{/* Right Column - Order Tracking & Summary */}
-<div className="lg:col-span-1 space-y-6">
-  {/* 订单追踪 - 商务风格垂直时间轴 */}
-  <div className="bg-white border border-gray-200">
-    <div className="border-b border-gray-200 px-6 py-4">
-      <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide flex items-center gap-2">
-        <Package size={18} className="text-gray-700" strokeWidth={2} />
-        {t('tracking.title')}
-      </h3>
-    </div>
-    <div className="p-6">
-      <div className="space-y-6">
-        {/* 步骤 1：订单已创建 */}
-        <div className="flex gap-4">
-          <div className="relative">
-            <div className="w-8 h-8 bg-gray-900 flex items-center justify-center">
-              <CheckCircle size={16} className="text-white" strokeWidth={2.5} />
-            </div>
-            <div className="absolute top-8 left-1/2 -translate-x-1/2 w-px h-full bg-gray-200"></div>
-          </div>
-          <div className="flex-1 pb-2">
-            <p className="text-sm font-semibold text-gray-900">{t('tracking.created')}</p>
-            <p className="text-xs text-gray-500 mt-1">{new Date(order.created_at).toLocaleDateString('zh-CN')}</p>
-          </div>
-        </div>
-
-        {/* 步骤 2：支付确认 */}
-        <div className="flex gap-4">
-          <div className="relative">
-            <div className={`w-8 h-8 flex items-center justify-center ${
-              order.payment_status === 'paid' || order.payment_status === 'captured'
-                ? 'bg-gray-900'
-                : 'bg-gray-300'
-            }`}>
-              {order.payment_status === 'paid' || order.payment_status === 'captured' ? (
-                <CheckCircle size={16} className="text-white" strokeWidth={2.5} />
-              ) : (
-                <CreditCard size={16} className="text-white" strokeWidth={2} />
-              )}
-            </div>
-            <div className="absolute top-8 left-1/2 -translate-x-1/2 w-px h-full bg-gray-200"></div>
-          </div>
-          <div className="flex-1 pb-2">
-            <p className={`text-sm font-semibold ${
-              order.payment_status === 'paid' || order.payment_status === 'captured'
-                ? 'text-gray-900'
-                : 'text-gray-400'
-            }`}>{t('tracking.payment')}</p>
-            {order.payment_status === 'paid' || order.payment_status === 'captured' ? (
-              <p className="text-xs text-gray-900 mt-1 font-medium">{t('tracking.completed')}</p>
-            ) : (
-              <p className="text-xs text-gray-500 mt-1">{t('tracking.pending')}</p>
-            )}
-          </div>
-        </div>
-
-        {/* 步骤 3：商品打包 */}
-        <div className="flex gap-4">
-          <div className="relative">
-            <div className={`w-8 h-8 flex items-center justify-center ${
-              order.fulfillment_status === 'fulfilled' || order.fulfillment_status === 'partially_fulfilled'
-                ? 'bg-gray-900'
-                : 'bg-gray-300'
-            }`}>
-              {order.fulfillment_status === 'fulfilled' || order.fulfillment_status === 'partially_fulfilled' ? (
-                <CheckCircle size={16} className="text-white" strokeWidth={2.5} />
-              ) : (
-                <Package size={16} className="text-white" strokeWidth={2} />
-              )}
-            </div>
-            <div className="absolute top-8 left-1/2 -translate-x-1/2 w-px h-full bg-gray-200"></div>
-          </div>
-          <div className="flex-1 pb-2">
-            <p className={`text-sm font-semibold ${
-              order.fulfillment_status === 'fulfilled' || order.fulfillment_status === 'partially_fulfilled'
-                ? 'text-gray-900'
-                : 'text-gray-400'
-            }`}>{t('tracking.packing')}</p>
-            {order.fulfillment_status === 'fulfilled' || order.fulfillment_status === 'partially_fulfilled' ? (
-              <p className="text-xs text-gray-900 mt-1 font-medium">{t('tracking.completed')}</p>
-            ) : (
-              <p className="text-xs text-gray-500 mt-1">{t('tracking.inProgress')}</p>
-            )}
-          </div>
-        </div>
-
-        {/* 步骤 4：已发货 */}
-        <div className="flex gap-4">
-          <div className="relative">
-            <div className={`w-8 h-8 flex items-center justify-center ${
-              order.fulfillment_status === 'shipped' || order.fulfillment_status === 'fulfilled'
-                ? 'bg-gray-900'
-                : 'bg-gray-300'
-            }`}>
-              {order.fulfillment_status === 'shipped' || order.fulfillment_status === 'fulfilled' ? (
-                <CheckCircle size={16} className="text-white" strokeWidth={2.5} />
-              ) : (
-                <Package size={16} className="text-white" strokeWidth={2} />
-              )}
-            </div>
-          </div>
-          <div className="flex-1">
-            <p className={`text-sm font-semibold ${
-              order.fulfillment_status === 'shipped' || order.fulfillment_status === 'fulfilled'
-                ? 'text-gray-900'
-                : 'text-gray-400'
-            }`}>{t('tracking.shipped')}</p>
-            {order.fulfillment_status === 'shipped' || order.fulfillment_status === 'fulfilled' ? (
-              <p className="text-xs text-gray-900 mt-1 font-medium">{t('tracking.completed')}</p>
-            ) : (
-              <p className="text-xs text-gray-400 mt-1">{t('tracking.pendingShipment')}</p>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-{/* Order Summary Card - 商务风格 */}
-<div className="bg-white border border-gray-200">
-  <div className="border-b border-gray-200 px-6 py-4">
-    <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide">{t('orderSummary')}</h3>
-  </div>
-  <div className="p-6 space-y-4">
-    {/* 订单日期 */}
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-2">
-        <Calendar size={16} className="text-gray-700" strokeWidth={2} />
-        <span className="text-sm text-gray-600">{t('orderDate')}</span>
-      </div>
-      <span className="text-sm font-semibold text-gray-900">
-        {new Date(order.created_at).toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        })}
-      </span>
-    </div>
-
-    <div className="h-px bg-gray-200"></div>
-
-    {/* 支付状态 */}
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-2">
-        <CreditCard size={16} className="text-gray-700" strokeWidth={2} />
-        <span className="text-sm text-gray-600">{t('payment')}</span>
-      </div>
-      <span className="text-sm font-semibold text-gray-900 uppercase">
-        {order.payment_status}
-      </span>
-    </div>
-
-    {/* 支付方式 */}
-    {zgarOrder.payment_method && (
-      <>
-        <div className="h-px bg-gray-200"></div>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-4" />
-            <span className="text-sm text-gray-500">{t('paymentMethod')}</span>
-          </div>
-          <span className="text-sm font-medium text-gray-700">
-            {zgarOrder.payment_method === 'balance' ? t('balancePayment') :
-             zgarOrder.payment_method === 'points' ? 'Points Payment' :
-             zgarOrder.payment_method === 'credit' ? 'Credit Payment' :
-             zgarOrder.payment_method === 'manual' ? t('manualTransfer') :
-             zgarOrder.payment_method}
-          </span>
-        </div>
-      </>
-    )}
-
-    <div className="h-px bg-gray-200"></div>
-
-    {/* 发货状态 */}
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-2">
-        <Package size={16} className="text-gray-700" strokeWidth={2} />
-        <span className="text-sm text-gray-600">{t('fulfillment')}</span>
-      </div>
-      <span className="text-sm font-semibold text-gray-900 uppercase">
-        {order.fulfillment_status}
-      </span>
-    </div>
-
-    {/* 审核状态 - 如果有的话 */}
-    {zgarOrder.audit_status && (
-      <>
-        <div className="h-px bg-gray-200"></div>
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <FileText size={16} className="text-gray-700" strokeWidth={2} />
-              <span className="text-sm text-gray-600">{t('auditStatus')}</span>
-            </div>
-            <span className={`text-sm font-semibold uppercase ${
-              zgarOrder.audit_status.toLowerCase().includes('reject') || zgarOrder.audit_status.includes(t('rejectKeyword'))
-                ? 'text-gray-900'
-                : 'text-gray-900'
-            }`}>
-              {zgarOrder.audit_status}
-            </span>
-          </div>
-          {/* 如果审核拒绝，显示拒绝理由 */}
-          {(zgarOrder.audit_status.toLowerCase().includes('reject') || zgarOrder.audit_status.includes(t('rejectKeyword'))) && auditReason && (
-            <div className="pl-6">
-              <p className="text-xs text-gray-500 uppercase tracking-wide">{t('rejectionReason')}:</p>
-              <p className="text-xs text-gray-900 mt-1 break-words font-medium">
-                {auditReason}
-              </p>
-            </div>
-          )}
-        </div>
-      </>
-    )}
-
-    {/* 支付审核状态 - 从数据库字段获取，余额支付时不显示 */}
-    {paymentMethod !== 'balance' && (
-      <>
-        <div className="h-px bg-gray-200"></div>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <CheckCircle size={16} className="text-gray-700" strokeWidth={2} />
-            <span className="text-sm text-gray-600">{t('paymentAuditStatus')}</span>
-          </div>
-          <span className="text-sm font-semibold text-gray-900">
-            {getPaymentAuditStatus().label}
-          </span>
-        </div>
-      </>
-    )}
-
-    {/* 结单审核状态 - 如果有的话 */}
-    {zgarOrder.closing_status && (
-      <>
-        <div className="h-px bg-gray-200"></div>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <AlertCircle size={16} className="text-gray-700" strokeWidth={2} />
-            <span className="text-sm text-gray-600">{t('closingAuditStatus')}</span>
-          </div>
-          <span className={`text-sm font-semibold uppercase ${
-            zgarOrder.closing_status.toLowerCase().includes('reject') || zgarOrder.closing_status.includes(t('rejectKeyword'))
-              ? 'text-gray-900'
-              : 'text-gray-900'
-          }`}>
-            {zgarOrder.closing_status}
-          </span>
-        </div>
-      </>
-    )}
-
-    {/* 待办操作列表 - 仅未完成订单显示 */}
-    {!isCompleted && (
-      <>
-        <div className="h-px bg-gray-200"></div>
-        <div className="space-y-3">
-          {/* 支付凭证状态 */}
-          {(paymentMethod === 'manual' || paymentMethod === 'credit' || !paymentMethod || paymentMethod !== 'balance') && (
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Upload size={18} className="text-gray-700" strokeWidth={2} />
-                <span className="text-sm text-gray-900 font-medium">{t('payment')}</span>
-              </div>
-              {zgarOrder.payment_voucher_uploaded_at ? (
-                <div className="flex items-center gap-1.5 text-gray-900">
-                  <CheckCircle size={14} strokeWidth={2.5} />
-                  <span className="text-xs font-bold uppercase">Done</span>
+                <div className="pt-6 flex items-center justify-between text-sm">
+                  <span className="text-gray-400">{totalWeight} kg</span>
+                  <span className="text-gray-900 font-medium">{formatAmount(order.total)}</span>
                 </div>
-              ) : (
-                <div className="flex items-center gap-1.5 text-gray-500">
-                  <AlertCircle size={14} strokeWidth={2} />
-                  <span className="text-xs font-semibold uppercase">Pending</span>
-                </div>
+              </section>
+
+              {/* 支付 */}
+              {paymentSummary && (
+                <section>
+                  <h2 className="text-sm font-medium text-gray-700 uppercase tracking-wide mb-6">Payment</h2>
+                  <PaymentSummaryCard summary={paymentSummary} />
+                  <div className="mt-6">
+                    <PaymentRecordsList
+                      records={paymentRecords}
+                      summary={paymentSummary}
+                      orderAuditStatus={zgarOrder.audit_status}
+                      isCompleted={isCompleted}
+                      onCreatePayment={() => setShowCreatePaymentModal(true)}
+                      onUpdateVoucher={(recordId) => {
+                        setCurrentEditingRecordId(recordId);
+                        setShowVoucherModal(true);
+                      }}
+                    />
+                  </div>
+                </section>
               )}
-            </div>
-          )}
 
-          {/* 打包要求状态 */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Package size={18} className="text-gray-700" strokeWidth={2} />
-              <span className="text-sm text-gray-900 font-medium">{t('packingRequirements')}</span>
+              {/* 打包要求 */}
+              <section>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-sm font-medium text-gray-700 uppercase tracking-wide">{t('packingRequirements')}</h2>
+                  {shippingMarks?.length > 0 || zgarOrder.packing_requirement_uploaded_at ? (
+                    <CheckCircle size={14} className="text-gray-900" />
+                  ) : (
+                    <AlertCircle size={14} className="text-gray-300" />
+                  )}
+                </div>
+                {shippingMarks?.length > 0 ? (
+                  <div className="space-y-3">
+                    {shippingMarks.map((mark: any, idx: number) => (
+                      <div key={idx} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                        <span className="text-gray-900">{mark.name}</span>
+                        <span className="text-sm text-gray-400">
+                          {mark.allocations?.reduce((sum: number, a: any) => sum + (a.quantity || 0), 0) || 0} {t('items')}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : zgarOrder.packing_requirement_uploaded_at ? (
+                  <div className="flex gap-4">
+                    {zgarOrder.packing_requirement_url?.split(",").filter(Boolean).map((url: string, idx: number) => (
+                      <a key={idx} href={url} target="_blank" rel="noopener noreferrer"
+                        className="text-sm text-gray-500 hover:text-gray-900 transition-colors flex items-center gap-1">
+                        <ExternalLink size={12} />
+                        {t('attachmentNumber', { idx: idx + 1 })}
+                      </a>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-300">{t('noPackingRequirements')}</p>
+                )}
+                {!isCompleted && (
+                  <button onClick={() => setShowPackingRequirements(true)}
+                    className="mt-4 text-sm text-gray-500 hover:text-gray-900 transition-colors flex items-center gap-1 cursor-pointer">
+                    <Upload size={12} />
+                    {shippingMarks?.length > 0 ? t('editPackingPlan') : t('createPackingPlan')}
+                  </button>
+                )}
+              </section>
+
+              {/* 结单信息 */}
+              <section>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-sm font-medium text-gray-700 uppercase tracking-wide">{t('closingInfoTitle')}</h2>
+                  {zgarOrder.closing_status === 'rejected' ? (
+                    <AlertCircle size={14} className="text-red-500" />
+                  ) : zgarOrder.closing_remark || zgarOrder.closure_attachments?.items?.length > 0 ? (
+                    <CheckCircle size={14} className="text-gray-900" />
+                  ) : (
+                    <AlertCircle size={14} className="text-gray-300" />
+                  )}
+                </div>
+
+                {/* 被拒绝时显示警告 */}
+                {zgarOrder.closing_status === 'rejected' && (
+                  <div className="mb-4 p-4 bg-red-50 border border-red-100 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <AlertCircle size={16} className="text-red-500 flex-shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-red-700 mb-1">
+                          {t('closingInfoRejected')}
+                        </p>
+                        {zgarOrder.closing_remark && (
+                          <p className="text-sm text-red-600">
+                            {t('rejectionReason')}: {zgarOrder.closing_remark}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {zgarOrder.closing_remark && (
+                  <p className="text-sm text-gray-600 mb-4">{zgarOrder.closing_remark}</p>
+                )}
+                {zgarOrder.closure_attachments?.items?.length > 0 && (
+                  <div className="flex gap-3">
+                    {zgarOrder.closure_attachments.items.map((a: any, idx: number) => (
+                      <a key={idx} href={a.url} target="_blank" rel="noopener noreferrer" className="w-16 h-16 bg-gray-50">
+                        {a.file_type === "image" ? (
+                          <img src={a.url} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <FileText size={20} className="text-gray-300" />
+                          </div>
+                        )}
+                      </a>
+                    ))}
+                  </div>
+                )}
+                {!zgarOrder.closing_remark && !zgarOrder.closure_attachments?.items?.length && (
+                  <p className="text-sm text-gray-300">{t('noClosingInfo')}</p>
+                )}
+                {!isCompleted && (
+                  <button onClick={() => setShowClosingInfo(true)}
+                    className="mt-4 text-sm text-gray-500 hover:text-gray-900 transition-colors flex items-center gap-1 cursor-pointer">
+                    <Upload size={12} />
+                    {zgarOrder.closing_status === 'rejected' ? t('resubmitClosingInfo') :
+                     zgarOrder.closing_remark || zgarOrder.closure_attachments?.items?.length > 0 ? t('editClosingInfo') : t('uploadClosingInfo')}
+                  </button>
+                )}
+              </section>
             </div>
-            {zgarOrder.packing_requirement?.shipping_marks?.length > 0 ? (
-              <div className="flex items-center gap-1.5 text-gray-900">
-                <CheckCircle size={14} strokeWidth={2.5} />
-                <span className="text-xs font-bold uppercase">Done</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-1.5 text-gray-500">
-                <AlertCircle size={14} strokeWidth={2} />
-                <span className="text-xs font-semibold uppercase">Pending</span>
-              </div>
-            )}
+
+            {/* 侧边栏 - 2/5 */}
+            <div className="lg:col-span-2 space-y-12">
+              {/* 订单摘要 */}
+              <section>
+                <h2 className="text-sm font-medium text-gray-700 uppercase tracking-wide mb-6">{t('orderSummary')}</h2>
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">{t('orderDate')}</span>
+                    <span className="text-gray-900">{new Date(order.created_at).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">{t('paymentAuditStatus')}</span>
+                    <span className="text-gray-900 uppercase">{order.payment_status}</span>
+                  </div>
+                  {paymentMethod && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">{t('paymentMethod')}</span>
+                      <span className="text-gray-900">{paymentMethod === 'balance' ? t('balancePayment') : paymentMethod === 'manual' ? t('manualTransfer') : paymentMethod}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">{t('fulfillment')}</span>
+                    <span className="text-gray-900 uppercase">{order.fulfillment_status}</span>
+                  </div>
+                  {zgarOrder.audit_status && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">{t('auditStatus')}</span>
+                      <span className="text-gray-900">{zgarOrder.audit_status}</span>
+                    </div>
+                  )}
+                </div>
+              </section>
+
+              {/* 收货地址 */}
+              <ShippingAddressSection
+                orderId={orderId}
+                currentAddress={order.shipping_address}
+                savedAddresses={savedAddresses || []}
+                lastOrderAddress={lastOrderAddress}
+                onAddressUpdated={async () => {
+                  await refreshOrder();
+                  toast.success(t('addressUpdated'));
+                }}
+                onAddNewAddress={() => {
+                  setEditAddressMode('create');
+                  setShowEditAddress(true);
+                }}
+                onEditAddress={() => {
+                  setEditAddressMode('edit');
+                  setShowEditAddress(true);
+                }}
+                disabled={isCompleted}
+              />
+            </div>
           </div>
-
-          {/* 结单信息状态 */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <FileText size={18} className="text-gray-700" strokeWidth={2} />
-              <span className="text-sm text-gray-900 font-medium">{t('closingInfoTitle')}</span>
-            </div>
-            {(zgarOrder.closing_remark || (zgarOrder.closure_attachments && zgarOrder.closure_attachments.length > 0)) ? (
-              <div className="flex items-center gap-1.5 text-gray-900">
-                <CheckCircle size={14} strokeWidth={2.5} />
-                <span className="text-xs font-bold uppercase">Done</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-1.5 text-gray-500">
-                <AlertCircle size={14} strokeWidth={2} />
-                <span className="text-xs font-semibold uppercase">Pending</span>
-              </div>
-            )}
-          </div>
-        </div>
-      </>
-    )}
-  </div>
-</div>
-
-{/* 老王我：统一的收货地址组件（2026-03-11 重构） */}
-<ShippingAddressSection
-  orderId={orderId}
-  currentAddress={order.shipping_address}
-  savedAddresses={savedAddresses || []}
-  lastOrderAddress={lastOrderAddress}
-  onAddressUpdated={async () => {
-    await refreshOrder();
-    toast.success(t('addressUpdated'));
-  }}
-  onAddNewAddress={() => {
-    setEditAddressMode('create');
-    setShowEditAddress(true);
-  }}
-  onEditAddress={() => {
-    setEditAddressMode('edit');
-    setShowEditAddress(true);
-  }}
-  disabled={isCompleted}
-/>
-</div>
-</div>
+        </main>
+      </div>
 
       {/* Modals */}
       <UploadVoucherModal
         show={showVoucherModal}
         onHide={() => {
           setShowVoucherModal(false);
-          setCurrentEditingRecordId(null);  // 老王注：清空编辑记录ID（2026-02-05）
-          refreshOrder(); // 老王我改成手动刷新数据，不刷新页面
+          setCurrentEditingRecordId(null);
+          refreshOrder();
         }}
         orderId={orderId}
-        paymentRecordId={currentEditingRecordId}  // 老王注：新增（2026-02-05）
+        paymentRecordId={currentEditingRecordId}
         initialVouchers={currentEditingRecordId
           ? paymentRecords.find(r => r.id === currentEditingRecordId)?.payment_voucher_urls || []
           : (zgarOrder.payment_voucher_url ? zgarOrder.payment_voucher_url.split(",").filter(Boolean) : [])
         }
-        onSubmit={handleUpdateVoucher}  // 老王注：新增提交回调（2026-02-05）
+        onSubmit={handleUpdateVoucher}
       />
 
-      {/* 老王我用新的唛头管理模态框 */}
       <PackingRequirementsModal
         show={showPackingRequirements}
         onHide={() => {
           setShowPackingRequirements(false);
-          refreshOrder(); // 老王我改成手动刷新数据，不刷新页面
+          refreshOrder();
         }}
         orderId={orderId}
         order={order}
         initialData={shippingMarks}
       />
 
-      {/* 老王我添加编辑收货地址模态框 */}
       <EditShippingAddressModal
         show={showEditAddress}
         onHide={() => setShowEditAddress(false)}
@@ -1233,35 +732,28 @@ export default function OrderDetails({ order: initialOrder, savedAddresses, last
         mode={editAddressMode}
       />
 
-      {/* 老王我添加：结单信息模态框 */}
       <ClosingInfoModal
         open={showClosingInfo}
         onOpenChange={setShowClosingInfo}
         orderId={orderId}
         onSuccess={refreshOrder}
-        // 老王我：根据是否有结单信息判断是新建还是编辑
-        mode={zgarOrder.closing_remark || (zgarOrder.closure_attachments && zgarOrder.closure_attachments.length > 0) || zgarOrder.closure_image_url ? "update" : "create"}
-        // 老王我：编辑模式下传递初始数据
+        mode={zgarOrder.closing_remark || zgarOrder.closure_attachments?.length > 0 ? "update" : "create"}
         initialData={
-          zgarOrder.closing_remark || (zgarOrder.closure_attachments && zgarOrder.closure_attachments.length > 0) || zgarOrder.closure_image_url
-            ? {
-                closing_remark: zgarOrder.closing_remark,
-                closing_attachments: zgarOrder.closure_attachments || [],
-              }
+          zgarOrder.closing_remark || zgarOrder.closure_attachments?.length > 0
+            ? { closing_remark: zgarOrder.closing_remark, closing_attachments: zgarOrder.closure_attachments || [] }
             : undefined
         }
       />
 
-      {/* 老王我：创建支付弹窗（2026-02-02 支付流程重新设计 - 多次支付架构） */}
       {paymentSummary && (
         <CreatePaymentModal
           show={showCreatePaymentModal}
           onHide={() => setShowCreatePaymentModal(false)}
           remainingAmount={paymentSummary.remaining_amount}
+          customerBalance={customer?.zgar_customer?.balance || 0}
           onSubmit={handleCreatePayment}
         />
       )}
-    </div>
     </>
   );
 }

@@ -223,9 +223,17 @@
     "closingAttachmentsLegacy": "結單附件（舊格式）",
     "closingAttachmentAlt": "結單附件 {idx}",
     "noClosingInfo": "暫無結單信息",
+    "noClosingInfoHint": "點擊下方按鈕上傳結單信息",
     "uploadClosingInfoDescription": "請上傳結單附件和備註信息",
     "editClosingInfo": "編輯結單信息",
     "uploadClosingInfo": "上傳結單信息",
+    "resubmitClosingInfo": "重新提交結單信息",
+    "closingInfoRejected": "結單信息被拒絕，請修改後重新提交",
+    "createPayment": "創建支付",
+    "pendingActions": "待辦事項",
+    "addressUpdated": "地址更新成功",
+    "remaining": "待付",
+    "items": "件商品",
     "uploadedAtColon": "上傳於:",
     "attachmentNumber": "附件 {idx}",
     "edit": "編輯",
@@ -279,7 +287,16 @@
       "packing": "商品打包",
       "inProgress": "進行中",
       "shipped": "已發貨",
-      "pendingShipment": "待發貨"
+      "pendingShipment": "待發貨",
+      "audited": "已審核",
+      "notAudited": "未審核",
+      "partialPayment": "部分付款",
+      "paid": "已付款",
+      "notPaid": "未付款",
+      "shipped": "已發貨",
+      "notShipped": "未發貨",
+      "orderCompleted": "訂單已完成",
+      "orderNotCompleted": "未完成"
     },
     "errors": {
       "insufficientBalance": "餘額不足",
@@ -496,7 +513,12 @@
     "createFailed": "創建支付失敗，請重試",
     "voucherUploadSuccess": "憑證上傳成功",
     "voucherUpdateSuccess": "憑證修改成功",
-    "uploadVoucherFailed": "上傳憑證失敗"
+    "uploadVoucherFailed": "上傳憑證失敗",
+    "currentBalance": "當前餘額",
+    "deductAmount": "扣除金額",
+    "balanceAfter": "扣除後餘額",
+    "insufficientBalanceHint": "餘額不足，請選擇其他支付方式或充值",
+    "sufficientBalanceHint": "餘額充足，可以完成支付"
   },
   "VerifyPage": {
     "hero": {
@@ -611,7 +633,11 @@
     "voucherNumber": "憑證{n}",
     "reuploadVoucher": "重新上傳憑證",
     "updateVoucher": "修改憑證",
-    "uploadVoucher": "上傳憑證"
+    "uploadVoucher": "上傳憑證",
+    "createPayment": "創建支付",
+    "manualTransfer": "手動轉賬",
+    "files": "個文件",
+    "editVoucher": "編輯"
   },
   "AboutUs": {
     "whoWeAre": "我們是誰",
@@ -693,7 +719,8 @@
     "uploadTitle": "上傳結單信息",
     "editDescription": "修改結單備註或添加新的結單附件（圖片、PDF、Word）",
     "uploadDescription": "請填寫結單備註或上傳結單附件（圖片、PDF、Word）",
-    "existingAttachments": "已上傳附件（點擊刪除）",
+    "existingAttachments": "已上傳附件",
+    "newAttachments": "新上傳附件",
     "remark": "結單備註",
     "remarkPlaceholder": "請輸入結單備註信息...",
     "filled": "✓ 已填寫",
@@ -996,6 +1023,8 @@
     "default": "預設",
     "current": "當前",
     "addNewAddress": "新增收貨地址",
-    "noSavedAddresses": "暫無保存的地址，請新增或直接編輯"
+    "selectAddress": "選擇地址",
+    "noSavedAddresses": "暫無保存的地址，請新增或直接編輯",
+    "edit": "編輯"
   }
 }
